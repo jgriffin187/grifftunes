@@ -196,9 +196,10 @@ html.remote #lightsBtn{display:none!important}
 .cdHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .cdHead h2{font-family:Monoton;font-weight:400;font-size:clamp(30px,3.4vw,48px);line-height:1;color:#fff;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 34px var(--accent)}
 .cdHead p{color:var(--muted);font-size:16px;margin-top:6px}
-.cdYears{display:flex;gap:10px;flex-wrap:wrap}
-.cdYear{display:flex;flex-direction:column;align-items:center;padding:10px 18px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--stroke);min-width:96px;transition:.2s}
-.cdYear b{font-family:Bungee;font-weight:400;font-size:24px;line-height:1.1}
+.cdYears{display:flex;gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:2px}
+.cdYears::-webkit-scrollbar{display:none}
+.cdYear{display:flex;flex-direction:column;align-items:center;padding:9px 10px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--stroke);min-width:80px;flex:none;transition:.2s}
+.cdYear b{font-family:Bungee;font-weight:400;font-size:22px;line-height:1.1}
 .cdYear small{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700;text-transform:uppercase}
 .cdYear.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)}
 .cdYear.on small{color:rgba(255,255,255,.85)}
@@ -1953,7 +1954,7 @@ async function huePair(ip){
 
 /* ---------- Hot 100 Rewind countdown ---------- */
 const CD={data:null,loading:null,years:20,active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{}};
-const CD_YEARS=[5,10,15,20,25];
+const CD_YEARS=[5,10,15,20,25,30,35,40];
 function cdData(){
  if(CD.data)return Promise.resolve(CD.data);
  if(!CD.loading)CD.loading=fetch('hot100-top20.json').then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()}).then(j=>{CD.data=j;return j}).finally(()=>{CD.loading=null});
@@ -1977,7 +1978,7 @@ function renderCountdown(){
  const panel=$('#cdPanel');if(!CD.data)return;
  const yr=new Date().getFullYear(),date=CD.active?CD.date:cdWeek(CD.years),rows=CD.data.weeks[date]||[];
  panel.innerHTML=`<div class="cdHead"><div><h2>Hot 100 Rewind</h2><p>This week's Top 20, straight from the Billboard Hot 100 archives</p></div>
-  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active?' disabled':''}><b>${yr-n}</b><small>${n} years ago</small></button>`).join('')}</div></div>
+  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div></div>
   <div class="cdBar"><span class="cdWeek">Chart week of ${esc(fmtWeek(date))}</span>
   <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':'Start countdown · #20 → #1'}</button></div>
   <div class="cdList" id="cdList">${rows.map(e=>{const[c,txt]=cdMove(e);return`<div class="cdRow" data-pos="${e[0]}"><span class="n">${e[0]}</span><span class="m"><b>${esc(e[1])}</b><span>${esc(e[2])} · peak #${e[4]} · ${e[5]} wk${e[5]===1?'':'s'}</span></span><span class="mv ${c}">${txt}</span></div>`}).join('')}</div>`;
