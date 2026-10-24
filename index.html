@@ -120,6 +120,9 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .vinyl .lbl::after{content:'';position:absolute;left:50%;top:50%;width:9px;height:9px;margin:-4.5px;border-radius:50%;background:#000}
 .np.playing .vinyl{left:168px;animation-play-state:running}
 @keyframes spin{to{transform:rotate(360deg)}}
+.vinyl{cursor:pointer;touch-action:manipulation}
+.vinyl.scratch{animation:scratch .6s ease-in-out!important}
+@keyframes scratch{0%{transform:rotate(0)}18%{transform:rotate(-34deg)}36%{transform:rotate(8deg)}54%{transform:rotate(-26deg)}74%{transform:rotate(12deg)}100%{transform:rotate(0)}}
 .npArt{position:absolute;left:0;top:0;width:226px;height:226px;border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 44px color-mix(in srgb,var(--accent) 40%,transparent);z-index:2;background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .npArt img{width:100%;height:100%;object-fit:cover}
 .npTitle{font-size:26px;font-weight:800;white-space:nowrap;overflow:hidden;position:relative;line-height:1.25}
@@ -904,6 +907,40 @@ function sfx(type){
  }catch(e){}
 }
 
+/* ---------- DJ scratch (synthesized, no samples) ---------- */
+let noiseBuf=null;
+function scratchStroke(t,dur,peak,out){
+ const N=48,curve=new Float32Array(N);
+ for(let i=0;i<N;i++){const x=i/(N-1);curve[i]=.04+peak*Math.pow(Math.max(0,Math.sin(Math.PI*x)),.8)}
+ const scaled=k=>curve.map(r=>r*k);
+ const osc=actx.createOscillator();osc.type='sawtooth';
+ const f1=actx.createBiquadFilter(),f2=actx.createBiquadFilter(),nf=actx.createBiquadFilter();
+ f1.type=f2.type=nf.type='bandpass';f1.Q.value=5;f2.Q.value=7;nf.Q.value=1.2;
+ const g=actx.createGain(),ng=actx.createGain();ng.gain.value=.5;g.gain.value=0;
+ const n=actx.createBufferSource();n.buffer=noiseBuf;
+ osc.frequency.setValueCurveAtTime(scaled(105),t,dur);
+ f1.frequency.setValueCurveAtTime(scaled(620),t,dur);
+ f2.frequency.setValueCurveAtTime(scaled(1080),t,dur);
+ nf.frequency.setValueCurveAtTime(scaled(1900),t,dur);
+ g.gain.setValueCurveAtTime(curve.map(r=>Math.min(1,r/peak)),t,dur);
+ osc.connect(f1).connect(g);osc.connect(f2).connect(g);n.connect(nf).connect(ng).connect(g);g.connect(out);
+ osc.start(t);osc.stop(t+dur+.02);n.start(t,Math.random()*.5);n.stop(t+dur+.02);
+}
+function djScratch(){
+ const v=$('.vinyl');if(v){v.classList.remove('scratch');void v.offsetWidth;v.classList.add('scratch');setTimeout(()=>v.classList.remove('scratch'),650)}
+ if(!S.sfx)return;
+ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  if(actx.state==='suspended')actx.resume();
+  if(!noiseBuf){const len=actx.sampleRate;noiseBuf=actx.createBuffer(1,len,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}
+  const out=actx.createGain();out.gain.value=.32;
+  const comp=actx.createDynamicsCompressor();out.connect(comp).connect(actx.destination);
+  const patterns=[[[.13,2.6],[.11,2.0],[.08,2.8],[.16,1.8]],[[.09,2.9],[.09,2.4],[.09,2.9],[.2,1.6]],[[.18,2.2],[.07,3.0],[.15,1.9]]];
+  let t=actx.currentTime+.01;
+  for(const[d,pk]of patterns[Math.floor(Math.random()*patterns.length)]){scratchStroke(t,d,pk,out);t+=d+.012+Math.random()*.02}
+ }catch(e){}
+}
+
 /* ---------- UI helpers ---------- */
 function toast(msg,img){
  const warn=img==='warn';
@@ -1363,6 +1400,7 @@ document.addEventListener('click',e=>{
 });
 addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$$('.modal.open').pop();if(m)closeModal(m)}});
 $('#openSearch').onclick=openSearch;
+$('.vinyl').addEventListener('pointerdown',e=>{e.stopPropagation();djScratch()});
 $('#sInput').addEventListener('input',onQuery);
 $('#sInput').addEventListener('focus',()=>{if(S.osk)$('#osk').style.display=''});
 $('#coinBtn').onclick=insertCoin;
