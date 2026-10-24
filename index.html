@@ -594,7 +594,12 @@ const SpotifyEngine={
  })},
  async play(t){this.expect=t.id;this.expectUntil=Date.now()+8000;this.endedFor=null;this.pendingEnd=false;this.nearEnd=false;this.st=null;
   await api(`/me/player/play?device_id=${this.deviceId}`,{method:'PUT',body:{uris:[t.uri]}})},
- async toggle(){if(this.player)await this.player.togglePause()},
+ async toggle(){
+  const playing=this.st?!this.st.paused:!P.paused;
+  if(this.st){this.st=Object.assign({},this.st,{paused:playing,position:this.st.paused?this.st.position:Math.min(this.st.position+(performance.now()-this.stAt),this.st.duration)});this.stAt=performance.now()}
+  try{await api(`/me/player/${playing?'pause':'play'}?device_id=${this.deviceId}`,{method:'PUT'})}
+  catch(e){if(this.player){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}}
+ },
  stop(){if(this.player)this.player.pause().catch(()=>{})},
  setVolume(v){if(this.player)this.player.setVolume(v/100).catch(()=>{})},
  match(tr,id){return!!tr&&(tr.id===id||(tr.linked_from&&tr.linked_from.id===id))},
@@ -750,6 +755,7 @@ function enqueue(t,next){
 }
 async function togglePlay(){
  if(!P.current){advance();return}
+ P.paused=!P.paused;renderPlayState();
  try{await engine.toggle()}catch(e){}
  if(engine===DemoEngine){P.paused=engine.paused;renderPlayState()}
 }
