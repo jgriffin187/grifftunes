@@ -137,6 +137,33 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .playBtn:active,.skipBtn:active{transform:scale(.92)}
 .skipBtn{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.09);border:1px solid var(--stroke);display:grid;place-items:center;flex:none}
 .skipBtn svg{width:22px;height:22px}
+.devBtn{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.09);border:1px solid var(--stroke);display:grid;place-items:center;flex:none;color:#fff}
+.devBtn svg{width:22px;height:22px}
+.devBtn.on{color:#1ed760;border-color:rgba(30,215,96,.6);box-shadow:0 0 18px rgba(30,215,96,.35)}
+.devBtn:active{transform:scale(.92)}
+.devChip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;background:rgba(30,215,96,.14);border:1px solid rgba(30,215,96,.5);color:#1ed760;font:700 12px Outfit,sans-serif;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.devChip svg{width:14px;height:14px;flex:none}
+.times{align-items:center}
+.speakers .sheet{width:min(620px,94vw);height:auto;max-height:90vh}
+.devList{padding:10px 26px 4px;overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.devRow{display:flex;align-items:center;gap:16px;width:100%;padding:14px 16px;border-radius:18px;background:rgba(255,255,255,.05);border:1px solid var(--stroke);text-align:left;transition:transform .12s}
+.devRow:active{transform:scale(.98)}
+.devRow.on{border-color:rgba(30,215,96,.7);background:rgba(30,215,96,.1);box-shadow:0 0 24px rgba(30,215,96,.2)}
+.devRow[disabled]{opacity:.42;cursor:default}
+.devIco{width:50px;height:50px;border-radius:14px;display:grid;place-items:center;flex:none;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.devRow.on .devIco{background:#1ed760;color:#06290f}
+.devIco svg{width:26px;height:26px}
+.devTxt{flex:1;min-width:0;display:flex;flex-direction:column}
+.devTxt b{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.devTxt small{font-size:14px;color:var(--muted)}
+.devLive{display:flex;align-items:flex-end;gap:3px;height:20px;flex:none}
+.devLive i{width:4px;border-radius:2px;background:#1ed760;animation:eq .9s ease-in-out infinite alternate}
+.devLive i:nth-child(2){animation-delay:-.3s}.devLive i:nth-child(3){animation-delay:-.6s}
+@keyframes eq{from{height:4px}to{height:20px}}
+.devFoot{padding:14px 26px 26px;display:flex;gap:16px;align-items:center}
+.devFoot p{font-size:14px;color:var(--muted);line-height:1.45}
+.devNote{font-size:15px;color:var(--muted);line-height:1.5;padding:14px 4px}
+html.remote #devChip{display:none!important}
 .vol{flex:1;display:flex;align-items:center;gap:10px;color:var(--muted)}
 .vol svg{width:22px;height:22px;flex:none}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.16);outline:none}
@@ -330,6 +357,7 @@ html.remote .badge{display:flex!important}
  .ctrls{margin-top:6px}
  .playBtn{width:54px;height:54px}.playBtn svg{width:24px;height:24px}
  .skipBtn{width:46px;height:46px}
+ .devBtn{width:46px;height:46px}
  .side{gap:12px}
  .queue{padding:14px 12px 10px 16px}
  .qHead{margin-bottom:8px;font-size:16px}
@@ -426,10 +454,11 @@ html.remote .badge{display:flex!important}
     <div class="npArtist" id="npArtist"></div>
     <canvas id="viz"></canvas>
     <div class="prog"><i id="progFill"></i></div>
-    <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+    <div class="times"><span id="tCur">0:00</span><button class="devChip" id="devChip" style="display:none"></button><span id="tDur">0:00</span></div>
     <div class="ctrls">
      <button class="playBtn" id="playBtn" aria-label="Play or pause"></button>
      <button class="skipBtn" id="skipBtn" aria-label="Skip" data-icon="skip"></button>
+     <button class="devBtn" id="devBtn" aria-label="Choose speaker" data-icon="speaker"></button>
      <div class="vol"><span data-icon="vol"></span><input type="range" id="vol" min="0" max="100"></div>
     </div>
    </div>
@@ -450,6 +479,12 @@ html.remote .badge{display:flex!important}
  <div class="sTop"><div class="sField"><span data-icon="search"></span><input id="sInput" class="sInput" placeholder="Type a song, artist or album…" autocomplete="off" autocorrect="off" spellcheck="false"></div><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="sResults" id="sResults"></div>
  <div class="osk" id="osk"></div>
+</div></div>
+
+<div class="modal speakers" id="devModal"><div class="sheet card">
+ <div class="sHead"><h2>Play music on</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
+ <div class="devList" id="devList"></div>
+ <div class="devFoot"><button class="btn" id="devRefresh">Refresh</button><p>Lists Spotify Connect speakers on your account (Sonos, Amazon Echo, smart TVs, Wi-Fi speakers). They need to be on and on your Wi-Fi. Bluetooth speakers are paired in ChromeOS Quick Settings instead.</p></div>
 </div></div>
 
 <div class="modal qr" id="qrModal"><div class="sheet card">
@@ -516,6 +551,10 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+ speaker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r=".8" fill="currentColor"/><circle cx="12" cy="6.5" r=".8" fill="currentColor"/></svg>',
+ tv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
+ computer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
+ car:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14l-1.5-6.5A2 2 0 0 0 15.6 9H8.4a2 2 0 0 0-1.9 1.5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>',
  phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>',
  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H8l-6 7 6 7h13z"/><path d="m11 9 6 6M17 9l-6 6"/></svg>'
 };
@@ -697,11 +736,20 @@ const DemoEngine={
  async toggle(){if(!this.t)return;this.poll();this.paused=!this.paused;this.last=performance.now()},
  stop(){this.t=null},
  setVolume(){},
+ target:null,targetName:null,
+ async devices(){await sleep(400);return[
+  {id:'demo-sonos',name:'Living Room Sonos',type:'Speaker'},
+  {id:'demo-echo',name:'Kitchen Echo',type:'Speaker'},
+  {id:'demo-tv',name:'Basement TV',type:'TV'},
+  {id:'demo-car',name:'Car Stereo',type:'Automobile',is_restricted:true}]},
+ async transferTo(d){await sleep(300);this.target=d?d.id:null;this.targetName=d?d.name:null;renderDevChip()},
  poll(){if(!this.t)return null;const n=performance.now();if(!this.paused)this.pos+=n-this.last;this.last=n;
   return{pos:Math.min(this.pos,this.t.duration),dur:this.t.duration,paused:this.paused,ended:this.pos>=this.t.duration}}
 };
 const SpotifyEngine={
  player:null,deviceId:null,st:null,stAt:0,expect:null,expectUntil:0,endedFor:null,pendingEnd:false,nearEnd:false,
+ target:null,targetName:null,pollT:null,polling:false,volT:null,
+ dev(){return this.target||this.deviceId},
  init(){return new Promise((res,rej)=>{
   const to=setTimeout(()=>rej(new Error('player timed out')),20000);
   window.onSpotifyWebPlaybackSDKReady=()=>{
@@ -719,18 +767,56 @@ const SpotifyEngine={
   const sc=document.createElement('script');sc.src='https://sdk.scdn.co/spotify-player.js';sc.onerror=()=>{clearTimeout(to);rej(new Error('could not load the Spotify player'))};document.head.appendChild(sc);
  })},
  async play(t){this.expect=t.id;this.expectUntil=Date.now()+8000;this.endedFor=null;this.pendingEnd=false;this.nearEnd=false;this.st=null;
-  await api(`/me/player/play?device_id=${this.deviceId}`,{method:'PUT',body:{uris:[t.uri]}})},
+  try{await api(`/me/player/play?device_id=${this.dev()}`,{method:'PUT',body:{uris:[t.uri]}})}
+  catch(e){
+   if(!this.target)throw e;
+   toast(`${this.targetName} isn't available, so playing here instead`,'warn');this.useLocal();
+   await api(`/me/player/play?device_id=${this.deviceId}`,{method:'PUT',body:{uris:[t.uri]}});
+  }},
  async toggle(){
   const playing=this.st?!this.st.paused:!P.paused;
   if(this.st){this.st=Object.assign({},this.st,{paused:playing,position:this.st.paused?this.st.position:Math.min(this.st.position+(performance.now()-this.stAt),this.st.duration)});this.stAt=performance.now()}
-  try{await api(`/me/player/${playing?'pause':'play'}?device_id=${this.deviceId}`,{method:'PUT'})}
-  catch(e){if(this.player){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}}
+  try{await api(`/me/player/${playing?'pause':'play'}?device_id=${this.dev()}`,{method:'PUT'})}
+  catch(e){if(this.player&&!this.target){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}}
  },
- stop(){if(this.player)this.player.pause().catch(()=>{})},
- setVolume(v){if(this.player)this.player.setVolume(v/100).catch(()=>{})},
+ stop(){if(this.target){api(`/me/player/pause?device_id=${this.target}`,{method:'PUT'}).catch(()=>{});return}if(this.player)this.player.pause().catch(()=>{})},
+ setVolume(v){
+  if(this.target){clearTimeout(this.volT);this.volT=setTimeout(()=>api(`/me/player/volume?volume_percent=${Math.round(v)}&device_id=${this.target}`,{method:'PUT'}).catch(()=>{}),300);return}
+  if(this.player)this.player.setVolume(v/100).catch(()=>{});
+ },
+ async devices(){const j=await api('/me/player/devices');return((j&&j.devices)||[]).filter(d=>d&&d.id)},
+ async transferTo(d){
+  const id=d?d.id:this.deviceId,playing=!!P.current&&!P.paused;
+  try{await api('/me/player',{method:'PUT',body:{device_ids:[id],play:playing}})}catch(e){if(P.current)throw e}
+  if(d){this.target=d.id;this.targetName=d.name;this.expect=null;this.startPoll()}
+  else this.useLocal();
+  renderDevChip();
+ },
+ useLocal(){this.target=null;this.targetName=null;this.stopPoll();renderDevChip()},
+ startPoll(){this.stopPoll();this.pollT=setInterval(()=>this.pollRemote(),2000);this.pollRemote()},
+ stopPoll(){clearInterval(this.pollT);this.pollT=null},
+ matchItem(it,id){return!!it&&(it.id===id||(it.linked_from&&it.linked_from.id===id))},
+ async pollRemote(){
+  if(!this.target||this.polling)return;this.polling=true;
+  try{
+   const j=await api('/me/player');
+   if(!this.target||!P.current)return;
+   const id=P.current.id;
+   if(!j||!j.device){if(!this.expect&&this.nearEnd&&this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
+   if(j.device.id!==this.target){
+    if(j.device.id===this.deviceId){this.useLocal();return}
+    this.target=j.device.id;this.targetName=j.device.name;renderDevChip();
+   }
+   const item=j.item;
+   if(this.expect){if(this.matchItem(item,this.expect))this.expect=null;else if(Date.now()<this.expectUntil)return;else this.expect=null}
+   const atEdge=!j.is_playing&&(j.progress_ms<1500||(item&&j.progress_ms>=item.duration_ms-2500));
+   if((item&&!this.matchItem(item,id))||(atEdge&&this.nearEnd)){if(this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
+   this.st={paused:!j.is_playing,position:j.progress_ms||0,duration:(item&&item.duration_ms)||P.dur};this.stAt=performance.now();
+  }catch(e){}finally{this.polling=false}
+ },
  match(tr,id){return!!tr&&(tr.id===id||(tr.linked_from&&tr.linked_from.id===id))},
  onState(s){
-  if(!s||!P.current)return;
+  if(!s||!P.current||this.target)return;
   const id=P.current.id,tw=s.track_window||{},cur=tw.current_track;
   if(this.expect){if(this.match(cur,this.expect))this.expect=null;else if(Date.now()<this.expectUntil)return;else this.expect=null}
   const prevHas=(tw.previous_tracks||[]).some(x=>this.match(x,id));
@@ -742,7 +828,7 @@ const SpotifyEngine={
   if(this.pendingEnd){this.pendingEnd=false;return{ended:true}}
   const s=this.st;if(!s)return null;
   const pos=s.paused?s.position:s.position+(performance.now()-this.stAt);
-  if(!s.paused)this.nearEnd=pos>s.duration-2500;
+  if(!s.paused)this.nearEnd=pos>s.duration-(this.target?6000:2500);
   return{pos:Math.min(pos,s.duration),dur:s.duration,paused:s.paused,ended:false};
  }
 };
@@ -1378,6 +1464,37 @@ function remoteConnect(){
  };
  if(RM.peer.open)go();else RM.peer.once('open',go);
 }
+
+/* ---------- Speaker picker (Spotify Connect) ---------- */
+const devIcon=t=>{t=String(t||'').toLowerCase();return t==='tv'||t==='castvideo'||t==='stb'?I.tv:t==='computer'?I.computer:t==='smartphone'||t==='tablet'?I.phone:t==='automobile'?I.car:I.speaker};
+const devType=t=>({speaker:'Speaker',tv:'TV',computer:'Computer',smartphone:'Phone',tablet:'Tablet',castaudio:'Cast speaker',castvideo:'Chromecast',avr:'Receiver',stb:'TV box',audiodongle:'Speaker',gameconsole:'Game console',automobile:'Car'})[String(t||'').toLowerCase()]||'Speaker';
+let DEVS=[];
+function renderDevChip(){
+ const name=engine&&engine.targetName,c=$('#devChip'),b=$('#devBtn');if(!c)return;
+ c.style.display=name?'':'none';c.innerHTML=name?I.speaker+esc(name):'';b.classList.toggle('on',!!name);
+ b.setAttribute('aria-label',name?'Playing on '+name+'. Choose speaker':'Choose speaker');
+}
+function renderDevList(list){
+ const cur=engine.target||null;
+ DEVS=[{id:null,name:S.name,type:'computer',sub:'This jukebox · its own speakers'}].concat(list.map(d=>({id:d.id,name:d.name,type:d.type,restricted:!!d.is_restricted,sub:devType(d.type)+(d.is_restricted?' · can’t be controlled by apps':'')})));
+ const eq='<span class="devLive"><i></i><i></i><i></i></span>';
+ $('#devList').innerHTML=DEVS.map((d,i)=>{const on=d.id===cur;return`<button class="devRow${on?' on':''}" data-dev="${i}"${d.restricted?' disabled':''}><span class="devIco">${devIcon(d.type)}</span><span class="devTxt"><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></span>${on?eq:''}</button>`}).join('')
+  +(list.length?'':'<div class="devNote">No other Spotify speakers found. Make sure the speaker is on and on your Wi-Fi (opening Spotify on it once can wake it up), then tap Refresh.</div>');
+}
+async function openDevices(){
+ sfx('tick');openModal($('#devModal'));
+ const L=$('#devList');L.innerHTML='<div class="loading" style="min-height:180px"><div class="spin"></div><div>Looking for speakers…</div></div>';
+ try{const list=engine.devices?await engine.devices():[];renderDevList(list.filter(d=>d.id!==engine.deviceId))}
+ catch(e){L.innerHTML=`<div class="loading" style="min-height:180px">Couldn't list speakers<br><small>${esc(e.message)}</small></div>`}
+}
+$('#devBtn').onclick=openDevices;$('#devChip').onclick=openDevices;$('#devRefresh').onclick=openDevices;
+$('#devList').addEventListener('click',async e=>{
+ const r=e.target.closest('[data-dev]');if(!r||r.disabled)return;
+ const d=DEVS[+r.dataset.dev];if(!d||d.id===(engine.target||null)){closeModal($('#devModal'));return}
+ r.classList.add('on');
+ try{await engine.transferTo(d.id?{id:d.id,name:d.name}:null);sfx('add');toast(d.id?'Now playing on '+d.name:'Back on the jukebox speakers');closeModal($('#devModal'))}
+ catch(err){r.classList.remove('on');toast("Couldn't switch speakers: "+err.message,'warn')}
+});
 
 /* ---------- Boot ---------- */
 async function boot(){
