@@ -192,6 +192,45 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .field select{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 14px;font:500 18px Outfit,sans-serif}
 .field select option{color:#000}
 html.remote #lightsBtn{display:none!important}
+.cdPanel{flex:1;min-height:0;display:flex;flex-direction:column;gap:14px;padding:4px 2px 2px}
+.cdHead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.cdHead h2{font-family:Monoton;font-weight:400;font-size:clamp(30px,3.4vw,48px);line-height:1;color:#fff;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 34px var(--accent)}
+.cdHead p{color:var(--muted);font-size:16px;margin-top:6px}
+.cdYears{display:flex;gap:10px;flex-wrap:wrap}
+.cdYear{display:flex;flex-direction:column;align-items:center;padding:10px 18px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--stroke);min-width:96px;transition:.2s}
+.cdYear b{font-family:Bungee;font-weight:400;font-size:24px;line-height:1.1}
+.cdYear small{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700;text-transform:uppercase}
+.cdYear.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)}
+.cdYear.on small{color:rgba(255,255,255,.85)}
+.cdBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cdWeek{font-family:Bungee;font-size:15px;letter-spacing:.06em;color:var(--gold)}
+.cdGo{margin-left:auto;height:56px;padding:0 28px;border-radius:999px;font-family:Bungee;font-size:16px;letter-spacing:.05em;color:#2a1600;background:linear-gradient(180deg,#ffe680,#ffb800);box-shadow:0 6px 0 #b37400,0 10px 30px rgba(255,184,0,.45)}
+.cdGo:active{transform:translateY(4px);box-shadow:0 2px 0 #b37400}
+.cdGo.stop{background:rgba(255,255,255,.1);color:#fff;box-shadow:none;border:1px solid var(--stroke)}
+.cdGo[disabled]{opacity:.7}
+.cdList{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;gap:8px 14px;padding-right:6px;scrollbar-width:thin}
+.cdRow{display:flex;align-items:center;gap:14px;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid transparent}
+.cdRow .n{font-family:Bungee;font-size:26px;width:44px;text-align:center;flex:none;color:var(--accent2);text-shadow:0 0 12px color-mix(in srgb,var(--accent2) 60%,transparent)}
+.cdRow .m{flex:1;min-width:0;display:flex;flex-direction:column}
+.cdRow .m b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdRow .m span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdRow .mv{font-size:12px;font-weight:800;flex:none;width:44px;text-align:right}
+.mv.up{color:#1ed760}.mv.down{color:#ff5b6e}.mv.new{color:var(--gold)}.mv.same{color:var(--faint)}
+.cdRow.done{opacity:.4}
+.cdRow.now{border-color:var(--gold);background:rgba(255,210,63,.12);box-shadow:0 0 20px rgba(255,210,63,.25)}
+.cdRow.miss .m b::after{content:' · not on Spotify';font-weight:500;font-size:12px;color:var(--faint)}
+.cdRow.miss{opacity:.45}
+.houseTag.cdTag{background:rgba(255,210,63,.18);color:var(--gold);border:1px solid rgba(255,210,63,.45)}
+#cdCard{position:fixed;left:50%;top:190px;z-index:70;display:flex;align-items:center;gap:26px;padding:22px 34px 22px 26px;border-radius:28px;background:rgba(14,7,30,.92);border:1px solid rgba(255,210,63,.5);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,210,63,.25);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);pointer-events:none;opacity:0;transform:translate(-50%,-30px) scale(.94);transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1);max-width:min(860px,92vw)}
+#cdCard.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.cdNum{font-family:Bungee;font-size:clamp(64px,7vw,104px);line-height:.9;color:var(--gold);text-shadow:0 0 18px rgba(255,210,63,.75),0 0 44px rgba(255,170,40,.5);flex:none}
+.cdTxt{display:flex;flex-direction:column;min-width:0}
+.cdTxt small{font-family:Bungee;font-size:14px;letter-spacing:.16em;color:var(--accent2)}
+.cdTxt b{font-size:clamp(24px,2.6vw,38px);font-weight:800;line-height:1.1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cdTxt span{font-size:clamp(17px,1.6vw,22px);color:rgba(255,255,255,.8)}
+.cdTxt em{font-style:normal;font-size:14px;color:var(--muted);margin-top:6px}
+html.remote #cdCard{display:none!important}
+@media (max-width:820px){.cdList{grid-template-columns:1fr}.cdPanel{min-height:600px}}
 .devChip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;background:rgba(30,215,96,.14);border:1px solid rgba(30,215,96,.5);color:#1ed760;font:700 12px Outfit,sans-serif;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .devChip svg{width:14px;height:14px;flex:none}
 .times{align-items:center}
@@ -498,6 +537,7 @@ html.remote .badge{display:flex!important}
    </div>
    <div class="shelfHead"><h2 id="shelfTitle">Featured</h2><div class="shelfNav"><button id="shPrev" aria-label="Scroll left" data-icon="left"></button><button id="shNext" aria-label="Scroll right" data-icon="right"></button></div></div>
    <div class="shelf" id="shelf"></div>
+   <div class="cdPanel" id="cdPanel" style="display:none"></div>
   </section>
 
   <aside class="side">
@@ -584,6 +624,8 @@ html.remote .badge{display:flex!important}
 <div id="gallery">
  <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas></div>
 </div>
+
+<div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 
 <div id="toasts"></div>
 
@@ -696,6 +738,8 @@ const DEMO=(()=>{
   async search(q){await sleep(150);q=q.toLowerCase();const m=s=>s.toLowerCase().includes(q);
    return{tracks:all.filter(t=>m(t.name)||m(t.artist)).slice(0,20),albums:albums.filter(a=>m(a.name)||m(a.sub)),artists:artists.filter(a=>m(a.name))}},
   async housePool(){return all},
+  async findSong(title,artist){await sleep(40);const h=[...(title+artist)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7),h1=h%360,h2=(h1+90)%360,img=demoArt(title,artist,h1,h2,h%5);
+   return{id:'cd'+h,uri:'demo:cd:'+h,name:title,artist,album:'Billboard Hot 100',img,color:[`hsl(${h1} 100% 60%)`,`hsl(${h2} 100% 62%)`],duration:(170+h%90)*1000}},
   async stationTracks(st){await sleep(250);const h=x=>[...x].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);return all.filter(t=>h(t.id+st.id)%3===0)}
  };
 })();
@@ -785,6 +829,19 @@ const SPOTIFY={
   if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
   if(it.type==='artist'||it.type==='hits')return this.artistHits(it);
   return[];
+ },
+ async findSong(title,artist){
+  const main=String(artist).split(/\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with)\s+|,\s*/i)[0].trim();
+  const clean=String(title).replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();
+  const k=songKey(clean),a=main.toLowerCase();
+  for(const q of[`track:"${clean}" artist:"${main}"`,`${clean} ${main}`]){
+   const j=await api('/search?type=track&limit=8&q='+encodeURIComponent(q)).catch(()=>null);
+   const items=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists);
+   const byArtist=t=>t.artists.some(x=>{const n=x.name.toLowerCase();return n.includes(a)||a.includes(n)});
+   const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
+   if(best)return spT(best);
+  }
+  return null;
  },
  async artistHits(it){
   const pages=await Promise.all([0,10,20].map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(`artist:"${it.name}"`)).catch(()=>null)));
@@ -1049,8 +1106,9 @@ function renderNP(){
  $('#vinylLabel').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  setTitle(c?c.name:'Pick a song!');
  $('#npArtist').textContent=c?c.artist:'Tap any album to get the party started';
- $('#houseTag').style.display=c&&(c.house||c.radio)?'':'none';
- $('#houseTag').textContent=c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
+ $('#houseTag').style.display=c&&(c.house||c.radio||c.cd)?'':'none';
+ $('#houseTag').textContent=c&&c.cd?`COUNTDOWN · #${c.cd.pos} · ${c.cd.year}`:c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
+ $('#houseTag').classList.toggle('cdTag',!!(c&&c.cd));
  $('#houseTag').classList.toggle('radioTag',!!(c&&c.radio));
  renderRadio();
  renderPlayState();renderProgress();syncAttract();hostSync();
@@ -1067,7 +1125,7 @@ function renderQueue(){
  const l=$('#qList'),n=P.queue.length;
  $('#qCount').textContent=n?`${n} song${n>1?'s':''} · ${fmt(P.queue.reduce((a,t)=>a+(t.duration||0),0))}`:'';
  l.innerHTML=n?P.queue.map((t,i)=>`<div class="qItem" style="animation-delay:${Math.min(i,8)*40}ms"><div class="qNum">${i+1}</div><img src="${esc(t.img||PLACEHOLDER)}" alt=""><div class="qMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><button class="qX" data-qx="${i}" aria-label="Remove">${I.close}</button></div>`).join('')
-  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':S.radio?'The radio keeps playing until someone picks a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
+  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':CD.active?'The countdown keeps going until someone picks a song.':S.radio?'The radio keeps playing until someone picks a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
  syncAttract();hostSync();
  requestAnimationFrame(qFade);
 }
@@ -1075,8 +1133,8 @@ function qFade(){const l=$('#qList');if(l)l.classList.toggle('more',l.scrollHeig
 
 let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
-async function startTrack(t,house=false,radio=null){
- P.current=Object.assign({},t,{house,radio});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
+async function startTrack(t,house=false,radio=null,cd=null){
+ P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
  renderNP();accentFrom(t);markNow();hueTrack();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
 }
@@ -1086,6 +1144,7 @@ async function advance(){
  try{
   const next=P.queue.shift();saveQueue();renderQueue();
   if(next){await startTrack(next);return}
+  if(CD.active){const e=cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
   if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
   if(S.house){const pool=await getHouse();if(pool.length){await startTrack(pool[Math.floor(Math.random()*pool.length)],true);return}}
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();
@@ -1100,7 +1159,7 @@ function enqueue(t,mode,src){
  sfx('add');
  const tag=src==='phone'?'Phone request · ':'';
  if(mode==='w')hueFlash('now');
- if(mode==='w'||!P.current||P.current.house||P.current.radio){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
+ if(mode==='w'||!P.current||P.current.house||P.current.radio||P.current.cd){if(P.current&&P.current.cd&&CD.active)CD.idx=Math.max(0,CD.idx-1);startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
  else{if(next)P.queue.unshift(t);else P.queue.push(t);saveQueue();renderQueue();
   const pos=next?1:P.queue.length;toast(`${tag}${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
  return true;
@@ -1127,9 +1186,12 @@ const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' roun
 const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
-function buildTabs(){$('#tabs').innerHTML=provider.tabs.map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}
+function buildTabs(){$('#tabs').innerHTML=provider.tabs.concat(REMOTE?[]:[{id:'countdown',name:'Countdown'}]).map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}
 async function loadTab(id){
  tabId=id;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
+ const isCd=id==='countdown';$('#flow').style.display=$('.shelfHead').style.display=$('#shelf').style.display=isCd?'none':'';$('#cdPanel').style.display=isCd?'':'none';
+ if(isCd){openCountdown();return}
+ requestAnimationFrame(()=>{layoutFlow();sizeShelf()});
  const tb=provider.tabs.find(t=>t.id===id);$('#shelfTitle').textContent=tb?tb.name:'';
  $('#shelf').innerHTML=Array.from({length:14},()=>'<div class="tile sk"><div class="art"></div></div>').join('');
  try{
@@ -1469,7 +1531,7 @@ const peerOpts=()=>Object.assign({debug:0},store.get('peerServer',{}));
 const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
 function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
 const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
-const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio};
+const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio,cd:t.cd};
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
@@ -1560,7 +1622,8 @@ const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
  tracks(item){return rcall({t:'tracks',item:slimI(item)})},
  search(q){return rcall({t:'search',q})},
  async housePool(){return[]},
- async stationTracks(){return[]}};
+ async stationTracks(){return[]},
+ async findSong(){return null}};
 async function remoteEnqueue(t,mode){
  sfx('add');
  try{const r=await rcall({t:'enqueue',track:slimT(t),mode,next:mode==='n'});
@@ -1886,6 +1949,89 @@ async function huePair(ip){
   if($('#hueCount')){toast('No button press seen. Try again.','warn');renderHueSettings()}
  }catch(e){toast("Couldn't pair: "+e.message,'warn');renderHueSettings()}
  finally{HUE.pairing=false}
+}
+
+/* ---------- Hot 100 Rewind countdown ---------- */
+const CD={data:null,loading:null,years:20,active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{}};
+const CD_YEARS=[5,10,15,20,25];
+function cdData(){
+ if(CD.data)return Promise.resolve(CD.data);
+ if(!CD.loading)CD.loading=fetch('hot100-top20.json').then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()}).then(j=>{CD.data=j;return j}).finally(()=>{CD.loading=null});
+ return CD.loading;
+}
+function cdWeek(years){
+ const d=new Date();d.setFullYear(d.getFullYear()-years);const t=d.getTime();
+ let best=null,bd=Infinity;for(const x of Object.keys(CD.data.weeks)){const diff=Math.abs(new Date(x+'T12:00:00').getTime()-t);if(diff<bd){bd=diff;best=x}}
+ return best;
+}
+const fmtWeek=d=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
+function cdMove(e){const[pos,, ,lw]=e;if(!lw)return['new','NEW'];if(lw===pos)return['same','—'];return lw>pos?['up','▲'+(lw-pos)]:['down','▼'+(pos-lw)]}
+async function openCountdown(){
+ const panel=$('#cdPanel');
+ if(!CD.data){panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading 68 years of charts…</div></div>';
+  try{await cdData()}catch(e){panel.innerHTML=`<div class="loading">Couldn't load the chart archive<br><small>${esc(e.message)}</small></div>`;return}}
+ if(tabId!=='countdown')return;
+ renderCountdown();
+}
+function renderCountdown(){
+ const panel=$('#cdPanel');if(!CD.data)return;
+ const yr=new Date().getFullYear(),date=CD.active?CD.date:cdWeek(CD.years),rows=CD.data.weeks[date]||[];
+ panel.innerHTML=`<div class="cdHead"><div><h2>Hot 100 Rewind</h2><p>This week's Top 20, straight from the Billboard Hot 100 archives</p></div>
+  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active?' disabled':''}><b>${yr-n}</b><small>${n} years ago</small></button>`).join('')}</div></div>
+  <div class="cdBar"><span class="cdWeek">Chart week of ${esc(fmtWeek(date))}</span>
+  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':'Start countdown · #20 → #1'}</button></div>
+  <div class="cdList" id="cdList">${rows.map(e=>{const[c,txt]=cdMove(e);return`<div class="cdRow" data-pos="${e[0]}"><span class="n">${e[0]}</span><span class="m"><b>${esc(e[1])}</b><span>${esc(e[2])} · peak #${e[4]} · ${e[5]} wk${e[5]===1?'':'s'}</span></span><span class="mv ${c}">${txt}</span></div>`}).join('')}</div>`;
+ renderCdRows();
+}
+function renderCdRows(){
+ if(tabId!=='countdown'||!CD.active)return;
+ const cur=P.current&&P.current.cd;const missing=new Set(CD.missing||[]);
+ $$('#cdList .cdRow').forEach(r=>{const pos=+r.dataset.pos;r.classList.toggle('now',!!cur&&cur.pos===pos);r.classList.toggle('miss',missing.has(pos));
+  const played=CD.list.slice(0,CD.idx).some(x=>x.cd.pos===pos)&&!(cur&&cur.pos===pos);r.classList.toggle('done',played)});
+ const now=$('#cdList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+$('#cdPanel').addEventListener('click',e=>{
+ const y=e.target.closest('[data-cdy]');if(y&&!CD.active){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown();return}
+ if(e.target.closest('#cdGo')){if(CD.active)stopCountdown();else startCountdown()}
+});
+async function startCountdown(){
+ if(CD.matching)return;
+ const date=cdWeek(CD.years),year=+date.slice(0,4),entries=[...(CD.data.weeks[date]||[])].sort((a,b)=>b[0]-a[0]);
+ CD.matching=true;renderCountdown();
+ let done=0;const btn=()=>{const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${entries.length}`};
+ try{
+  const found=CD.cache[date]||{};
+  for(let i=0;i<entries.length;i+=4){
+   await Promise.all(entries.slice(i,i+4).map(async e=>{if(!(e[0] in found)){try{found[e[0]]=await provider.findSong(e[1],e[2])}catch(err){found[e[0]]=null}}done++;btn()}));
+  }
+  CD.cache[date]=found;
+  CD.list=entries.filter(e=>found[e[0]]).map(e=>({track:found[e[0]],e,cd:{pos:e[0],year,date,lw:e[3],peak:e[4],weeks:e[5]}}));
+  CD.missing=entries.filter(e=>!found[e[0]]).map(e=>e[0]);
+  if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
+  CD.active=true;CD.idx=0;CD.date=date;CD.year=year;
+  sfx('coin');toast(`Hot 100 Rewind · ${fmtWeek(date)}`+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+  if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
+  else toast('The countdown starts after the current picks');
+ }finally{CD.matching=false;renderCountdown()}
+}
+function stopCountdown(){CD.active=false;CD.list=[];CD.idx=0;renderCountdown();renderNP();toast('Countdown stopped. This song will finish.')}
+function cdNext(){
+ if(!CD.active)return null;
+ if(CD.idx<CD.list.length)return CD.list[CD.idx++];
+ CD.active=false;const top=CD.list[CD.list.length-1];
+ toast(top?`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`:"That's the countdown!");
+ if(tabId==='countdown')renderCountdown();
+ return null;
+}
+let cdCardT=null;
+function cdCard(x){
+ const c=x.cd,[cls,mv]=cdMove([c.pos,0,0,c.lw]);
+ $('#cdNum').textContent='#'+c.pos;
+ $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
+ $('#cdTitle').textContent=x.track.name;$('#cdArtist').textContent=x.e[2];
+ $('#cdStats').textContent=[`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks===1?'':'s'} on the chart`,cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)}`:`Down ${mv.slice(1)}`].join(' · ');
+ const el=$('#cdCard');el.classList.add('show');clearTimeout(cdCardT);cdCardT=setTimeout(()=>el.classList.remove('show'),7500);
+ if(c.pos<=3&&S.sfx)sfx('coin');
 }
 
 /* ---------- Boot ---------- */
