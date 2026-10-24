@@ -1243,7 +1243,7 @@ async function artNext(){
   const g=$('#gallery'),el=document.createElement('div');el.className='gSlide';
   el.innerHTML=`<img class="gArt" src="${src}" alt=""><div class="gLabel"><b>${esc(a.title)}</b><span>${esc(a.artist)}${a.date?', '+esc(a.date):''}</span><small>Art Institute of Chicago</small></div>`;
   g.insertBefore(el,$('#gNow'));
-  const pill=$('#gNow');pill.classList.remove('hide');clearTimeout(ART.pillT);ART.pillT=setTimeout(()=>pill.classList.add('hide'),9000);
+  $('#gNow').classList.remove('hide');
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
   $$('.gSlide',g).forEach(o=>{if(o!==el){o.classList.remove('show');setTimeout(()=>o.remove(),2800)}});
   return true;
