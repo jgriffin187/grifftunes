@@ -266,25 +266,21 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 #gallery.on{opacity:1;pointer-events:auto}
 .gSlide{position:absolute;inset:0;opacity:0;transition:opacity 2.6s ease}
 .gSlide.show{opacity:1}
-.gBg{position:absolute;inset:-80px;background-size:cover;background-position:center;filter:blur(70px) brightness(.3) saturate(1.25)}
-.gWall{position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 30%,rgba(255,236,205,.1),transparent 70%),radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.6))}
-.gFrame{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);padding:clamp(8px,1vw,16px);background:linear-gradient(145deg,#4a3722,#20160d 55%,#3a2a19);box-shadow:0 0 0 1px #0b0805,inset 0 0 0 2px rgba(255,214,150,.22),inset 0 0 0 6px rgba(0,0,0,.25),0 40px 100px rgba(0,0,0,.8)}
-.gSlide.show .gFrame{animation:breathe 48s ease-in-out infinite alternate}
-@keyframes breathe{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.035)}}
-.gMat{padding:clamp(14px,2.4vw,40px);background:#efe9dd;box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
-.gMat img{display:block;max-width:74vw;max-height:66vh;width:auto;height:auto;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
-.gLabel{position:absolute;right:4vw;bottom:4.5vh;background:rgba(246,242,234,.95);color:#1d1814;padding:14px 22px 12px;border-radius:2px;max-width:min(34vw,460px);font-family:Georgia,'Times New Roman',serif;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.gArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.gSlide.show .gArt{animation:kenburns 60s ease-in-out infinite alternate}
+@keyframes kenburns{from{transform:scale(1.02) translate(0,0)}to{transform:scale(1.08) translate(-1.2%,-1%)}}
+.gLabel{position:absolute;right:3vw;bottom:4vh;background:rgba(246,242,234,.92);color:#1d1814;padding:12px 20px 10px;border-radius:2px;max-width:min(34vw,460px);font-family:Georgia,'Times New Roman',serif;box-shadow:0 10px 30px rgba(0,0,0,.45);animation:peek 10s ease forwards}
 .gLabel b{display:block;font-style:italic;font-weight:400;font-size:clamp(16px,1.3vw,22px);line-height:1.25}
 .gLabel span{display:block;font-size:clamp(13px,1vw,16px);color:#4d4237;margin-top:3px}
 .gLabel small{display:block;margin-top:8px;font-family:Outfit,sans-serif;font-size:10px;letter-spacing:.18em;color:#8b7d6d;text-transform:uppercase}
-.gLogo{position:absolute;top:3vh;left:3vw;z-index:3;font-family:Monoton;font-size:clamp(24px,2.4vw,40px);opacity:.75;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 34px var(--accent)}
-.gCta{position:absolute;top:4vh;right:3vw;z-index:3;font-family:Bungee;font-size:clamp(12px,1vw,16px);letter-spacing:.2em;color:rgba(255,255,255,.5)}
-.gNow{position:absolute;left:4vw;bottom:4.5vh;z-index:3;display:flex;align-items:center;gap:14px;padding:10px 22px 10px 10px;border-radius:999px;background:rgba(10,6,20,.74);border:1px solid var(--stroke);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:40vw;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+@keyframes peek{0%,10%{opacity:0}20%,75%{opacity:1}100%{opacity:0}}
+.gNow{position:absolute;left:3vw;bottom:4vh;z-index:3;transition:opacity 1.2s;display:flex;align-items:center;gap:14px;padding:10px 22px 10px 10px;border-radius:999px;background:rgba(10,6,20,.74);border:1px solid var(--stroke);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:40vw;box-shadow:0 12px 34px rgba(0,0,0,.5)}
 .gNow img{width:54px;height:54px;border-radius:50%;object-fit:cover;flex:none;animation:spin 6s linear infinite}
 .gNow div{min-width:0;display:flex;flex-direction:column}
 .gNow b,.gNow span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gNow b{font-size:17px}.gNow span{font-size:14px;color:var(--muted)}
 #gViz{width:84px;height:30px;flex:none}
+.gNow.hide{opacity:0}
 #attract{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .9s;background:#05020c;overflow:hidden}
 #attract.on{opacity:1;pointer-events:auto}
 .attBg{position:absolute;inset:-120px;background-size:cover;background-position:center;filter:blur(80px) saturate(1.9) brightness(.5);transform:scale(1.2)}
@@ -403,8 +399,6 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 </div>
 
 <div id="gallery">
- <div class="gLogo" id="gLogo"></div>
- <div class="gCta">Touch to pick a song</div>
  <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas></div>
 </div>
 
@@ -689,7 +683,7 @@ const REG=new Map();let regN=0;const reg=x=>{const k='k'+(regN++);REG.set(k,x);r
 function applyName(){
  const w=(S.name||'Jukebox').trim().split(/\s+/);const last=w.pop();
  $('.logo .l1').textContent=w.join(' ');$('.logo .l1').style.display=w.length?'':'none';
- $('.logo .l2').textContent=last;$('#attLogo').textContent=last;$('#gLogo').textContent=last;document.title=S.name;
+ $('.logo .l2').textContent=last;$('#attLogo').textContent=last;document.title=S.name;
 }
 function setBadge(kind,text){const b=$('#modeBadge');b.className='badge '+kind;b.textContent=text}
 function renderCredits(){
@@ -1002,35 +996,36 @@ function artLoad(){
  if(ART.list.length)return Promise.resolve();
  if(ART.loading)return ART.loading;
  ART.loading=(async()=>{
-  const cached=store.get('art',null);
+  const cached=store.get('art2',null);
   if(cached&&cached.list&&cached.list.length>=12&&Date.now()-cached.at<7*864e5){ART.list=cached.list;ART.iiif=cached.iiif||ART.iiif}
   else{
    const base=[{term:{is_public_domain:true}},{exists:{field:'image_id'}}];
    const tries=[
     {query:{bool:{must:base.concat([{term:{artwork_type_id:1}},{term:{is_boosted:true}}])}}},
     {query:{bool:{must:base.concat([{term:{artwork_type_id:1}}])}}},
-    {q:'oil painting',query:{bool:{must:base}}}
+    {q:'landscape oil painting',query:{bool:{must:base}}}
    ];
+   const seen=new Map();
    for(const t of tries){
     try{
-     const out=[];
-     for(let page=1;page<=3;page++){
-      const params=Object.assign({},t,{fields:['id','title','artist_title','artist_display','date_display','image_id','artwork_type_title'],limit:100,page});
+     for(let page=1;page<=4;page++){
+      const params=Object.assign({},t,{fields:['id','title','artist_title','artist_display','date_display','image_id','artwork_type_title','thumbnail'],limit:100,page});
       const r=await fetch('https://api.artic.edu/api/v1/artworks/search?params='+encodeURIComponent(JSON.stringify(params)));
       if(!r.ok)break;
       const j=await r.json();
       if(j.config&&j.config.iiif_url)ART.iiif=j.config.iiif_url;
-      out.push(...(j.data||[]).filter(a=>a.image_id&&(t.q||!a.artwork_type_title||/paint/i.test(a.artwork_type_title))));
+      (j.data||[]).filter(a=>a.image_id&&(t.q||!a.artwork_type_title||/paint/i.test(a.artwork_type_title))).forEach(a=>{
+       if(seen.has(a.id))return;
+       const th=a.thumbnail||{};
+       seen.set(a.id,{title:a.title||'Untitled',artist:a.artist_title||String(a.artist_display||'').split('\n')[0]||'Unknown artist',date:a.date_display||'',img:a.image_id,r:th.width&&th.height?+(th.width/th.height).toFixed(3):0});
+      });
       if(!j.pagination||page>=j.pagination.total_pages)break;
       await sleep(500);
      }
-     if(out.length>=12){
-      ART.list=out.map(a=>({title:a.title||'Untitled',artist:a.artist_title||String(a.artist_display||'').split('\n')[0]||'Unknown artist',date:a.date_display||'',img:a.image_id}));
-      store.set('art',{list:ART.list,iiif:ART.iiif,at:Date.now()});
-      break;
-     }
     }catch(e){console.warn('Art load failed',e)}
+    if([...seen.values()].filter(a=>a.r>=1.4&&a.r<=2.3).length>=40)break;
    }
+   if(seen.size>=12){ART.list=[...seen.values()];store.set('art2',{list:ART.list,iiif:ART.iiif,at:Date.now()})}
   }
   for(let i=ART.list.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[ART.list[i],ART.list[k]]=[ART.list[k],ART.list[i]]}
  })().finally(()=>{ART.loading=null});
@@ -1040,12 +1035,15 @@ const artUrl=(a,w)=>`${ART.iiif}/${a.img}/full/${w},/0/default.jpg`;
 const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
 async function artNext(){
  for(let n=0;n<6&&ART.list.length;n++){
-  const a=ART.list[ART.idx++%ART.list.length];let src=artUrl(a,1686);
+  const sar=innerWidth/Math.max(1,innerHeight),fits=ART.list.filter(x=>x.r&&x.r>=sar*.8&&x.r<=sar*1.28);
+  const pool=fits.length>=10?fits:ART.list;
+  const a=pool[ART.idx++%pool.length];let src=artUrl(a,1686);
   try{await loadImg(src)}catch(e){src=artUrl(a,843);try{await loadImg(src)}catch(e2){continue}}
   if(!galleryOn)return true;
   const g=$('#gallery'),el=document.createElement('div');el.className='gSlide';
-  el.innerHTML=`<div class="gBg" style="background-image:url('${src}')"></div><div class="gWall"></div><div class="gFrame"><div class="gMat"><img src="${src}" alt=""></div></div><div class="gLabel"><b>${esc(a.title)}</b><span>${esc(a.artist)}${a.date?', '+esc(a.date):''}</span><small>Art Institute of Chicago</small></div>`;
-  g.insertBefore(el,$('#gLogo'));
+  el.innerHTML=`<img class="gArt" src="${src}" alt=""><div class="gLabel"><b>${esc(a.title)}</b><span>${esc(a.artist)}${a.date?', '+esc(a.date):''}</span><small>Art Institute of Chicago</small></div>`;
+  g.insertBefore(el,$('#gNow'));
+  const pill=$('#gNow');pill.classList.remove('hide');clearTimeout(ART.pillT);ART.pillT=setTimeout(()=>pill.classList.add('hide'),9000);
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
   $$('.gSlide',g).forEach(o=>{if(o!==el){o.classList.remove('show');setTimeout(()=>o.remove(),2800)}});
   return true;
