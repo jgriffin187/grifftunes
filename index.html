@@ -196,6 +196,9 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .act.done{animation:pop .45s}
 .cost{font-family:Bungee;font-size:12px;padding:2px 8px;border-radius:99px;background:rgba(255,210,63,.22);color:var(--gold)}
 .act.n .cost{background:rgba(0,0,0,.28)}
+.act.w{background:#fff;color:#170b2b;box-shadow:0 0 0 2px var(--gold),0 0 22px rgba(255,210,63,.55)}
+.act.w .cost{background:#170b2b;color:var(--gold)}
+.act .sh{display:none}
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:200px;height:100%;color:var(--muted);font-size:18px;text-align:center;padding:20px}
 .spin{width:46px;height:46px;border-radius:50%;border:4px solid rgba(255,255,255,.14);border-top-color:var(--accent);animation:spin .8s linear infinite}
 
@@ -375,7 +378,9 @@ html.remote .badge{display:flex!important}
  .tArt{width:50px;height:50px}
  .tMeta{flex:1 1 calc(100% - 70px)}
  .tMeta b{font-size:17px}
- .act{flex:1 1 0;justify-content:center;height:44px}
+ .act{flex:1 1 0;min-width:0;justify-content:center;height:44px;padding:0 6px;font-size:14px;gap:6px}
+ .act .lg{display:none}.act .sh{display:inline}
+ .tracks{padding:10px 10px 20px}
  #toasts{top:auto;bottom:22px}
  .toast{font-size:15px}
  .search .sheet{height:100%;width:100%;border-radius:0}
@@ -493,9 +498,10 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:3,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
+if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
 const saveS=()=>{if(!REMOTE)store.set('settings',S)};
 let credits=store.get('credits',6);
 
@@ -868,12 +874,15 @@ async function advance(){
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();
  }finally{advancing=false}
 }
-function enqueue(t,next,src){
- if(REMOTE){remoteEnqueue(t,next);return true}
- if(!spend(next?2:1))return false;
+const COST={q:1,n:2,w:3};
+const normMode=m=>m==='w'||m==='n'||m==='q'?m:(m===true?'n':'q');
+function enqueue(t,mode,src){
+ mode=normMode(mode);const next=mode==='n';
+ if(REMOTE){remoteEnqueue(t,mode);return true}
+ if(!spend(COST[mode]))return false;
  sfx('add');
  const tag=src==='phone'?'Phone request · ':'';
- if(!P.current||P.current.house){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
+ if(mode==='w'||!P.current||P.current.house){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
  else{if(next)P.queue.unshift(t);else P.queue.push(t);saveQueue();renderQueue();
   const pos=next?1:P.queue.length;toast(`${tag}${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
  return true;
@@ -897,7 +906,7 @@ setInterval(()=>{
 
 /* ---------- Browse: tabs, coverflow, shelf ---------- */
 const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' round':''}" data-open="${reg(it)}"><div class="art"><img src="${esc(it.img)}" alt="" loading="lazy"></div><b>${esc(it.name)}</b><span>${esc(it.sub||'')}</span></button>`};
-const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}">+ Queue ${cost(1)}</button><button class="act n" data-act="n" data-k="${k}">Play next ${cost(2)}</button></div>`};
+const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
 function buildTabs(){$('#tabs').innerHTML=provider.tabs.map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}
@@ -1040,7 +1049,7 @@ function openSettings(){
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||3);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked};
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
@@ -1204,7 +1213,7 @@ setInterval(()=>{if(!attractOn&&S.attractSecs>0&&Date.now()-lastInput>S.attractS
 /* ---------- Global events ---------- */
 document.addEventListener('click',e=>{
  const a=e.target.closest('[data-act]');
- if(a){const t=REG.get(a.dataset.k);if(t&&enqueue(t,a.dataset.act==='n'))bump(a,'done');return}
+ if(a){const t=REG.get(a.dataset.k);if(t&&enqueue(t,a.dataset.act))bump(a,'done');return}
  const o=e.target.closest('[data-open]');if(o){openItem(REG.get(o.dataset.open));return}
  const qx=e.target.closest('[data-qx]');if(qx){P.queue.splice(+qx.dataset.qx,1);saveQueue();renderQueue();return}
  const tb=e.target.closest('[data-tab]');if(tb){sfx('tick');loadTab(tb.dataset.tab);return}
@@ -1255,10 +1264,10 @@ async function hostHandle(c,d){
   else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
   else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
   else if(d.t==='enqueue'){
-   const t=slimT(d.track),cost=d.next?2:1;
+   const t=slimT(d.track),mode=normMode(d.mode||(d.next?'n':'q')),cost=COST[mode];
    if(!t||!t.uri||!t.name)throw new Error('That song could not be added');
    if(!S.freePlay&&credits<cost){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:'Out of credits. Insert a coin at the jukebox!'});return}
-   enqueue(t,!!d.next,'phone');reply({ok:true});
+   enqueue(t,mode,'phone');reply({ok:true});
   }
  }catch(e){sendTo(c,{t:'error',id:d.id,msg:e.message||'Something went wrong'})}
 }
@@ -1329,10 +1338,10 @@ const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
  tracks(item){return rcall({t:'tracks',item:slimI(item)})},
  search(q){return rcall({t:'search',q})},
  async housePool(){return[]}};
-async function remoteEnqueue(t,next){
+async function remoteEnqueue(t,mode){
  sfx('add');
- try{const r=await rcall({t:'enqueue',track:slimT(t),next:!!next});
-  if(r&&r.ok)toast(next?`${t.name} · up next!`:`${t.name} · added to the queue`,t.img);
+ try{const r=await rcall({t:'enqueue',track:slimT(t),mode,next:mode==='n'});
+  if(r&&r.ok)toast(mode==='w'?`${t.name} · playing now!`:mode==='n'?`${t.name} · up next!`:`${t.name} · added to the queue`,t.img);
   else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
  }catch(e){sfx('err');toast(e.message,'warn')}
 }
