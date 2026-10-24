@@ -146,20 +146,21 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .queue{flex:1;min-height:0;display:flex;flex-direction:column;padding:18px 14px 12px 20px}
 .qHead{display:flex;align-items:baseline;gap:10px;font-family:Bungee;font-size:18px;margin-bottom:10px}
 .qHead span{font-family:Outfit;font-size:14px;color:var(--muted)}
-.qList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding-right:6px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
-.qItem{display:flex;align-items:center;gap:12px;padding:8px;border-radius:14px;background:rgba(255,255,255,.045);animation:slideIn .45s cubic-bezier(.2,.8,.2,1) both}
+.qList{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:6px;padding-right:6px;padding-bottom:4px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+.qItem{display:flex;align-items:center;gap:12px;padding:6px 8px;border-radius:12px;flex:none;background:rgba(255,255,255,.045);animation:slideIn .45s cubic-bezier(.2,.8,.2,1) both}
 .qItem:first-child{background:color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 40%,transparent)}
 .qNum{font-family:Bungee;width:26px;text-align:center;color:var(--accent2);flex:none}
-.qItem img{width:50px;height:50px;border-radius:10px;flex:none;object-fit:cover}
+.qItem img{width:44px;height:44px;border-radius:8px;flex:none;object-fit:cover}
 .qMeta{flex:1;min-width:0;display:flex;flex-direction:column}
 .qMeta b,.qMeta span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.qMeta b{font-size:16px}.qMeta span{font-size:14px;color:var(--muted)}
+.qMeta b{font-size:15px}.qMeta span{font-size:13px;color:var(--muted)}
 .qX{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;opacity:.45;flex:none}
 .qX svg{width:18px;height:18px}
 .qX:active{opacity:1;background:rgba(255,59,92,.3)}
 .qEmpty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;color:var(--muted);padding:20px}
 .qEmpty svg{width:46px;height:46px;color:var(--accent2);opacity:.8;margin-bottom:6px}
 .qEmpty b{color:#fff;font-size:18px}
+.qList.more{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 46px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 46px),transparent)}
 @keyframes slideIn{from{opacity:0;transform:translateX(30px)}}
 
 .modal{position:fixed;inset:0;z-index:50;display:grid;place-items:center;background:rgba(5,2,12,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity .3s}
@@ -311,6 +312,25 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .btnRow.center{justify-content:center}
 html.remote #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .ctrls,html.remote .qX,html.remote .clock{display:none!important}
 html.remote .badge{display:flex!important}
+@media (max-height:1000px) and (min-width:821px){
+ .np{display:grid;grid-template-columns:186px minmax(0,1fr);column-gap:14px;padding:16px 20px 16px}
+ .npLabel{grid-column:1/-1}
+ .npStage{grid-column:1;grid-row:2/4;height:124px;margin:12px 0 4px}
+ .npArt{width:124px;height:124px;border-radius:14px}
+ .vinyl{width:116px;height:116px;left:20px;top:4px}
+ .np.playing .vinyl{left:66px}
+ .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
+ .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
+ #viz,.prog,.times,.ctrls{grid-column:1/-1}
+ #viz{height:44px;margin:6px 0 4px}
+ .times{margin-top:4px}
+ .ctrls{margin-top:6px}
+ .playBtn{width:54px;height:54px}.playBtn svg{width:24px;height:24px}
+ .skipBtn{width:46px;height:46px}
+ .side{gap:12px}
+ .queue{padding:14px 12px 10px 16px}
+ .qHead{margin-bottom:8px;font-size:16px}
+}
 @media (max-width:1250px){.clock{display:none}.logo .l2{font-size:38px}.badge{display:none}}
 @media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 370px}.npArt{width:180px;height:180px}.npStage{height:180px}.vinyl{width:166px;height:166px}.np.playing .vinyl{left:136px}.coinBtn{padding:0 16px;font-size:14px}}
 @media (max-width:820px){
@@ -827,7 +847,9 @@ function renderQueue(){
  l.innerHTML=n?P.queue.map((t,i)=>`<div class="qItem" style="animation-delay:${Math.min(i,8)*40}ms"><div class="qNum">${i+1}</div><img src="${esc(t.img||PLACEHOLDER)}" alt=""><div class="qMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><button class="qX" data-qx="${i}" aria-label="Remove">${I.close}</button></div>`).join('')
   :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
  syncAttract();hostSync();
+ requestAnimationFrame(qFade);
 }
+function qFade(){const l=$('#qList');if(l)l.classList.toggle('more',l.scrollHeight-l.scrollTop-l.clientHeight>8)}
 
 let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
@@ -1197,6 +1219,7 @@ $('#coinBtn').onclick=insertCoin;
 $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
+$('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
 $('#shPrev').onclick=()=>$('#shelf').scrollBy({left:-$('#shelf').clientWidth*.8});
 $('#shNext').onclick=()=>$('#shelf').scrollBy({left:$('#shelf').clientWidth*.8});
 const vol=$('#vol');vol.value=S.volume;let volT=null;
