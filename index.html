@@ -477,7 +477,7 @@ const DEMO=(()=>{
 
 /* ---------- Spotify auth + API (PKCE, no server needed) ---------- */
 const SP_AUTH='https://accounts.spotify.com';
-const REDIRECT=location.origin+location.pathname;
+const REDIRECT=location.origin+location.pathname.replace(/index\.html$/i,'').replace(/\/?$/,'/').toLowerCase();
 const SCOPES='streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state user-library-read playlist-read-private playlist-read-collaborative user-top-read';
 let tok=store.get('sp_tokens',null);
 const b64url=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
