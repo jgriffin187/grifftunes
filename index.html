@@ -518,6 +518,7 @@ async function api(path,opts={},retry=true){
  if(r.status===429&&retry){await sleep((+r.headers.get('Retry-After')||2)*1000);return api(path,opts,false)}
  if(r.status===204||r.status===202)return null;
  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
+ if(r.status===403)throw new Error('Spotify blocks personal apps from opening this one');
  if(!r.ok)throw new Error((j&&j.error&&j.error.message)||('HTTP '+r.status));
  return j;
 }
@@ -526,21 +527,31 @@ const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,
 const spItem=(x,type)=>x?{id:x.id,type,name:x.name,sub:type==='album'?(x.artists||[]).map(a=>a.name).join(', '):type==='playlist'?('By '+((x.owner&&x.owner.display_name)||'Spotify')):'Artist',img:spImg(x.images),uri:x.uri}:null;
 const SPOTIFY={
  key:'spotify',
- tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'Playlists'},{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}],
+ tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'}],
+ me:null,
  async load(tab){
   if(tab==='albums'){const j=await api('/me/albums?limit=50');return j.items.map(x=>spItem(x.album,'album')).filter(Boolean)}
-  if(tab==='playlists'){const j=await api('/me/playlists?limit=50');return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...j.items.filter(Boolean).map(x=>spItem(x,'playlist'))]}
+  if(tab==='playlists'){
+   if(!this.me)this.me=await api('/me');
+   const j=await api('/me/playlists?limit=50');
+   const mine=j.items.filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
+   return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
+  }
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return j.items.map(x=>spItem(x,'artist'))}
-  if(tab==='new'){const j=await api('/browse/new-releases?limit=40');return j.albums.items.map(x=>spItem(x,'album'))}
   return[];
  },
  async tracks(it){
-  if(it.type==='album'){const j=await api(`/albums/${it.id}/tracks?limit=50`);return j.items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name}))}
-  if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return j.items.map(x=>spT(x.track)).filter(Boolean)}
-  if(it.type==='playlist'){let j;try{j=await api(`/playlists/${it.id}/items?limit=100`)}catch(e){j=await api(`/playlists/${it.id}/tracks?limit=100`)}return(j.items||[]).map(e=>spT(e.item||e.track)).filter(Boolean)}
+  if(it.type==='album'){
+   let items;
+   try{const j=await api(`/albums/${it.id}`);items=(j.tracks&&j.tracks.items)||[]}
+   catch(e){const j=await api(`/albums/${it.id}/tracks?limit=50`);items=j.items||[]}
+   return items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name}));
+  }
+  if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return j.items.map(x=>spT(x.track||x.item)).filter(Boolean)}
+  if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return(j.items||[]).map(e=>spT(e.item||e.track)).filter(Boolean)}
   if(it.type==='artist'){
-   try{const j=await api(`/artists/${it.id}/top-tracks?market=from_token`);if(j.tracks&&j.tracks.length)return j.tracks.map(t=>spT(t)).filter(Boolean)}catch(e){}
-   const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(`artist:"${it.name}"`));return j.tracks.items.map(t=>spT(t)).filter(Boolean);
+   const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(`artist:"${it.name}"`));
+   const all=j.tracks.items,own=all.filter(t=>(t.artists||[]).some(a=>a.id===it.id));return(own.length?own:all).map(t=>spT(t)).filter(Boolean);
   }
   return[];
  },
