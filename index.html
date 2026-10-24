@@ -167,6 +167,31 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .glass{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 40%,transparent 70%,rgba(0,0,0,.25));pointer-events:none}
 .np.radioOn #viz{display:none}
 .dial.tuning .band{filter:blur(.6px)}
+.lights .sheet{width:min(640px,94vw);height:auto;max-height:92vh}
+.lightsBody{padding:8px 28px 26px;overflow-y:auto}
+.lmodes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+.lmode{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:18px;border-radius:20px;text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--stroke);transition:transform .12s}
+.lmode:active{transform:scale(.97)}
+.lmode i{width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.lmode i svg{width:24px;height:24px}
+.lmode b{font-size:18px}.lmode small{font-size:13px;color:var(--muted);line-height:1.35}
+.lmode.on{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 30px rgba(255,255,255,.18)}
+.lm-auto i{background:conic-gradient(from 0deg,#ff2bd6,#ffd23f,#22e4ff,#7b2bff,#ff2bd6)}
+.lm-party i{background:linear-gradient(135deg,#ff00a8,#7cff00,#00f0ff)}
+.lm-chill i{background:linear-gradient(135deg,#ff9a3c,#7a2e00);color:#fff4e0}
+.lm-off i{background:rgba(255,255,255,.12)}
+.lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
+#lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
+.hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
+.hueBox p{color:var(--muted);font-size:15px;line-height:1.5}
+.huePress{display:flex;align-items:center;gap:18px;margin:6px 0 4px}
+.hueBridge{width:84px;height:84px;border-radius:20px;background:linear-gradient(160deg,#f5f5f5,#cfcfcf);position:relative;flex:none;box-shadow:0 8px 20px rgba(0,0,0,.4)}
+.hueBridge::after{content:'';position:absolute;left:50%;top:50%;width:34px;height:34px;margin:-17px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px #bdbdbd,0 0 0 0 rgba(34,228,255,.7);animation:huePulse 1.4s ease-out infinite}
+@keyframes huePulse{to{box-shadow:0 0 0 3px #bdbdbd,0 0 0 22px rgba(34,228,255,0)}}
+.hueCount{font-family:Bungee;font-size:28px;color:var(--accent2)}
+.field select{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 14px;font:500 18px Outfit,sans-serif}
+.field select option{color:#000}
+html.remote #lightsBtn{display:none!important}
 .devChip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;background:rgba(30,215,96,.14);border:1px solid rgba(30,215,96,.5);color:#1ed760;font:700 12px Outfit,sans-serif;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .devChip svg{width:14px;height:14px;flex:none}
 .times{align-items:center}
@@ -457,6 +482,7 @@ html.remote .badge{display:flex!important}
   <div class="credits" id="credits"><div class="coin">J</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
   <div class="clock" id="clock"></div>
+  <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
   <button class="iconBtn" id="phoneBtn" aria-label="Add songs from your phone" data-icon="phone"></button>
   <button class="iconBtn" id="gear" aria-label="Settings" data-icon="gear"></button>
  </header>
@@ -514,6 +540,15 @@ html.remote .badge{display:flex!important}
  <div class="osk" id="osk"></div>
 </div></div>
 
+<div class="modal lights" id="lightsModal"><div class="sheet card">
+ <div class="sHead"><h2>Basement lights</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
+ <div class="lightsBody">
+  <div class="lmodes" id="lmodes"></div>
+  <div class="field"><span class="lab">Brightness</span><div class="vol"><input type="range" id="lbri" min="5" max="100"></div></div>
+  <div class="lfoot"><span id="lroom"></span><button class="btn" id="lsettings">Hue settings</button></div>
+ </div>
+</div></div>
+
 <div class="modal speakers" id="devModal"><div class="sheet card">
  <div class="sHead"><h2>Play music on</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="devList" id="devList"></div>
@@ -566,7 +601,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s'};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
@@ -584,6 +619,10 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+ bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
+ sparkle:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+ hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-4 0v5M14 10V4a2 2 0 0 0-4 0v6M10 10.5V6a2 2 0 0 0-4 0v8a8 8 0 0 0 16 0v-3a2 2 0 0 0-4 0"/></svg>',
  radio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="13" rx="2.5"/><path d="M6 8 17 3"/><circle cx="16" cy="14.5" r="3"/><path d="M5.5 12.5h5M5.5 16.5h5"/></svg>',
  speaker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r=".8" fill="currentColor"/><circle cx="12" cy="6.5" r=".8" fill="currentColor"/></svg>',
  tv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
@@ -972,7 +1011,7 @@ function spend(n){
  credits-=n;store.set('credits',credits);renderCredits();return true;
 }
 function insertCoin(){
- credits+=S.coinCredits;store.set('credits',credits);sfx('coin');
+ credits+=S.coinCredits;store.set('credits',credits);sfx('coin');hueFlash('coin');
  const tgt=$('#credits .coin').getBoundingClientRect();
  const c=document.createElement('div');c.className='coin flyCoin';c.textContent='J';c.style.left=tgt.left+'px';c.style.top=tgt.top+'px';document.body.appendChild(c);
  setTimeout(()=>{c.remove();renderCredits();bump($('#credits'),'pop');
@@ -1038,7 +1077,7 @@ let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
 async function startTrack(t,house=false,radio=null){
  P.current=Object.assign({},t,{house,radio});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
- renderNP();accentFrom(t);markNow();
+ renderNP();accentFrom(t);markNow();hueTrack();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
 }
 let advancing=false;
@@ -1060,6 +1099,7 @@ function enqueue(t,mode,src){
  if(!spend(COST[mode]))return false;
  sfx('add');
  const tag=src==='phone'?'Phone request · ':'';
+ if(mode==='w')hueFlash('now');
  if(mode==='w'||!P.current||P.current.house||P.current.radio){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
  else{if(next)P.queue.unshift(t);else P.queue.push(t);saveQueue();renderQueue();
   const pos=next?1:P.queue.length;toast(`${tag}${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
@@ -1215,6 +1255,8 @@ function openSettings(){
   ${tg('fOsk','On-screen keyboard (for touchscreens)',S.osk)}
   ${tg('fPhones','Let guests add songs from their phones',S.phones)}
  </div>
+ <div class="field"><span class="lab">Philips Hue lights</span><div id="hueSet"></div>
+ </div>
  <div class="field"><label for="fCoin">Credits per coin</label><input type="number" id="fCoin" min="1" max="50" value="${S.coinCredits}"></div>
  <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button></div>
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
@@ -1232,6 +1274,7 @@ function openSettings(){
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
  const ia=$('#installApp');if(ia)ia.onclick=installApp;
+ renderHueSettings();
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
@@ -1352,8 +1395,8 @@ async function showGallery(){
  }
  clearInterval(ART.timer);ART.timer=setInterval(()=>{if(galleryOn)artNext()},Math.max(10,S.artSecs)*1000);
 }
-function showAttract(){attractOn=true;if(S.saver==='art'){showGallery();return}syncAttract();$('#attract').classList.add('on')}
-function hideAttract(){attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
+function showAttract(){attractOn=true;hueSaver(true);if(S.saver==='art'){showGallery();return}syncAttract();$('#attract').classList.add('on')}
+function hideAttract(){if(attractOn)hueSaver(false);attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
 
 /* ---------- Wall display: full screen, wake lock, install ---------- */
 const isInstalledApp=()=>matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
@@ -1688,6 +1731,163 @@ async function toggleRadio(){
 $('#radioBtn').onclick=toggleRadio;
 buildDial();
 
+
+/* ---------- Philips Hue (local bridge API over the home network) ---------- */
+const HUE={lights:[],q:[],busy:false,errAt:0,flashT:null,dim:false,pairing:false};
+const hueOn=()=>!REMOTE&&!!(S.hue&&S.hue.ip&&S.hue.user&&S.hue.group);
+const hueB=()=>Math.max(1,Math.round(S.hueBri/100*254));
+async function hueFetch(path,method,body,ip){
+ const host=ip||(S.hue&&S.hue.ip);if(!host)throw new Error('No Hue Bridge');
+ const r=await fetch(`http://${host}/api${path}`,{method:method||'GET',body:body?JSON.stringify(body):undefined,targetAddressSpace:'local'});
+ return r.json();
+}
+function hueErr(e){if(Date.now()-HUE.errAt>60000){HUE.errAt=Date.now();toast("Can't reach the Hue Bridge","warn")}console.warn('Hue',e)}
+function hueSend(path,body,group){if(!hueOn())return;HUE.q.push({path,body,gap:group?1000:120});huePump()}
+async function huePump(){
+ if(HUE.busy)return;HUE.busy=true;
+ while(HUE.q.length){const c=HUE.q.shift();try{const r=await hueFetch(`/${S.hue.user}${c.path}`,'PUT',c.body);if(Array.isArray(r)&&r[0]&&r[0].error&&r[0].error.type===1)hueErr(new Error('unauthorized'))}catch(e){hueErr(e)}await sleep(c.gap)}
+ HUE.busy=false;
+}
+const hueGroup=body=>hueSend(`/groups/${S.hue.group}/action`,body,true);
+function rgbToXy(r,g,b){
+ [r,g,b]=[r,g,b].map(v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92});
+ const X=r*.664511+g*.154324+b*.162028,Y=r*.283881+g*.668433+b*.047685,Z=r*.000088+g*.07231+b*.986039,t=X+Y+Z||1;
+ return[+(X/t).toFixed(4),+(Y/t).toFixed(4)];
+}
+function cssRgb(c){const x=document.createElement('canvas').getContext('2d');x.fillStyle=c;x.fillRect(0,0,1,1);const d=x.getImageData(0,0,1,1).data;return[d[0],d[1],d[2]]}
+async function artPalette(t){
+ if(t.color)return t.color.map(cssRgb);
+ if(!t.img)return[];
+ try{
+  const img=new Image();img.crossOrigin='anonymous';img.src=t.img;await img.decode();
+  const c=document.createElement('canvas');c.width=c.height=24;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,24,24);
+  const d=x.getImageData(0,0,24,24).data,bins=Array.from({length:12},()=>({w:0,r:0,g:0,b:0}));
+  for(let i=0;i<d.length;i+=4){const[h,sat,l]=rgb2hsl(d[i],d[i+1],d[i+2]);if(sat<.25||l<.12||l>.88)continue;const k=Math.floor(h/30)%12,w=sat*(1-Math.abs(l-.5));const B=bins[k];B.w+=w;B.r+=d[i]*w;B.g+=d[i+1]*w;B.b+=d[i+2]*w}
+  const top=bins.map((B,k)=>({k,...B})).filter(B=>B.w>.4).sort((a,b)=>b.w-a.w),pick=[];
+  for(const B of top){if(pick.length<3&&!pick.some(P2=>Math.min(Math.abs(P2.k-B.k),12-Math.abs(P2.k-B.k))<2))pick.push(B)}
+  return pick.map(B=>[B.r/B.w,B.g/B.w,B.b/B.w].map(Math.round));
+ }catch(e){return[]}
+}
+const STATION_COLORS={'60s':['#ff5e7e','#ffd23f','#3ee8ff'],'70s':['#ff9a1f','#c2410c','#facc15'],'80s':['#ff2bd6','#7b2bff','#22e4ff'],'90s':['#00e0a4','#ff4fd8','#7b2bff'],'00s':['#3b82f6','#a855f7','#22d3ee'],now:['#22e4ff','#ff2bd6','#ffffff'],country:['#1e6bff','#ffb000','#ff7a1a'],classic:['#ff8c1a','#ffd23f','#ff3b1f'],rock:['#ff2020','#7a00ff','#ff7a00'],pop:['#ff2bd6','#22e4ff','#ffd23f'],hiphop:['#ffd23f','#a855f7','#ff2bd6'],rnb:['#c026d3','#be123c','#7c3aed'],alt:['#14b8a6','#6366f1','#22c55e'],dance:['#ff00a8','#00f0ff','#7cff00']};
+async function hueMood(){
+ const t=P.current;
+ if(!t){hueGroup({on:true,effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
+ const st=t.radio&&S.radio&&STATIONS.find(x=>x.name===t.radio);
+ let pal=st&&S.hueRadio&&STATION_COLORS[st.id]?STATION_COLORS[st.id].map(cssRgb):await artPalette(t);
+ if(!pal.length)pal=[getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff2bd6','#22e4ff'].map(cssRgb);
+ if(t!==P.current&&P.current)return;
+ HUE.q=HUE.q.filter(c=>!c.mood);
+ const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
+ const warm=(()=>{const[h]=rgb2hsl(...pal[0]);return h<70||h>290})();
+ const lights=HUE.lights.length?HUE.lights:[{id:null,kind:'color'}];
+ lights.forEach((L,i)=>{
+  const col=pal[i%pal.length];
+  const body=L.kind==='color'?{on:true,effect:'none',xy:rgbToXy(...col),bri:B,transitiontime:20}:L.kind==='ct'?{on:true,ct:warm?420:260,bri:B,transitiontime:20}:{on:true,bri:B,transitiontime:20};
+  if(L.id==null){hueGroup(body);return}
+  HUE.q.push({path:`/lights/${L.id}/state`,body,gap:120,mood:true});
+ });
+ huePump();
+}
+function hueApply(){
+ if(!hueOn()||S.hueMode==='off')return;
+ const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
+ if(S.hueMode==='party')hueGroup({on:true,effect:'colorloop',sat:254,bri:B,transitiontime:10});
+ else if(S.hueMode==='chill')hueGroup({on:true,effect:'none',ct:447,bri:Math.round(B*.45),transitiontime:20});
+ else hueMood();
+}
+function hueTrack(){if(hueOn()&&S.hueMode==='auto')hueMood()}
+function hueFlash(kind){
+ if(!hueOn()||!S.hueFx||S.hueMode==='off')return;
+ if(kind==='now'){hueGroup({alert:'select'});return}
+ HUE.q=HUE.q.filter(c=>!c.mood);
+ hueGroup({on:true,effect:'none',xy:rgbToXy(255,196,40),bri:254,transitiontime:1});
+ clearTimeout(HUE.flashT);HUE.flashT=setTimeout(hueApply,1100);
+}
+function hueSaver(on){
+ if(!hueOn()||!S.hueSaver||S.hueMode==='off')return;
+ HUE.dim=on;
+ if(on)hueGroup({bri:Math.max(10,Math.round(hueB()*.22)),transitiontime:40});else hueApply();
+}
+async function hueLoadLights(){
+ if(!hueOn())return;
+ try{
+  const[g,ls]=await Promise.all([hueFetch(`/${S.hue.user}/groups/${S.hue.group}`),hueFetch(`/${S.hue.user}/lights`)]);
+  const ids=(g&&g.lights)||[];
+  HUE.lights=ids.map(id=>{const L=ls[id]||{},ty=String(L.type||'').toLowerCase(),c=(L.capabilities&&L.capabilities.control)||{};
+   return{id,name:L.name,kind:c.colorgamut||/color light/.test(ty)?'color':c.ct||/temperature/.test(ty)?'ct':'dim'}});
+ }catch(e){hueErr(e)}
+}
+function renderLightsBtn(){const b=$('#lightsBtn');if(!b)return;b.style.display=hueOn()?'':'none';b.classList.toggle('on',hueOn()&&S.hueMode!=='off')}
+const LMODES=[['auto','sparkle','Album colors','The room takes on each song\'s colors (or the radio station\'s)'],['party','bulb','Party','Bright color loop on every color light'],['chill','moon','Chill','Warm and dim for hanging out'],['off','hand','Hands off','GriffTunes leaves the lights alone (use with Hue + Spotify sync)']];
+function openLights(){
+ sfx('tick');
+ $('#lmodes').innerHTML=LMODES.map(([id,ic,name,sub])=>`<button class="lmode lm-${id}${S.hueMode===id?' on':''}" data-lmode="${id}"><i>${I[ic]}</i><b>${name}</b><small>${sub}</small></button>`).join('');
+ $('#lbri').value=S.hueBri;$('#lroom').textContent=S.hue&&S.hue.groupName?'Room: '+S.hue.groupName:'';
+ openModal($('#lightsModal'));
+}
+$('#lightsBtn').onclick=openLights;
+$('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()}});
+let briT=null;$('#lbri').addEventListener('input',e=>{S.hueBri=+e.target.value;clearTimeout(briT);briT=setTimeout(()=>{saveS();if(S.hueMode!=='off')hueGroup({bri:S.hueMode==='chill'?Math.round(hueB()*.45):hueB(),transitiontime:4})},350)});
+$('#lsettings').onclick=()=>{closeModal($('#lightsModal'));openSettings();setTimeout(()=>{const h=$('#hueSet');if(h)h.scrollIntoView({behavior:'smooth',block:'center'})},400)};
+
+async function renderHueSettings(){
+ const box=$('#hueSet');if(!box)return;
+ if(REMOTE){box.innerHTML='';return}
+ if(hueOn()){
+  box.innerHTML=`<div class="hueBox"><p><span class="ok">● Connected</span> to the Hue Bridge at ${esc(S.hue.ip)}</p>
+   <div class="field"><label for="hueRoom">Room or zone GriffTunes controls</label><select id="hueRoom"><option>Loading…</option></select></div>
+   <label class="tg"><span>Flash on Insert coin and Play now</span><input type="checkbox" id="hFx" ${S.hueFx?'checked':''}><i></i></label>
+   <label class="tg"><span>Dim the room during the screensaver</span><input type="checkbox" id="hSaver" ${S.hueSaver?'checked':''}><i></i></label>
+   <label class="tg"><span>Radio stations get their own colors</span><input type="checkbox" id="hRadio" ${S.hueRadio?'checked':''}><i></i></label>
+   <div class="btnRow"><button class="btn primary" id="hTest">Test flash</button><button class="btn" id="hOpen">Light modes</button><button class="btn" id="hOff">Disconnect Hue</button></div></div>`;
+  const tgl=(id,key)=>{$(id).onchange=e=>{S[key]=e.target.checked;saveS()}};tgl('#hFx','hueFx');tgl('#hSaver','hueSaver');tgl('#hRadio','hueRadio');
+  $('#hTest').onclick=()=>{const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
+  $('#hOpen').onclick=()=>{closeModal($('#settingsModal'));openLights()};
+  $('#hOff').onclick=()=>{S.hue=null;saveS();HUE.lights=[];renderLightsBtn();renderHueSettings();toast('Hue disconnected')};
+  try{
+   const groups=await hueFetch(`/${S.hue.user}/groups`);
+   const opts=Object.entries(groups||{}).filter(([,g])=>g&&['Room','Zone','Entertainment'].includes(g.type)).sort((a,b)=>a[1].name.localeCompare(b[1].name));
+   const sel=$('#hueRoom');if(!sel)return;
+   sel.innerHTML=opts.map(([id,g])=>`<option value="${esc(id)}"${id===S.hue.group?' selected':''}>${esc(g.name)} · ${g.lights.length} light${g.lights.length===1?'':'s'}${g.type==='Room'?'':' ('+g.type.toLowerCase()+')'}</option>`).join('');
+   sel.onchange=()=>{S.hue.group=sel.value;S.hue.groupName=groups[sel.value].name;saveS();hueLoadLights().then(hueApply);toast('Lights: '+S.hue.groupName)};
+  }catch(e){const sel=$('#hueRoom');if(sel)sel.innerHTML=`<option>${esc(S.hue.groupName||'Saved room')}</option>`}
+  return;
+ }
+ box.innerHTML=`<div class="hueBox"><p>Light up the basement: album colors on every song, a gold flash when someone inserts a coin, and the room dims during the screensaver.</p>
+  <div class="field two" style="margin-bottom:0"><div><label for="hueIp">Hue Bridge address</label><input type="text" id="hueIp" placeholder="Finding your bridge…" inputmode="decimal"></div><div style="display:flex;align-items:flex-end"><button class="btn primary" id="huePair" style="width:100%">Connect Hue Bridge</button></div></div>
+  <p style="margin-top:10px;font-size:13px">Chrome will ask to "connect to devices on your local network". Choose Allow.</p></div>`;
+ const ip=$('#hueIp');
+ fetch('https://discovery.meethue.com/').then(r=>r.json()).then(j=>{if(Array.isArray(j)&&j[0]&&!ip.value)ip.value=j[0].internalipaddress;ip.placeholder='e.g. 192.168.1.20'}).catch(()=>{ip.placeholder='e.g. 192.168.1.20'});
+ $('#huePair').onclick=()=>huePair(ip.value.trim());
+}
+async function huePair(ip){
+ const box=$('#hueSet');
+ if(!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)){toast('Enter the bridge address, like 192.168.1.20','warn');return}
+ if(HUE.pairing)return;HUE.pairing=true;
+ try{await hueFetch('/config','GET',null,ip)}catch(e){HUE.pairing=false;toast(`Can't reach a Hue Bridge at ${ip}. Check the address, and allow local network access if Chrome asks.`,'warn');return}
+ box.innerHTML=`<div class="hueBox"><div class="huePress"><div class="hueBridge"></div><div><b style="font-size:20px">Press the round button on top of your Hue Bridge</b><p>Waiting for the bridge… <span class="hueCount" id="hueCount">30</span></p></div></div></div>`;
+ const until=Date.now()+30000;
+ try{
+  while(Date.now()<until&&$('#hueCount')){
+   $('#hueCount').textContent=Math.ceil((until-Date.now())/1000);
+   const r=await hueFetch('','POST',{devicetype:'grifftunes#jukebox'},ip);
+   const ok=Array.isArray(r)&&r[0]&&r[0].success&&r[0].success.username;
+   if(ok){
+    const groups=await hueFetch(`/${ok}/groups`,'GET',null,ip);
+    const list=Object.entries(groups||{}).filter(([,g])=>g&&['Room','Zone','Entertainment'].includes(g.type));
+    const best=list.find(([,g])=>/basement/i.test(g.name))||list.find(([,g])=>g.type==='Room')||list[0];
+    S.hue={ip,user:ok,group:best?best[0]:'0',groupName:best?best[1].name:'All lights'};saveS();
+    sfx('coin');toast('Hue connected · '+S.hue.groupName);
+    await hueLoadLights();renderLightsBtn();renderHueSettings();hueApply();
+    return;
+   }
+   await sleep(2000);
+  }
+  if($('#hueCount')){toast('No button press seen. Try again.','warn');renderHueSettings()}
+ }catch(e){toast("Couldn't pair: "+e.message,'warn');renderHueSettings()}
+ finally{HUE.pairing=false}
+}
+
 /* ---------- Boot ---------- */
 async function boot(){
  applyName();renderCredits();tickClock();buildOSK();
@@ -1715,6 +1915,7 @@ async function boot(){
  keepAwake();
  if(S.saver==='art')setTimeout(()=>artLoad(),4000);
  startHost();
+ renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
 }
 $('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
 boot();
