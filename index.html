@@ -141,6 +141,29 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .devBtn svg{width:22px;height:22px}
 .devBtn.on{color:#1ed760;border-color:rgba(30,215,96,.6);box-shadow:0 0 18px rgba(30,215,96,.35)}
 .devBtn:active{transform:scale(.92)}
+.radioBtn.on{color:#ffb238;border-color:rgba(255,178,56,.7);box-shadow:0 0 18px rgba(255,178,56,.45)}
+.houseTag.radioTag{background:rgba(255,178,56,.18);color:#ffc35c;border:1px solid rgba(255,178,56,.4)}
+.radio{margin:10px 0 6px;position:relative}
+.rTop{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-family:Bungee;letter-spacing:.06em}
+.onAir{font-size:11px;padding:3px 8px;border-radius:4px;color:#3b0a0a;background:#5a2020;letter-spacing:.14em;transition:.3s}
+.np.playing .onAir{background:#ff3b3b;color:#fff;box-shadow:0 0 14px #ff3b3b,0 0 30px rgba(255,59,59,.5);animation:blink 2.4s steps(2) infinite}
+.rName{font-size:18px;color:#ffd27a;text-shadow:0 0 10px rgba(255,190,80,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rFm{margin-left:auto;font-size:13px;color:rgba(255,210,122,.7)}
+.dial{position:relative;height:66px;border-radius:12px;overflow:hidden;overflow:clip;cursor:grab;touch-action:none;
+ background:radial-gradient(ellipse at 50% 120%,rgba(255,170,60,.55),rgba(120,60,10,.15) 60%,transparent 75%),linear-gradient(180deg,#2b1806,#1a0e03);
+ box-shadow:inset 0 0 0 2px #6b4a1e,inset 0 0 0 4px #20140a,inset 0 0 0 5px rgba(255,214,150,.35),inset 0 8px 18px rgba(0,0,0,.6),0 6px 18px rgba(0,0,0,.4)}
+.dial.dragging{cursor:grabbing}
+.band{position:absolute;top:0;bottom:0;left:50%;display:flex;transition:transform .7s cubic-bezier(.2,.8,.2,1);
+ background-image:repeating-linear-gradient(90deg,rgba(255,214,140,.55) 0 1px,transparent 1px 9px),repeating-linear-gradient(90deg,rgba(255,214,140,.85) 0 2px,transparent 2px 45px);
+ background-size:auto 9px,auto 16px;background-repeat:repeat-x;background-position:0 6px,0 6px}
+.dial.dragging .band{transition:none}
+.st{width:90px;flex:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:9px;gap:2px;color:rgba(255,214,140,.55);font-family:Bungee;font-size:11px;letter-spacing:.04em;white-space:nowrap;transition:color .3s,text-shadow .3s;user-select:none}
+.st small{font-family:Outfit;font-size:10px;font-weight:700;opacity:.7}
+.st.on{color:#fff3d6;text-shadow:0 0 8px #ffb238,0 0 18px rgba(255,178,56,.8)}
+.needle{position:absolute;left:50%;top:4px;bottom:4px;width:3px;margin-left:-1.5px;border-radius:2px;background:#ff2d2d;box-shadow:0 0 8px #ff2d2d,0 0 18px rgba(255,45,45,.7);pointer-events:none}
+.glass{position:absolute;inset:0;border-radius:inherit;background:linear-gradient(180deg,rgba(255,255,255,.14),transparent 40%,transparent 70%,rgba(0,0,0,.25));pointer-events:none}
+.np.radioOn #viz{display:none}
+.dial.tuning .band{filter:blur(.6px)}
 .devChip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;background:rgba(30,215,96,.14);border:1px solid rgba(30,215,96,.5);color:#1ed760;font:700 12px Outfit,sans-serif;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .devChip svg{width:14px;height:14px;flex:none}
 .times{align-items:center}
@@ -164,6 +187,7 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .devFoot p{font-size:14px;color:var(--muted);line-height:1.45}
 .devNote{font-size:15px;color:var(--muted);line-height:1.5;padding:14px 4px}
 html.remote #devChip{display:none!important}
+html.remote #radio{display:none!important}
 .vol{flex:1;display:flex;align-items:center;gap:10px;color:var(--muted)}
 .vol svg{width:22px;height:22px;flex:none}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.16);outline:none}
@@ -351,7 +375,8 @@ html.remote .badge{display:flex!important}
  .np.playing .vinyl{left:66px}
  .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
  .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
- #viz,.prog,.times,.ctrls{grid-column:1/-1}
+ #viz,.radio,.prog,.times,.ctrls{grid-column:1/-1}
+ .radio{margin:6px 0 2px}.dial{height:56px}.rTop{margin-bottom:6px}.rName{font-size:15px}
  #viz{height:44px;margin:6px 0 4px}
  .times{margin-top:4px}
  .ctrls{margin-top:6px}
@@ -453,12 +478,17 @@ html.remote .badge{display:flex!important}
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
     <canvas id="viz"></canvas>
+    <div class="radio" id="radio" style="display:none">
+     <div class="rTop"><span class="onAir" id="onAir">ON AIR</span><span class="rName" id="rName"></span><span class="rFm" id="rFm"></span></div>
+     <div class="dial" id="dial"><div class="band" id="band"></div><div class="needle"></div><div class="glass"></div></div>
+    </div>
     <div class="prog"><i id="progFill"></i></div>
     <div class="times"><span id="tCur">0:00</span><button class="devChip" id="devChip" style="display:none"></button><span id="tDur">0:00</span></div>
     <div class="ctrls">
      <button class="playBtn" id="playBtn" aria-label="Play or pause"></button>
      <button class="skipBtn" id="skipBtn" aria-label="Skip" data-icon="skip"></button>
      <button class="devBtn" id="devBtn" aria-label="Choose speaker" data-icon="speaker"></button>
+     <button class="devBtn radioBtn" id="radioBtn" aria-label="Radio" data-icon="radio"></button>
      <div class="vol"><span data-icon="vol"></span><input type="range" id="vol" min="0" max="100"></div>
     </div>
    </div>
@@ -533,9 +563,9 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s'};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
-if(REMOTE)Object.assign(S,{attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
+if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
 const saveS=()=>{if(!REMOTE)store.set('settings',S)};
 let credits=store.get('credits',6);
@@ -551,6 +581,7 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+ radio:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="13" rx="2.5"/><path d="M6 8 17 3"/><circle cx="16" cy="14.5" r="3"/><path d="M5.5 12.5h5M5.5 16.5h5"/></svg>',
  speaker:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><circle cx="12" cy="14" r="4"/><circle cx="12" cy="14" r=".8" fill="currentColor"/><circle cx="12" cy="6.5" r=".8" fill="currentColor"/></svg>',
  tv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="13" rx="2"/><path d="M8 21h8M12 18v3"/></svg>',
  computer:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20"/></svg>',
@@ -622,7 +653,8 @@ const DEMO=(()=>{
   async tracks(it){await sleep(150);const real=[...albums,...playlists,...artists].find(x=>x.id===it.id);return((real||it).tracks)||[]},
   async search(q){await sleep(150);q=q.toLowerCase();const m=s=>s.toLowerCase().includes(q);
    return{tracks:all.filter(t=>m(t.name)||m(t.artist)).slice(0,20),albums:albums.filter(a=>m(a.name)||m(a.sub)),artists:artists.filter(a=>m(a.name))}},
-  async housePool(){return all}
+  async housePool(){return all},
+  async stationTracks(st){await sleep(250);const h=x=>[...x].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);return all.filter(t=>h(t.id+st.id)%3===0)}
  };
 })();
 
@@ -722,6 +754,25 @@ const SPOTIFY={
  },
  async search(q){const j=await api('/search?type=track,album,artist&limit=10&q='+encodeURIComponent(q));
   return{tracks:((j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean),albums:((j.albums&&j.albums.items)||[]).filter(Boolean).map(x=>spItem(x,'album')),artists:((j.artists&&j.artists.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}},
+ async stationTracks(st){
+  const rnd=n=>Math.floor(Math.random()*n);
+  if(st.kind==='library'){
+   const first=await api('/me/tracks?limit=1');const total=(first&&first.total)||0;
+   const offs=total>50?[rnd(total-49),rnd(total-49)]:[0];
+   const pages=await Promise.all(offs.map(o=>api(`/me/tracks?limit=50&offset=${o}`).catch(()=>null)));
+   return pages.flatMap(j=>((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item))).filter(Boolean);
+  }
+  if(st.kind==='artists'){
+   if(!this.topArtists){const j=await api('/me/top/artists?limit=30&time_range=medium_term');this.topArtists=((j&&j.items)||[]).filter(Boolean)}
+   const picks=[...this.topArtists].sort(()=>Math.random()-.5).slice(0,4);
+   const lists=await Promise.all(picks.map(a=>this.artistHits({id:a.id,name:a.name}).catch(()=>[])));
+   return lists.flatMap(l=>l.sort(()=>Math.random()-.5).slice(0,7));
+  }
+  const q=st.kind==='year'?`year:${st.from}-${st.to}`:`genre:"${st.genre}"`;
+  const offs=[0,10,20,30,40,60,80,100,130,160,200,250].sort(()=>Math.random()-.5).slice(0,4);
+  const pages=await Promise.all(offs.map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(q)).catch(()=>null)));
+  return dedupeHits(pages.flatMap(j=>(j&&j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean));
+ },
  async housePool(){
   try{const j=await api('/me/tracks?limit=50');const a=((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);if(a.length)return a}catch(e){}
   try{const j=await api('/me/albums?limit=20');return((j&&j.items)||[]).filter(Boolean).map(x=>x.album||x.item).filter(al=>al&&al.tracks&&al.tracks.items).flatMap(al=>al.tracks.items.map(t=>spT(t,spImg(al.images)))).filter(Boolean)}catch(e){return[]}
@@ -922,7 +973,10 @@ function renderNP(){
  $('#vinylLabel').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  setTitle(c?c.name:'Pick a song!');
  $('#npArtist').textContent=c?c.artist:'Tap any album to get the party started';
- $('#houseTag').style.display=c&&c.house?'':'none';
+ $('#houseTag').style.display=c&&(c.house||c.radio)?'':'none';
+ $('#houseTag').textContent=c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
+ $('#houseTag').classList.toggle('radioTag',!!(c&&c.radio));
+ renderRadio();
  renderPlayState();renderProgress();syncAttract();hostSync();
 }
 function renderPlayState(){
@@ -937,7 +991,7 @@ function renderQueue(){
  const l=$('#qList'),n=P.queue.length;
  $('#qCount').textContent=n?`${n} song${n>1?'s':''} · ${fmt(P.queue.reduce((a,t)=>a+(t.duration||0),0))}`:'';
  l.innerHTML=n?P.queue.map((t,i)=>`<div class="qItem" style="animation-delay:${Math.min(i,8)*40}ms"><div class="qNum">${i+1}</div><img src="${esc(t.img||PLACEHOLDER)}" alt=""><div class="qMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><button class="qX" data-qx="${i}" aria-label="Remove">${I.close}</button></div>`).join('')
-  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
+  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':S.radio?'The radio keeps playing until someone picks a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
  syncAttract();hostSync();
  requestAnimationFrame(qFade);
 }
@@ -945,8 +999,8 @@ function qFade(){const l=$('#qList');if(l)l.classList.toggle('more',l.scrollHeig
 
 let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
-async function startTrack(t,house=false){
- P.current=Object.assign({},t,{house});P.pos=0;P.dur=t.duration||0;P.paused=false;
+async function startTrack(t,house=false,radio=null){
+ P.current=Object.assign({},t,{house,radio});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
  renderNP();accentFrom(t);markNow();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
 }
@@ -956,6 +1010,7 @@ async function advance(){
  try{
   const next=P.queue.shift();saveQueue();renderQueue();
   if(next){await startTrack(next);return}
+  if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
   if(S.house){const pool=await getHouse();if(pool.length){await startTrack(pool[Math.floor(Math.random()*pool.length)],true);return}}
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();
  }finally{advancing=false}
@@ -968,7 +1023,7 @@ function enqueue(t,mode,src){
  if(!spend(COST[mode]))return false;
  sfx('add');
  const tag=src==='phone'?'Phone request · ':'';
- if(mode==='w'||!P.current||P.current.house){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
+ if(mode==='w'||!P.current||P.current.house||P.current.radio){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
  else{if(next)P.queue.unshift(t);else P.queue.push(t);saveQueue();renderQueue();
   const pos=next?1:P.queue.length;toast(`${tag}${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
  return true;
@@ -1186,7 +1241,7 @@ function syncAttract(){
 function syncGalleryNow(){
  const c=P.current,g=$('#gNow');if(!g)return;
  g.style.display=c?'':'none';
- if(c){$('#gNowImg').src=c.img||PLACEHOLDER;$('#gNowTitle').textContent=c.name;$('#gNowArtist').textContent=c.artist}
+ if(c){$('#gNowImg').src=c.img||PLACEHOLDER;$('#gNowTitle').textContent=c.name;$('#gNowArtist').textContent=c.artist+(c.radio?' · '+c.radio+' radio':'')}
 }
 
 /* ---------- Fine art gallery (Art Institute of Chicago open access) ---------- */
@@ -1333,7 +1388,7 @@ const peerOpts=()=>Object.assign({debug:0},store.get('peerServer',{}));
 const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
 function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
 const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
-const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house};
+const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio};
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
@@ -1423,7 +1478,8 @@ const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
  async load(tab){if(tab==='_wait')return[];return rcall({t:'browse',tab})},
  tracks(item){return rcall({t:'tracks',item:slimI(item)})},
  search(q){return rcall({t:'search',q})},
- async housePool(){return[]}};
+ async housePool(){return[]},
+ async stationTracks(){return[]}};
 async function remoteEnqueue(t,mode){
  sfx('add');
  try{const r=await rcall({t:'enqueue',track:slimT(t),mode,next:mode==='n'});
@@ -1495,6 +1551,104 @@ $('#devList').addEventListener('click',async e=>{
  try{await engine.transferTo(d.id?{id:d.id,name:d.name}:null);sfx('add');toast(d.id?'Now playing on '+d.name:'Back on the jukebox speakers');closeModal($('#devModal'))}
  catch(err){r.classList.remove('on');toast("Couldn't switch speakers: "+err.message,'warn')}
 });
+
+/* ---------- Radio ---------- */
+const YR=new Date().getFullYear();
+const STATIONS=[
+ {id:'lib',name:'My Library',kind:'library'},{id:'art',name:'My Artists',kind:'artists'},
+ {id:'60s',name:'60s',kind:'year',from:1960,to:1969},{id:'70s',name:'70s',kind:'year',from:1970,to:1979},
+ {id:'80s',name:'80s',kind:'year',from:1980,to:1989},{id:'90s',name:'90s',kind:'year',from:1990,to:1999},
+ {id:'00s',name:'2000s',kind:'year',from:2000,to:2009},{id:'now',name:'Today',kind:'year',from:YR-2,to:YR},
+ {id:'country',name:'Country',kind:'genre',genre:'country'},{id:'classic',name:'Classic Rock',kind:'genre',genre:'classic rock'},
+ {id:'rock',name:'Rock',kind:'genre',genre:'rock'},{id:'pop',name:'Pop',kind:'genre',genre:'pop'},
+ {id:'hiphop',name:'Hip-Hop',kind:'genre',genre:'hip hop'},{id:'rnb',name:'R&B',kind:'genre',genre:'r&b'},
+ {id:'alt',name:'Alternative',kind:'genre',genre:'alternative'},{id:'dance',name:'Dance',kind:'genre',genre:'dance'}
+].map((st,i,a)=>Object.assign(st,{fm:(88.1+i*(19.8/(a.length-1))).toFixed(1)}));
+const stationById=id=>STATIONS.find(x=>x.id===id)||STATIONS[4];
+const RADIO={buf:[],for:null,loading:null,recent:new Set()};
+function shuffle(a){for(let i=a.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[a[i],a[k]]=[a[k],a[i]]}return a}
+async function radioFill(st){
+ if(RADIO.loading&&RADIO.for===st.id)return RADIO.loading;
+ RADIO.for=st.id;
+ RADIO.loading=(async()=>{
+  let got=[];
+  for(let tries=0;tries<2&&got.length<4;tries++){
+   try{got=((await provider.stationTracks(st))||[]).filter(t=>t&&t.uri&&!RADIO.recent.has(t.id))}catch(e){console.warn('Radio',e)}
+  }
+  if(RADIO.for!==st.id)return;
+  const have=new Set(RADIO.buf.map(t=>t.id));
+  RADIO.buf=RADIO.buf.concat(shuffle(got.filter(t=>!have.has(t.id))));
+ })().finally(()=>{RADIO.loading=null});
+ return RADIO.loading;
+}
+async function radioNext(){
+ const st=stationById(S.station);
+ if(RADIO.for!==st.id){RADIO.buf=[];RADIO.for=st.id}
+ if(!RADIO.buf.length)await radioFill(st);
+ if(RADIO.recent.size>150)RADIO.recent=new Set([...RADIO.recent].slice(-100));
+ const t=RADIO.buf.shift();
+ if(RADIO.buf.length<5)radioFill(st);
+ if(!t)toast(`Couldn't tune in to ${st.name} right now`,'warn');
+ return t||null;
+}
+function staticNoise(){
+ if(!S.sfx)return;
+ try{
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const len=Math.floor(actx.sampleRate*.5),buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<len;i++){const env=Math.sin(Math.PI*i/len);d[i]=(Math.random()*2-1)*env*(.6+.4*Math.sin(i/90))}
+  const src=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();
+  src.buffer=buf;f.type='bandpass';f.frequency.value=1600;f.Q.value=.6;g.gain.value=.07;
+  src.connect(f).connect(g).connect(actx.destination);src.start();
+ }catch(e){}
+}
+function buildDial(){$('#band').innerHTML=STATIONS.map((st,i)=>`<div class="st" data-st="${i}"><span>${esc(st.name)}</span><small>${st.fm}</small></div>`).join('')}
+let dialOffset=0;
+function placeBand(idx){dialOffset=-(idx*90+45);$('#band').style.transform=`translateX(${dialOffset}px)`}
+function renderRadio(){
+ const np=$('#np');if(!np)return;
+ np.classList.toggle('radioOn',!!S.radio);$('#radio').style.display=S.radio?'':'none';
+ $('#radioBtn').classList.toggle('on',!!S.radio);
+ const i=STATIONS.indexOf(stationById(S.station));
+ $('#rName').textContent=STATIONS[i].name;$('#rFm').textContent='FM '+STATIONS[i].fm;
+ $$('#band .st').forEach((el,k)=>el.classList.toggle('on',k===i));
+ const dl=$('#dial');dl.scrollLeft=0;if(!dl.classList.contains('dragging'))placeBand(i);
+}
+async function tune(idx){
+ const st=STATIONS[Math.max(0,Math.min(STATIONS.length-1,idx))];
+ const changed=st.id!==S.station;
+ S.station=st.id;saveS();RADIO.buf=[];RADIO.for=null;
+ const d=$('#dial');d.classList.add('tuning');setTimeout(()=>d.classList.remove('tuning'),700);
+ renderRadio();
+ if(!changed)return;
+ staticNoise();
+ if(!P.current||P.current.house||P.current.radio){
+  const t=await radioNext();if(t&&S.station===st.id)startTrack(t,false,st.name);
+ }else toast(`Tuned to ${st.name}. It starts after the current picks.`);
+}
+async function toggleRadio(){
+ S.radio=!S.radio;saveS();renderRadio();renderQueue();sfx('tick');
+ if(S.radio){
+  staticNoise();const st=stationById(S.station);
+  toast(`Radio on · ${st.name} · FM ${st.fm}`);
+  if(!P.current||P.current.house){const t=await radioNext();if(t&&S.radio)startTrack(t,false,st.name)}
+  else radioFill(st);
+ }else toast(P.current&&P.current.radio?'Radio off. This song will finish.':'Radio off');
+}
+(()=>{
+ const dial=$('#dial');let x0=null,start=0,moved=false;
+ dial.addEventListener('pointerdown',e=>{x0=e.clientX;start=dialOffset;moved=false;dial.setPointerCapture(e.pointerId)});
+ dial.addEventListener('pointermove',e=>{if(x0==null)return;const dx=e.clientX-x0;if(Math.abs(dx)>4){moved=true;dial.classList.add('dragging')}if(!moved)return;
+  dialOffset=Math.min(-45,Math.max(-(STATIONS.length*90-45),start+dx));$('#band').style.transform=`translateX(${dialOffset}px)`;
+  const near=Math.round((-dialOffset-45)/90);$$('#band .st').forEach((el,k)=>el.classList.toggle('on',k===near))});
+ const end=e=>{if(x0==null)return;x0=null;dial.classList.remove('dragging');
+  if(moved){tune(Math.round((-dialOffset-45)/90));return}
+  const el=document.elementFromPoint(e.clientX,e.clientY),stEl=el&&el.closest('.st');
+  if(stEl)tune(+stEl.dataset.st);else renderRadio()};
+ dial.addEventListener('pointerup',end);dial.addEventListener('pointercancel',()=>{x0=null;dial.classList.remove('dragging');renderRadio()});
+})();
+$('#radioBtn').onclick=toggleRadio;
+buildDial();
 
 /* ---------- Boot ---------- */
 async function boot(){
