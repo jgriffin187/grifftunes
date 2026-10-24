@@ -336,7 +336,21 @@ html.remote .badge{display:flex!important}
  .osk .row{gap:4px}
  .field.two{grid-template-columns:1fr}
 }
+.hitsCard{display:flex;align-items:center;gap:22px;width:100%;margin:14px 0 6px;padding:16px 22px 16px 16px;border-radius:22px;text-align:left;position:relative;overflow:hidden;background:linear-gradient(120deg,color-mix(in srgb,var(--accent) 55%,#14092a),color-mix(in srgb,var(--accent2) 42%,#14092a));box-shadow:0 0 30px color-mix(in srgb,var(--accent) 35%,transparent),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .12s}
+.hitsCard:active{transform:scale(.98)}
+.hitsCard img{width:110px;height:110px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 3px rgba(255,255,255,.85),0 10px 30px rgba(0,0,0,.5);flex:none}
+.hitsCard div{flex:1;min-width:0}
+.hitsCard small{font-family:Bungee;font-size:13px;letter-spacing:.16em;color:var(--gold);text-transform:uppercase}
+.hitsCard b{display:block;font-size:32px;font-weight:800;line-height:1.1;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hitsCard span{color:rgba(255,255,255,.82);font-size:16px}
+.hitsGo{width:62px;height:62px;border-radius:50%;background:#fff;display:grid;place-items:center;flex:none;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.hitsGo svg{width:28px;height:28px;fill:#1a0a2e;margin-left:3px}
 @media (max-width:600px){
+ .hitsCard{gap:14px;padding:12px 14px 12px 12px}
+ .hitsCard img{width:70px;height:70px}
+ .hitsCard b{font-size:22px}
+ .hitsCard span{font-size:13px}
+ .hitsGo{width:46px;height:46px}.hitsGo svg{width:22px;height:22px}
  .tRow{flex-wrap:wrap;row-gap:10px;padding:12px}
  .tArt{width:50px;height:50px}
  .tMeta{flex:1 1 calc(100% - 70px)}
@@ -597,6 +611,15 @@ async function api(path,opts={},retry=true){
 const spImg=imgs=>imgs&&imgs.length?(imgs.find(i=>i.width&&i.width>=250&&i.width<=700)||imgs[0]).url:'';
 const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),album:(t.album&&t.album.name)||'',img:spImg(t.album&&t.album.images)||img||'',duration:t.duration_ms}:null;
 const spItem=(x,type)=>x?{id:x.id,type,name:x.name,sub:type==='album'?(x.artists||[]).map(a=>a.name).join(', '):type==='playlist'?('By '+((x.owner&&x.owner.display_name)||'Spotify')):'Artist',img:spImg(x.images),uri:x.uri}:null;
+const songKey=n=>String(n||'').toLowerCase()
+ .replace(/\s*[\(\[](feat|ft|with)\.?[^\)\]]*[\)\]]/g,'')
+ .replace(/\s*[\(\[][^\)\]]*(remaster|live|version|edit|mix|mono|stereo|acoustic|demo|bonus)[^\)\]]*[\)\]]/g,'')
+ .replace(/\s+[-–—]\s+.*$/,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim().replace(/^the /,'');
+function dedupeHits(list){
+ const m=new Map(),live=t=>/\blive\b/i.test(t.name);
+ for(const t of list){const k=songKey(t.name);const cur=m.get(k);if(!cur)m.set(k,t);else if(live(cur)&&!live(t))m.set(k,t)}
+ return[...m.values()];
+}
 const SPOTIFY={
  key:'spotify',
  tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'}],
@@ -621,11 +644,16 @@ const SPOTIFY={
   }
   if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
   if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
-  if(it.type==='artist'){
-   const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(`artist:"${it.name}"`));
-   const all=j.tracks.items,own=all.filter(t=>(t.artists||[]).some(a=>a.id===it.id));return(own.length?own:all).map(t=>spT(t)).filter(Boolean);
-  }
+  if(it.type==='artist'||it.type==='hits')return this.artistHits(it);
   return[];
+ },
+ async artistHits(it){
+  const pages=await Promise.all([0,10,20].map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(`artist:"${it.name}"`)).catch(()=>null)));
+  const raw=pages.flatMap(j=>(j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists&&t.artists.length);
+  const isA=a=>a&&(it.id?a.id===it.id:String(a.name).toLowerCase()===String(it.name).toLowerCase());
+  let pick=raw.filter(t=>isA(t.artists[0]));
+  if(pick.length<10)pick=pick.concat(raw.filter(t=>!pick.includes(t)&&t.artists.some(isA)));
+  return dedupeHits(pick.map(t=>spT(t)).filter(Boolean)).slice(0,30);
  },
  async search(q){const j=await api('/search?type=track,album,artist&limit=10&q='+encodeURIComponent(q));
   return{tracks:((j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean),albums:((j.albums&&j.albums.items)||[]).filter(Boolean).map(x=>spItem(x,'album')),artists:((j.artists&&j.artists.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}},
@@ -908,8 +936,8 @@ const closeModal=m=>m.classList.remove('open');
 async function openItem(it){
  if(!it)return;sfx('tick');fixImg(it);
  $('#heroBg').style.backgroundImage=`url("${it.img}")`;
- const hi=$('#heroImg');hi.src=it.img;hi.classList.toggle('round',it.type==='artist');
- $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',artist:'ARTIST · TOP SONGS'})[it.type]||'';
+ const hi=$('#heroImg');hi.src=it.img;hi.classList.toggle('round',it.type==='artist'||it.type==='hits');
+ $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
  $('#heroName').textContent=it.name;$('#heroSub').textContent=it.sub||'';
  const list=$('#trackList');list.innerHTML='<div class="loading"><div class="spin"></div></div>';list.scrollTop=0;
  openModal($('#albumModal'));
@@ -927,10 +955,16 @@ function openSearch(){
  if(!S.osk)setTimeout(()=>inp.focus(),250);
 }
 function onQuery(){clearTimeout(sTimer);const q=$('#sInput').value.trim();if(!q){sSeq++;searchEmpty();return}sTimer=setTimeout(()=>doSearch(q),350)}
+function hitsCard(a){
+ fixImg(a);const it={id:a.id,type:'hits',name:a.name,sub:'Greatest hits',img:a.img};
+ return`<button class="hitsCard" data-open="${reg(it)}"><img src="${esc(a.img)}" alt=""><div><small>Greatest hits</small><b>${esc(a.name)}</b><span>Their most popular songs, ready to queue</span></div><i class="hitsGo">${I.play}</i></button>`;
+}
 async function doSearch(q){
  const my=++sSeq;$('#sResults').innerHTML='<div class="loading"><div class="spin"></div></div>';
  try{
   const r=await provider.search(q);if(my!==sSeq)return;let h='';
+  const qn=q.toLowerCase().trim(),ar=(r.artists||[]).find(a=>{const n=String(a.name).toLowerCase();return qn.length>1&&(n.includes(qn)||qn.includes(n))});
+  if(ar)h+=hitsCard(ar);
   if(r.tracks.length)h+=`<div class="sSection"><h4>Songs</h4>${r.tracks.map(row).join('')}</div>`;
   if(r.artists.length)h+=`<div class="sSection"><h4>Artists</h4><div class="sRow">${r.artists.map(tile).join('')}</div></div>`;
   if(r.albums.length)h+=`<div class="sSection"><h4>Albums</h4><div class="sRow">${r.albums.map(tile).join('')}</div></div>`;
