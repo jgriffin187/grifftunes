@@ -293,6 +293,24 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .attCta{position:relative;font-family:Bungee;font-size:clamp(18px,2vw,28px);letter-spacing:.14em;color:var(--gold);animation:blink 1.4s steps(2) infinite;text-shadow:0 0 18px rgba(255,210,63,.7);margin-top:6px;z-index:2}
 #attViz{position:absolute;left:0;right:0;bottom:0;width:100%;height:24vh;opacity:.9}
 
+.qrMini{margin-left:auto;display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;font-family:Outfit;font-size:13px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 16px color-mix(in srgb,var(--accent) 45%,transparent)}
+.qrMini svg{width:16px;height:16px}
+.qr .sheet{width:min(560px,94vw);height:auto;max-height:96vh;align-items:center;padding:34px 30px 28px;text-align:center;position:relative;overflow-y:auto}
+.qrLogo{font-family:Monoton;font-size:clamp(30px,4vw,42px);line-height:1;margin-bottom:22px;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 34px var(--accent)}
+.qrWrap{position:relative;width:min(360px,72vw,50vh);aspect-ratio:1;flex:none}
+.qrGlow{position:absolute;inset:-18px;border-radius:40px;background:conic-gradient(from 0deg,var(--accent),#ffd23f,var(--accent2),var(--accent));filter:blur(22px);opacity:.8;animation:hue 8s linear infinite}
+@keyframes hue{to{filter:blur(22px) hue-rotate(360deg)}}
+.qrRing{position:absolute;inset:-6px;border-radius:32px;background:linear-gradient(135deg,var(--accent),#ffd23f,var(--accent2))}
+.qrCard{position:relative;width:100%;height:100%;border-radius:26px;background:#fff;padding:6%;display:grid;place-items:center;color:#6b6380;font-weight:700}
+.qrCard svg{width:100%;height:100%;display:block}
+.qrTitle{font-family:Bungee;font-weight:400;font-size:clamp(22px,3vw,28px);margin-top:30px;background:linear-gradient(90deg,#fff,var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.qrSub{color:var(--muted);font-size:17px;margin-top:6px}
+.qrStatus{margin-top:16px;display:inline-flex;gap:10px;align-items:center;padding:9px 18px;border-radius:99px;background:rgba(255,255,255,.07);border:1px solid var(--stroke);font-weight:700;font-size:14px}
+.qrStatus i{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px currentColor;flex:none}
+.qrStatus.ok i{background:#1ed760}.qrStatus.bad i{background:#ff3b5c}
+.btnRow.center{justify-content:center}
+html.remote #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .ctrls,html.remote .qX,html.remote .clock{display:none!important}
+html.remote .badge{display:flex!important}
 @media (max-width:1250px){.clock{display:none}.logo .l2{font-size:38px}.badge{display:none}}
 @media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 370px}.npArt{width:180px;height:180px}.npStage{height:180px}.vinyl{width:166px;height:166px}.np.playing .vinyl{left:136px}.coinBtn{padding:0 16px;font-size:14px}}
 @media (max-width:820px){
@@ -318,6 +336,18 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
  .osk .row{gap:4px}
  .field.two{grid-template-columns:1fr}
 }
+@media (max-width:600px){
+ .tRow{flex-wrap:wrap;row-gap:10px;padding:12px}
+ .tArt{width:50px;height:50px}
+ .tMeta{flex:1 1 calc(100% - 70px)}
+ .tMeta b{font-size:17px}
+ .act{flex:1 1 0;justify-content:center;height:44px}
+ #toasts{top:auto;bottom:22px}
+ .toast{font-size:15px}
+ .search .sheet{height:100%;width:100%;border-radius:0}
+ .sTop{padding:14px 14px 8px}
+ .sResults{padding:4px 12px 12px}
+}
 @media (prefers-reduced-motion:reduce){.blob,.floor,.logo .l2,.attArt{animation:none}}
 </style>
 </head>
@@ -332,6 +362,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
   <div class="credits" id="credits"><div class="coin">J</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
   <div class="clock" id="clock"></div>
+  <button class="iconBtn" id="phoneBtn" aria-label="Add songs from your phone" data-icon="phone"></button>
   <button class="iconBtn" id="gear" aria-label="Settings" data-icon="gear"></button>
  </header>
 
@@ -364,7 +395,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
     </div>
    </div>
    <div class="queue card">
-    <div class="qHead">UP NEXT <span id="qCount"></span></div>
+    <div class="qHead">UP NEXT <span id="qCount"></span><button class="qrMini" id="qrMini" data-icon="phone">Add from phone</button></div>
     <div class="qList" id="qList"></div>
    </div>
   </aside>
@@ -380,6 +411,16 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
  <div class="sTop"><div class="sField"><span data-icon="search"></span><input id="sInput" class="sInput" placeholder="Type a song, artist or album…" autocomplete="off" autocorrect="off" spellcheck="false"></div><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="sResults" id="sResults"></div>
  <div class="osk" id="osk"></div>
+</div></div>
+
+<div class="modal qr" id="qrModal"><div class="sheet card">
+ <button class="closeBtn" data-close aria-label="Close" data-icon="close"></button>
+ <div class="qrLogo" id="qrLogo">GriffTunes</div>
+ <div class="qrWrap"><div class="qrGlow"></div><div class="qrRing"></div><div class="qrCard" id="qrCard"></div></div>
+ <h2 class="qrTitle">Scan to pick songs</h2>
+ <p class="qrSub">Point your phone's camera here. No app or login needed.</p>
+ <div class="qrStatus" id="qrStatus"><i></i><span>Starting phone link…</span></div>
+ <div class="btnRow center"><button class="btn" id="qrCopy">Copy link</button><button class="btn" id="qrNew">New code</button></div>
 </div></div>
 
 <div class="modal settings" id="settingsModal"><div class="sheet card">
@@ -416,9 +457,12 @@ const store={
  set(k,v){try{localStorage.setItem('jbx.'+k,JSON.stringify(v))}catch(e){}},
  del(k){try{localStorage.removeItem('jbx.'+k)}catch(e){}}
 };
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:3,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true};
+const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
+const REMOTE=!!REMOTE_ROOM;
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:3,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
-const saveS=()=>store.set('settings',S);
+if(REMOTE)Object.assign(S,{attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
+const saveS=()=>{if(!REMOTE)store.set('settings',S)};
 let credits=store.get('credits',6);
 
 const I={
@@ -432,6 +476,7 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+ phone:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="3"/><path d="M11 18h2"/></svg>',
  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 5H8l-6 7 6 7h13z"/><path d="m11 9 6 6M17 9l-6 6"/></svg>'
 };
 $$('[data-icon]').forEach(el=>{el.insertAdjacentHTML('afterbegin',I[el.dataset.icon]||'')});
@@ -495,7 +540,7 @@ const DEMO=(()=>{
    if(tab==='artists')return artists;
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
   },
-  async tracks(it){await sleep(150);return it.tracks||[]},
+  async tracks(it){await sleep(150);const real=[...albums,...playlists,...artists].find(x=>x.id===it.id);return((real||it).tracks)||[]},
   async search(q){await sleep(150);q=q.toLowerCase();const m=s=>s.toLowerCase().includes(q);
    return{tracks:all.filter(t=>m(t.name)||m(t.artist)).slice(0,20),albums:albums.filter(a=>m(a.name)||m(a.sub)),artists:artists.filter(a=>m(a.name))}},
   async housePool(){return all}
@@ -557,14 +602,14 @@ const SPOTIFY={
  tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'}],
  me:null,
  async load(tab){
-  if(tab==='albums'){const j=await api('/me/albums?limit=50');return j.items.map(x=>spItem(x.album,'album')).filter(Boolean)}
+  if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
   if(tab==='playlists'){
    if(!this.me)this.me=await api('/me');
    const j=await api('/me/playlists?limit=50');
-   const mine=j.items.filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
+   const mine=((j&&j.items)||[]).filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
    return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
   }
-  if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return j.items.map(x=>spItem(x,'artist'))}
+  if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
   return[];
  },
  async tracks(it){
@@ -574,8 +619,8 @@ const SPOTIFY={
    catch(e){const j=await api(`/albums/${it.id}/tracks?limit=50`);items=j.items||[]}
    return items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name}));
   }
-  if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return j.items.map(x=>spT(x.track||x.item)).filter(Boolean)}
-  if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return(j.items||[]).map(e=>spT(e.item||e.track)).filter(Boolean)}
+  if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
+  if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
   if(it.type==='artist'){
    const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(`artist:"${it.name}"`));
    const all=j.tracks.items,own=all.filter(t=>(t.artists||[]).some(a=>a.id===it.id));return(own.length?own:all).map(t=>spT(t)).filter(Boolean);
@@ -585,8 +630,8 @@ const SPOTIFY={
  async search(q){const j=await api('/search?type=track,album,artist&limit=10&q='+encodeURIComponent(q));
   return{tracks:((j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean),albums:((j.albums&&j.albums.items)||[]).filter(Boolean).map(x=>spItem(x,'album')),artists:((j.artists&&j.artists.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}},
  async housePool(){
-  try{const j=await api('/me/tracks?limit=50');const a=j.items.map(x=>spT(x.track)).filter(Boolean);if(a.length)return a}catch(e){}
-  try{const j=await api('/me/albums?limit=20');return j.items.flatMap(x=>x.album.tracks.items.map(t=>spT(t,spImg(x.album.images)))).filter(Boolean)}catch(e){return[]}
+  try{const j=await api('/me/tracks?limit=50');const a=((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);if(a.length)return a}catch(e){}
+  try{const j=await api('/me/albums?limit=20');return((j&&j.items)||[]).filter(Boolean).map(x=>x.album||x.item).filter(al=>al&&al.tracks&&al.tracks.items).flatMap(al=>al.tracks.items.map(t=>spT(t,spImg(al.images)))).filter(Boolean)}catch(e){return[]}
  }
 };
 
@@ -651,7 +696,7 @@ const SpotifyEngine={
 let provider=DEMO,engine=DemoEngine;
 const P={current:null,queue:[],pos:0,dur:0,paused:true};
 const qKey=()=>'queue_'+provider.key;
-const saveQueue=()=>store.set(qKey(),P.queue);
+const saveQueue=()=>{if(!REMOTE)store.set(qKey(),P.queue)};
 
 /* ---------- Sound effects ---------- */
 let actx=null;
@@ -691,6 +736,7 @@ function renderCredits(){
  $('#creditNum').textContent=S.freePlay?'FREE PLAY':credits;
  c.querySelector('small').style.display=S.freePlay?'none':'';
  $('#coinBtn').style.display=S.freePlay?'none':'';
+ hostSync();
 }
 function spend(n){
  if(S.freePlay)return true;
@@ -737,10 +783,10 @@ function renderNP(){
  setTitle(c?c.name:'Pick a song!');
  $('#npArtist').textContent=c?c.artist:'Tap any album to get the party started';
  $('#houseTag').style.display=c&&c.house?'':'none';
- renderPlayState();renderProgress();syncAttract();
+ renderPlayState();renderProgress();syncAttract();hostSync();
 }
 function renderPlayState(){
- $('#np').classList.toggle('playing',!!P.current&&!P.paused);
+ $('#np').classList.toggle('playing',!!P.current&&!P.paused);hostSync();
  $('#playBtn').innerHTML=(!P.current||P.paused)?I.play:I.pause;
 }
 function renderProgress(){
@@ -751,8 +797,8 @@ function renderQueue(){
  const l=$('#qList'),n=P.queue.length;
  $('#qCount').textContent=n?`${n} song${n>1?'s':''} · ${fmt(P.queue.reduce((a,t)=>a+(t.duration||0),0))}`:'';
  l.innerHTML=n?P.queue.map((t,i)=>`<div class="qItem" style="animation-delay:${Math.min(i,8)*40}ms"><div class="qNum">${i+1}</div><img src="${esc(t.img||PLACEHOLDER)}" alt=""><div class="qMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><button class="qX" data-qx="${i}" aria-label="Remove">${I.close}</button></div>`).join('')
-  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
- syncAttract();
+  :`<div class="qEmpty">${I.note}<b>Queue is empty</b><span>${REMOTE?'Search or browse to add a song.':S.house?'The house mix keeps the vibe going until someone picks a song.':'Pick a song to keep the party going.'}</span></div>`;
+ syncAttract();hostSync();
 }
 
 let houseCache=null,houseAt=0;
@@ -772,12 +818,14 @@ async function advance(){
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();
  }finally{advancing=false}
 }
-function enqueue(t,next){
+function enqueue(t,next,src){
+ if(REMOTE){remoteEnqueue(t,next);return true}
  if(!spend(next?2:1))return false;
  sfx('add');
- if(!P.current||P.current.house){startTrack(t);toast('Now playing · '+t.name,t.img)}
+ const tag=src==='phone'?'Phone request · ':'';
+ if(!P.current||P.current.house){startTrack(t);toast(tag+'Now playing · '+t.name,t.img)}
  else{if(next)P.queue.unshift(t);else P.queue.push(t);saveQueue();renderQueue();
-  const pos=next?1:P.queue.length;toast(`${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
+  const pos=next?1:P.queue.length;toast(`${tag}${t.name} · ${pos===1?'up next!':'#'+pos+' in line'}`,t.img)}
  return true;
 }
 async function togglePlay(){
@@ -922,6 +970,7 @@ function openSettings(){
   ${tg('fHouse','House music when the queue is empty',S.house)}
   ${tg('fSfx','Arcade sound effects',S.sfx)}
   ${tg('fOsk','On-screen keyboard (for touchscreens)',S.osk)}
+  ${tg('fPhones','Let guests add songs from their phones',S.phones)}
  </div>
  <div class="field"><label for="fCoin">Credits per coin</label><input type="number" id="fCoin" min="1" max="50" value="${S.coinCredits}"></div>
  <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button></div>
@@ -935,7 +984,7 @@ function openSettings(){
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||3);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||3);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked};
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
@@ -944,7 +993,7 @@ function openSettings(){
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
- $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();closeModal($('#settingsModal'));toast('Settings saved')};
+ $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();closeModal($('#settingsModal'));toast('Settings saved')};
  openModal($('#settingsModal'));
 }
 
@@ -1122,9 +1171,160 @@ addEventListener('resize',()=>{layoutFlow();sizeShelf()});
 function tickClock(){const d=new Date();let h=d.getHours()%12||12;$('#clock').innerHTML=`${h}<i>:</i>${String(d.getMinutes()).padStart(2,'0')}`}
 setInterval(tickClock,10000);
 
+
+/* ---------- Phone requests: QR code + direct phone-to-jukebox link (PeerJS) ---------- */
+const loadScript=src=>new Promise((res,rej)=>{const el=document.createElement('script');el.src=src;el.async=true;el.onload=res;el.onerror=()=>{el.remove();rej(new Error('Could not load '+src))};document.head.appendChild(el)});
+async function loadLib(urls,ready){if(ready())return;for(const u of urls){try{await loadScript(u);if(ready())return}catch(e){}}throw new Error('Could not load a required library')}
+const PEER_URLS=['https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];
+const QR_URLS=['https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js','https://unpkg.com/qrcode-generator@1.4.4/qrcode.js'];
+const peerOpts=()=>Object.assign({debug:0},store.get('peerServer',{}));
+const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
+function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
+const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
+const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house};
+const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri};
+
+const HOST={peer:null,conns:new Set(),status:'off'};
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs}}
+function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
+let syncT=null;
+function hostSync(){if(REMOTE||!HOST.conns.size)return;clearTimeout(syncT);syncT=setTimeout(()=>{const m=hostState();HOST.conns.forEach(c=>sendTo(c,m))},150)}
+setInterval(()=>{if(!REMOTE&&HOST.conns.size){const m={t:'tick',pos:P.pos,dur:P.dur,paused:P.paused};HOST.conns.forEach(c=>sendTo(c,m))}},4000);
+async function hostHandle(c,d){
+ if(!d||typeof d!=='object'||!d.t)return;
+ const reply=data=>sendTo(c,{t:'result',id:d.id,data});
+ try{
+  if(d.t==='search'){const r=await provider.search(String(d.q||'').slice(0,80));reply({tracks:r.tracks.map(slimT),albums:r.albums.map(fixImg).map(slimI),artists:r.artists.map(fixImg).map(slimI)})}
+  else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
+  else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
+  else if(d.t==='enqueue'){
+   const t=slimT(d.track),cost=d.next?2:1;
+   if(!t||!t.uri||!t.name)throw new Error('That song could not be added');
+   if(!S.freePlay&&credits<cost){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:'Out of credits. Insert a coin at the jukebox!'});return}
+   enqueue(t,!!d.next,'phone');reply({ok:true});
+  }
+ }catch(e){sendTo(c,{t:'error',id:d.id,msg:e.message||'Something went wrong'})}
+}
+function updateQrStatus(){
+ const el=$('#qrStatus');if(!el)return;const n=HOST.conns.size;
+ const map={off:['bad','Phone requests are off. Turn them on in Settings.'],connecting:['','Starting phone link…'],
+  ready:['ok',n?`Ready · ${n} phone${n>1?'s':''} connected`:'Ready for phones'],
+  error:['bad',"Can't reach the phone-link service. Retrying…"],taken:['bad','GriffTunes is already open in another window']};
+ const[k,txt]=map[HOST.status]||map.connecting;el.className='qrStatus '+k;el.querySelector('span').textContent=txt;
+}
+async function startHost(){
+ if(REMOTE||!S.phones||HOST.peer)return;
+ HOST.status='connecting';updateQrStatus();
+ try{await loadLib(PEER_URLS,()=>!!window.Peer)}catch(e){HOST.status='error';updateQrStatus();setTimeout(startHost,30000);return}
+ if(!S.phones||HOST.peer)return;
+ const peer=new Peer('grifftunes-'+roomCode(),peerOpts());HOST.peer=peer;
+ peer.on('open',()=>{HOST.status='ready';updateQrStatus()});
+ peer.on('connection',c=>{
+  c.on('open',()=>{HOST.conns.add(c);sendTo(c,hostState());updateQrStatus();toast('A phone joined '+S.name)});
+  c.on('data',d=>hostHandle(c,d));
+  const gone=()=>{HOST.conns.delete(c);updateQrStatus()};c.on('close',gone);c.on('error',gone);
+ });
+ peer.on('disconnected',()=>{if(HOST.peer!==peer)return;HOST.status='connecting';updateQrStatus();setTimeout(()=>{try{if(!peer.destroyed)peer.reconnect()}catch(e){}},3000)});
+ peer.on('error',e=>{
+  console.warn('Phone link:',e.type,e.message);
+  if(e.type==='unavailable-id'){HOST.status='taken';stopHost(true);setTimeout(startHost,20000)}
+  else if(['network','server-error','socket-error','socket-closed','browser-incompatible'].includes(e.type)){HOST.status='error';stopHost(true);setTimeout(startHost,15000)}
+  updateQrStatus();
+ });
+}
+function stopHost(keepStatus){if(HOST.peer){try{HOST.peer.destroy()}catch(e){}}HOST.peer=null;HOST.conns.clear();if(!keepStatus)HOST.status='off';updateQrStatus()}
+
+function qrSvg(text){
+ const qr=qrcode(0,'H');qr.addData(text);qr.make();const n=qr.getModuleCount();
+ let L=Math.round(n*.24);if(L%2!==n%2)L++;const ls=(n-L)/2;
+ const inFinder=(r,c)=>(r<7&&c<7)||(r<7&&c>=n-7)||(r>=n-7&&c<7);
+ const inLogo=(r,c)=>r>=ls-1&&r<ls+L+1&&c>=ls-1&&c<ls+L+1;
+ let dots='';
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(qr.isDark(r,c)&&!inFinder(r,c)&&!inLogo(r,c))dots+=`<rect x="${c+.07}" y="${r+.07}" width=".86" height=".86" rx=".3"/>`;
+ const finder=(x,y)=>`<rect x="${x+.5}" y="${y+.5}" width="6" height="6" rx="1.9" fill="none" stroke="url(#qg)" stroke-width="1"/><rect x="${x+2}" y="${y+2}" width="3" height="3" rx=".9" fill="url(#qg)"/>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" shape-rendering="geometricPrecision" role="img" aria-label="QR code to add songs from your phone"><defs><linearGradient id="qg" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${n}" y2="${n}"><stop offset="0" stop-color="#6d28d9"/><stop offset=".5" stop-color="#be185d"/><stop offset="1" stop-color="#0e7490"/></linearGradient><linearGradient id="qt" gradientUnits="userSpaceOnUse" x1="${ls}" y1="0" x2="${ls+L}" y2="0"><stop offset="0" stop-color="#ff4fd8"/><stop offset="1" stop-color="#3ee8ff"/></linearGradient></defs><g fill="url(#qg)">${dots}</g>${finder(0,0)}${finder(n-7,0)}${finder(0,n-7)}<rect x="${ls}" y="${ls}" width="${L}" height="${L}" rx="${L*.24}" fill="#0b0716" stroke="url(#qg)" stroke-width=".35"/><text x="${n/2}" y="${n/2-L*.06}" text-anchor="middle" font-family="Bungee,Arial Black,sans-serif" font-size="${L*.27}" fill="url(#qt)">GRIFF</text><text x="${n/2}" y="${n/2+L*.24}" text-anchor="middle" font-family="Bungee,Arial Black,sans-serif" font-size="${L*.27}" fill="url(#qt)">TUNES</text></svg>`;
+}
+async function openQR(){
+ sfx('tick');$('#qrLogo').textContent=S.name;openModal($('#qrModal'));updateQrStatus();
+ const card=$('#qrCard');card.textContent='Loading…';
+ if(!S.phones){card.textContent='Phone requests are off';return}
+ startHost();
+ try{await loadLib(QR_URLS,()=>typeof window.qrcode==='function');card.innerHTML=qrSvg(remoteURL())}
+ catch(e){card.textContent="Couldn't draw the QR code. Check the internet connection."}
+}
+$('#phoneBtn').onclick=openQR;$('#qrMini').onclick=openQR;
+$('#qrCopy').onclick=async()=>{try{await navigator.clipboard.writeText(remoteURL());toast('Link copied')}catch(e){toast(remoteURL(),'warn')}};
+$('#qrNew').onclick=()=>{store.set('room',genRoom());stopHost();startHost();openQR();toast('New code made. Old QR codes no longer work.')};
+
+/* ---------- Guest mode (phone that scanned the QR) ---------- */
+const RM={conn:null,peer:null,pending:new Map(),seq:0,tabsLoaded:false,retry:null};
+const RemoteEngine={st:null,at:0,async init(){},async play(){},async toggle(){},stop(){},setVolume(){},
+ poll(){const s=this.st;if(!s||!P.current)return null;const pos=s.paused?s.pos:s.pos+(performance.now()-this.at);return{pos:Math.min(pos,s.dur||pos),dur:s.dur,paused:s.paused,ended:false}}};
+function rcall(msg){
+ return new Promise((res,rej)=>{
+  if(!RM.conn||!RM.conn.open)return rej(new Error('Not connected to the jukebox yet'));
+  const id=++RM.seq;RM.pending.set(id,{res,rej});RM.conn.send(Object.assign({},msg,{id}));
+  setTimeout(()=>{if(RM.pending.has(id)){RM.pending.delete(id);rej(new Error("The jukebox didn't answer"))}},20000);
+ });
+}
+const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
+ async load(tab){if(tab==='_wait')return[];return rcall({t:'browse',tab})},
+ tracks(item){return rcall({t:'tracks',item:slimI(item)})},
+ search(q){return rcall({t:'search',q})},
+ async housePool(){return[]}};
+async function remoteEnqueue(t,next){
+ sfx('add');
+ try{const r=await rcall({t:'enqueue',track:slimT(t),next:!!next});
+  if(r&&r.ok)toast(next?`${t.name} · up next!`:`${t.name} · added to the queue`,t.img);
+  else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
+ }catch(e){sfx('err');toast(e.message,'warn')}
+}
+function applyHostState(m){
+ if(m.name&&m.name!==S.name){S.name=m.name;applyName()}
+ S.freePlay=!!m.freePlay;credits=m.credits|0;renderCredits();
+ const prev=P.current&&P.current.id;
+ P.current=m.current||null;P.queue=m.queue||[];P.paused=!!m.paused;P.pos=m.pos||0;P.dur=m.dur||0;
+ RemoteEngine.st={pos:P.pos,dur:P.dur,paused:P.paused};RemoteEngine.at=performance.now();
+ renderNP();renderQueue();
+ if(P.current&&P.current.id!==prev){accentFrom(P.current);markNow()}
+ if(m.tabs&&m.tabs.length&&!RM.tabsLoaded){RM.tabsLoaded=true;REMOTE_PROVIDER.tabs=m.tabs;buildTabs();loadTab(m.tabs[0].id)}
+}
+function remoteConnect(){
+ clearTimeout(RM.retry);
+ const fail=(txt,wait)=>{setBadge('warn',txt);RM.conn=null;clearTimeout(RM.retry);RM.retry=setTimeout(remoteConnect,wait||4000)};
+ if(!window.Peer){loadLib(PEER_URLS,()=>!!window.Peer).then(remoteConnect,()=>fail('Offline',8000));return}
+ setBadge('warn','Connecting…');
+ if(!RM.peer||RM.peer.destroyed||RM.peer.disconnected){
+  try{if(RM.peer)RM.peer.destroy()}catch(e){}
+  RM.peer=new Peer(peerOpts());
+  RM.peer.on('error',e=>{if(e.type==='peer-unavailable')fail('Jukebox offline',6000);else if(['network','server-error','socket-error','socket-closed'].includes(e.type))fail('Reconnecting…',5000)});
+ }
+ const go=()=>{
+  const c=RM.peer.connect('grifftunes-'+REMOTE_ROOM,{reliable:true});
+  c.on('open',()=>{RM.conn=c;setBadge('spotify','Connected')});
+  c.on('data',m=>{
+   if(!m||!m.t)return;
+   if(m.t==='state')applyHostState(m);
+   else if(m.t==='tick'){RemoteEngine.st={pos:m.pos,dur:m.dur,paused:m.paused};RemoteEngine.at=performance.now();if(P.paused!==!!m.paused){P.paused=!!m.paused;renderPlayState()}}
+   else if((m.t==='result'||m.t==='error')&&RM.pending.has(m.id)){const p=RM.pending.get(m.id);RM.pending.delete(m.id);m.t==='result'?p.res(m.data):p.rej(new Error(m.msg))}
+  });
+  c.on('close',()=>{if(RM.conn===c)fail('Reconnecting…',3000)});
+ };
+ if(RM.peer.open)go();else RM.peer.once('open',go);
+}
+
 /* ---------- Boot ---------- */
 async function boot(){
  applyName();renderCredits();tickClock();buildOSK();
+ if(REMOTE){
+  document.documentElement.classList.add('remote');
+  provider=REMOTE_PROVIDER;engine=RemoteEngine;
+  renderNP();renderQueue();buildTabs();sizeShelf();renderFlow([]);
+  $('#shelf').innerHTML='<div class="shelfMsg">Connecting to the jukebox…</div>';
+  requestAnimationFrame(frame);remoteConnect();
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!(RM.conn&&RM.conn.open))remoteConnect()});
+  return;
+ }
  await handleRedirect();
  if(S.mode==='spotify'&&tok){
   provider=SPOTIFY;engine=SpotifyEngine;setBadge('warn','Connecting…');
@@ -1139,8 +1339,9 @@ async function boot(){
  requestAnimationFrame(frame);
  keepAwake();
  if(S.saver==='art')setTimeout(()=>artLoad(),4000);
+ startHost();
 }
-$('#modeBadge').onclick=openSettings;
+$('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
 boot();
 })();
 </script>
