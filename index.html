@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07040f">
 <title>GriffTunes</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bungee&family=Monoton&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -229,7 +232,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .seg button.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
 .tg{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--stroke);font-size:18px;cursor:pointer}
 .tg input{display:none}
-.tg i{width:58px;height:32px;border-radius:99px;background:rgba(255,255,255,.16);position:relative;transition:.25s;flex:none}
+.field>label.tg{display:flex;font-size:18px;letter-spacing:0;font-weight:500;color:#fff;text-transform:none;margin-bottom:0}
+.tg i{display:block;width:58px;height:32px;border-radius:99px;background:rgba(255,255,255,.16);position:relative;transition:.25s;flex:none}
 .tg i::after{content:'';position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.25s}
 .tg input:checked+i{background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .tg input:checked+i::after{left:30px}
@@ -258,6 +262,29 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .floatTxt{position:fixed;z-index:96;pointer-events:none;font-family:Bungee;font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(255,210,63,.8);animation:rise 1.1s ease-out forwards}
 @keyframes rise{to{transform:translateY(-70px);opacity:0}}
 
+#gallery{position:fixed;inset:0;z-index:81;background:#050307;opacity:0;pointer-events:none;transition:opacity 1.4s;overflow:hidden;cursor:pointer}
+#gallery.on{opacity:1;pointer-events:auto}
+.gSlide{position:absolute;inset:0;opacity:0;transition:opacity 2.6s ease}
+.gSlide.show{opacity:1}
+.gBg{position:absolute;inset:-80px;background-size:cover;background-position:center;filter:blur(70px) brightness(.3) saturate(1.25)}
+.gWall{position:absolute;inset:0;background:radial-gradient(ellipse 60% 55% at 50% 30%,rgba(255,236,205,.1),transparent 70%),radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.6))}
+.gFrame{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);padding:clamp(8px,1vw,16px);background:linear-gradient(145deg,#4a3722,#20160d 55%,#3a2a19);box-shadow:0 0 0 1px #0b0805,inset 0 0 0 2px rgba(255,214,150,.22),inset 0 0 0 6px rgba(0,0,0,.25),0 40px 100px rgba(0,0,0,.8)}
+.gSlide.show .gFrame{animation:breathe 48s ease-in-out infinite alternate}
+@keyframes breathe{from{transform:translate(-50%,-50%) scale(1)}to{transform:translate(-50%,-50%) scale(1.035)}}
+.gMat{padding:clamp(14px,2.4vw,40px);background:#efe9dd;box-shadow:inset 0 2px 8px rgba(0,0,0,.25)}
+.gMat img{display:block;max-width:74vw;max-height:66vh;width:auto;height:auto;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.gLabel{position:absolute;right:4vw;bottom:4.5vh;background:rgba(246,242,234,.95);color:#1d1814;padding:14px 22px 12px;border-radius:2px;max-width:min(34vw,460px);font-family:Georgia,'Times New Roman',serif;box-shadow:0 12px 34px rgba(0,0,0,.55)}
+.gLabel b{display:block;font-style:italic;font-weight:400;font-size:clamp(16px,1.3vw,22px);line-height:1.25}
+.gLabel span{display:block;font-size:clamp(13px,1vw,16px);color:#4d4237;margin-top:3px}
+.gLabel small{display:block;margin-top:8px;font-family:Outfit,sans-serif;font-size:10px;letter-spacing:.18em;color:#8b7d6d;text-transform:uppercase}
+.gLogo{position:absolute;top:3vh;left:3vw;z-index:3;font-family:Monoton;font-size:clamp(24px,2.4vw,40px);opacity:.75;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 34px var(--accent)}
+.gCta{position:absolute;top:4vh;right:3vw;z-index:3;font-family:Bungee;font-size:clamp(12px,1vw,16px);letter-spacing:.2em;color:rgba(255,255,255,.5)}
+.gNow{position:absolute;left:4vw;bottom:4.5vh;z-index:3;display:flex;align-items:center;gap:14px;padding:10px 22px 10px 10px;border-radius:999px;background:rgba(10,6,20,.74);border:1px solid var(--stroke);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:40vw;box-shadow:0 12px 34px rgba(0,0,0,.5)}
+.gNow img{width:54px;height:54px;border-radius:50%;object-fit:cover;flex:none;animation:spin 6s linear infinite}
+.gNow div{min-width:0;display:flex;flex-direction:column}
+.gNow b,.gNow span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gNow b{font-size:17px}.gNow span{font-size:14px;color:var(--muted)}
+#gViz{width:84px;height:30px;flex:none}
 #attract{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .9s;background:#05020c;overflow:hidden}
 #attract.on{opacity:1;pointer-events:auto}
 .attBg{position:absolute;inset:-120px;background-size:cover;background-position:center;filter:blur(80px) saturate(1.9) brightness(.5);transform:scale(1.2)}
@@ -375,6 +402,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
  <canvas id="attViz"></canvas>
 </div>
 
+<div id="gallery">
+ <div class="gLogo" id="gLogo"></div>
+ <div class="gCta">Touch to pick a song</div>
+ <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas></div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
@@ -389,7 +422,7 @@ const store={
  set(k,v){try{localStorage.setItem('jbx.'+k,JSON.stringify(v))}catch(e){}},
  del(k){try{localStorage.removeItem('jbx.'+k)}catch(e){}}
 };
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:3,house:true,attractSecs:90,sfx:true,osk:true,volume:70};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:3,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 const saveS=()=>store.set('settings',S);
 let credits=store.get('credits',6);
@@ -656,7 +689,7 @@ const REG=new Map();let regN=0;const reg=x=>{const k='k'+(regN++);REG.set(k,x);r
 function applyName(){
  const w=(S.name||'Jukebox').trim().split(/\s+/);const last=w.pop();
  $('.logo .l1').textContent=w.join(' ');$('.logo .l1').style.display=w.length?'':'none';
- $('.logo .l2').textContent=last;$('#attLogo').textContent=last;document.title=S.name;
+ $('.logo .l2').textContent=last;$('#attLogo').textContent=last;$('#gLogo').textContent=last;document.title=S.name;
 }
 function setBadge(kind,text){const b=$('#modeBadge');b.className='badge '+kind;b.textContent=text}
 function renderCredits(){
@@ -876,7 +909,7 @@ function buildOSK(){
 
 /* ---------- Settings ---------- */
 function openSettings(){
- let mode=S.mode;const connected=!!tok;
+ let mode=S.mode,saver=S.saver;const connected=!!tok;
  const tg=(id,label,on)=>`<label class="tg"><span>${label}</span><input type="checkbox" id="${id}" ${on?'checked':''}><i></i></label>`;
  $('#setBody').innerHTML=`
  <div class="field"><label for="fName">Jukebox name</label><input type="text" id="fName" value="${esc(S.name)}"></div>
@@ -896,15 +929,28 @@ function openSettings(){
   ${tg('fSfx','Arcade sound effects',S.sfx)}
   ${tg('fOsk','On-screen keyboard (for touchscreens)',S.osk)}
  </div>
- <div class="field two"><div><label for="fCoin">Credits per coin</label><input type="number" id="fCoin" min="1" max="50" value="${S.coinCredits}"></div><div><label for="fAttract">Attract mode after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div></div>
+ <div class="field"><label for="fCoin">Credits per coin</label><input type="number" id="fCoin" min="1" max="50" value="${S.coinCredits}"></div>
+ <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button></div>
+  <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
+  <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
+  <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
+ <div class="field"><span class="lab">Wall display</span>
+  ${tg('fAutoFs','Go full screen on first tap',S.autoFs)}
+  ${tg('fWake','Keep the screen awake',S.wake)}
+  <div class="btnRow"><button class="btn" id="fsNow">Full screen now</button>${isInstalledApp()?'<span class="ok">● Running as installed app</span>':'<button class="btn primary" id="installApp">Install GriffTunes app</button>'}</div>
+ </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||3);S.attractSecs=Math.max(0,+$('#fAttract').value||0)};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||3);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked};
+ $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
+ $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
+ $('#fsNow').onclick=()=>goFullscreen();
+ const ia=$('#installApp');if(ia)ia.onclick=installApp;
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
- $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();closeModal($('#settingsModal'));toast('Settings saved')};
+ $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();closeModal($('#settingsModal'));toast('Settings saved')};
  openModal($('#settingsModal'));
 }
 
@@ -930,7 +976,7 @@ function drawViz(cv,n,mirror){
  }
  x.globalAlpha=1;
 }
-function frame(){drawViz($('#viz'),36,true);if(attractOn)drawViz($('#attViz'),80,false);requestAnimationFrame(frame)}
+function frame(){drawViz($('#viz'),36,true);if(attractOn&&!galleryOn)drawViz($('#attViz'),80,false);if(galleryOn)drawViz($('#gViz'),12,false);requestAnimationFrame(frame)}
 
 /* ---------- Attract mode ---------- */
 let lastInput=Date.now(),attractOn=false;
@@ -941,14 +987,114 @@ function syncAttract(){
  $('#attTitle').textContent=c?c.name:S.name;
  $('#attArtist').textContent=c?c.artist:'The jukebox is ready';
  const n=P.queue[0];$('#attNext').textContent=n?`Up next: ${n.name} — ${n.artist}`:'';
+ syncGalleryNow();
 }
-function showAttract(){attractOn=true;syncAttract();$('#attract').classList.add('on')}
-function hideAttract(){attractOn=false;$('#attract').classList.remove('on')}
+function syncGalleryNow(){
+ const c=P.current,g=$('#gNow');if(!g)return;
+ g.style.display=c?'':'none';
+ if(c){$('#gNowImg').src=c.img||PLACEHOLDER;$('#gNowTitle').textContent=c.name;$('#gNowArtist').textContent=c.artist}
+}
+
+/* ---------- Fine art gallery (Art Institute of Chicago open access) ---------- */
+const ART={list:[],idx:0,timer:null,iiif:'https://www.artic.edu/iiif/2',loading:null};
+let galleryOn=false;
+function artLoad(){
+ if(ART.list.length)return Promise.resolve();
+ if(ART.loading)return ART.loading;
+ ART.loading=(async()=>{
+  const cached=store.get('art',null);
+  if(cached&&cached.list&&cached.list.length>=12&&Date.now()-cached.at<7*864e5){ART.list=cached.list;ART.iiif=cached.iiif||ART.iiif}
+  else{
+   const base=[{term:{is_public_domain:true}},{exists:{field:'image_id'}}];
+   const tries=[
+    {query:{bool:{must:base.concat([{term:{artwork_type_id:1}},{term:{is_boosted:true}}])}}},
+    {query:{bool:{must:base.concat([{term:{artwork_type_id:1}}])}}},
+    {q:'oil painting',query:{bool:{must:base}}}
+   ];
+   for(const t of tries){
+    try{
+     const out=[];
+     for(let page=1;page<=3;page++){
+      const params=Object.assign({},t,{fields:['id','title','artist_title','artist_display','date_display','image_id','artwork_type_title'],limit:100,page});
+      const r=await fetch('https://api.artic.edu/api/v1/artworks/search?params='+encodeURIComponent(JSON.stringify(params)));
+      if(!r.ok)break;
+      const j=await r.json();
+      if(j.config&&j.config.iiif_url)ART.iiif=j.config.iiif_url;
+      out.push(...(j.data||[]).filter(a=>a.image_id&&(t.q||!a.artwork_type_title||/paint/i.test(a.artwork_type_title))));
+      if(!j.pagination||page>=j.pagination.total_pages)break;
+      await sleep(500);
+     }
+     if(out.length>=12){
+      ART.list=out.map(a=>({title:a.title||'Untitled',artist:a.artist_title||String(a.artist_display||'').split('\n')[0]||'Unknown artist',date:a.date_display||'',img:a.image_id}));
+      store.set('art',{list:ART.list,iiif:ART.iiif,at:Date.now()});
+      break;
+     }
+    }catch(e){console.warn('Art load failed',e)}
+   }
+  }
+  for(let i=ART.list.length-1;i>0;i--){const k=Math.floor(Math.random()*(i+1));[ART.list[i],ART.list[k]]=[ART.list[k],ART.list[i]]}
+ })().finally(()=>{ART.loading=null});
+ return ART.loading;
+}
+const artUrl=(a,w)=>`${ART.iiif}/${a.img}/full/${w},/0/default.jpg`;
+const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
+async function artNext(){
+ for(let n=0;n<6&&ART.list.length;n++){
+  const a=ART.list[ART.idx++%ART.list.length];let src=artUrl(a,1686);
+  try{await loadImg(src)}catch(e){src=artUrl(a,843);try{await loadImg(src)}catch(e2){continue}}
+  if(!galleryOn)return true;
+  const g=$('#gallery'),el=document.createElement('div');el.className='gSlide';
+  el.innerHTML=`<div class="gBg" style="background-image:url('${src}')"></div><div class="gWall"></div><div class="gFrame"><div class="gMat"><img src="${src}" alt=""></div></div><div class="gLabel"><b>${esc(a.title)}</b><span>${esc(a.artist)}${a.date?', '+esc(a.date):''}</span><small>Art Institute of Chicago</small></div>`;
+  g.insertBefore(el,$('#gLogo'));
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  $$('.gSlide',g).forEach(o=>{if(o!==el){o.classList.remove('show');setTimeout(()=>o.remove(),2800)}});
+  return true;
+ }
+ return false;
+}
+async function showGallery(){
+ galleryOn=true;syncGalleryNow();$('#gallery').classList.add('on');
+ await artLoad();
+ if(!attractOn||!galleryOn)return;
+ if(!ART.list.length||!(await artNext())){
+  if(!attractOn)return;
+  galleryOn=false;$('#gallery').classList.remove('on');syncAttract();$('#attract').classList.add('on');return;
+ }
+ clearInterval(ART.timer);ART.timer=setInterval(()=>{if(galleryOn)artNext()},Math.max(10,S.artSecs)*1000);
+}
+function showAttract(){attractOn=true;if(S.saver==='art'){showGallery();return}syncAttract();$('#attract').classList.add('on')}
+function hideAttract(){attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
+
+/* ---------- Wall display: full screen, wake lock, install ---------- */
+const isInstalledApp=()=>matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
+function goFullscreen(){const d=document.documentElement;if(!document.fullscreenElement&&d.requestFullscreen)d.requestFullscreen().catch(()=>{})}
+let wakeLock=null;
+async function keepAwake(){
+ if(!S.wake){if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null}return}
+ if(!('wakeLock' in navigator)||document.visibilityState!=='visible')return;
+ try{if(!wakeLock||wakeLock.released)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
+}
+document.addEventListener('visibilitychange',keepAwake);
+let installEvt=null;
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
+async function installApp(){
+ if(installEvt){installEvt.prompt();try{await installEvt.userChoice}catch(e){}installEvt=null;return}
+ toast('In Chrome: menu ⋮ → Cast, save and share → Install page as app','warn');
+}
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+let fsTried=false,swallowClick=false;
+addEventListener('click',e=>{
+ if(swallowClick){swallowClick=false;e.stopPropagation();e.preventDefault();return}
+ if(actx&&actx.state==='suspended')actx.resume();
+ if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
+ if(S.autoFs&&!fsTried&&!isInstalledApp()){fsTried=true;goFullscreen()}
+ keepAwake();
+},true);
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,e=>{
  lastInput=Date.now();
  if(actx&&actx.state==='suspended')actx.resume();
  if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
- if(attractOn){hideAttract();e.stopPropagation();e.preventDefault()}
+ if(attractOn){hideAttract();swallowClick=true;setTimeout(()=>{swallowClick=false},700);e.stopPropagation();e.preventDefault()}
 },true));
 setInterval(()=>{if(!attractOn&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
 
@@ -993,6 +1139,8 @@ async function boot(){
  renderNP();renderQueue();buildTabs();sizeShelf();
  loadTab(provider.tabs[0].id);
  requestAnimationFrame(frame);
+ keepAwake();
+ if(S.saver==='art')setTimeout(()=>artLoad(),4000);
 }
 $('#modeBadge').onclick=openSettings;
 boot();
