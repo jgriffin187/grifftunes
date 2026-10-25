@@ -1120,6 +1120,7 @@ function renderNP(){
 function renderPlayState(){
  $('#np').classList.toggle('playing',!!P.current&&!P.paused);hostSync();
  $('#playBtn').innerHTML=(!P.current||P.paused)?I.play:I.pause;
+ syncGalleryNow();
 }
 function renderProgress(){
  const pct=P.dur?Math.min(100,P.pos/P.dur*100):0;
@@ -1386,7 +1387,7 @@ function syncAttract(){
 }
 function syncGalleryNow(){
  const c=P.current,g=$('#gNow');if(!g)return;
- g.style.display=c?'':'none';
+ g.style.display=c&&!P.paused?'':'none';
  if(c){$('#gNowImg').src=c.img||PLACEHOLDER;$('#gNowTitle').textContent=c.name;$('#gNowArtist').textContent=c.artist+(c.radio?' · '+c.radio+' radio':'')}
 }
 
