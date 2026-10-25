@@ -223,7 +223,8 @@ html.remote #lightsBtn{display:none!important}
 .cdGo.stop{background:rgba(255,255,255,.1);color:#fff;box-shadow:none;border:1px solid var(--stroke)}
 .cdGo[disabled]{opacity:.7}
 .cdList{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:min-content;gap:8px 14px;padding-right:6px;scrollbar-width:thin}
-.cdRow{display:flex;align-items:center;gap:14px;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid transparent}
+.cdRow{display:flex;align-items:center;gap:14px;padding:9px 14px;border-radius:14px;background:rgba(255,255,255,.045);border:1px solid transparent;cursor:pointer;transition:transform .12s,background .2s}
+.cdRow:active{transform:scale(.98);background:rgba(255,255,255,.12)}
 .cdRow .n{font-family:Bungee;font-size:26px;width:44px;text-align:center;flex:none;color:var(--accent2);text-shadow:0 0 12px color-mix(in srgb,var(--accent2) 60%,transparent)}
 .cdRow .m{flex:1;min-width:0;display:flex;flex-direction:column}
 .cdRow .m b{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2143,12 +2144,14 @@ function renderCdRows(){
  const now=$('#cdList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 $('#cdPanel').addEventListener('click',async e=>{
+ const row=e.target.closest('.cdRow');
+ if(row){const pos=+row.dataset.pos;if(CD.matching)return;sfx('tick');if(CD.active)cdJump(pos);else startCountdown(pos);return}
  if(CD.active&&!e.target.closest('#cdGo'))return;
  const c=e.target.closest('[data-cdc]');if(c){CD.chart=c.dataset.cdc;sfx('tick');await openCountdown();return}
  const y=e.target.closest('[data-cdy]');if(y&&!y.disabled){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown();return}
  if(e.target.closest('#cdGo')){if(CD.active)stopCountdown();else startCountdown()}
 });
-async function startCountdown(){
+async function startCountdown(fromPos){
  if(CD.matching)return;
  const v=cdView(CD.years),key=CD.chart+':'+v.year+':'+(v.date||''),rows=[...v.rows].sort((a,b)=>b.pos-a.pos);
  if(!rows.length)return;
@@ -2165,9 +2168,17 @@ async function startCountdown(){
   if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
   CD.active=true;CD.idx=0;CD.view=v;CD.date=v.date;CD.year=v.year;
   sfx('coin');toast((CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
-  if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
+  if(fromPos)await cdJump(fromPos);
+  else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
   else toast('The countdown starts after the current picks');
  }finally{CD.matching=false;renderCountdown()}
+}
+// Jump straight to a position: it plays now, and the countdown carries on from there toward #1
+async function cdJump(pos){
+ const i=CD.list.findIndex(x=>x.cd.pos===pos);
+ if(i<0){toast(`#${pos} isn't on Spotify, so it can't be played`,'warn');return}
+ const x=CD.list[i];CD.idx=i+1;
+ await startTrack(x.track,false,null,x.cd);cdCard(x);renderCdRows();
 }
 function stopCountdown(){CD.active=false;CD.list=[];CD.idx=0;renderCountdown();renderNP();toast('Countdown stopped. This song will finish.')}
 function cdNext(){
