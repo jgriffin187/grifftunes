@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07040f">
 <title>GriffTunes</title>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -276,6 +277,15 @@ html.remote #cdCard{display:none!important}
 @media (max-width:820px){.lyrHead{padding:16px 16px 6px}.lyrHead img{width:56px;height:56px}.lyrHead b{font-size:20px}.lyrLines{padding:0 6vw}}
 #deck{position:fixed;inset:0;z-index:76;display:grid;place-items:center;background:#050308;opacity:0;pointer-events:none;transition:opacity .5s;overflow:hidden}
 #deck.on{opacity:1;pointer-events:auto}
+#dk3d{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
+#deck.three #dk3d{display:block}#deck.three .dk{display:none}
+.dk3Cap{position:absolute;left:3vw;bottom:4vh;z-index:4;display:none;flex-direction:column;gap:2px;max-width:46vw;text-shadow:0 2px 18px rgba(0,0,0,.8)}
+#deck.three .dk3Cap{display:flex}
+.dk3Cap small{font-family:Bungee;font-size:clamp(11px,1vw,15px);letter-spacing:.24em;color:#ff8a4c}
+.dk3Cap b{font-size:clamp(24px,2.6vw,42px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dk3Cap span{font-size:clamp(16px,1.5vw,24px);color:rgba(255,255,255,.75)}
+.dk3Load{position:absolute;inset:0;display:none;place-items:center;z-index:3}
+#deck.loading3 .dk3Load{display:grid}#deck.loading3 .dk{opacity:0}
 .dkBg{position:absolute;left:50%;top:50%;width:14vw;height:14vh;margin:-7vh 0 0 -7vw;background-size:cover;background-position:center;filter:blur(12px) saturate(1.5) brightness(.32);transform:scale(9);will-change:transform}
 .dkClose{position:absolute;top:18px;right:18px;z-index:5}
 .dk{position:relative}
@@ -740,6 +750,9 @@ html.remote .badge{display:flex!important}
 
 <div id="deck">
  <div class="dkBg" id="dkBg"></div>
+ <canvas id="dk3d"></canvas>
+ <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span></div>
+ <div class="dk3Load" id="dk3Load"><div class="spin"></div></div>
  <button class="closeBtn dkClose" id="dkClose" aria-label="Close turntable" data-icon="close"></button>
  <div class="dk" id="dk">
   <div class="dkPlinth" id="dkPlinth">
@@ -2628,19 +2641,48 @@ function deckFrame(t){
  if(t-(DECK.infoAt||0)>250){DECK.infoAt=t;deckInfo()}
  DECK.raf=requestAnimationFrame(deckFrame);
 }
+let D3=null,D3fail=false,D3loading=null;
+async function deck3d(){
+ if(D3||D3fail)return D3;
+ if(!D3loading)D3loading=(async()=>{
+  try{
+   const t=document.createElement('canvas').getContext('webgl2');if(!t)throw new Error('no WebGL2');
+   const m=await import('./deck3d.js');
+   D3=m.createDeck($('#dk3d'),{
+    state:()=>({playing:!!P.current&&!P.paused,pos:P.pos,dur:P.dur,has:!!P.current}),
+    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')}
+   });
+   window.__gtDeck=D3;
+  }catch(e){console.warn('3D turntable unavailable, using the 2D deck',e);D3fail=true}
+  return D3;
+ })();
+ return D3loading;
+}
+function deck3Info(){
+ const c=P.current;
+ $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING')+` · ${DECK.rpm===45?'45':'33⅓'} RPM`;
+ $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
+ if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
+}
 function openDeck(saver){
  DECK.open=true;DECK.saver=!!saver;if(!saver)sfx('tick');
  deckLayout();deckInfo();$('#deck').classList.add('on');$('#deckBtn').classList.add('on');
- cancelAnimationFrame(DECK.raf);DECK.last=0;DECK.raf=requestAnimationFrame(deckFrame);
+ const dk=$('#deck');
+ if(!D3&&!D3fail)dk.classList.add('loading3');
+ deck3d().then(d=>{
+  dk.classList.remove('loading3');if(!DECK.open)return;
+  if(d){dk.classList.add('three');cancelAnimationFrame(DECK.raf);d.start();deck3Info();clearInterval(DECK.capT);DECK.capT=setInterval(deck3Info,500)}
+  else{dk.classList.remove('three');cancelAnimationFrame(DECK.raf);DECK.last=0;DECK.raf=requestAnimationFrame(deckFrame)}
+ });
 }
-function closeDeck(){DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf)}
+function closeDeck(){if(D3)D3.stop();clearInterval(DECK.capT);DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf)}
 $('#deckBtn').onclick=()=>openDeck(false);
 $('#dkClose').onclick=closeDeck;
 $('#dkStart').onclick=()=>{sfx('tick');togglePlay()};
 $('#dkSkip').onclick=()=>{sfx('tick');advance()};
 $('#dkVol').addEventListener('input',e=>{S.volume=+e.target.value;engine.setVolume(S.volume);$('#vol').value=S.volume;saveS()});
 $('#deck').addEventListener('click',e=>{const b=e.target.closest('[data-dksp]');if(!b)return;DECK.rpm=+b.dataset.dksp;$$('#deck [data-dksp]').forEach(x=>x.classList.toggle('on',x===b));sfx('tick');deckInfo()});
-addEventListener('resize',()=>{if(DECK.open)deckLayout()});
+addEventListener('resize',()=>{if(DECK.open){deckLayout();if(D3)D3.resize()}});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
 (()=>{
  const plat=$('#dkPlat');let a0=0,ang0=0,moved=0;
