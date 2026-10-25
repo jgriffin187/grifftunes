@@ -2907,7 +2907,7 @@ window.__gtTip={show:showTip,hide:hideTip};
 async function boot(){
  applyName();renderCredits();tickClock();buildOSK();
  if(REMOTE){
-  document.documentElement.classList.add('remote');
+  document.documentElement.classList.add('remote','noPhoneVol');
   provider=REMOTE_PROVIDER;engine=RemoteEngine;
   renderNP();renderQueue();buildTabs();sizeShelf();renderFlow([]);
   $('#shelf').innerHTML='<div class="shelfMsg">Connecting to the jukebox…</div>';
@@ -2932,6 +2932,26 @@ async function boot(){
  startHost();
  renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
 }
+/* ---------- Auto-update: the jukebox picks up new versions on its own ---------- */
+// Checks GitHub Pages every 10 minutes; when a new version is out, reloads at a quiet moment (nothing playing, no menus open).
+const UPD={base:null,ready:false,quietSince:0};
+async function pageHash(){
+ const r=await fetch(location.pathname+'?v='+Date.now(),{cache:'no-store'});if(!r.ok)throw 0;
+ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(await r.text()));
+ return Array.from(new Uint8Array(b).slice(0,8),x=>x.toString(16).padStart(2,'0')).join('');
+}
+async function updCheck(){
+ if(REMOTE||!crypto.subtle||location.protocol==='file:')return;
+ try{const h=await pageHash();if(!UPD.base)UPD.base=h;else if(h!==UPD.base&&!UPD.ready){UPD.ready=true;console.info('[GriffTunes] new version available; reloading when quiet')}}catch(e){}
+}
+setTimeout(updCheck,20000);setInterval(updCheck,10*60000);
+setInterval(()=>{
+ if(!UPD.ready)return;
+ const quiet=(!P.current||P.paused)&&!P.queue.length&&!$('.modal.open')&&!(typeof DECK!=='undefined'&&DECK.open&&!DECK.saver);
+ if(!quiet){UPD.quietSince=0;return}
+ if(!UPD.quietSince)UPD.quietSince=Date.now();
+ if(Date.now()-UPD.quietSince>60000)location.reload();
+},5000);
 $('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
 boot();
 })();
