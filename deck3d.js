@@ -155,7 +155,7 @@ export function createDeck(canvas, hooks) {
   const cradle = new THREE.Mesh(new THREE.TorusGeometry(.06, .018, 10, 24, Math.PI), rubber); cradle.position.set(restX, top + .44, restZ); cradle.rotation.y = -restA; scene.add(cradle);
 
   // ---------- controls ----------
-  const clickables = [];
+  const clickables = []; let hoverAct = null;
   const startBase = new THREE.Mesh(new THREE.CylinderGeometry(.46, .5, .05, 64), darkMetal); startBase.position.set(-W / 2 + .8, top + .025, D / 2 - .78); scene.add(startBase);
   const startLamp = new THREE.MeshPhysicalMaterial({ color: 0x3a1a10, emissive: 0xff6a2a, emissiveIntensity: 0, roughness: .3 });
   const startBtn = new THREE.Mesh(new THREE.CylinderGeometry(.38, .4, .1, 64), [darkMetal, satin, satin]); startBtn.position.set(-W / 2 + .8, top + .1, D / 2 - .78); startBtn.castShadow = true; startBtn.userData.act = 'start'; scene.add(startBtn); clickables.push(startBtn);
@@ -215,8 +215,9 @@ export function createDeck(canvas, hooks) {
     if (hits.length) { const a = hits[0].object.userData.act; press(hits[0].object); if (a === 'start') hooks.onStart(); else if (a === 'skip') hooks.onSkip(); else { rpm = a === 'rpm45' ? 45 : 33; hooks.onRpm && hooks.onRpm(rpm) } return }
     const pa = platterAngle(e); if (pa && pa.r < RR) { canvas.setPointerCapture(e.pointerId); dragging = { a0: pa.a, ang0: ang, moved: 0 }; hooks.onScratch(); }
   });
+  canvas.addEventListener('pointerleave', () => { if (hoverAct && hooks.onHover) { hoverAct = null; hooks.onHover(null) } });
   canvas.addEventListener('pointermove', e => {
-    if (!dragging) { const h = hit(e).intersectObjects(clickables, false); canvas.style.cursor = h.length ? 'pointer' : ''; return }
+    if (!dragging) { const h = hit(e).intersectObjects(clickables, false); canvas.style.cursor = h.length ? 'pointer' : ''; if (e.pointerType === 'mouse' && hooks.onHover) { const a = h.length ? h[0].object.userData.act : null; if (a !== hoverAct) { hoverAct = a; hooks.onHover(a, e.clientX, e.clientY) } } return }
     const pa = platterAngle(e); if (!pa) return; let da = pa.a - dragging.a0; if (da > Math.PI) da -= TAU; if (da < -Math.PI) da += TAU;
     ang = dragging.ang0 - da; dragging.moved += Math.abs(da); if (dragging.moved > 1.4) { hooks.onScratch(); dragging.a0 = pa.a; dragging.ang0 = ang; dragging.moved = 0 }
   });

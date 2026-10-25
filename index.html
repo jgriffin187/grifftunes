@@ -199,6 +199,8 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .famRow b{font-size:17px}.famRow small{font-size:13px;color:var(--muted)}
 .famRow .btn{height:42px;padding:0 18px;font-size:14px}
 .btn[disabled]{opacity:.45}
+.tip{position:fixed;z-index:2147483000;pointer-events:none;max-width:300px;padding:8px 12px;border-radius:10px;background:rgba(16,12,32,.94);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 14px/1.35 Outfit,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 18px color-mix(in srgb,var(--accent) 30%,transparent);opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
+.tip.on{opacity:1;transform:none}
 .lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
 #lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
 .hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
@@ -2652,7 +2654,7 @@ async function deck3d(){
    const m=await import('./deck3d.js');
    D3=m.createDeck($('#dk3d'),{
     state:()=>({playing:!!P.current&&!P.paused,pos:P.pos,dur:P.dur,has:!!P.current}),
-    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')}
+    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Drag the record to scratch'}[a],x,y,true)}
    });
    window.__gtDeck=D3;
   }catch(e){console.warn('3D turntable unavailable, using the 2D deck',e);D3fail=true}
@@ -2677,7 +2679,7 @@ function openDeck(saver){
   else{dk.classList.remove('three');cancelAnimationFrame(DECK.raf);DECK.last=0;DECK.raf=requestAnimationFrame(deckFrame)}
  });
 }
-function closeDeck(){if(D3)D3.stop();clearInterval(DECK.capT);DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf)}
+function closeDeck(){hideTip();if(D3)D3.stop();clearInterval(DECK.capT);DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf)}
 $('#deckBtn').onclick=()=>openDeck(false);
 $('#dkClose').onclick=closeDeck;
 $('#dkStart').onclick=()=>{sfx('tick');togglePlay()};
@@ -2693,6 +2695,92 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
  plat.addEventListener('pointermove',e=>{if(!DECK.drag)return;let da=angAt(e)-a0;if(da>180)da-=360;if(da<-180)da+=360;moved+=Math.abs(da);DECK.ang=ang0+da;if(moved>90){djScratch();a0=angAt(e);ang0=DECK.ang;moved=0}});
  const up=()=>{DECK.drag=null};plat.addEventListener('pointerup',up);plat.addEventListener('pointercancel',up);
 })();
+
+/* ---------- Mouse-over tips (mouse only; touch taps never show them) ---------- */
+const TIPS={
+ coinBtn:()=>S.freePlay?'Free play is on, no coins needed':`Insert a coin for ${S.coinCredits} credits`,
+ credits:()=>S.freePlay?'Free play: every song is free':'Credits left. Queue 1 · Play next 2 · Play now 3',
+ modeBadge:'Music source. Click for settings',
+ phoneBtn:'Show a QR code so guests can add songs from their phones',
+ qrMini:'Show a QR code so guests can add songs from their phones',
+ lightsBtn:'Hue lights: pick a lighting mode',
+ gear:'Settings',
+ openSearch:'Search for any song, artist or album',
+ shPrev:'Scroll left',shNext:'Scroll right',
+ playBtn:()=>P.current?(P.paused?'Resume':'Pause'):'Play',
+ skipBtn:'Skip to the next song',
+ devBtn:'Choose which speaker plays the music',
+ devChip:'The speaker playing now. Click to change it',
+ devRefresh:'Look for speakers again',
+ radioBtn:()=>S.radio?'Radio is on: tap to turn it off or change stations':'Radio: nonstop music when Up Next is empty',
+ lyrBtn:'Show sing-along lyrics',
+ deckBtn:'Full-screen turntable',
+ vol:()=>`Volume ${S.volume}%`,
+ clearQueue:'Remove every song from Up Next',
+ micBtn:'Search by voice',
+ lyrClose:'Close lyrics',
+ dkClose:'Close the turntable',dkSkip:'Next song',dkStart:'Start or stop the record',dkVol:()=>`Volume ${S.volume}%`,
+ cdGo:()=>CD.active?'Stop the countdown':'Play the countdown from #20 to #1',
+ spIn:'Sign in to Spotify',spOut:'Disconnect Spotify from GriffTunes',
+ famAdd:"Add a family member's Spotify playlists",
+ setSave:'Save settings and close',resetCredits:'Set credits back to zero',
+ qrNew:'Make a new code. Old QR codes stop working',qrCopy:'Copy the phone link',
+ previewSaver:'Show the screensaver now',
+ installApp:'Install GriffTunes as an app',fsNow:'Switch to full screen',
+ huePair:'Connect to your Hue Bridge. Press the button on the bridge first',
+ hTest:'Flash the lights to test them',hOpen:'Pick a lighting mode',lsettings:'Open Hue settings',
+ spkBtn:'Turn the speaker power plugs on or off',
+};
+const TIP_ATTR={
+ act:el=>{const k=el.dataset.act,c=S.freePlay?'':` (${COST[k]} credit${COST[k]>1?'s':''})`;return({q:'Add to the end of Up Next',n:'Play right after the current song',w:'Stop the current song and play this now'})[k]+c},
+ qx:()=>'Remove from Up Next',
+ close:()=>'Close',
+ flow:el=>el.dataset.flow==='1'?'Next':'Previous',
+ tab:el=>'Show '+el.textContent.trim(),
+ open:el=>{const b=el.querySelector('b');return b?'Open '+b.textContent.trim():'Open'},
+ saver:el=>({art:'Screensaver: full-screen fine art paintings',np:'Screensaver: big now-playing screen',deck:'Screensaver: the turntable'})[el.dataset.saver],
+ mode:el=>el.dataset.mode==='spotify'?'Play music from your Spotify account':'Try GriffTunes with sample music',
+ dksp:el=>el.dataset.dksp==='45'?'45 RPM':'33⅓ RPM',
+ cdc:el=>el.dataset.cdc==='country'?'Country #1 hits from a past year':'Billboard Hot 100 top 20 from this week in a past year',
+ cdy:el=>`This week, ${el.dataset.cdy} years ago`,
+ dev:()=>'Play on this speaker',
+ famdel:()=>'Remove this family member',
+ key:el=>({BS:'Backspace',CLR:'Clear',GO:'Search',' ':'Space'})[el.dataset.key],
+};
+function tipFor(el){
+ if(el.dataset.tip)return el.dataset.tip;
+ if(el.id&&TIPS[el.id]){const t=TIPS[el.id];return typeof t==='function'?t():t}
+ for(const k in TIP_ATTR)if(k in el.dataset){const t=TIP_ATTR[k](el);if(t!==undefined)return t||''}
+ if('key' in el.dataset)return '';
+ if(el.classList.contains('vinyl'))return 'Click the record to scratch';
+ const lab=el.getAttribute('aria-label');if(lab)return lab;
+ const b=el.querySelector('b'),sm=el.querySelector('small');
+ if(b)return b.textContent.trim()+(sm?': '+sm.textContent.trim():'');
+ return el.textContent.trim().replace(/\s+/g,' ').slice(0,80);
+}
+const tipEl=document.createElement('div');tipEl.className='tip';document.body.appendChild(tipEl);
+let tipT=null,tipFor0=null;
+function placeTip(x,y,below){
+ const r=tipEl.getBoundingClientRect(),m=8;
+ let left=Math.min(innerWidth-r.width-m,Math.max(m,x-r.width/2));
+ let top=below?y+12:y-r.height-10;if(top<m)top=y+24;if(top+r.height>innerHeight-m)top=innerHeight-r.height-m;
+ tipEl.style.left=left+'px';tipEl.style.top=top+'px';
+}
+function showTip(text,x,y,below){if(!text){hideTip();return}tipEl.textContent=text;tipEl.classList.add('on');placeTip(x,y,below)}
+function hideTip(){clearTimeout(tipT);tipFor0=null;tipEl.classList.remove('on')}
+const TIP_SEL='button,input[type=range],.credits,.vinyl,#modeBadge,[data-tip]';
+document.addEventListener('pointerover',e=>{
+ if(e.pointerType!=='mouse')return;
+ const el=e.target.closest(TIP_SEL);
+ if(!el){if(tipFor0)hideTip();return}
+ if(el===tipFor0)return;
+ hideTip();tipFor0=el;
+ tipT=setTimeout(()=>{if(tipFor0!==el||!el.isConnected)return;const r=el.getBoundingClientRect();showTip(tipFor(el),r.left+r.width/2,r.top)},450);
+},true);
+document.addEventListener('pointerdown',()=>hideTip(),true);
+document.addEventListener('input',e=>{if(tipFor0&&e.target===tipFor0&&tipEl.classList.contains('on')){tipEl.textContent=tipFor(tipFor0)}},true);
+addEventListener('scroll',hideTip,true);addEventListener('blur',hideTip);
+window.__gtTip={show:showTip,hide:hideTip};
 
 /* ---------- Boot ---------- */
 async function boot(){
