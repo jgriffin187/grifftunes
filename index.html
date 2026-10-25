@@ -557,7 +557,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .qrStatus i{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px currentColor;flex:none}
 .qrStatus.ok i{background:#1ed760}.qrStatus.bad i{background:#ff3b5c}
 .btnRow.center{justify-content:center}
-html.remote #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .qX,html.remote .clock{display:none!important}
+html.remote.noPhoneCoins #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .qX,html.remote .clock{display:none!important}
 html.remote .badge{display:flex!important}
 html.remote .ctrls>:not(.vol){display:none!important}
 html.remote .ctrls .vol{padding:6px 2px 0;min-width:0;max-width:100%}
@@ -817,7 +817,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
@@ -1375,11 +1375,16 @@ function spend(n){
  credits-=n;store.set('credits',credits);renderCredits();return true;
 }
 function insertCoin(){
+ if(REMOTE){phoneCoin();return}
  credits+=S.coinCredits;store.set('credits',credits);sfx('coin');hueFlash('coin');
+ coinFx(S.coinCredits,()=>{renderCredits();bump($('#credits'),'pop')});
+}
+// coin flying into the credit counter, then "+10"
+function coinFx(n,landed){
  const tgt=$('#credits .coin').getBoundingClientRect();
  const c=document.createElement('div');c.className='coin flyCoin';c.textContent='GT';c.style.left=tgt.left+'px';c.style.top=tgt.top+'px';document.body.appendChild(c);
- setTimeout(()=>{c.remove();renderCredits();bump($('#credits'),'pop');
-  const f=document.createElement('div');f.className='floatTxt';f.textContent='+'+S.coinCredits;f.style.left=(tgt.left+tgt.width+70)+'px';f.style.top=(tgt.top+4)+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1200)},700);
+ setTimeout(()=>{c.remove();landed&&landed();
+  const f=document.createElement('div');f.className='floatTxt';f.textContent='+'+n;f.style.left=(tgt.left+tgt.width+(REMOTE?6:70))+'px';f.style.top=(tgt.top+(REMOTE?-22:4))+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1200)},700);
 }
 
 /* ---------- Accent color from album art ---------- */
@@ -1676,6 +1681,7 @@ function openSettings(){
   ${tg('fOsk','On-screen keyboard (for touchscreens)',S.osk)}
   ${tg('fPhones','Let guests add songs from their phones',S.phones)}
   ${tg('fPhoneVol','Let phones change the volume',S.phoneVol)}
+  ${tg('fPhoneCoins','Let phones insert coins',S.phoneCoins)}
  </div>
  <div class="field"><span class="lab">Philips Hue lights</span><div id="hueSet"></div>
  </div>
@@ -1692,7 +1698,7 @@ function openSettings(){
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
@@ -1906,7 +1912,7 @@ const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,i
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol}}
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
 let syncT=null;
 function hostSync(){if(REMOTE||!HOST.conns.size)return;clearTimeout(syncT);syncT=setTimeout(()=>{const m=hostState();HOST.conns.forEach(c=>sendTo(c,m))},150)}
@@ -1918,6 +1924,10 @@ async function hostHandle(c,d){
   if(d.t==='search'){const r=await provider.search(String(d.q||'').slice(0,80));reply({tracks:r.tracks.map(slimT),albums:r.albums.map(fixImg).map(slimI),artists:r.artists.map(fixImg).map(slimI)})}
   else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
   else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
+  else if(d.t==='coin'){
+   if(!S.phoneCoins||S.freePlay){reply({ok:false,msg:S.freePlay?'Free play is on, no coins needed':'Coins can only be added at the jukebox'});return}
+   insertCoin();reply({ok:true,n:S.coinCredits});
+  }
   else if(d.t==='vol'){
    if(!S.phoneVol){sendTo(c,hostState());return}
    const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
@@ -1926,7 +1936,7 @@ async function hostHandle(c,d){
   else if(d.t==='enqueue'){
    const t=slimT(d.track),mode=normMode(d.mode||(d.next?'n':'q')),cost=COST[mode];
    if(!t||!t.uri||!t.name)throw new Error('That song could not be added');
-   if(!S.freePlay&&credits<cost){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:'Out of credits. Insert a coin at the jukebox!'});return}
+   if(!S.freePlay&&credits<cost){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:S.phoneCoins?'Out of credits. Tap Insert coin!':'Out of credits. Insert a coin at the jukebox!'});return}
    enqueue(t,mode,'phone');reply({ok:true});
   }
  }catch(e){sendTo(c,{t:'error',id:d.id,msg:e.message||'Something went wrong'})}
@@ -2007,6 +2017,15 @@ async function remoteEnqueue(t,mode){
   else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
  }catch(e){sfx('err');toast(e.message,'warn')}
 }
+let coinBusy=false;
+async function phoneCoin(){
+ if(coinBusy)return;coinBusy=true;sfx('coin');
+ try{const r=await rcall({t:'coin'});
+  if(r&&r.ok)coinFx(r.n,()=>bump($('#credits'),'pop'));
+  else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
+ }catch(e){sfx('err');toast(e.message,'warn')}
+ finally{coinBusy=false}
+}
 let rVolAt=0,rVolT=null,rVolLast=0;
 function remoteVol(v){
  rVolAt=Date.now();S.volume=v;
@@ -2019,6 +2038,7 @@ function applyRemoteVol(v,ok){
 }
 function applyHostState(m){
  applyRemoteVol(m.vol,m.volOk);
+ document.documentElement.classList.toggle('noPhoneCoins',!m.coinsOk);if(m.coinCredits)S.coinCredits=m.coinCredits;
  if(m.name&&m.name!==S.name){S.name=m.name;applyName()}
  S.freePlay=!!m.freePlay;credits=m.credits|0;renderCredits();
  const prev=P.current&&P.current.id;
@@ -2909,7 +2929,7 @@ window.__gtTip={show:showTip,hide:hideTip};
 async function boot(){
  applyName();renderCredits();tickClock();buildOSK();
  if(REMOTE){
-  document.documentElement.classList.add('remote','noPhoneVol');
+  document.documentElement.classList.add('remote','noPhoneVol','noPhoneCoins');
   provider=REMOTE_PROVIDER;engine=RemoteEngine;
   renderNP();renderQueue();buildTabs();sizeShelf();renderFlow([]);
   $('#shelf').innerHTML='<div class="shelfMsg">Connecting to the jukebox…</div>';
