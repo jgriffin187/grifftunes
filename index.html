@@ -190,6 +190,12 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .spkRow.on .spkBtn{background:rgba(255,59,92,.18);border-color:rgba(255,59,92,.5)}
 .spkRow:not(.on) .spkBtn{background:#1ed760;color:#06290f;border-color:transparent}
 .spkPlugList{display:flex;flex-direction:column}
+.famRow{display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--stroke)}
+.famRow img{width:46px;height:46px;border-radius:50%;object-fit:cover;flex:none}
+.famRow span{flex:1;min-width:0;display:flex;flex-direction:column}
+.famRow b{font-size:17px}.famRow small{font-size:13px;color:var(--muted)}
+.famRow .btn{height:42px;padding:0 18px;font-size:14px}
+.btn[disabled]{opacity:.45}
 .lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
 #lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
 .hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
@@ -786,10 +792,11 @@ const DEMO=(()=>{
  const shuffle=(a,seed)=>{const rr=rng(seed);return a.map(x=>[rr(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])};
  return{
   key:'demo',
-  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'artists',name:'Artists'},{id:'new',name:'New Releases'}],
+  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'family',name:'Family'},{id:'artists',name:'Artists'},{id:'new',name:'New Releases'}],
   async load(tab){await sleep(120);
    if(tab==='albums')return albums;
    if(tab==='playlists')return playlists;
+   if(tab==='family')return playlists.slice(0,6).map((p,i)=>Object.assign({},p,{name:['Road Trip Mix','Workout','Sunday Morning','Summer 2026','Dance Party','Chill Vibes'][i],sub:`${i%2?'Sam':'Alex'}'s playlist`}));
    if(tab==='artists')return artists;
    if(tab==='new'){const now=Date.now();return shuffle(albums.slice(),day+7).slice(0,14).map((a,i)=>Object.assign({},a,{sub:`${a.sub} · ${newLabel(new Date(now-(i*2+1)*864e5).toISOString().slice(0,10))}`}))}
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
@@ -812,12 +819,51 @@ const SCOPES='streaming user-read-email user-read-private user-read-playback-sta
 let tok=store.get('sp_tokens',null);
 const b64url=buf=>btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 function randStr(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return b64url(a).slice(0,n)}
-async function spLogin(){
+const FAM_SCOPES='user-read-private playlist-read-private playlist-read-collaborative user-library-read';
+let FAM=store.get('family',[]);
+const saveFam=()=>store.set('family',FAM);
+async function spLogin(family){
  if(!S.clientId){toast('Paste your Spotify Client ID first','warn');return}
  if(!window.crypto||!crypto.subtle){toast('Spotify login needs https:// or http://127.0.0.1','warn');return}
  const v=randStr(64);store.set('pkce',v);
  const ch=b64url(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v)));
- location.href=SP_AUTH+'/authorize?'+new URLSearchParams({client_id:S.clientId,response_type:'code',redirect_uri:REDIRECT,code_challenge_method:'S256',code_challenge:ch,scope:SCOPES});
+ const q={client_id:S.clientId,response_type:'code',redirect_uri:REDIRECT,code_challenge_method:'S256',code_challenge:ch,scope:family?FAM_SCOPES:SCOPES,state:family?'fam':'main'};
+ if(family)q.show_dialog='true';
+ location.href=SP_AUTH+'/authorize?'+new URLSearchParams(q);
+}
+async function rawToken(params){
+ const r=await fetch(SP_AUTH+'/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)});
+ const j=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error(j.error_description||j.error||'Token error');
+ return j;
+}
+async function famAdd(code){
+ const j=await rawToken({grant_type:'authorization_code',code,redirect_uri:REDIRECT,client_id:S.clientId,code_verifier:store.get('pkce','')});
+ const t={access:j.access_token,refresh:j.refresh_token,exp:Date.now()+((j.expires_in||3600)-60)*1000};
+ const r=await fetch('https://api.spotify.com/v1/me',{headers:{Authorization:'Bearer '+t.access}});
+ if(r.status===403)throw new Error("this account isn't added under User Management in your Spotify developer dashboard yet");
+ if(!r.ok)throw new Error('HTTP '+r.status);
+ const me=await r.json();
+ let mine=null;try{mine=tok?(await api('/me')).id:null}catch(e){}
+ if(me.id===mine){toast("That's your own account. On the Spotify sign-in page, tap 'Not you?' and sign in as the family member.",'warn');return}
+ const first=String(me.display_name||me.id).split(' ')[0];
+ const m={id:me.id,name:first,full:me.display_name||me.id,img:spImg(me.images),tok:t};
+ FAM=FAM.filter(x=>x.id!==m.id).concat([m]);saveFam();
+ toast(`${first}'s playlists added to the Family tab`);
+}
+async function famToken(m){
+ if(Date.now()<m.tok.exp)return m.tok.access;
+ const j=await rawToken({grant_type:'refresh_token',refresh_token:m.tok.refresh,client_id:S.clientId});
+ m.tok={access:j.access_token,refresh:j.refresh_token||m.tok.refresh,exp:Date.now()+((j.expires_in||3600)-60)*1000};saveFam();
+ return m.tok.access;
+}
+async function famApi(m,path){
+ let access;try{access=await famToken(m)}catch(e){throw new Error(`${m.name}'s Spotify sign-in expired. Re-add them in Settings`)}
+ const r=await fetch('https://api.spotify.com/v1'+path,{headers:{Authorization:'Bearer '+access}});
+ if(r.status===401){m.tok.exp=0;saveFam();return famApi(m,path)}
+ if(r.status===403)throw new Error('Spotify blocks personal apps from opening this one');
+ if(!r.ok)throw new Error('HTTP '+r.status);
+ return r.json();
 }
 async function tokenReq(params){
  const r=await fetch(SP_AUTH+'/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)});
@@ -831,6 +877,7 @@ async function handleRedirect(){
  if(q.get('error')){history.replaceState(null,'',REDIRECT);toast('Spotify login was cancelled','warn');return}
  const code=q.get('code');if(!code)return;
  history.replaceState(null,'',REDIRECT);
+ if(q.get('state')==='fam'){try{await famAdd(code)}catch(e){toast("Couldn't add family member: "+e.message,'warn')}return}
  try{await tokenReq({grant_type:'authorization_code',code,redirect_uri:REDIRECT,client_id:S.clientId,code_verifier:store.get('pkce','')});S.mode='spotify';saveS();toast('Spotify connected!')}
  catch(e){toast('Spotify login failed: '+e.message,'warn')}
 }
@@ -871,7 +918,7 @@ function dedupeHits(list){
 }
 const SPOTIFY={
  key:'spotify',
- tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}],
+ get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat(FAM.length?[{id:'family',name:'Family'}]:[],[{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}])},
  me:null,
  async load(tab){
   if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
@@ -882,6 +929,17 @@ const SPOTIFY={
    return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
   }
   if(tab==='new')return this.newReleases();
+  if(tab==='family'){
+   const out=[];
+   for(const m of FAM){
+    try{
+     const me=m.id,j=await famApi(m,'/me/playlists?limit=50');
+     out.push({id:'liked-'+m.id,type:'fliked',member:m.id,name:`${m.name}'s Liked Songs`,sub:m.full,img:LIKED_ART});
+     ((j&&j.items)||[]).filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).forEach(x=>{const it=spItem(x,'playlist');it.type='fplaylist';it.member=m.id;it.sub=`${m.name}'s playlist`;out.push(it)});
+    }catch(e){out.push({id:'err-'+m.id,type:'ferr',member:m.id,name:m.name,sub:e.message,img:m.img||''})}
+   }
+   return out;
+  }
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
   return[];
  },
@@ -892,6 +950,12 @@ const SPOTIFY={
    catch(e){const j=await api(`/albums/${it.id}/tracks?limit=50`);items=j.items||[]}
    return items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name}));
   }
+  if(it.type==='fplaylist'||it.type==='fliked'){
+   const m=FAM.find(x=>x.id===it.member);if(!m)throw new Error('That family member was removed');
+   if(it.type==='fliked'){const j=await famApi(m,'/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
+   const j=await famApi(m,`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
+  }
+  if(it.type==='ferr')throw new Error(it.sub);
   if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
   if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
   if(it.type==='artist'||it.type==='hits')return this.artistHits(it);
@@ -1342,7 +1406,7 @@ async function openItem(it){
  if(!it)return;sfx('tick');fixImg(it);
  $('#heroBg').style.backgroundImage=`url("${it.img}")`;
  const hi=$('#heroImg');hi.src=it.img;hi.classList.toggle('round',it.type==='artist'||it.type==='hits');
- $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
+ $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',fplaylist:'FAMILY PLAYLIST',fliked:'FAMILY · LIKED SONGS',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
  $('#heroName').textContent=it.name;$('#heroSub').textContent=it.sub||'';
  const list=$('#trackList');list.innerHTML='<div class="loading"><div class="spin"></div></div>';list.scrollTop=0;
  openModal($('#albumModal'));
@@ -1446,6 +1510,13 @@ function openSettings(){
     Needs Spotify Premium, and this page has to be served over https (GitHub Pages works) or from <code>http://127.0.0.1</code>.</div>
    <div class="field"><label for="fClient">Spotify Client ID</label><input type="text" id="fClient" value="${esc(S.clientId)}" placeholder="Paste Client ID"></div>
    <div class="btnRow">${connected?`<span class="ok">● Connected to Spotify</span><button class="btn" id="spOut">Disconnect</button>`:`<button class="btn spotify" id="spIn">Connect Spotify</button>`}</div>
+   ${connected?`<div class="field"><span class="lab">Family members' playlists</span>
+    <div id="famList">${FAM.length?FAM.map(m=>`<div class="famRow"><img src="${esc(m.img||PLACEHOLDER)}" alt=""><span><b>${esc(m.full)}</b><small>Playlists in the Family tab</small></span><button class="btn" data-famdel="${esc(m.id)}">Remove</button></div>`).join(''):'<p class="note">No family members yet.</p>'}</div>
+    <div class="btnRow"><button class="btn spotify" id="famAdd"${FAM.length>=4?' disabled':''}>Add family member</button></div>
+    <div class="note"><b>Before adding someone</b><ol>
+     <li>In your Spotify developer dashboard, open the GriffTunes app → <b>User Management</b>, and add their name and the email on their Spotify account. Spotify allows you plus 4 people.</li>
+     <li>Tap <b>Add family member</b>. On Spotify's page, tap <b>Not you?</b> and have them sign in with their own account.</li></ol>
+     Their playlists are only read, never changed. Music still plays through your account.</div></div>`:''}
   </div></div>
  <div class="field"><span class="lab">Jukebox rules</span>
   ${tg('fFree','Free play (no credits needed)',S.freePlay)}
@@ -1476,6 +1547,8 @@ function openSettings(){
  const ia=$('#installApp');if(ia)ia.onclick=installApp;
  renderHueSettings();
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
+ const fa=$('#famAdd');if(fa)fa.onclick=()=>{collect();saveS();spLogin(true)};
+ const fl=$('#famList');if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
@@ -1670,7 +1743,7 @@ const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcde
 function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
 const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
 const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio,cd:t.cd};
-const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri};
+const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
 function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs}}
