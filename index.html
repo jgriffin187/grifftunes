@@ -274,6 +274,60 @@ html.remote #cdCard{display:none!important}
 .gLyric{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);z-index:3;max-width:80vw;text-align:center;font-size:clamp(26px,3vw,48px);font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 30px rgba(0,0,0,.7);opacity:0;transition:opacity .5s;pointer-events:none}
 .gLyric.on{opacity:1}
 @media (max-width:820px){.lyrHead{padding:16px 16px 6px}.lyrHead img{width:56px;height:56px}.lyrHead b{font-size:20px}.lyrLines{padding:0 6vw}}
+#deck{position:fixed;inset:0;z-index:76;display:grid;place-items:center;background:#050308;opacity:0;pointer-events:none;transition:opacity .5s;overflow:hidden}
+#deck.on{opacity:1;pointer-events:auto}
+.dkBg{position:absolute;left:50%;top:50%;width:14vw;height:14vh;margin:-7vh 0 0 -7vw;background-size:cover;background-position:center;filter:blur(12px) saturate(1.5) brightness(.32);transform:scale(9);will-change:transform}
+.dkClose{position:absolute;top:18px;right:18px;z-index:5}
+.dk{position:relative}
+.dkPlinth{position:relative;border-radius:26px;overflow:hidden;
+ background:radial-gradient(ellipse 70% 60% at 30% 20%,rgba(255,255,255,.07),transparent 60%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,rgba(0,0,0,.02) 2px 4px),linear-gradient(160deg,#25232a,#121116 55%,#0b0a0e);
+ box-shadow:inset 0 0 0 2px #b8794a,inset 0 0 0 4px #1a1418,inset 0 0 0 5px rgba(255,200,150,.25),inset 0 2px 0 6px rgba(255,255,255,.05),0 50px 90px rgba(0,0,0,.75)}
+.dkBrand{position:absolute;left:3.2%;top:4.5%;display:flex;flex-direction:column;gap:2px;z-index:2}
+.dkLogo{font-family:Monoton;font-size:calc(var(--u)*3.6);color:#f4d2b2;text-shadow:0 0 6px rgba(255,170,110,.6),0 0 18px rgba(255,120,60,.35);line-height:1}
+.dkModel{font-family:Bungee;font-size:calc(var(--u)*1.25);letter-spacing:.32em;color:#b8794a}
+.dkGlow{position:absolute;border-radius:50%;background:conic-gradient(from 0deg,var(--accent),var(--accent2),var(--accent));filter:blur(18px);opacity:.0;transition:opacity 1.2s;will-change:transform}
+#deck.spinning .dkGlow{opacity:.55}
+.dkPlat{position:absolute;border-radius:50%}
+.dkSpinner{position:absolute;inset:0;border-radius:50%;will-change:transform}
+.dkKnurl{position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(#5d5a62 0 1.2deg,#2a282e 1.2deg 2.4deg);box-shadow:0 0 0 2px #0a090c,inset 0 0 0 calc(var(--u)*.8) rgba(0,0,0,.35)}
+.dkMat{position:absolute;inset:3.2%;border-radius:50%;background:#0d0c10;box-shadow:inset 0 0 0 1px #2b2930}
+.dkRec{position:absolute;inset:5.2%;border-radius:50%;
+ background:radial-gradient(circle,transparent 0 31%,#0b0b0d 31.5%,#0b0b0d 33%,transparent 33.5%),repeating-radial-gradient(circle,#101012 0 1.1px,#18181b 1.6px 2.4px),#111;
+ box-shadow:inset 0 0 0 2px #070708,inset 0 0 24px rgba(0,0,0,.8)}
+.dkLbl{position:absolute;inset:32%;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));background-size:cover;background-position:center;box-shadow:0 0 0 3px #0b0b0d,inset 0 0 18px rgba(0,0,0,.45)}
+.dkSheen{position:absolute;inset:5.2%;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
+ background:conic-gradient(from 30deg,transparent 0deg,rgba(255,255,255,.16) 18deg,transparent 42deg,transparent 180deg,rgba(255,255,255,.12) 200deg,transparent 228deg,transparent 360deg);
+ -webkit-mask-image:radial-gradient(circle,transparent 30%,#000 34%);mask-image:radial-gradient(circle,transparent 30%,#000 34%)}
+.dkSpindle{position:absolute;left:50%;top:50%;width:2.2%;height:2.2%;margin:-1.1%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#bbb 40%,#555);box-shadow:0 1px 3px rgba(0,0,0,.8)}
+.dkBase{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a464f,#1c1a20 70%);box-shadow:0 0 0 2px #b8794a,0 6px 14px rgba(0,0,0,.6)}
+.dkBase i{position:absolute;inset:28%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e9e6ee,#8d8993 60%,#3b3940);box-shadow:0 2px 6px rgba(0,0,0,.7)}
+.dkArm{position:absolute;height:0;transform-origin:0 0;z-index:3;will-change:transform}
+.dkArm .dkTube{position:absolute;left:0;top:calc(var(--u)*-.42);height:calc(var(--u)*.84);border-radius:99px;background:linear-gradient(180deg,#f7f5fa,#a9a5b0 55%,#615e68);box-shadow:0 calc(var(--u)*1.4) calc(var(--u)*1.2) rgba(0,0,0,.45)}
+.dkArm .dkCw{position:absolute;top:calc(var(--u)*-1.5);height:calc(var(--u)*3);border-radius:calc(var(--u)*.6);background:linear-gradient(180deg,#3d3a42,#151418 60%,#2b2930);box-shadow:inset 0 0 0 1px #b8794a,0 calc(var(--u)*1.2) calc(var(--u)) rgba(0,0,0,.5)}
+.dkArm .dkHead{position:absolute;top:calc(var(--u)*-1.1);width:calc(var(--u)*5.2);height:calc(var(--u)*2.2);border-radius:calc(var(--u)*.5);transform-origin:0 50%;transform:rotate(-24deg);background:linear-gradient(180deg,#2a282e,#0f0e12);box-shadow:inset 0 0 0 1px #b8794a,0 calc(var(--u)*1.2) calc(var(--u)) rgba(0,0,0,.5)}
+.dkArm .dkHead b{position:absolute;right:18%;top:-24%;width:12%;height:40%;background:#b8794a;border-radius:2px}
+.dkRest{position:absolute;width:calc(var(--u)*2.2);height:calc(var(--u)*2.2);border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a464f,#16141a);box-shadow:0 0 0 1px #b8794a,0 4px 8px rgba(0,0,0,.6);z-index:2}
+.dkDisp{position:absolute;right:3.5%;bottom:30%;width:24%;padding:calc(var(--u)*1.4) calc(var(--u)*1.8);border-radius:calc(var(--u)*1.2);background:linear-gradient(180deg,#0b0a0e,#141218);box-shadow:inset 0 0 0 1px #3a3640,inset 0 6px 16px rgba(0,0,0,.7);display:flex;flex-direction:column;gap:2px;z-index:2}
+.dkDisp small{font-family:Bungee;font-size:calc(var(--u)*1.1);letter-spacing:.22em;color:#ff7a3c;text-shadow:0 0 8px rgba(255,122,60,.7)}
+.dkDisp b{font-size:calc(var(--u)*2.3);font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dkDisp span{font-size:calc(var(--u)*1.6);color:rgba(255,255,255,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dkDisp em{font-style:normal;font-family:Bungee;font-size:calc(var(--u)*1.3);color:#f4d2b2;margin-top:4px}
+.dkFader{position:absolute;right:3.5%;bottom:20%;width:24%;display:flex;align-items:center;gap:calc(var(--u)*1.2);z-index:2}
+.dkFader span{font-family:Bungee;font-size:calc(var(--u)*1.1);color:#b8794a;letter-spacing:.2em}
+.dkFader input{flex:1;height:calc(var(--u)*.9);border-radius:99px;background:#08070a;box-shadow:inset 0 0 0 1px #3a3640}
+.dkFader input::-webkit-slider-thumb{width:calc(var(--u)*4);height:calc(var(--u)*2.2);border-radius:4px;background:linear-gradient(180deg,#e9e6ee,#8d8993);box-shadow:0 0 0 1px #b8794a,0 3px 6px rgba(0,0,0,.6)}
+.dkStart{position:absolute;left:3.5%;bottom:7%;width:calc(var(--u)*10);height:calc(var(--u)*10);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:radial-gradient(circle at 40% 30%,#3b3840,#141218 70%);box-shadow:0 0 0 2px #b8794a,0 0 0 calc(var(--u)*.7) #0b0a0e,0 8px 18px rgba(0,0,0,.6);z-index:2}
+.dkStart i{width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);border-radius:50%;background:#3a1a10;box-shadow:inset 0 0 0 2px #5a2a18;transition:.3s}
+#deck.spinning .dkStart i{background:#ff7a3c;box-shadow:0 0 14px #ff7a3c,0 0 30px rgba(255,122,60,.6)}
+.dkStart span{font-family:Bungee;font-size:calc(var(--u)*.95);letter-spacing:.1em;color:#d9b89a}
+.dkStart:active{transform:scale(.95)}
+.dkSpeed{position:absolute;left:calc(3.5% + var(--u)*11.5);bottom:8.5%;display:flex;gap:calc(var(--u)*.8);z-index:2}
+.dkSpeed button{width:calc(var(--u)*5);height:calc(var(--u)*3);border-radius:calc(var(--u)*.6);font-family:Bungee;font-size:calc(var(--u)*1.3);color:#d9b89a;background:linear-gradient(180deg,#2f2c34,#141218);box-shadow:0 0 0 1px #3d3a42,0 3px 6px rgba(0,0,0,.6)}
+.dkSpeed button.on{color:#fff;box-shadow:0 0 0 1px #b8794a,0 0 12px rgba(255,122,60,.5)}
+.dkSkip{position:absolute;right:3.5%;bottom:7%;width:calc(var(--u)*5.4);height:calc(var(--u)*5.4);border-radius:50%;display:grid;place-items:center;background:linear-gradient(180deg,#2f2c34,#141218);box-shadow:0 0 0 1px #b8794a,0 4px 10px rgba(0,0,0,.6);color:#d9b89a;z-index:2}
+.dkSkip svg{width:45%;height:45%;fill:currentColor}
+.deckBtn.on{color:#ff9a5c;border-color:rgba(255,154,92,.6)}
+html.remote #deckBtn{display:none!important}
 .devChip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:99px;background:rgba(30,215,96,.14);border:1px solid rgba(30,215,96,.5);color:#1ed760;font:700 12px Outfit,sans-serif;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .devChip svg{width:14px;height:14px;flex:none}
 .times{align-items:center}
@@ -612,6 +666,7 @@ html.remote .badge{display:flex!important}
      <button class="devBtn" id="devBtn" aria-label="Choose speaker" data-icon="speaker"></button>
      <button class="devBtn radioBtn" id="radioBtn" aria-label="Radio" data-icon="radio"></button>
      <button class="devBtn lyrBtn" id="lyrBtn" aria-label="Lyrics" data-icon="lyrics"></button>
+     <button class="devBtn deckBtn" id="deckBtn" aria-label="Turntable view" data-icon="deck"></button>
      <div class="vol"><span data-icon="vol"></span><input type="range" id="vol" min="0" max="100"></div>
     </div>
    </div>
@@ -683,6 +738,34 @@ html.remote .badge{display:flex!important}
 
 <div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 
+<div id="deck">
+ <div class="dkBg" id="dkBg"></div>
+ <button class="closeBtn dkClose" id="dkClose" aria-label="Close turntable" data-icon="close"></button>
+ <div class="dk" id="dk">
+  <div class="dkPlinth" id="dkPlinth">
+   <div class="dkBrand"><span class="dkLogo" id="dkLogo">GriffTunes</span><span class="dkModel">GT-1 · DIRECT DRIVE</span></div>
+   <div class="dkGlow" id="dkGlow"></div>
+   <div class="dkPlat" id="dkPlat">
+    <div class="dkSpinner" id="dkSpin">
+     <div class="dkKnurl"></div>
+     <div class="dkMat"></div>
+     <div class="dkRec"><div class="dkLbl" id="dkLbl"></div></div>
+    </div>
+    <div class="dkSheen"></div>
+    <div class="dkSpindle"></div>
+   </div>
+   <div class="dkBase" id="dkBase"><i></i></div>
+   <div class="dkArm" id="dkArm"><i class="dkCw"></i><i class="dkTube"></i><i class="dkHead"><b></b></i></div>
+   <div class="dkRest" id="dkRest"></div>
+   <div class="dkDisp"><small id="dkState">STANDBY</small><b id="dkTitle">Pick a song</b><span id="dkArtist">GriffTunes</span><em id="dkTime">0:00 / 0:00</em></div>
+   <div class="dkFader"><span>VOL</span><input type="range" id="dkVol" min="0" max="100"></div>
+   <button class="dkStart" id="dkStart"><i></i><span>START · STOP</span></button>
+   <div class="dkSpeed"><button data-dksp="33" class="on">33</button><button data-dksp="45">45</button></div>
+   <button class="dkSkip" id="dkSkip" aria-label="Next song" data-icon="skip"></button>
+  </div>
+ </div>
+</div>
+
 <div id="lyr">
  <div class="lyrBg" id="lyrBg"></div>
  <div class="lyrHead"><img id="lyrArt" alt=""><div><b id="lyrTitle"></b><span id="lyrArtist"></span></div><button class="closeBtn static" id="lyrClose" aria-label="Close lyrics" data-icon="close"></button></div>
@@ -724,6 +807,7 @@ const I={
  left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m15 5-7 7 7 7"/></svg>',
  right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>',
  note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+ deck:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2.5"/><circle cx="10" cy="12" r="5"/><circle cx="10" cy="12" r="1"/><path d="M18 7v6l-3 3"/></svg>',
  mic:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4M8 22h8"/></svg>',
  lyrics:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11M4 11h9M4 16h6"/><circle cx="17.5" cy="16.5" r="2.5"/><path d="M20 16.5V7l2-1"/></svg>',
  bulb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>',
@@ -1528,7 +1612,7 @@ function openSettings(){
  <div class="field"><span class="lab">Philips Hue lights</span><div id="hueSet"></div>
  </div>
  <div class="field"><label for="fCoin">Credits per coin</label><input type="number" id="fCoin" min="1" max="50" value="${S.coinCredits}"></div>
- <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button></div>
+ <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button><button data-saver="deck" class="${S.saver==='deck'?'on':''}">Turntable</button></div>
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
@@ -1668,8 +1752,8 @@ async function showGallery(){
  }
  clearInterval(ART.timer);ART.timer=setInterval(()=>{if(galleryOn)artNext()},Math.max(10,S.artSecs)*1000);
 }
-function showAttract(){attractOn=true;hueSaver(true);if(S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
-function hideAttract(){if(attractOn)hueSaver(false);attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
+function showAttract(){attractOn=true;hueSaver(true);if(S.saver==='deck'){openDeck(true);return}if(S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
+function hideAttract(){if(attractOn)hueSaver(false);if(DECK.saver)closeDeck();attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
 
 /* ---------- Wall display: full screen, wake lock, install ---------- */
 const isInstalledApp=()=>matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches;
@@ -1702,7 +1786,7 @@ addEventListener('click',e=>{
  if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
  if(attractOn){hideAttract();swallowClick=true;setTimeout(()=>{swallowClick=false},700);e.stopPropagation();e.preventDefault()}
 },true));
-setInterval(()=>{if(!attractOn&&!LYR.open&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
+setInterval(()=>{if(!attractOn&&!LYR.open&&!(DECK.open&&!DECK.saver)&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
 
 /* ---------- Global events ---------- */
 document.addEventListener('click',e=>{
@@ -2491,6 +2575,80 @@ function openLyrics(){LYR.open=true;sfx('tick');$('#lyr').classList.add('on');if
 function closeLyrics(){LYR.open=false;$('#lyr').classList.remove('on');lyrRender()}
 $('#lyrBtn').onclick=openLyrics;$('#lyrClose').onclick=closeLyrics;
 addEventListener('keydown',e=>{if(e.key==='Escape'&&LYR.open)closeLyrics()});
+
+/* ---------- Turntable view (original GT-1 deck) ---------- */
+const DECK={open:false,saver:false,ang:0,speed:0,armA:null,g:null,last:0,drag:null,raf:0,rpm:33};
+function deckLayout(){
+ const vw=innerWidth,vh=innerHeight,W=Math.min(vw*.94,(vh-40)*16/10.5),H=W*10.5/16,u=W/100;
+ const pl=$('#dkPlinth');pl.style.width=W+'px';pl.style.height=H+'px';pl.style.setProperty('--u',u+'px');$('#deck').style.setProperty('--u',u+'px');
+ const R=H*.43,cx=W*.37,cy=H*.53;
+ const plat=$('#dkPlat');Object.assign(plat.style,{left:cx-R+'px',top:cy-R+'px',width:2*R+'px',height:2*R+'px'});
+ const gl=$('#dkGlow');Object.assign(gl.style,{left:cx-R*1.02+'px',top:cy-R*1.02+'px',width:2.04*R+'px',height:2.04*R+'px'});
+ const px=cx+R*1.22,py=cy-R*.86,bs=u*8.5;
+ Object.assign($('#dkBase').style,{left:px-bs/2+'px',top:py-bs/2+'px',width:bs+'px',height:bs+'px'});
+ const d=Math.hypot(cx-px,cy-py),L=d*1.02,phi=Math.atan2(cy-py,cx-px);
+ const arm=$('#dkArm');arm.style.left=px+'px';arm.style.top=py+'px';
+ $('#dkArm .dkTube').style.width=L+'px';$('#dkArm .dkHead').style.left=L-u*.6+'px';
+ const cw=$('#dkArm .dkCw');cw.style.left=-u*7+'px';cw.style.width=u*5.5+'px';
+ const angFor=r=>{const c=Math.min(1,Math.max(-1,(d*d+L*L-r*r)/(2*d*L)));return phi-Math.acos(c)};
+ const rec=R*.948,rest=angFor(R*1.24);
+ const ra=rest,rx=px+Math.cos(ra)*L*.86,ry=py+Math.sin(ra)*L*.86;
+ Object.assign($('#dkRest').style,{left:rx-u*1.1+'px',top:ry-u*1.1+'px'});
+ DECK.g={R,cx,cy,px,py,L,angFor,outer:rec*.97,inner:rec*.36,rest};
+ if(DECK.armA==null)DECK.armA=rest;
+}
+function deckTarget(){
+ const g=DECK.g;if(!g)return 0;
+ if(!P.current)return g.rest;
+ const f=P.dur?Math.min(1,Math.max(0,P.pos/P.dur)):0;
+ return g.angFor(g.outer-(g.outer-g.inner)*f);
+}
+function deckInfo(){
+ const c=P.current;
+ $('#dkLbl').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
+ $('#dkBg').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
+ $('#dkTitle').textContent=c?c.name:'Pick a song';$('#dkArtist').textContent=c?c.artist:'GriffTunes';
+ $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING')+` · ${DECK.rpm===45?'45':'33⅓'} RPM`;
+ $('#dkTime').textContent=`${fmt(P.pos)} / ${fmt(P.dur)}`;
+ $('#dkVol').value=S.volume;
+}
+function deckFrame(t){
+ if(!DECK.open)return;
+ const dt=Math.min(.25,(t-(DECK.last||t))/1000);DECK.last=t;DECK.fr=(DECK.fr||0)+1;
+ const on=!!P.current&&!P.paused,full=DECK.rpm*6;
+ DECK.speed+=((on?full:0)-DECK.speed)*Math.min(1,dt*(on?2.6:1.5));
+ if(!DECK.drag)DECK.ang=(DECK.ang+DECK.speed*dt)%360;
+ $('#dkSpin').style.transform=`rotate(${DECK.ang}deg)`;
+ $('#dkGlow').style.transform=`rotate(${-DECK.ang*.15}deg)`;
+ $('#deck').classList.toggle('spinning',DECK.speed>20);
+ const tgt=deckTarget(),diff=tgt-DECK.armA;
+ DECK.armA+=diff*Math.min(1,dt*(Math.abs(diff)>.02?2.2:6));
+ const lift=Math.min(1,Math.abs(diff)*12);
+ $('#dkArm').style.transform=`rotate(${DECK.armA}rad) scale(${1+lift*.015})`;
+ if(t-(DECK.infoAt||0)>250){DECK.infoAt=t;deckInfo()}
+ DECK.raf=requestAnimationFrame(deckFrame);
+}
+function openDeck(saver){
+ DECK.open=true;DECK.saver=!!saver;if(!saver)sfx('tick');
+ deckLayout();deckInfo();$('#deck').classList.add('on');$('#deckBtn').classList.add('on');
+ cancelAnimationFrame(DECK.raf);DECK.last=0;DECK.raf=requestAnimationFrame(deckFrame);
+}
+function closeDeck(){DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf)}
+$('#deckBtn').onclick=()=>openDeck(false);
+$('#dkClose').onclick=closeDeck;
+$('#dkStart').onclick=()=>{sfx('tick');togglePlay()};
+$('#dkSkip').onclick=()=>{sfx('tick');advance()};
+$('#dkVol').addEventListener('input',e=>{S.volume=+e.target.value;engine.setVolume(S.volume);$('#vol').value=S.volume;saveS()});
+$('#deck').addEventListener('click',e=>{const b=e.target.closest('[data-dksp]');if(!b)return;DECK.rpm=+b.dataset.dksp;$$('#deck [data-dksp]').forEach(x=>x.classList.toggle('on',x===b));sfx('tick');deckInfo()});
+addEventListener('resize',()=>{if(DECK.open)deckLayout()});
+addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
+(()=>{
+ const plat=$('#dkPlat');let a0=0,ang0=0,moved=0;
+ const angAt=e=>{const r=plat.getBoundingClientRect();return Math.atan2(e.clientY-(r.top+r.height/2),e.clientX-(r.left+r.width/2))*180/Math.PI};
+ plat.addEventListener('pointerdown',e=>{if(DECK.saver)return;e.preventDefault();plat.setPointerCapture(e.pointerId);a0=angAt(e);ang0=DECK.ang;moved=0;DECK.drag=true;djScratch()});
+ plat.addEventListener('pointermove',e=>{if(!DECK.drag)return;let da=angAt(e)-a0;if(da>180)da-=360;if(da<-180)da+=360;moved+=Math.abs(da);DECK.ang=ang0+da;if(moved>90){djScratch();a0=angAt(e);ang0=DECK.ang;moved=0}});
+ const up=()=>{DECK.drag=null};plat.addEventListener('pointerup',up);plat.addEventListener('pointercancel',up);
+})();
 
 /* ---------- Boot ---------- */
 async function boot(){
