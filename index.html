@@ -557,8 +557,11 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .qrStatus i{width:9px;height:9px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px currentColor;flex:none}
 .qrStatus.ok i{background:#1ed760}.qrStatus.bad i{background:#ff3b5c}
 .btnRow.center{justify-content:center}
-html.remote #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .ctrls,html.remote .qX,html.remote .clock{display:none!important}
+html.remote #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .qX,html.remote .clock{display:none!important}
 html.remote .badge{display:flex!important}
+html.remote .ctrls>:not(.vol){display:none!important}
+html.remote .ctrls .vol{padding:6px 2px 0}
+html.remote.noPhoneVol .ctrls{display:none!important}
 @media (max-height:1000px) and (min-width:821px){
  .np{display:grid;grid-template-columns:186px minmax(0,1fr);column-gap:14px;padding:16px 20px 16px}
  .npLabel{grid-column:1/-1}
@@ -812,7 +815,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
@@ -1250,7 +1253,7 @@ const SpotifyEngine={
    if(j&&j.device&&j.device.id===this.target){
     this.noVol=j.device.supports_volume===false;
     const dv=j.device.volume_percent;
-    if(typeof dv==='number'&&!this.volBusy&&Date.now()-this.volAt>3000&&dv!==S.volume){S.volume=dv;$('#vol').value=dv;const dk=$('#dkVol');if(dk)dk.value=dv}
+    if(typeof dv==='number'&&!this.volBusy&&Date.now()-this.volAt>3000&&dv!==S.volume){setVol(dv,null,true)}
    }
    if(!this.target||!P.current)return;
    const id=P.current.id;
@@ -1670,6 +1673,7 @@ function openSettings(){
   ${tg('fSfx','Arcade sound effects',S.sfx)}
   ${tg('fOsk','On-screen keyboard (for touchscreens)',S.osk)}
   ${tg('fPhones','Let guests add songs from their phones',S.phones)}
+  ${tg('fPhoneVol','Let phones change the volume',S.phoneVol)}
  </div>
  <div class="field"><span class="lab">Philips Hue lights</span><div id="hueSet"></div>
  </div>
@@ -1686,7 +1690,7 @@ function openSettings(){
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.lyricsSaver=$('#fLyrSaver').checked};
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
@@ -1698,7 +1702,7 @@ function openSettings(){
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
- $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();closeModal($('#settingsModal'));toast('Settings saved')};
+ $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();hostSync();closeModal($('#settingsModal'));toast('Settings saved')};
  openModal($('#settingsModal'));
 }
 
@@ -1872,8 +1876,16 @@ $('#skipBtn').onclick=()=>{sfx('tick');advance()};
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
 $('#shPrev').onclick=()=>$('#shelf').scrollBy({left:-$('#shelf').clientWidth*.8});
 $('#shNext').onclick=()=>$('#shelf').scrollBy({left:$('#shelf').clientWidth*.8});
-const vol=$('#vol');vol.value=S.volume;let volT=null;
-vol.addEventListener('input',()=>{S.volume=+vol.value;engine.setVolume(S.volume);clearTimeout(volT);volT=setTimeout(saveS,400)});
+const vol=$('#vol');vol.value=S.volume;let volT=null,volSyncT=null;
+// One place for volume changes from the touchscreen, the turntable, phones, or the speaker itself.
+// from: the phone connection that made the change (it isn't echoed back to that phone mid-drag)
+function setVol(v,from,noEngine){
+ S.volume=v;vol.value=v;const dk=$('#dkVol');if(dk)dk.value=v;
+ if(!noEngine)engine.setVolume(v);
+ clearTimeout(volT);volT=setTimeout(saveS,400);
+ if(!REMOTE&&HOST.conns.size){clearTimeout(volSyncT);volSyncT=setTimeout(()=>HOST.conns.forEach(c=>{if(c!==from)sendTo(c,{t:'vol',v:S.volume,ok:!!S.phoneVol})}),120)}
+}
+vol.addEventListener('input',()=>{if(REMOTE){remoteVol(+vol.value);return}setVol(+vol.value)});
 addEventListener('resize',()=>{layoutFlow();sizeShelf()});
 function tickClock(){const d=new Date();let h=d.getHours()%12||12;$('#clock').innerHTML=`${h}<i>:</i>${String(d.getMinutes()).padStart(2,'0')}`}
 setInterval(tickClock,10000);
@@ -1892,7 +1904,7 @@ const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,i
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs}}
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
 let syncT=null;
 function hostSync(){if(REMOTE||!HOST.conns.size)return;clearTimeout(syncT);syncT=setTimeout(()=>{const m=hostState();HOST.conns.forEach(c=>sendTo(c,m))},150)}
@@ -1904,6 +1916,11 @@ async function hostHandle(c,d){
   if(d.t==='search'){const r=await provider.search(String(d.q||'').slice(0,80));reply({tracks:r.tracks.map(slimT),albums:r.albums.map(fixImg).map(slimI),artists:r.artists.map(fixImg).map(slimI)})}
   else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
   else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
+  else if(d.t==='vol'){
+   if(!S.phoneVol){sendTo(c,hostState());return}
+   const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
+   setVol(v,c);
+  }
   else if(d.t==='enqueue'){
    const t=slimT(d.track),mode=normMode(d.mode||(d.next?'n':'q')),cost=COST[mode];
    if(!t||!t.uri||!t.name)throw new Error('That song could not be added');
@@ -1988,7 +2005,18 @@ async function remoteEnqueue(t,mode){
   else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
  }catch(e){sfx('err');toast(e.message,'warn')}
 }
+let rVolAt=0,rVolT=null,rVolLast=0;
+function remoteVol(v){
+ rVolAt=Date.now();S.volume=v;
+ const send=()=>{rVolLast=Date.now();if(RM.conn&&RM.conn.open)try{RM.conn.send({t:'vol',v:S.volume})}catch(e){}};
+ clearTimeout(rVolT);if(Date.now()-rVolLast>150)send();else rVolT=setTimeout(send,150);
+}
+function applyRemoteVol(v,ok){
+ document.documentElement.classList.toggle('noPhoneVol',!ok);
+ if(typeof v==='number'&&Date.now()-rVolAt>700){S.volume=v;$('#vol').value=v}
+}
 function applyHostState(m){
+ applyRemoteVol(m.vol,m.volOk);
  if(m.name&&m.name!==S.name){S.name=m.name;applyName()}
  S.freePlay=!!m.freePlay;credits=m.credits|0;renderCredits();
  const prev=P.current&&P.current.id;
@@ -2014,6 +2042,7 @@ function remoteConnect(){
   c.on('data',m=>{
    if(!m||!m.t)return;
    if(m.t==='state')applyHostState(m);
+   else if(m.t==='vol')applyRemoteVol(m.v,m.ok);
    else if(m.t==='tick'){RemoteEngine.st={pos:m.pos,dur:m.dur,paused:m.paused};RemoteEngine.at=performance.now();if(P.paused!==!!m.paused){P.paused=!!m.paused;renderPlayState()}}
    else if((m.t==='result'||m.t==='error')&&RM.pending.has(m.id)){const p=RM.pending.get(m.id);RM.pending.delete(m.id);m.t==='result'?p.res(m.data):p.rej(new Error(m.msg))}
   });
@@ -2776,7 +2805,7 @@ $('#deckBtn').onclick=()=>openDeck(false);
 $('#dkClose').onclick=closeDeck;
 $('#dkStart').onclick=()=>{sfx('tick');togglePlay()};
 $('#dkSkip').onclick=()=>{sfx('tick');advance()};
-$('#dkVol').addEventListener('input',e=>{S.volume=+e.target.value;engine.setVolume(S.volume);$('#vol').value=S.volume;saveS()});
+$('#dkVol').addEventListener('input',e=>setVol(+e.target.value));
 $('#deck').addEventListener('click',e=>{const b=e.target.closest('[data-dksp]');if(!b)return;DECK.rpm=+b.dataset.dksp;$$('#deck [data-dksp]').forEach(x=>x.classList.toggle('on',x===b));sfx('tick');deckInfo()});
 addEventListener('resize',()=>{if(DECK.open){deckLayout();if(D3)D3.resize()}});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
