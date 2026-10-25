@@ -45,7 +45,7 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .searchBtn:active{transform:scale(.98);border-color:var(--accent2)}
 .searchBtn svg{width:26px;height:26px;color:var(--accent2);flex:none}
 .credits{display:flex;align-items:center;gap:12px;height:62px;padding:0 22px 0 10px;border-radius:999px;background:linear-gradient(135deg,rgba(255,210,63,.2),rgba(255,140,0,.07));border:1px solid rgba(255,210,63,.45);box-shadow:0 0 24px rgba(255,210,63,.16),inset 0 0 18px rgba(255,210,63,.1);flex:none}
-.coin{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c4,#ffd23f 42%,#c88a00);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 0 14px rgba(255,210,63,.6);display:grid;place-items:center;font-family:Bungee;color:#7a4b00;font-size:18px;flex:none}
+.coin{width:42px;height:42px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c4,#ffd23f 42%,#c88a00);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 0 14px rgba(255,210,63,.6);display:grid;place-items:center;font-family:Bungee;color:#7a4b00;font-size:15px;letter-spacing:-.04em;flex:none}
 .credits small{display:block;font-size:10px;letter-spacing:.28em;color:var(--gold);font-weight:800}
 .credits b{font-family:Bungee;font-size:28px;line-height:1;font-weight:400}
 .credits.free b{font-size:19px;color:var(--gold);animation:blink 1.3s steps(2) infinite}
@@ -522,7 +522,7 @@ html.remote .badge{display:flex!important}
   <div class="logo" id="logo"><span class="l1"></span><span class="l2"></span></div>
   <div class="badge" id="modeBadge">Demo</div>
   <button class="searchBtn" id="openSearch"><span data-icon="search"></span>Search songs, artists &amp; albums</button>
-  <div class="credits" id="credits"><div class="coin">J</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
+  <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
   <div class="clock" id="clock"></div>
   <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
@@ -1074,7 +1074,7 @@ function spend(n){
 function insertCoin(){
  credits+=S.coinCredits;store.set('credits',credits);sfx('coin');hueFlash('coin');
  const tgt=$('#credits .coin').getBoundingClientRect();
- const c=document.createElement('div');c.className='coin flyCoin';c.textContent='J';c.style.left=tgt.left+'px';c.style.top=tgt.top+'px';document.body.appendChild(c);
+ const c=document.createElement('div');c.className='coin flyCoin';c.textContent='GT';c.style.left=tgt.left+'px';c.style.top=tgt.top+'px';document.body.appendChild(c);
  setTimeout(()=>{c.remove();renderCredits();bump($('#credits'),'pop');
   const f=document.createElement('div');f.className='floatTxt';f.textContent='+'+S.coinCredits;f.style.left=(tgt.left+tgt.width+70)+'px';f.style.top=(tgt.top+4)+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1200)},700);
 }
