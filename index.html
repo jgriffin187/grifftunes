@@ -1163,7 +1163,7 @@ const SpotifyEngine={
   window.onSpotifyWebPlaybackSDKReady=()=>{
    const p=new Spotify.Player({name:S.name||'Basement Jukebox',getOAuthToken:cb=>{getToken().then(cb).catch(()=>{})},volume:S.volume/100});
    this.player=p;
-   p.addListener('ready',async({device_id})=>{this.deviceId=device_id;clearTimeout(to);try{await api('/me/player',{method:'PUT',body:{device_ids:[device_id],play:false}})}catch(e){}res()});
+   p.addListener('ready',async({device_id})=>{const first=!this.deviceId;this.deviceId=device_id;clearTimeout(to);if(first&&!this.target&&!S.spkDevice){try{await api('/me/player',{method:'PUT',body:{device_ids:[device_id],play:false}})}catch(e){}}res()});
    p.addListener('not_ready',()=>toast('Spotify player went offline','warn'));
    p.addListener('initialization_error',({message})=>{clearTimeout(to);rej(new Error(message))});
    p.addListener('authentication_error',({message})=>{clearTimeout(to);rej(new Error(message))});
@@ -1181,15 +1181,27 @@ const SpotifyEngine={
    toast(`${this.targetName} isn't available, so playing here instead`,'warn');this.useLocal();
    await api(`/me/player/play?device_id=${this.deviceId}`,{method:'PUT',body:{uris:[t.uri]}});
   }},
+ async adopt(){
+  // If Spotify is playing on another speaker but GriffTunes lost track of it, follow that speaker instead of pulling music back here
+  if(this.target)return;
+  try{const j=await api('/me/player');if(j&&j.device&&j.device.id&&j.device.id!==this.deviceId){this.useDevice({id:j.device.id,name:j.device.name})}}catch(e){}
+ },
  async toggle(){
+  await this.adopt();
   const playing=this.st?!this.st.paused:!P.paused;
   if(this.st){this.st=Object.assign({},this.st,{paused:playing,position:this.st.paused?this.st.position:Math.min(this.st.position+(performance.now()-this.stAt),this.st.duration)});this.stAt=performance.now()}
   try{await api(`/me/player/${playing?'pause':'play'}?device_id=${this.dev()}`,{method:'PUT'})}
-  catch(e){if(this.player&&!this.target){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}}
+  catch(e){
+   if(this.target){
+    // a paused speaker can go idle; waking it with a transfer keeps the music there
+    if(!playing){try{await api('/me/player',{method:'PUT',body:{device_ids:[this.target],play:true}})}catch(err){toast(`${this.targetName} isn't responding. Try the speaker button`,'warn')}}
+   }else if(this.player){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}
+  }
  },
  stop(){if(this.target){api(`/me/player/pause?device_id=${this.target}`,{method:'PUT'}).catch(()=>{});return}if(this.player)this.player.pause().catch(()=>{})},
  volAt:0,volSent:0,volBusy:false,volWarned:false,
  setVolume(v){
+  if(!this.target&&P.current&&!this.adopting&&Date.now()-(this.adoptAt||0)>5000){this.adopting=true;this.adoptAt=Date.now();this.adopt().then(()=>{this.adopting=false;if(this.target)this.setVolume(S.volume)})}
   if(this.target){
    this.volAt=Date.now();this.volWant=Math.round(v);
    clearTimeout(this.volT);
@@ -1220,7 +1232,7 @@ const SpotifyEngine={
   else this.useLocal();
   renderDevChip();
  },
- useLocal(){this.target=null;this.targetName=null;this.stopPoll();renderDevChip()},
+ useLocal(why){if(this.target){console.info('[GriffTunes] stopped controlling',this.targetName,why||'');if(why)toast(why,'warn')}this.target=null;this.targetName=null;this.stopPoll();renderDevChip()},
  useDevice(d){this.target=d.id;this.targetName=d.name;this.expect=null;this.startPoll();renderDevChip()},
  startPoll(){this.stopPoll();this.pollT=setInterval(()=>this.pollRemote(),2000);this.pollRemote()},
  stopPoll(){clearInterval(this.pollT);this.pollT=null},
@@ -1238,7 +1250,7 @@ const SpotifyEngine={
    const id=P.current.id;
    if(!j||!j.device){if(!this.expect&&this.nearEnd&&this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
    if(j.device.id!==this.target){
-    if(j.device.id===this.deviceId){this.useLocal();return}
+    if(j.device.id===this.deviceId){this.useLocal('Spotify moved the music back to the GriffTunes player');return}
     this.target=j.device.id;this.targetName=j.device.name;renderDevChip();
    }
    const item=j.item;
