@@ -180,6 +180,16 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .lm-party i{background:linear-gradient(135deg,#ff00a8,#7cff00,#00f0ff)}
 .lm-chill i{background:linear-gradient(135deg,#ff9a3c,#7a2e00);color:#fff4e0}
 .lm-off i{background:rgba(255,255,255,.12)}
+.spkRow{display:flex;align-items:center;gap:16px;padding:14px 16px;border-radius:20px;margin:6px 0 14px;background:rgba(255,255,255,.05);border:1px solid var(--stroke)}
+.spkRow .si{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:rgba(255,255,255,.1);flex:none}
+.spkRow .si svg{width:24px;height:24px}
+.spkRow.on .si{background:#1ed760;color:#06290f;box-shadow:0 0 20px rgba(30,215,96,.45)}
+.spkRow .st2{flex:1;min-width:0;display:flex;flex-direction:column}
+.spkRow .st2 b{font-size:18px}.spkRow .st2 small{color:var(--muted);font-size:13px}
+.spkBtn{height:50px;min-width:120px;padding:0 22px;border-radius:999px;font-weight:800;font-size:16px;background:rgba(255,255,255,.1);border:1px solid var(--stroke)}
+.spkRow.on .spkBtn{background:rgba(255,59,92,.18);border-color:rgba(255,59,92,.5)}
+.spkRow:not(.on) .spkBtn{background:#1ed760;color:#06290f;border-color:transparent}
+.spkPlugList{display:flex;flex-direction:column}
 .lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
 #lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
 .hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
@@ -585,8 +595,9 @@ html.remote .badge{display:flex!important}
 </div></div>
 
 <div class="modal lights" id="lightsModal"><div class="sheet card">
- <div class="sHead"><h2>Basement lights</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
+ <div class="sHead"><h2 id="lightsTitle">Basement lights</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="lightsBody">
+  <div class="spkRow" id="spkRow" style="display:none"></div>
   <div class="lmodes" id="lmodes"></div>
   <div class="field"><span class="lab">Brightness</span><div class="vol"><input type="range" id="lbri" min="5" max="100"></div></div>
   <div class="lfoot"><span id="lroom"></span><button class="btn" id="lsettings">Hue settings</button></div>
@@ -647,7 +658,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:''};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
@@ -897,6 +908,7 @@ const DemoEngine={
   {id:'demo-tv',name:'Basement TV',type:'TV'},
   {id:'demo-car',name:'Car Stereo',type:'Automobile',is_restricted:true}]},
  async transferTo(d){await sleep(300);this.target=d?d.id:null;this.targetName=d?d.name:null;renderDevChip()},
+ useDevice(d){this.target=d.id;this.targetName=d.name;renderDevChip()},
  poll(){if(!this.t)return null;const n=performance.now();if(!this.paused)this.pos+=n-this.last;this.last=n;
   return{pos:Math.min(this.pos,this.t.duration),dur:this.t.duration,paused:this.paused,ended:this.pos>=this.t.duration}}
 };
@@ -947,6 +959,7 @@ const SpotifyEngine={
   renderDevChip();
  },
  useLocal(){this.target=null;this.targetName=null;this.stopPoll();renderDevChip()},
+ useDevice(d){this.target=d.id;this.targetName=d.name;this.expect=null;this.startPoll();renderDevChip()},
  startPoll(){this.stopPoll();this.pollT=setInterval(()=>this.pollRemote(),2000);this.pollRemote()},
  stopPoll(){clearInterval(this.pollT);this.pollT=null},
  matchItem(it,id){return!!it&&(it.id===id||(it.linked_from&&it.linked_from.id===id))},
@@ -1139,6 +1152,7 @@ function qFade(){const l=$('#qList');if(l)l.classList.toggle('more',l.scrollHeig
 let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
 async function startTrack(t,house=false,radio=null,cd=null){
+ await speakersAuto();
  P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
  renderNP();accentFrom(t);markNow();hueTrack();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
@@ -1816,7 +1830,7 @@ async function huePump(){
  while(HUE.q.length){const c=HUE.q.shift();try{const r=await hueFetch(`/${S.hue.user}${c.path}`,'PUT',c.body);if(Array.isArray(r)&&r[0]&&r[0].error&&r[0].error.type===1)hueErr(new Error('unauthorized'))}catch(e){hueErr(e)}await sleep(c.gap)}
  HUE.busy=false;
 }
-const hueGroup=body=>hueSend(`/groups/${S.hue.group}/action`,body,true);
+const hueGroup=body=>hueSend(`/groups/${(S.hue.cmdGroup)||S.hue.group}/action`,body,true);
 function rgbToXy(r,g,b){
  [r,g,b]=[r,g,b].map(v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92});
  const X=r*.664511+g*.154324+b*.162028,Y=r*.283881+g*.668433+b*.047685,Z=r*.000088+g*.07231+b*.986039,t=X+Y+Z||1;
@@ -1876,13 +1890,34 @@ function hueSaver(on){
  HUE.dim=on;
  if(on)hueGroup({bri:Math.max(10,Math.round(hueB()*.22)),transitiontime:40});else hueApply();
 }
+const isPlug=L=>!!L&&(/plug/i.test(L.type||'')||/plug/i.test(L.productname||'')||/plug/i.test(L.archetype||'')||((L.config||{}).archetype==='plug'));
+async function hueCmdGroup(ids){
+ // Group commands must never reach the speaker plugs, so if the room contains plugs,
+ // keep a private LightGroup of just the lights and send group commands there.
+ if(!ids){if(S.hue.cmdGroup){S.hue.cmdGroup=null;saveS()}return}
+ const want=[...ids].sort().join(',');
+ try{
+  if(S.hue.cmdGroup){
+   const g=await hueFetch(`/${S.hue.user}/groups/${S.hue.cmdGroup}`);
+   if(g&&g.lights&&[...g.lights].sort().join(',')===want)return;
+   if(g&&g.lights){await hueFetch(`/${S.hue.user}/groups/${S.hue.cmdGroup}`,'PUT',{lights:ids});return}
+  }
+  const r=await hueFetch(`/${S.hue.user}/groups`,'POST',{name:'GriffTunes lights',type:'LightGroup',lights:ids});
+  const id=Array.isArray(r)&&r[0]&&r[0].success&&r[0].success.id;
+  if(id){S.hue.cmdGroup=String(id);saveS()}
+ }catch(e){hueErr(e)}
+}
 async function hueLoadLights(){
  if(!hueOn())return;
  try{
   const[g,ls]=await Promise.all([hueFetch(`/${S.hue.user}/groups/${S.hue.group}`),hueFetch(`/${S.hue.user}/lights`)]);
   const ids=(g&&g.lights)||[];
-  HUE.lights=ids.map(id=>{const L=ls[id]||{},ty=String(L.type||'').toLowerCase(),c=(L.capabilities&&L.capabilities.control)||{};
+  HUE.all=ls||{};
+  const plug=id=>isPlug(ls[id])||(S.huePlugs||[]).includes(id);
+  const roomIds=(S.hue.group==='0'?Object.keys(ls||{}):ids);
+  HUE.lights=roomIds.filter(id=>ls[id]&&!plug(id)).map(id=>{const L=ls[id]||{},ty=String(L.type||'').toLowerCase(),c=(L.capabilities&&L.capabilities.control)||{};
    return{id,name:L.name,kind:c.colorgamut||/color light/.test(ty)?'color':c.ct||/temperature/.test(ty)?'ct':'dim'}});
+  await hueCmdGroup(roomIds.some(plug)?HUE.lights.map(L=>L.id):null);
  }catch(e){hueErr(e)}
 }
 function renderLightsBtn(){const b=$('#lightsBtn');if(!b)return;b.style.display=hueOn()?'':'none';b.classList.toggle('on',hueOn()&&S.hueMode!=='off')}
@@ -1891,12 +1926,84 @@ function openLights(){
  sfx('tick');
  $('#lmodes').innerHTML=LMODES.map(([id,ic,name,sub])=>`<button class="lmode lm-${id}${S.hueMode===id?' on':''}" data-lmode="${id}"><i>${I[ic]}</i><b>${name}</b><small>${sub}</small></button>`).join('');
  $('#lbri').value=S.hueBri;$('#lroom').textContent=S.hue&&S.hue.groupName?'Room: '+S.hue.groupName:'';
+ $('#lightsTitle').textContent=(S.huePlugs||[]).length?'Lights & speakers':'Basement lights';
+ renderSpkRow();
  openModal($('#lightsModal'));
 }
 $('#lightsBtn').onclick=openLights;
 $('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()}});
 let briT=null;$('#lbri').addEventListener('input',e=>{S.hueBri=+e.target.value;clearTimeout(briT);briT=setTimeout(()=>{saveS();if(S.hueMode!=='off')hueGroup({bri:S.hueMode==='chill'?Math.round(hueB()*.45):hueB(),transitiontime:4})},350)});
 $('#lsettings').onclick=()=>{closeModal($('#lightsModal'));openSettings();setTimeout(()=>{const h=$('#hueSet');if(h)h.scrollIntoView({behavior:'smooth',block:'center'})},400)};
+
+/* ---------- Speaker power: Hue smart plugs + auto speaker routing ---------- */
+const SPK={on:null,session:false,lastPlay:Date.now(),busy:false};
+const spkReady=()=>hueOn()&&(S.huePlugs||[]).length>0;
+async function spkState(){
+ if(!spkReady())return null;
+ try{const st=await Promise.all(S.huePlugs.map(id=>hueFetch(`/${S.hue.user}/lights/${id}`)));SPK.on=st.some(L=>L&&L.state&&L.state.on)}catch(e){hueErr(e)}
+ return SPK.on;
+}
+async function spkSet(on){
+ if(!spkReady())return;
+ SPK.on=on;
+ await Promise.all(S.huePlugs.map(id=>hueFetch(`/${S.hue.user}/lights/${id}/state`,'PUT',{on}).catch(hueErr)));
+ renderSpkRow();
+}
+async function spkRoute(){
+ if(!S.spkDevice||!engine.devices||!engine.useDevice||engine.targetName===S.spkDevice)return;
+ try{
+  const list=await Promise.race([engine.devices(),sleep(3500).then(()=>[])]);
+  const d=list.find(x=>x.name===S.spkDevice);
+  if(d)engine.useDevice({id:d.id,name:d.name});
+  else toast(`${S.spkDevice} isn't showing up in Spotify, so playing here`,'warn');
+ }catch(e){}
+}
+async function speakersAuto(){
+ SPK.lastPlay=Date.now();
+ if(REMOTE||SPK.session)return;
+ SPK.session=true;
+ if(spkReady()&&S.spkAuto){
+  if(SPK.on===null)await spkState();
+  if(!SPK.on){spkSet(true);toast('Turning on the speakers')}
+ }
+ await spkRoute();
+}
+setInterval(async()=>{
+ if(P.current&&!P.paused){SPK.lastPlay=Date.now();return}
+ if(!SPK.session||!S.spkIdle||Date.now()-SPK.lastPlay<S.spkIdle*60000)return;
+ SPK.session=false;
+ if(spkReady()&&S.spkAuto&&(await spkState())){await spkSet(false);toast(`Speakers off after ${S.spkIdle} quiet minutes`)}
+},20000);
+async function renderSpkRow(){
+ const row=$('#spkRow');if(!row)return;
+ if(!spkReady()){row.style.display='none';return}
+ row.style.display='';
+ const draw=()=>{const on=!!SPK.on;row.classList.toggle('on',on);
+  row.innerHTML=`<span class="si">${I.speaker}</span><span class="st2"><b>Speakers ${SPK.on===null?'…':on?'on':'off'}</b><small>${S.huePlugs.map(id=>esc((HUE.all&&HUE.all[id]&&HUE.all[id].name)||'Plug '+id)).join(' · ')}</small></span><button class="spkBtn" id="spkBtn">${on?'Turn off':'Turn on'}</button>`;
+  $('#spkBtn').onclick=async()=>{sfx('tick');const turnOn=!SPK.on;await spkSet(turnOn);if(turnOn){SPK.session=true;SPK.lastPlay=Date.now();spkRoute()}else SPK.session=false;draw()}};
+ draw();await spkState();draw();
+}
+async function renderSpkSettings(){
+ const box=$('#spkPlugs');if(!box)return;
+ let ls={};try{ls=await hueFetch(`/${S.hue.user}/lights`)||{}}catch(e){box.innerHTML='<p class="note">Couldn\'t read the Hue lights.</p>';return}
+ HUE.all=ls;
+ const plugs=Object.entries(ls).filter(([id,L])=>isPlug(L)||(S.huePlugs||[]).includes(id));
+ if(!plugs.length){box.innerHTML='<p class="note">No Hue smart plugs found yet. Add them in the Hue app, then reopen Settings.</p>';return}
+ box.innerHTML=plugs.map(([id,L])=>`<label class="tg"><span>${esc(L.name)} <small style="color:var(--muted)">· ${L.state&&L.state.on?'on':'off'}</small></span><input type="checkbox" data-plug="${esc(id)}" ${(S.huePlugs||[]).includes(id)?'checked':''}><i></i></label>`).join('')
+  +'<p class="note" style="margin-top:8px">Tick the plugs your speakers are on. Album colors, Party and the other light effects will never switch these.</p>';
+ box.onchange=e=>{const c=e.target.closest('[data-plug]');if(!c)return;
+  const set=new Set(S.huePlugs||[]);c.checked?set.add(c.dataset.plug):set.delete(c.dataset.plug);S.huePlugs=[...set];saveS();SPK.on=null;
+  $('#spkOpts').style.display=S.huePlugs.length?'':'none';hueLoadLights();if(S.huePlugs.length)fillSpkDevices()};
+ if((S.huePlugs||[]).length)fillSpkDevices();
+}
+async function fillSpkDevices(){
+ const sel=$('#hSpkDev');if(!sel||!engine.devices)return;
+ try{
+  const list=(await engine.devices()).filter(d=>d.id!==engine.deviceId&&!d.is_restricted);
+  const names=[...new Set(list.map(d=>d.name).concat(S.spkDevice?[S.spkDevice]:[]))];
+  sel.innerHTML='<option value="">Don\'t change</option>'+names.map(n=>`<option${n===S.spkDevice?' selected':''}>${esc(n)}</option>`).join('');
+ }catch(e){}
+}
 
 async function renderHueSettings(){
  const box=$('#hueSet');if(!box)return;
@@ -1907,8 +2014,17 @@ async function renderHueSettings(){
    <label class="tg"><span>Flash on Insert coin and Play now</span><input type="checkbox" id="hFx" ${S.hueFx?'checked':''}><i></i></label>
    <label class="tg"><span>Dim the room during the screensaver</span><input type="checkbox" id="hSaver" ${S.hueSaver?'checked':''}><i></i></label>
    <label class="tg"><span>Radio stations get their own colors</span><input type="checkbox" id="hRadio" ${S.hueRadio?'checked':''}><i></i></label>
+   <div class="field" style="margin-top:20px"><span class="lab">Speaker power (Hue smart plugs)</span><div class="spkPlugList" id="spkPlugs"><p class="note">Looking for smart plugs…</p></div></div>
+   <div id="spkOpts" style="display:${(S.huePlugs||[]).length?'':'none'}">
+    <label class="tg"><span>Turn the speakers on when music starts</span><input type="checkbox" id="hSpkAuto" ${S.spkAuto?'checked':''}><i></i></label>
+    <div class="field two"><div><label for="hSpkIdle">Turn off after quiet (min, 0 = never)</label><input type="number" id="hSpkIdle" min="0" max="600" value="${S.spkIdle}"></div>
+     <div><label for="hSpkDev">When they turn on, play music on</label><select id="hSpkDev"><option value="">Don't change</option>${S.spkDevice?`<option selected>${esc(S.spkDevice)}</option>`:''}</select></div></div>
+   </div>
    <div class="btnRow"><button class="btn primary" id="hTest">Test flash</button><button class="btn" id="hOpen">Light modes</button><button class="btn" id="hOff">Disconnect Hue</button></div></div>`;
-  const tgl=(id,key)=>{$(id).onchange=e=>{S[key]=e.target.checked;saveS()}};tgl('#hFx','hueFx');tgl('#hSaver','hueSaver');tgl('#hRadio','hueRadio');
+  const tgl=(id,key)=>{$(id).onchange=e=>{S[key]=e.target.checked;saveS()}};tgl('#hFx','hueFx');tgl('#hSaver','hueSaver');tgl('#hRadio','hueRadio');tgl('#hSpkAuto','spkAuto');
+  $('#hSpkIdle').onchange=e=>{S.spkIdle=Math.max(0,+e.target.value||0);saveS()};
+  $('#hSpkDev').onchange=e=>{S.spkDevice=e.target.value;saveS()};
+  renderSpkSettings();
   $('#hTest').onclick=()=>{const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
   $('#hOpen').onclick=()=>{closeModal($('#settingsModal'));openLights()};
   $('#hOff').onclick=()=>{S.hue=null;saveS();HUE.lights=[];renderLightsBtn();renderHueSettings();toast('Hue disconnected')};
