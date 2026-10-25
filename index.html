@@ -1851,21 +1851,29 @@ async function artPalette(t){
  }catch(e){return[]}
 }
 const STATION_COLORS={'60s':['#ff5e7e','#ffd23f','#3ee8ff'],'70s':['#ff9a1f','#c2410c','#facc15'],'80s':['#ff2bd6','#7b2bff','#22e4ff'],'90s':['#00e0a4','#ff4fd8','#7b2bff'],'00s':['#3b82f6','#a855f7','#22d3ee'],now:['#22e4ff','#ff2bd6','#ffffff'],country:['#1e6bff','#ffb000','#ff7a1a'],classic:['#ff8c1a','#ffd23f','#ff3b1f'],rock:['#ff2020','#7a00ff','#ff7a00'],pop:['#ff2bd6','#22e4ff','#ffd23f'],hiphop:['#ffd23f','#a855f7','#ff2bd6'],rnb:['#c026d3','#be123c','#7c3aed'],alt:['#14b8a6','#6366f1','#22c55e'],dance:['#ff00a8','#00f0ff','#7cff00']};
+// Lights switched off (e.g. at the Hue dimmer) stay off: GriffTunes only recolors lights that are already on.
+async function hueOnLights(){
+ try{const ls=await hueFetch(`/${S.hue.user}/lights`)||{};HUE.all=ls;
+  return new Set(Object.keys(ls).filter(id=>ls[id].state&&ls[id].state.on&&ls[id].state.reachable!==false))}
+ catch(e){hueErr(e);return new Set()}
+}
 async function hueMood(){
  const t=P.current;
- if(!t){hueGroup({on:true,effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
+ if(!t){hueGroup({effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
  const st=t.radio&&S.radio&&STATIONS.find(x=>x.name===t.radio);
  let pal=st&&S.hueRadio&&STATION_COLORS[st.id]?STATION_COLORS[st.id].map(cssRgb):await artPalette(t);
  if(!pal.length)pal=[getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff2bd6','#22e4ff'].map(cssRgb);
  if(t!==P.current&&P.current)return;
+ const onIds=await hueOnLights();
+ if(t!==P.current&&P.current)return;
+ const lights=HUE.lights.filter(L=>onIds.has(L.id));
+ if(!lights.length)return;
  HUE.q=HUE.q.filter(c=>!c.mood);
  const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
  const warm=(()=>{const[h]=rgb2hsl(...pal[0]);return h<70||h>290})();
- const lights=HUE.lights.length?HUE.lights:[{id:null,kind:'color'}];
  lights.forEach((L,i)=>{
   const col=pal[i%pal.length];
-  const body=L.kind==='color'?{on:true,effect:'none',xy:rgbToXy(...col),bri:B,transitiontime:20}:L.kind==='ct'?{on:true,ct:warm?420:260,bri:B,transitiontime:20}:{on:true,bri:B,transitiontime:20};
-  if(L.id==null){hueGroup(body);return}
+  const body=L.kind==='color'?{effect:'none',xy:rgbToXy(...col),bri:B,transitiontime:20}:L.kind==='ct'?{ct:warm?420:260,bri:B,transitiontime:20}:{bri:B,transitiontime:20};
   HUE.q.push({path:`/lights/${L.id}/state`,body,gap:120,mood:true});
  });
  huePump();
@@ -1873,17 +1881,21 @@ async function hueMood(){
 function hueApply(){
  if(!hueOn()||S.hueMode==='off')return;
  const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
- if(S.hueMode==='party')hueGroup({on:true,effect:'colorloop',sat:254,bri:B,transitiontime:10});
- else if(S.hueMode==='chill')hueGroup({on:true,effect:'none',ct:447,bri:Math.round(B*.45),transitiontime:20});
+ if(S.hueMode==='party')hueGroup({effect:'colorloop',sat:254,bri:B,transitiontime:10});
+ else if(S.hueMode==='chill')hueGroup({effect:'none',ct:447,bri:Math.round(B*.45),transitiontime:20});
  else hueMood();
+}
+async function hueLightsOn(){
+ if(!hueOn())return;
+ try{await hueFetch(`/${S.hue.user}/groups/${S.hue.cmdGroup||S.hue.group}/action`,'PUT',{on:true})}catch(e){hueErr(e)}
+ await sleep(400);
 }
 function hueTrack(){if(hueOn()&&S.hueMode==='auto')hueMood()}
 function hueFlash(kind){
  if(!hueOn()||!S.hueFx||S.hueMode==='off')return;
- if(kind==='now'){hueGroup({alert:'select'});return}
  HUE.q=HUE.q.filter(c=>!c.mood);
- hueGroup({on:true,effect:'none',xy:rgbToXy(255,196,40),bri:254,transitiontime:1});
- clearTimeout(HUE.flashT);HUE.flashT=setTimeout(hueApply,1100);
+ hueGroup(kind==='now'?{effect:'none',bri:254,transitiontime:1}:{effect:'none',xy:rgbToXy(255,196,40),bri:254,transitiontime:1});
+ clearTimeout(HUE.flashT);HUE.flashT=setTimeout(hueApply,kind==='now'?800:1100);
 }
 function hueSaver(on){
  if(!hueOn()||!S.hueSaver||S.hueMode==='off')return;
@@ -1931,7 +1943,7 @@ function openLights(){
  openModal($('#lightsModal'));
 }
 $('#lightsBtn').onclick=openLights;
-$('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()}});
+$('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){hueLightsOn().then(()=>{if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()})}});
 let briT=null;$('#lbri').addEventListener('input',e=>{S.hueBri=+e.target.value;clearTimeout(briT);briT=setTimeout(()=>{saveS();if(S.hueMode!=='off')hueGroup({bri:S.hueMode==='chill'?Math.round(hueB()*.45):hueB(),transitiontime:4})},350)});
 $('#lsettings').onclick=()=>{closeModal($('#lightsModal'));openSettings();setTimeout(()=>{const h=$('#hueSet');if(h)h.scrollIntoView({behavior:'smooth',block:'center'})},400)};
 
@@ -2025,7 +2037,7 @@ async function renderHueSettings(){
   $('#hSpkIdle').onchange=e=>{S.spkIdle=Math.max(0,+e.target.value||0);saveS()};
   $('#hSpkDev').onchange=e=>{S.spkDevice=e.target.value;saveS()};
   renderSpkSettings();
-  $('#hTest').onclick=()=>{const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
+  $('#hTest').onclick=async()=>{if(!(await hueOnLights()).size){toast('The lights are off. Turn them on first.','warn');return}const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
   $('#hOpen').onclick=()=>{closeModal($('#settingsModal'));openLights()};
   $('#hOff').onclick=()=>{S.hue=null;saveS();HUE.lights=[];renderLightsBtn();renderHueSettings();toast('Hue disconnected')};
   try{
