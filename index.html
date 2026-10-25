@@ -201,6 +201,11 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .btn[disabled]{opacity:.45}
 .tip{position:fixed;z-index:2147483000;pointer-events:none;max-width:300px;padding:8px 12px;border-radius:10px;background:rgba(16,12,32,.94);border:1px solid rgba(255,255,255,.16);color:#fff;font:600 14px/1.35 Outfit,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.5),0 0 18px color-mix(in srgb,var(--accent) 30%,transparent);opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s}
 .tip.on{opacity:1;transform:none}
+.lswatch{display:flex;align-items:center;gap:16px;margin:14px 0 4px;padding:12px 16px;border-radius:16px;background:rgba(255,255,255,.05);border:1px solid var(--stroke)}
+.lswatch span{display:flex;flex-direction:column;font-weight:700;font-size:15px;min-width:0;flex:0 1 auto}
+.lswatch small{font-weight:500;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.swBar{flex:1;display:flex;height:30px;border-radius:10px;overflow:hidden;min-width:120px}
+.swBar i{flex:1;display:block;box-shadow:0 0 22px currentColor}
 .lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
 #lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
 .hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
@@ -708,6 +713,7 @@ html.remote .badge{display:flex!important}
  <div class="lightsBody">
   <div class="spkRow" id="spkRow" style="display:none"></div>
   <div class="lmodes" id="lmodes"></div>
+  <div class="lswatch" id="lswatch" style="display:none"></div>
   <div class="field"><span class="lab">Brightness</span><div class="vol"><input type="range" id="lbri" min="5" max="100"></div></div>
   <div class="lfoot"><span id="lroom"></span><button class="btn" id="lsettings">Hue settings</button></div>
  </div>
@@ -2165,22 +2171,54 @@ async function huePump(){
 const hueGroup=body=>hueSend(`/groups/${(S.hue.cmdGroup)||S.hue.group}/action`,body,true);
 function rgbToXy(r,g,b){
  [r,g,b]=[r,g,b].map(v=>{v/=255;return v>.04045?Math.pow((v+.055)/1.055,2.4):v/12.92});
- const X=r*.664511+g*.154324+b*.162028,Y=r*.283881+g*.668433+b*.047685,Z=r*.000088+g*.07231+b*.986039,t=X+Y+Z||1;
+ // standard sRGB (D65) -> CIE XYZ; the bridge then fits the point into each bulb's own color range
+ const X=r*.4124+g*.3576+b*.1805,Y=r*.2126+g*.7152+b*.0722,Z=r*.0193+g*.1192+b*.9505,t=X+Y+Z||1;
  return[+(X/t).toFixed(4),+(Y/t).toFixed(4)];
 }
 function cssRgb(c){const x=document.createElement('canvas').getContext('2d');x.fillStyle=c;x.fillRect(0,0,1,1);const d=x.getImageData(0,0,1,1).data;return[d[0],d[1],d[2]]}
+function hsl2rgb(h,sa,l){const k=n=>(n+h/30)%12,a=sa*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return[f(0),f(8),f(4)].map(v=>Math.round(v*255))}
+// Album art -> up to 3 light colors with how much of the cover each one covers.
+// {cols:[{rgb,w}], gray:true} for black-and-white covers, {fail:true} if the image can't be read.
+const PAL_CACHE=new Map();
 async function artPalette(t){
- if(t.color)return t.color.map(cssRgb);
- if(!t.img)return[];
- try{
-  const img=new Image();img.crossOrigin='anonymous';img.src=t.img;await img.decode();
-  const c=document.createElement('canvas');c.width=c.height=24;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,24,24);
-  const d=x.getImageData(0,0,24,24).data,bins=Array.from({length:12},()=>({w:0,r:0,g:0,b:0}));
-  for(let i=0;i<d.length;i+=4){const[h,sat,l]=rgb2hsl(d[i],d[i+1],d[i+2]);if(sat<.25||l<.12||l>.88)continue;const k=Math.floor(h/30)%12,w=sat*(1-Math.abs(l-.5));const B=bins[k];B.w+=w;B.r+=d[i]*w;B.g+=d[i+1]*w;B.b+=d[i+2]*w}
-  const top=bins.map((B,k)=>({k,...B})).filter(B=>B.w>.4).sort((a,b)=>b.w-a.w),pick=[];
-  for(const B of top){if(pick.length<3&&!pick.some(P2=>Math.min(Math.abs(P2.k-B.k),12-Math.abs(P2.k-B.k))<2))pick.push(B)}
-  return pick.map(B=>[B.r/B.w,B.g/B.w,B.b/B.w].map(Math.round));
- }catch(e){return[]}
+ if(t.color)return{cols:t.color.map(c=>({rgb:cssRgb(c),w:1}))};
+ if(!t.img)return{fail:true};
+ if(PAL_CACHE.has(t.img))return PAL_CACHE.get(t.img);
+ let img;
+ for(let tries=0;tries<2&&!img;tries++){try{const im=new Image();im.crossOrigin='anonymous';im.src=t.img;await im.decode();img=im}catch(e){await sleep(600)}}
+ if(!img){console.warn('[GriffTunes lights] could not read album art',t.img);return{fail:true}}
+ const N=32,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(img,0,0,N,N);
+ let d;try{d=x.getImageData(0,0,N,N).data}catch(e){console.warn('[GriffTunes lights] album art blocked by the browser',e);return{fail:true}}
+ const BN=24,bins=Array.from({length:BN},()=>({w:0,r:0,g:0,b:0}));let chroma=0;
+ for(let i=0;i<d.length;i+=4){
+  const[h,sa,l]=rgb2hsl(d[i],d[i+1],d[i+2]);
+  if(sa<.2||l<.08||l>.93)continue;
+  const w=sa*(1-Math.abs(l-.5)*1.3);if(w<=0)continue;
+  const B=bins[Math.floor(h/(360/BN))%BN];B.w+=w;B.r+=d[i]*w;B.g+=d[i+1]*w;B.b+=d[i+2]*w;chroma+=w;
+ }
+ // under ~4% of the cover in real color = black-and-white / gray cover
+ if(chroma<N*N*.04){const r={gray:true};PAL_CACHE.set(t.img,r);return r}
+ // smooth each bin with its neighbors so one hue split across two bins still counts as one color
+ const sm=bins.map((_,k)=>{const o={k,w:0,r:0,g:0,b:0};for(const j of[-1,0,1]){const B=bins[(k+j+BN)%BN],f=j?.5:1;o.w+=B.w*f;o.r+=B.r*f;o.g+=B.g*f;o.b+=B.b*f}return o}).sort((p,q)=>q.w-p.w);
+ const pick=[];
+ for(const B of sm){
+  if(pick.length>=3||B.w<sm[0].w*.15)break;
+  if(pick.some(P2=>{const dk=Math.abs(P2.k-B.k);return Math.min(dk,BN-dk)<3}))continue;
+  pick.push(B);
+ }
+ // lights look washed out with muted colors, so keep each hue but make it vivid
+ const cols=pick.map(B=>{const[h,sa]=rgb2hsl(B.r/B.w,B.g/B.w,B.b/B.w);return{rgb:hsl2rgb(h,Math.max(sa,.8),.5),src:[B.r/B.w,B.g/B.w,B.b/B.w].map(Math.round),w:B.w}});
+ const r={cols};if(PAL_CACHE.size>200)PAL_CACHE.clear();PAL_CACHE.set(t.img,r);return r;
+}
+// Hand out lights in proportion to how much of the cover each color covers (every color gets at least one light), alternating so neighbors differ.
+function lightPlan(cols,n){
+ const tot=cols.reduce((a,c)=>a+c.w,0)||1,cnt=cols.map(c=>c.w/tot*n);
+ let ints=cnt.map(v=>Math.max(n>=cols.length?1:0,Math.floor(v)));
+ while(ints.reduce((a,b)=>a+b,0)>n){const i=ints.indexOf(Math.max(...ints));ints[i]--}
+ while(ints.reduce((a,b)=>a+b,0)<n){let bi=0,bv=-1e9;cnt.forEach((v,i)=>{if(v-ints[i]>bv){bv=v-ints[i];bi=i}});ints[bi]++}
+ const out=[],used=ints.map(()=>0);
+ for(let k=0;k<n;k++){let bi=-1,bv=-1e9;ints.forEach((v,i)=>{if(used[i]<v){const def=v*(k+1)/n-used[i];if(def>bv){bv=def;bi=i}}});used[bi]++;out.push(cols[bi])}
+ return out;
 }
 const STATION_COLORS={'60s':['#ff5e7e','#ffd23f','#3ee8ff'],'70s':['#ff9a1f','#c2410c','#facc15'],'80s':['#ff2bd6','#7b2bff','#22e4ff'],'90s':['#00e0a4','#ff4fd8','#7b2bff'],'00s':['#3b82f6','#a855f7','#22d3ee'],now:['#22e4ff','#ff2bd6','#ffffff'],country:['#1e6bff','#ffb000','#ff7a1a'],classic:['#ff8c1a','#ffd23f','#ff3b1f'],rock:['#ff2020','#7a00ff','#ff7a00'],pop:['#ff2bd6','#22e4ff','#ffd23f'],hiphop:['#ffd23f','#a855f7','#ff2bd6'],rnb:['#c026d3','#be123c','#7c3aed'],alt:['#14b8a6','#6366f1','#22c55e'],dance:['#ff00a8','#00f0ff','#7cff00']};
 // Lights switched off (e.g. at the Hue dimmer) stay off: GriffTunes only recolors lights that are already on.
@@ -2193,22 +2231,37 @@ async function hueMood(){
  const t=P.current;
  if(!t){hueGroup({effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
  const st=t.radio&&S.radio&&STATIONS.find(x=>x.name===t.radio);
- let pal=st&&S.hueRadio&&STATION_COLORS[st.id]?STATION_COLORS[st.id].map(cssRgb):await artPalette(t);
- if(!pal.length)pal=[getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()||'#ff2bd6','#22e4ff'].map(cssRgb);
- if(t!==P.current&&P.current)return;
+ let pal=st&&S.hueRadio&&STATION_COLORS[st.id]?{cols:STATION_COLORS[st.id].map(c=>({rgb:cssRgb(c),w:1}))}:await artPalette(t);
+ if(pal.fail||(!pal.gray&&!pal.cols.length))pal={cols:['#ff2bd6','#22e4ff'].map(c=>({rgb:cssRgb(c),w:1})),fallback:true};
+ if(t!==P.current)return;
  const onIds=await hueOnLights();
- if(t!==P.current&&P.current)return;
+ if(t!==P.current)return;
  const lights=HUE.lights.filter(L=>onIds.has(L.id));
+ HUE.last={song:t.name,gray:!!pal.gray,fallback:!!pal.fallback,colors:(pal.cols||[]).map(c=>({rgb:c.rgb,share:c.w})),lights:[]};
+ renderLightSwatch();
  if(!lights.length)return;
  HUE.q=HUE.q.filter(c=>!c.mood);
  const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
- const warm=(()=>{const[h]=rgb2hsl(...pal[0]);return h<70||h>290})();
- lights.forEach((L,i)=>{
-  const col=pal[i%pal.length];
-  const body=L.kind==='color'?{effect:'none',xy:rgbToXy(...col),bri:B,transitiontime:20}:L.kind==='ct'?{ct:warm?420:260,bri:B,transitiontime:20}:{bri:B,transitiontime:20};
+ const plan=pal.gray?[]:lightPlan(pal.cols,lights.filter(L=>L.kind==='color').length);
+ const lead=pal.gray?null:pal.cols[0].rgb,warm=lead?(()=>{const[h]=rgb2hsl(...lead);return h<70||h>290})():true;
+ let ci=0;
+ lights.forEach(L=>{
+  let body;
+  if(L.kind==='color'&&!pal.gray){const col=plan[ci++].rgb;body={effect:'none',xy:rgbToXy(...col),bri:B,transitiontime:20};HUE.last.lights.push({name:L.name,rgb:col})}
+  else if(L.kind==='color'||L.kind==='ct')body={effect:'none',ct:pal.gray?370:warm?420:260,bri:B,transitiontime:20};
+  else body={bri:B,transitiontime:20};
+  if(L.kind==='ct')delete body.effect;
   HUE.q.push({path:`/lights/${L.id}/state`,body,gap:120,mood:true});
  });
+ console.info('[GriffTunes lights]',t.name,HUE.last);
  huePump();
+}
+function renderLightSwatch(){
+ const el=$('#lswatch');if(!el)return;const L=HUE.last;
+ if(!L||S.hueMode!=='auto'){el.style.display='none';return}
+ el.style.display='';
+ const sw=L.gray?'<i style="background:#ffd9a8"></i>':L.colors.map(c=>`<i style="background:rgb(${c.rgb.join(',')});flex:${Math.max(.6,c.share)}"></i>`).join('');
+ el.innerHTML=`<span>${L.gray?'Black-and-white cover, so warm white':L.fallback?"Couldn't read the album art, so GriffTunes colors":'Now on the lights'}<small>${esc(L.song||'')}</small></span><div class="swBar">${sw}</div>`;
 }
 function hueApply(){
  if(!hueOn()||S.hueMode==='off')return;
@@ -2271,11 +2324,11 @@ function openLights(){
  $('#lmodes').innerHTML=LMODES.map(([id,ic,name,sub])=>`<button class="lmode lm-${id}${S.hueMode===id?' on':''}" data-lmode="${id}"><i>${I[ic]}</i><b>${name}</b><small>${sub}</small></button>`).join('');
  $('#lbri').value=S.hueBri;$('#lroom').textContent=S.hue&&S.hue.groupName?'Room: '+S.hue.groupName:'';
  $('#lightsTitle').textContent=(S.huePlugs||[]).length?'Lights & speakers':'Basement lights';
- renderSpkRow();
+ renderSpkRow();renderLightSwatch();
  openModal($('#lightsModal'));
 }
 $('#lightsBtn').onclick=openLights;
-$('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){hueLightsOn().then(()=>{if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()})}});
+$('#lmodes').addEventListener('click',e=>{const b=e.target.closest('[data-lmode]');if(!b)return;S.hueMode=b.dataset.lmode;saveS();setTimeout(renderLightSwatch,1500);$$('#lmodes .lmode').forEach(x=>x.classList.toggle('on',x===b));renderLightsBtn();sfx('add');if(S.hueMode!=='off'){hueLightsOn().then(()=>{if(S.hueMode!=='party')hueGroup({effect:'none'});hueApply()})}});
 let briT=null;$('#lbri').addEventListener('input',e=>{S.hueBri=+e.target.value;clearTimeout(briT);briT=setTimeout(()=>{saveS();if(S.hueMode!=='off')hueGroup({bri:S.hueMode==='chill'?Math.round(hueB()*.45):hueB(),transitiontime:4})},350)});
 $('#lsettings').onclick=()=>{closeModal($('#lightsModal'));openSettings();setTimeout(()=>{const h=$('#hueSet');if(h)h.scrollIntoView({behavior:'smooth',block:'center'})},400)};
 
