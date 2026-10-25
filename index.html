@@ -996,8 +996,10 @@ async function api(path,opts={},retry=true){
  if(r.status===429&&retry){await sleep((+r.headers.get('Retry-After')||2)*1000);return api(path,opts,false)}
  if(r.status===204||r.status===202)return null;
  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
- if(r.status===403)throw new Error('Spotify blocks personal apps from opening this one');
- if(!r.ok)throw new Error((j&&j.error&&j.error.message)||('HTTP '+r.status));
+ if(!r.ok){
+  const er=new Error(r.status===403&&!/\/me\/player/.test(path)?'Spotify blocks personal apps from opening this one':((j&&j.error&&j.error.message)||('HTTP '+r.status)));
+  er.status=r.status;er.reason=j&&j.error&&j.error.reason;throw er;
+ }
  return j;
 }
 const spImg=imgs=>imgs&&imgs.length?(imgs.find(i=>i.width&&i.width>=250&&i.width<=700)||imgs[0]).url:'';
@@ -1186,8 +1188,28 @@ const SpotifyEngine={
   catch(e){if(this.player&&!this.target){try{await(playing?this.player.pause():this.player.resume())}catch(err){}}}
  },
  stop(){if(this.target){api(`/me/player/pause?device_id=${this.target}`,{method:'PUT'}).catch(()=>{});return}if(this.player)this.player.pause().catch(()=>{})},
+ volAt:0,volSent:0,volBusy:false,volWarned:false,
  setVolume(v){
-  if(this.target){clearTimeout(this.volT);this.volT=setTimeout(()=>api(`/me/player/volume?volume_percent=${Math.round(v)}&device_id=${this.target}`,{method:'PUT'}).catch(()=>{}),300);return}
+  if(this.target){
+   this.volAt=Date.now();this.volWant=Math.round(v);
+   clearTimeout(this.volT);
+   const send=async()=>{
+    if(this.volBusy){this.volT=setTimeout(send,150);return}
+    const want=this.volWant,dev=this.target;if(!dev)return;
+    this.volBusy=true;this.volSent=Date.now();
+    try{await api(`/me/player/volume?volume_percent=${want}&device_id=${dev}`,{method:'PUT'})}
+    catch(e){
+     if(!this.volWarned){this.volWarned=true;
+      const fixed=e.reason==='VOLUME_CONTROL_DISALLOW'||e.status===403||this.noVol;
+      toast(fixed?`${this.targetName||'This speaker'} isn't letting apps change its volume. In the WiiM Home app, turn off Fixed Volume for this device`:`Couldn't change ${this.targetName||'the speaker'}'s volume: ${e.message}`,'warn');
+      setTimeout(()=>{this.volWarned=false},60000);
+     }
+    }finally{this.volBusy=false}
+   };
+   // send right away while dragging (at most ~4 per second), and once more when the slider stops
+   if(Date.now()-this.volSent>250)send();else this.volT=setTimeout(send,250);
+   return;
+  }
   if(this.player)this.player.setVolume(v/100).catch(()=>{});
  },
  async devices(){const j=await api('/me/player/devices');return((j&&j.devices)||[]).filter(d=>d&&d.id)},
@@ -1207,6 +1229,11 @@ const SpotifyEngine={
   if(!this.target||this.polling)return;this.polling=true;
   try{
    const j=await api('/me/player');
+   if(j&&j.device&&j.device.id===this.target){
+    this.noVol=j.device.supports_volume===false;
+    const dv=j.device.volume_percent;
+    if(typeof dv==='number'&&!this.volBusy&&Date.now()-this.volAt>3000&&dv!==S.volume){S.volume=dv;$('#vol').value=dv;const dk=$('#dkVol');if(dk)dk.value=dv}
+   }
    if(!this.target||!P.current)return;
    const id=P.current.id;
    if(!j||!j.device){if(!this.expect&&this.nearEnd&&this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
