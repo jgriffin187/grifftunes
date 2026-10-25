@@ -743,11 +743,12 @@ const DEMO=(()=>{
  const shuffle=(a,seed)=>{const rr=rng(seed);return a.map(x=>[rr(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])};
  return{
   key:'demo',
-  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'artists',name:'Artists'}],
+  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'artists',name:'Artists'},{id:'new',name:'New Releases'}],
   async load(tab){await sleep(120);
    if(tab==='albums')return albums;
    if(tab==='playlists')return playlists;
    if(tab==='artists')return artists;
+   if(tab==='new'){const now=Date.now();return shuffle(albums.slice(),day+7).slice(0,14).map((a,i)=>Object.assign({},a,{sub:`${a.sub} · ${newLabel(new Date(now-(i*2+1)*864e5).toISOString().slice(0,10))}`}))}
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
   },
   async tracks(it){await sleep(150);const real=[...albums,...playlists,...artists].find(x=>x.id===it.id);return((real||it).tracks)||[]},
@@ -809,6 +810,11 @@ async function api(path,opts={},retry=true){
 }
 const spImg=imgs=>imgs&&imgs.length?(imgs.find(i=>i.width&&i.width>=250&&i.width<=700)||imgs[0]).url:'';
 const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),album:(t.album&&t.album.name)||'',img:spImg(t.album&&t.album.images)||img||'',duration:t.duration_ms}:null;
+function newLabel(d){
+ if(!d)return 'New';const days=Math.round((Date.now()-new Date(d+'T12:00:00'))/864e5);
+ if(days<=0)return 'Out today';if(days===1)return 'Out yesterday';if(days<7)return `Out ${days} days ago`;
+ return 'Out '+new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
 const spItem=(x,type)=>x?{id:x.id,type,name:x.name,sub:type==='album'?(x.artists||[]).map(a=>a.name).join(', '):type==='playlist'?('By '+((x.owner&&x.owner.display_name)||'Spotify')):'Artist',img:spImg(x.images),uri:x.uri}:null;
 const songKey=n=>String(n||'').toLowerCase()
  .replace(/\s*[\(\[](feat|ft|with)\.?[^\)\]]*[\)\]]/g,'')
@@ -821,7 +827,7 @@ function dedupeHits(list){
 }
 const SPOTIFY={
  key:'spotify',
- tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'}],
+ tabs:[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'},{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}],
  me:null,
  async load(tab){
   if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
@@ -831,6 +837,7 @@ const SPOTIFY={
    const mine=((j&&j.items)||[]).filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
    return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
   }
+  if(tab==='new')return this.newReleases();
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
   return[];
  },
@@ -858,6 +865,29 @@ const SPOTIFY={
    if(best)return spT(best);
   }
   return null;
+ },
+ async newReleases(){
+  if(this.nrCache&&Date.now()-this.nrAt<60*60e3)return this.nrCache;
+  const cutoff=new Date(Date.now()-45*864e5).toISOString().slice(0,10),yr=new Date().getFullYear();
+  const fresh=a=>a&&a.id&&String(a.release_date||'')>=cutoff;
+  const search=q=>api('/search?type=album&limit=10&q='+encodeURIComponent(q)).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(()=>[]);
+  // 1) New from artists you actually listen to
+  let mine=[];
+  try{
+   if(!this.topArtists){const j=await api('/me/top/artists?limit=30&time_range=medium_term');this.topArtists=((j&&j.items)||[]).filter(Boolean)}
+   const lists=await Promise.all(this.topArtists.slice(0,20).map(a=>search(`artist:"${a.name}" year:${yr}`).then(l=>l.filter(x=>fresh(x)&&(x.artists||[]).some(y=>y.id===a.id)))));
+   mine=lists.flat();
+  }catch(e){}
+  // 2) Everything new on Spotify (search's "new" tag = released in the last ~2 weeks)
+  const pages=await Promise.all([0,10,20,30,40].map(o=>api(`/search?type=album&limit=10&offset=${o}&q=`+encodeURIComponent('tag:new')).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(()=>[])));
+  let general=pages.flat().filter(a=>a&&a.id);
+  if(!general.length)general=(await Promise.all([0,10,20].map(o=>api(`/search?type=album&limit=10&offset=${o}&q=`+encodeURIComponent(`year:${yr}`)).then(j=>((j&&j.albums&&j.albums.items)||[])).catch(()=>[])))).flat().filter(fresh);
+  const seen=new Set(),out=[];
+  const add=(a,yours)=>{if(!a||seen.has(a.id))return;seen.add(a.id);const it=spItem(a,'album');it.sub=`${it.sub} · ${yours?'For you · ':''}${newLabel(a.release_date)}${a.album_type==='single'?' · Single':''}`;it.rd=a.release_date||'';out.push(it)};
+  mine.sort((a,b)=>String(b.release_date).localeCompare(String(a.release_date))).forEach(a=>add(a,true));
+  general.sort((a,b)=>String(b.release_date).localeCompare(String(a.release_date))).forEach(a=>add(a,false));
+  this.nrCache=out;this.nrAt=Date.now();
+  return out;
  },
  async artistHits(it){
   const pages=await Promise.all([0,10,20].map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(`artist:"${it.name}"`)).catch(()=>null)));
