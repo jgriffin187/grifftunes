@@ -203,6 +203,9 @@ html.remote #lightsBtn{display:none!important}
 .cdYear small{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700;text-transform:uppercase}
 .cdYear.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)}
 .cdYear.on small{color:rgba(255,255,255,.85)}
+.cdChart{width:260px;flex:none}
+.cdChart button{height:42px;font-size:15px}
+.cdYear[disabled]{opacity:.35}
 .cdBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .cdWeek{font-family:Bungee;font-size:15px;letter-spacing:.06em;color:var(--gold)}
 .cdGo{margin-left:auto;height:56px;padding:0 28px;border-radius:999px;font-family:Bungee;font-size:16px;letter-spacing:.05em;color:#2a1600;background:linear-gradient(180deg,#ffe680,#ffb800);box-shadow:0 6px 0 #b37400,0 10px 30px rgba(255,184,0,.45)}
@@ -1108,7 +1111,7 @@ function renderNP(){
  setTitle(c?c.name:'Pick a song!');
  $('#npArtist').textContent=c?c.artist:'Tap any album to get the party started';
  $('#houseTag').style.display=c&&(c.house||c.radio||c.cd)?'':'none';
- $('#houseTag').textContent=c&&c.cd?`COUNTDOWN · #${c.cd.pos} · ${c.cd.year}`:c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
+ $('#houseTag').textContent=c&&c.cd?`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`:c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
  $('#houseTag').classList.toggle('cdTag',!!(c&&c.cd));
  $('#houseTag').classList.toggle('radioTag',!!(c&&c.radio));
  renderRadio();
@@ -1952,13 +1955,14 @@ async function huePair(ip){
  finally{HUE.pairing=false}
 }
 
-/* ---------- Hot 100 Rewind countdown ---------- */
-const CD={data:null,loading:null,years:20,active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{}};
+/* ---------- Countdown: Hot 100 Rewind (this week) + Country #1 hits (year) ---------- */
+const CD={data:null,cdata:null,loading:null,years:20,chart:'hot100',active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{},missing:[]};
 const CD_YEARS=[5,10,15,20,25,30,35,40];
-function cdData(){
- if(CD.data)return Promise.resolve(CD.data);
- if(!CD.loading)CD.loading=fetch('hot100-top20.json').then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()}).then(j=>{CD.data=j;return j}).finally(()=>{CD.loading=null});
- return CD.loading;
+const fetchJSON=f=>fetch(f).then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()});
+async function cdData(){
+ if(CD.chart==='country'){if(!CD.cdata)CD.cdata=await fetchJSON('country-top20.json');return CD.cdata}
+ if(!CD.data){if(!CD.loading)CD.loading=fetchJSON('hot100-top20.json').finally(()=>{CD.loading=null});CD.data=await CD.loading}
+ return CD.data;
 }
 function cdWeek(years){
  const d=new Date();d.setFullYear(d.getFullYear()-years);const t=d.getTime();
@@ -1966,51 +1970,72 @@ function cdWeek(years){
  return best;
 }
 const fmtWeek=d=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
-function cdMove(e){const[pos,, ,lw]=e;if(!lw)return['new','NEW'];if(lw===pos)return['same','—'];return lw>pos?['up','▲'+(lw-pos)]:['down','▼'+(pos-lw)]}
+const fmtMon=d=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
+function cdMove(pos,lw){if(!lw)return['new','NEW'];if(lw===pos)return['same','—'];return lw>pos?['up','▲'+(lw-pos)]:['down','▼'+(pos-lw)]}
+// Unified view of the selected chart: rows are {pos,title,artist,sub,badge:[cls,txt],cd}
+function cdView(years){
+ const yr=new Date().getFullYear()-years;
+ if(CD.chart==='country'){
+  let L=(CD.cdata&&CD.cdata.years[String(yr)])||[];
+  const chrono=L.length>1&&L.every(s=>s.weeks===L[0].weeks&&s.chart!=='airplay');
+  if(chrono)L=[...L].sort((a,b)=>b.first.localeCompare(a.first));
+  return{year:yr,date:null,chrono,heading:chrono?`Country #1 hits of ${yr}, in the order they hit #1`:`Country's biggest #1 hits of ${yr}`,rows:L.map((s,i)=>{const pos=i+1,radio=s.chart==='airplay';
+   return{pos,title:s.title,artist:s.artist,sub:radio?`${s.artist} · #1 on country radio`:`${s.artist} · #1 ${fmtMon(s.first)} · ${s.weeks} wk${s.weeks===1?'':'s'} at #1`,
+    badge:radio?['same','RADIO']:['up',s.weeks+' WK'],cd:{chart:'country',pos,year:yr,weeks:s.weeks,first:s.first,radio,chrono}}})};
+ }
+ const date=cdWeek(years),rows=(CD.data.weeks[date]||[]).map(e=>{const[pos,title,artist,lw,peak,weeks]=e;
+  return{pos,title,artist,sub:`${artist} · peak #${peak} · ${weeks} wk${weeks===1?'':'s'}`,badge:cdMove(pos,lw),cd:{chart:'hot100',pos,year:+date.slice(0,4),date,lw,peak,weeks}}});
+ return{year:+date.slice(0,4),date,heading:`Chart week of ${fmtWeek(date)}`,rows};
+}
 async function openCountdown(){
  const panel=$('#cdPanel');
- if(!CD.data){panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading 68 years of charts…</div></div>';
+ if(!(CD.chart==='country'?CD.cdata:CD.data)){panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
   try{await cdData()}catch(e){panel.innerHTML=`<div class="loading">Couldn't load the chart archive<br><small>${esc(e.message)}</small></div>`;return}}
  if(tabId!=='countdown')return;
  renderCountdown();
 }
 function renderCountdown(){
- const panel=$('#cdPanel');if(!CD.data)return;
- const yr=new Date().getFullYear(),date=CD.active?CD.date:cdWeek(CD.years),rows=CD.data.weeks[date]||[];
- panel.innerHTML=`<div class="cdHead"><div><h2>Hot 100 Rewind</h2><p>This week's Top 20, straight from the Billboard Hot 100 archives</p></div>
-  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div></div>
-  <div class="cdBar"><span class="cdWeek">Chart week of ${esc(fmtWeek(date))}</span>
-  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':'Start countdown · #20 → #1'}</button></div>
-  <div class="cdList" id="cdList">${rows.map(e=>{const[c,txt]=cdMove(e);return`<div class="cdRow" data-pos="${e[0]}"><span class="n">${e[0]}</span><span class="m"><b>${esc(e[1])}</b><span>${esc(e[2])} · peak #${e[4]} · ${e[5]} wk${e[5]===1?'':'s'}</span></span><span class="mv ${c}">${txt}</span></div>`}).join('')}</div>`;
+ const panel=$('#cdPanel');if(!(CD.chart==='country'?CD.cdata:CD.data))return;
+ const yr=new Date().getFullYear(),v=CD.active?CD.view:cdView(CD.years),cty=CD.chart==='country';
+ const hasYear=n=>!cty||!!(CD.cdata.years[String(yr-n)]||[]).length;
+ panel.innerHTML=`<div class="cdHead"><div><h2>${cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
+  <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button></div></div>
+  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div>
+  <div class="cdBar"><span class="cdWeek">${esc(v.heading)}</span>
+  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${Math.min(20,v.rows.length)} → #1`}</button></div>
+  <div class="cdList" id="cdList">${v.rows.length?v.rows.map(r=>`<div class="cdRow" data-pos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.sub)}</span></span><span class="mv ${r.badge[0]}">${r.badge[1]}</span></div>`).join(''):'<div class="loading">No chart for this year yet</div>'}</div>`;
  renderCdRows();
 }
 function renderCdRows(){
  if(tabId!=='countdown'||!CD.active)return;
- const cur=P.current&&P.current.cd;const missing=new Set(CD.missing||[]);
+ const cur=P.current&&P.current.cd,missing=new Set(CD.missing||[]);
  $$('#cdList .cdRow').forEach(r=>{const pos=+r.dataset.pos;r.classList.toggle('now',!!cur&&cur.pos===pos);r.classList.toggle('miss',missing.has(pos));
-  const played=CD.list.slice(0,CD.idx).some(x=>x.cd.pos===pos)&&!(cur&&cur.pos===pos);r.classList.toggle('done',played)});
+  r.classList.toggle('done',CD.list.slice(0,CD.idx).some(x=>x.cd.pos===pos)&&!(cur&&cur.pos===pos))});
  const now=$('#cdList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
-$('#cdPanel').addEventListener('click',e=>{
- const y=e.target.closest('[data-cdy]');if(y&&!CD.active){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown();return}
+$('#cdPanel').addEventListener('click',async e=>{
+ if(CD.active&&!e.target.closest('#cdGo'))return;
+ const c=e.target.closest('[data-cdc]');if(c){CD.chart=c.dataset.cdc;sfx('tick');await openCountdown();return}
+ const y=e.target.closest('[data-cdy]');if(y&&!y.disabled){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown();return}
  if(e.target.closest('#cdGo')){if(CD.active)stopCountdown();else startCountdown()}
 });
 async function startCountdown(){
  if(CD.matching)return;
- const date=cdWeek(CD.years),year=+date.slice(0,4),entries=[...(CD.data.weeks[date]||[])].sort((a,b)=>b[0]-a[0]);
+ const v=cdView(CD.years),key=CD.chart+':'+v.year+':'+(v.date||''),rows=[...v.rows].sort((a,b)=>b.pos-a.pos);
+ if(!rows.length)return;
  CD.matching=true;renderCountdown();
- let done=0;const btn=()=>{const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${entries.length}`};
+ let done=0;const btn=()=>{const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${rows.length}`};
  try{
-  const found=CD.cache[date]||{};
-  for(let i=0;i<entries.length;i+=4){
-   await Promise.all(entries.slice(i,i+4).map(async e=>{if(!(e[0] in found)){try{found[e[0]]=await provider.findSong(e[1],e[2])}catch(err){found[e[0]]=null}}done++;btn()}));
+  const found=CD.cache[key]||{};
+  for(let i=0;i<rows.length;i+=4){
+   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await provider.findSong(r.title,r.artist)}catch(err){found[r.pos]=null}}done++;btn()}));
   }
-  CD.cache[date]=found;
-  CD.list=entries.filter(e=>found[e[0]]).map(e=>({track:found[e[0]],e,cd:{pos:e[0],year,date,lw:e[3],peak:e[4],weeks:e[5]}}));
-  CD.missing=entries.filter(e=>!found[e[0]]).map(e=>e[0]);
+  CD.cache[key]=found;
+  CD.list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r,cd:r.cd}));
+  CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);
   if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
-  CD.active=true;CD.idx=0;CD.date=date;CD.year=year;
-  sfx('coin');toast(`Hot 100 Rewind · ${fmtWeek(date)}`+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+  CD.active=true;CD.idx=0;CD.view=v;CD.date=v.date;CD.year=v.year;
+  sfx('coin');toast((CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
   if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
   else toast('The countdown starts after the current picks');
  }finally{CD.matching=false;renderCountdown()}
@@ -2020,17 +2045,23 @@ function cdNext(){
  if(!CD.active)return null;
  if(CD.idx<CD.list.length)return CD.list[CD.idx++];
  CD.active=false;const top=CD.list[CD.list.length-1];
- toast(top?`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`:"That's the countdown!");
+ toast(top?(top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
  if(tabId==='countdown')renderCountdown();
  return null;
 }
 let cdCardT=null;
 function cdCard(x){
- const c=x.cd,[cls,mv]=cdMove([c.pos,0,0,c.lw]);
+ const c=x.cd;
  $('#cdNum').textContent='#'+c.pos;
- $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
- $('#cdTitle').textContent=x.track.name;$('#cdArtist').textContent=x.e[2];
- $('#cdStats').textContent=[`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks===1?'':'s'} on the chart`,cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)}`:`Down ${mv.slice(1)}`].join(' · ');
+ $('#cdTitle').textContent=x.track.name;$('#cdArtist').textContent=x.r.artist;
+ if(c.chart==='country'){
+  $('#cdWhen').textContent=c.chrono?`Country Gold · #1 on ${fmtWeek(c.first)}`:c.pos===1?`${c.year}'s biggest country #1`:`Country Gold · Number ${c.pos} of ${c.year}`;
+  $('#cdStats').textContent=c.radio?`Hit #1 on country radio in ${c.year}`:`#1 for ${c.weeks} week${c.weeks===1?'':'s'} · first hit #1 ${fmtWeek(c.first)}`;
+ }else{
+  const[cls,mv]=cdMove(c.pos,c.lw);
+  $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
+  $('#cdStats').textContent=[`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks===1?'':'s'} on the chart`,cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)}`:`Down ${mv.slice(1)}`].join(' · ');
+ }
  const el=$('#cdCard');el.classList.add('show');clearTimeout(cdCardT);cdCardT=setTimeout(()=>el.classList.remove('show'),7500);
  if(c.pos<=3&&S.sfx)sfx('coin');
 }
