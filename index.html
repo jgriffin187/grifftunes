@@ -1005,7 +1005,11 @@ async function getToken(){
 async function api(path,opts={},retry=true){
  const r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:'Bearer '+await getToken()},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined});
  if(r.status===401&&retry&&tok){tok.exp=0;return api(path,opts,false)}
- if(r.status===429&&retry){await sleep((+r.headers.get('Retry-After')||2)*1000);return api(path,opts,false)}
+ if(r.status===429){
+  const ra=+r.headers.get('Retry-After'),wait=ra||2;
+  if(retry&&wait<=8){await sleep(wait*1000+300);return api(path,opts,false)}
+  const er=new Error(`Spotify says GriffTunes is asking too fast. Try again in ${!ra?'a few minutes':wait>90?Math.ceil(wait/60)+' minutes':wait+' seconds'}`);er.status=429;er.wait=wait;throw er;
+ }
  if(r.status===204||r.status===202)return null;
  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
  if(!r.ok){
@@ -1015,6 +1019,8 @@ async function api(path,opts={},retry=true){
  return j;
 }
 // Follow Spotify's "next" links so long lists (playlists, big playlists, Liked Songs) aren't cut off at the first page
+// run fn over items, at most n at a time (keeps Spotify's speed limit happy)
+async function pmap(items,n,fn){const out=new Array(items.length);let i=0;await Promise.all(Array.from({length:Math.min(n,items.length)},async()=>{while(i<items.length){const k=i++;out[k]=await fn(items[k],k)}}));return out}
 async function allPages(get,path,cap){
  let out=[],p=path;
  while(p&&out.length<cap){const j=await get(p);if(!j)break;out=out.concat(j.items||[]);p=j.next?String(j.next).replace('https://api.spotify.com/v1',''):null}
@@ -1101,23 +1107,26 @@ const SPOTIFY={
   if(this.nrCache&&Date.now()-this.nrAt<60*60e3)return this.nrCache;
   const cutoff=new Date(Date.now()-45*864e5).toISOString().slice(0,10),yr=new Date().getFullYear();
   const fresh=a=>a&&a.id&&String(a.release_date||'')>=cutoff;
-  const search=q=>api('/search?type=album&limit=10&q='+encodeURIComponent(q)).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(()=>[]);
+  let limited=null;
+  const search=q=>api('/search?type=album&limit=10&q='+encodeURIComponent(q)).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(e=>{if(e.status===429)limited=e;return[]});
   // 1) New from artists you actually listen to
   let mine=[];
   try{
    if(!this.topArtists){const j=await api('/me/top/artists?limit=30&time_range=medium_term');this.topArtists=((j&&j.items)||[]).filter(Boolean)}
-   const lists=await Promise.all(this.topArtists.slice(0,20).map(a=>search(`artist:"${a.name}" year:${yr}`).then(l=>l.filter(x=>fresh(x)&&(x.artists||[]).some(y=>y.id===a.id)))));
+   // a few at a time: 20 searches at once trips Spotify's speed limit
+   const lists=await pmap(this.topArtists.slice(0,20),3,a=>limited?[]:search(`artist:"${a.name}" year:${yr}`).then(l=>l.filter(x=>fresh(x)&&(x.artists||[]).some(y=>y.id===a.id))));
    mine=lists.flat();
   }catch(e){}
   // 2) Everything new on Spotify (search's "new" tag = released in the last ~2 weeks)
-  const pages=await Promise.all([0,10,20,30,40].map(o=>api(`/search?type=album&limit=10&offset=${o}&q=`+encodeURIComponent('tag:new')).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(()=>[])));
-  let general=pages.flat().filter(a=>a&&a.id);
-  if(!general.length)general=(await Promise.all([0,10,20].map(o=>api(`/search?type=album&limit=10&offset=${o}&q=`+encodeURIComponent(`year:${yr}`)).then(j=>((j&&j.albums&&j.albums.items)||[])).catch(()=>[])))).flat().filter(fresh);
+  const pg=(q,o)=>limited?[]:api(`/search?type=album&limit=10&offset=${o}&q=`+encodeURIComponent(q)).then(j=>((j&&j.albums&&j.albums.items)||[]).filter(Boolean)).catch(e=>{if(e.status===429)limited=e;return[]});
+  let general=(await pmap([0,10,20,30,40],2,o=>pg('tag:new',o))).flat().filter(a=>a&&a.id);
+  if(!general.length&&!limited)general=(await pmap([0,10,20],2,o=>pg(`year:${yr}`,o))).flat().filter(fresh);
   const seen=new Set(),out=[];
   const add=(a,yours)=>{if(!a||seen.has(a.id))return;seen.add(a.id);const it=spItem(a,'album');it.sub=`${it.sub} · ${yours?'For you · ':''}${newLabel(a.release_date)}${a.album_type==='single'?' · Single':''}`;it.rd=a.release_date||'';out.push(it)};
   mine.sort((a,b)=>String(b.release_date).localeCompare(String(a.release_date))).forEach(a=>add(a,true));
   general.sort((a,b)=>String(b.release_date).localeCompare(String(a.release_date))).forEach(a=>add(a,false));
-  this.nrCache=out;this.nrAt=Date.now();
+  if(!out.length&&limited)throw limited;
+  if(out.length&&!limited){this.nrCache=out;this.nrAt=Date.now()}
   return out;
  },
  async artistHits(it){
