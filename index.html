@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07040f">
 <title>GriffTunes</title>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -289,7 +288,9 @@ html.remote #cdCard{display:none!important}
 #deck.on{opacity:1;pointer-events:auto}
 #dk3d{position:absolute;inset:0;width:100%;height:100%;display:none;touch-action:none}
 #deck.three #dk3d{display:block}#deck.three .dk{display:none}
-.dk3Cap{position:absolute;left:3vw;bottom:4vh;z-index:4;display:none;flex-direction:column;gap:2px;max-width:46vw;text-shadow:0 2px 18px rgba(0,0,0,.8)}
+#dkVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;pointer-events:none}
+#deck.three #dkVid{display:block}#deck.three .dkBg{display:none}
+.dk3Cap{position:absolute;left:3vw;top:5vh;z-index:4;pointer-events:none;display:none;flex-direction:column;gap:2px;max-width:46vw;text-shadow:0 2px 18px rgba(0,0,0,.8)}
 #deck.three .dk3Cap{display:flex}
 .dk3Cap small{font-family:Bungee;font-size:clamp(11px,1vw,15px);letter-spacing:.24em;color:#ff8a4c}
 .dk3Cap b{font-size:clamp(24px,2.6vw,42px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -2823,14 +2824,13 @@ async function deck3d(){
  if(D3||D3fail)return D3;
  if(!D3loading)D3loading=(async()=>{
   try{
-   const t=document.createElement('canvas').getContext('webgl2');if(!t)throw new Error('no WebGL2');
-   const m=await import('./deck3d.js');
+   const m=await import('./deckvideo.js');
    D3=m.createDeck($('#dk3d'),{
     state:()=>({playing:!!P.current&&!P.paused,pos:P.pos,dur:P.dur,has:!!P.current}),
-    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Drag the record to scratch'}[a],x,y,true)}
+    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song (the RESET button)',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Tap the record to start or stop. Drag it to scratch'}[a],x,y,true)}
    });
    window.__gtDeck=D3;
-  }catch(e){console.warn('3D turntable unavailable, using the 2D deck',e);D3fail=true}
+  }catch(e){console.warn('Video turntable unavailable, using the 2D deck',e);D3fail=true}
   return D3;
  })();
  return D3loading;
