@@ -2856,7 +2856,7 @@ function deckInfo(){
  $('#dkLbl').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkBg').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkTitle').textContent=c?c.name:'Pick a song';$('#dkArtist').textContent=c?c.artist:'GriffTunes';
- $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING')+` · ${DECK.rpm===45?'45':'33⅓'} RPM`;
+ $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING');
  $('#dkTime').textContent=`${fmt(P.pos)} / ${fmt(P.dur)}`;
  $('#dkVol').value=S.volume;
 }
@@ -2894,7 +2894,7 @@ async function deck3d(){
 }
 function deck3Info(){
  const c=P.current;
- $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING')+` · ${DECK.rpm===45?'45':'33⅓'} RPM`;
+ $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
 }
