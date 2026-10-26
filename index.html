@@ -206,9 +206,6 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .lswatch small{font-weight:500;color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .swBar{flex:1;display:flex;height:30px;border-radius:10px;overflow:hidden;min-width:120px}
 .swBar i{flex:1;display:block;box-shadow:0 0 22px currentColor}
-.tile.locked .art{position:relative}
-.tile.locked .art img{filter:saturate(.35) brightness(.7)}
-.tile.locked .art::after{content:"🔒";position:absolute;right:8px;bottom:8px;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;background:rgba(10,6,24,.75);border:1px solid rgba(255,255,255,.2)}
 .lfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px;color:var(--muted);font-size:14px}
 #lightsBtn.on{color:#ffd23f;border-color:rgba(255,210,63,.6);box-shadow:0 0 16px rgba(255,210,63,.35)}
 .hueBox{border:1px solid var(--stroke);border-radius:18px;padding:16px 18px;background:rgba(255,255,255,.04);margin-top:8px}
@@ -1061,18 +1058,6 @@ const SPOTIFY={
      all.filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);const it=spItem(x,'playlist');it.type='fplaylist';it.member=m.id;it.sub=`${m.name}'s playlist`;out.push(it)});
     }catch(e){out.push({id:'err-'+m.id,type:'ferr',member:m.id,name:m.name,sub:e.message,img:m.img||''})}
    }
-   // Playlists you follow that belong to someone not added yet: Spotify only lets this app open a playlist
-   // through its owner's own sign-in, so point to who to add.
-   try{
-    if(!this.me)this.me=await api('/me');
-    const mineAll=await allPages(api,'/me/playlists?limit=50',1000),added=new Set(FAM.map(m=>m.id).concat(this.me.id)),owners=new Map();
-    mineAll.forEach(x=>{const o=x&&x.owner;if(!o||added.has(o.id)||o.id==='spotify'||x.collaborative||seen.has(x.id))return;const k=owners.get(o.id)||{name:String(o.display_name||o.id).split(' ')[0],list:[]};k.list.push(x);owners.set(o.id,k)});
-    let shown=0;
-    [...owners.values()].sort((a,b)=>b.list.length-a.list.length).forEach(o=>o.list.forEach(x=>{
-     if(shown++>=80)return;
-     const it=spItem(x,'playlist');it.type='flock';it.owner=o.name;it.sub=`${o.name}'s playlist · add ${o.name} to play`;out.push(it);
-    }));
-   }catch(e){}
    if(!FAM.length)out.unshift({id:'fam-none',type:'ferr',name:'Add your family',sub:'In Settings, tap Add family member and have them sign in to Spotify. Their playlists show up here',img:LIKED_ART});
    return out;
   }
@@ -1093,11 +1078,6 @@ const SPOTIFY={
    return(await allPages(fg,`/playlists/${it.id}/items?limit=100`,1000)).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
   }
   if(it.type==='ferr')throw new Error(it.sub);
-  if(it.type==='flock'){
-   // Spotify usually only lets the owner's own sign-in open a playlist; try anyway, then explain
-   try{const r=(await allPages(api,`/playlists/${it.id}/items?limit=100`,1000)).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);if(r.length)return r}catch(e){}
-   throw new Error(`Spotify only lets GriffTunes open this playlist with ${it.owner||'its owner'}'s own sign-in. If ${it.owner?it.owner+' is':'they are'} family, add them in Settings → Add family member`);
-  }
   if(it.type==='liked')return(await allPages(api,'/me/tracks?limit=50',500)).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);
   if(it.type==='playlist')return(await allPages(api,`/playlists/${it.id}/items?limit=100`,1000)).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
   if(it.type==='artist'||it.type==='hits')return this.artistHits(it);
@@ -1524,7 +1504,7 @@ setInterval(()=>{
 },200);
 
 /* ---------- Browse: tabs, coverflow, shelf ---------- */
-const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' round':''}${it.type==='flock'?' locked':''}" data-open="${reg(it)}"><div class="art"><img src="${esc(it.img)}" alt="" loading="lazy"></div><b>${esc(it.name)}</b><span>${esc(it.sub||'')}</span></button>`};
+const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' round':''}" data-open="${reg(it)}"><div class="art"><img src="${esc(it.img)}" alt="" loading="lazy"></div><b>${esc(it.name)}</b><span>${esc(it.sub||'')}</span></button>`};
 const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
@@ -1581,7 +1561,7 @@ function flowGo(d){const n=Math.max(0,Math.min(flow.length-1,fi+d));if(n!==fi){f
  });
  setInterval(()=>{if(Date.now()-lastFlowTouch>9000&&flow.length>1&&!$('.modal.open')&&!attractOn){fi=(fi+1)%flow.length;layoutFlow()}},5000);
 })();
-function sizeShelf(){const sh=$('#shelf');const rowH=(sh.clientHeight-12-8)/2;const w=Math.max(110,Math.min(230,rowH-46));sh.style.setProperty('--tile',w+'px')}
+function sizeShelf(){const sh=$('#shelf');const rowH=(sh.clientHeight-12-8)/2;const w=Math.max(64,Math.min(230,rowH-48));sh.style.setProperty('--tile',w+'px')}
 
 /* ---------- Album / playlist / artist sheet ---------- */
 const openModal=m=>m.classList.add('open');
@@ -1590,12 +1570,12 @@ async function openItem(it){
  if(!it)return;sfx('tick');fixImg(it);
  $('#heroBg').style.backgroundImage=`url("${it.img}")`;
  const hi=$('#heroImg');hi.src=it.img;hi.classList.toggle('round',it.type==='artist'||it.type==='hits');
- $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',fplaylist:'FAMILY PLAYLIST',flock:'FOLLOWED PLAYLIST',fliked:'FAMILY · LIKED SONGS',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
+ $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',fplaylist:'FAMILY PLAYLIST',fliked:'FAMILY · LIKED SONGS',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
  $('#heroName').textContent=it.name;$('#heroSub').textContent=it.sub||'';
  const list=$('#trackList');list.innerHTML='<div class="loading"><div class="spin"></div></div>';list.scrollTop=0;
  openModal($('#albumModal'));
  try{const tr=await provider.tracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>'}
- catch(e){list.innerHTML=`<div class="loading">${it&&it.type==='flock'?'Locked playlist':"Couldn't load songs"}<br><small>${esc(e.message)}</small></div>`}
+ catch(e){list.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
 }
 
 /* ---------- Search + on-screen keyboard ---------- */
