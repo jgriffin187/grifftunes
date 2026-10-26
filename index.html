@@ -132,6 +132,10 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .npTitle span{display:inline-block;white-space:nowrap}
 .npTitle.scroll span{animation:marq 14s linear infinite}
 @keyframes marq{0%,12%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.houseBtn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:14px;height:52px;border-radius:999px;font-weight:800;font-size:17px;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 26px color-mix(in srgb,var(--accent) 50%,transparent);transition:transform .15s}
+.houseBtn svg{width:22px;height:22px}
+.houseBtn:active{transform:scale(.96)}
+.houseBtn.busy{opacity:.6;pointer-events:none}
 .npArtist{color:var(--muted);font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:relative}
 #viz{width:100%;height:70px;display:block;margin:10px 0 6px}
 .prog{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
@@ -617,7 +621,8 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  .np.playing .vinyl{left:66px}
  .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
  .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
- #viz,.radio,.prog,.times,.ctrls{grid-column:1/-1}
+ #viz,.radio,.prog,.times,.ctrls,.houseBtn{grid-column:1/-1}
+ .houseBtn{height:46px;font-size:16px;margin-top:10px}
  .radio{margin:6px 0 2px}.dial{height:56px}.rTop{margin-bottom:6px}.rName{font-size:15px}
  #viz{height:44px;margin:6px 0 4px}
  .times{margin-top:4px}
@@ -722,6 +727,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
     <div class="npStage"><div class="vinyl"><div class="lbl" id="vinylLabel"></div></div><div class="npArt"><img id="npImg" alt=""></div></div>
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
+    <button class="houseBtn" id="houseBtn" data-icon="sparkle" style="display:none"><span>Start House Mix</span></button>
     <canvas id="viz"></canvas>
     <div class="radio" id="radio" style="display:none">
      <div class="rTop"><span class="onAir" id="onAir">ON AIR</span><span class="rName" id="rName"></span><span class="rFm" id="rFm"></span></div>
@@ -1255,7 +1261,19 @@ const SPOTIFY={
   return dedupeHits(pages.flatMap(j=>(j&&j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean));
  },
  async housePool(){
-  try{const j=await api('/me/tracks?limit=50');const a=((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);if(a.length)return a}catch(e){}
+  // Up to ~250 songs sampled from all of your liked songs, not just the 50 most recent
+  try{
+   const first=await api('/me/tracks?limit=50'),total=(first&&first.total)||0;
+   let items=((first&&first.items)||[]).filter(Boolean);
+   if(total>50){
+    const pages=Math.min(4,Math.floor((total-50)/50)+1),offs=new Set();
+    while(offs.size<pages)offs.add(50+Math.floor(Math.random()*Math.max(1,total-50-49)));
+    const more=await pmap([...offs],2,o=>api(`/me/tracks?limit=50&offset=${o}`).catch(()=>null));
+    more.forEach(j=>{if(j&&j.items)items=items.concat(j.items.filter(Boolean))});
+   }
+   const seen=new Set(),a=items.map(x=>spT(x.track||x.item)).filter(t=>t&&!seen.has(t.id)&&seen.add(t.id));
+   if(a.length)return a;
+  }catch(e){}
   try{const j=await api('/me/albums?limit=20');return((j&&j.items)||[]).filter(Boolean).map(x=>x.album||x.item).filter(al=>al&&al.tracks&&al.tracks.items).flatMap(al=>al.tracks.items.map(t=>spT(t,spImg(al.images)))).filter(Boolean)}catch(e){return[]}
  }
 };
@@ -1531,7 +1549,8 @@ function renderNP(){
  $('#npImg').src=c?(c.img||PLACEHOLDER):PLACEHOLDER;
  $('#vinylLabel').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  setTitle(c?c.name:'Pick a song!');
- $('#npArtist').textContent=c?c.artist:'Tap any album to get the party started';
+ $('#npArtist').textContent=c?c.artist:(REMOTE?'Tap any album to get the party started':'Tap any album, or…');
+ $('#houseBtn').style.display=c||REMOTE?'none':'';
  $('#houseTag').style.display=c&&(c.house||c.radio||c.cd)?'':'none';
  $('#houseTag').textContent=c&&c.cd?`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`:c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
  $('#houseTag').classList.toggle('cdTag',!!(c&&c.cd));
@@ -1560,6 +1579,33 @@ function qFade(){const l=$('#qList');if(l)l.classList.toggle('more',l.scrollHeig
 
 let houseCache=null,houseAt=0;
 async function getHouse(){if(!houseCache||Date.now()-houseAt>30*60e3){try{houseCache=await provider.housePool();houseAt=Date.now()}catch(e){houseCache=[]}}return houseCache||[]}
+// House mix deals songs from a shuffled deck, so nothing repeats until the whole pool has played,
+// and a fresh deck never starts with something heard in the last stretch.
+const HOUSE={bag:[],recent:[]};
+async function houseNext(){
+ const pool=await getHouse();if(!pool.length)return null;
+ const ids=new Set(pool.map(t=>t.id)),cur=P.current&&P.current.id,queued=new Set(P.queue.map(t=>t.id));
+ HOUSE.bag=HOUSE.bag.filter(id=>ids.has(id));
+ if(!HOUSE.bag.length){
+  const keep=Math.min(HOUSE.recent.length,Math.floor(pool.length/2));
+  const avoid=new Set(HOUSE.recent.slice(-keep));
+  const fresh=pool.map(t=>t.id).filter(id=>!avoid.has(id));
+  for(let i=fresh.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[fresh[i],fresh[j]]=[fresh[j],fresh[i]]}
+  HOUSE.bag=fresh;
+ }
+ let k=HOUSE.bag.findIndex(id=>id!==cur&&!queued.has(id));if(k<0)k=HOUSE.bag.findIndex(id=>id!==cur);if(k<0)k=0;
+ const id=HOUSE.bag.splice(k,1)[0];
+ HOUSE.recent.push(id);if(HOUSE.recent.length>200)HOUSE.recent.splice(0,HOUSE.recent.length-200);
+ return pool.find(t=>t.id===id)||null;
+}
+async function startHouse(){
+ const b=$('#houseBtn');b.classList.add('busy');
+ try{
+  const t=await houseNext();
+  if(!t){sfx('err');toast('No songs for the house mix yet. Like a few songs on Spotify first','warn');return}
+  sfx('coin');await startTrack(t,true);toast('House mix · '+t.name,t.img);
+ }finally{b.classList.remove('busy')}
+}
 async function startTrack(t,house=false,radio=null,cd=null){
  await speakersAuto();
  P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
@@ -1573,8 +1619,9 @@ async function advance(){
   const next=P.queue.shift();saveQueue();renderQueue();
   if(next){await startTrack(next);return}
   if(CD.active){const e=cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
+  if(P.current&&P.current.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
   if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
-  if(S.house){const pool=await getHouse();if(pool.length){await startTrack(pool[Math.floor(Math.random()*pool.length)],true);return}}
+  if(S.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();
  }finally{advancing=false}
 }
@@ -2017,6 +2064,7 @@ $('#sInput').addEventListener('focus',()=>{if(S.osk)$('#osk').style.display=''})
 $('#coinBtn').onclick=insertCoin;
 $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
+$('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
 $('#shPrev').onclick=()=>$('#shelf').scrollBy({left:-$('#shelf').clientWidth*.8});
