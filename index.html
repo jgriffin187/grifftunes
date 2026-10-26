@@ -99,8 +99,9 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .tile .art::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);transition:.2s}
 .tile:active{transform:scale(.95)}
 .tile:active .art::after{box-shadow:inset 0 0 0 3px var(--accent2)}
-.tile b{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tile span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-5px}
+.tile b{font-size:16px;font-weight:700;line-height:1.2;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.tile span{font-size:12.5px;color:var(--muted);opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:-3px}
+.tile span:empty{display:none}
 .tile.round b,.tile.round span{text-align:center}
 .tile.sk .art{background:linear-gradient(90deg,rgba(255,255,255,.05),rgba(255,255,255,.13),rgba(255,255,255,.05));background-size:200% 100%;animation:shim 1.2s infinite}
 @keyframes shim{to{background-position:-200% 0}}
@@ -1520,7 +1521,8 @@ async function loadTab(id){
   const items=((await provider.load(id))||[]).filter(Boolean).map(fixImg);
   if(tabId!==id)return;
   renderFlow(items.slice(0,11));
-  $('#shelf').innerHTML=items.length?items.map(tile).join(''):'<div class="shelfMsg">Nothing here yet.</div>';
+  const subs=new Set(items.map(x=>x.sub||''));const shown=subs.size===1&&items.length>2?items.map(x=>Object.assign({},x,{sub:''})):items.map(x=>/^jgriffin187's playlist$/i.test(x.sub||'')||(provider.me&&x.sub===`${provider.me.display_name}'s playlist`)?Object.assign({},x,{sub:''}):x);
+  $('#shelf').innerHTML=items.length?shown.map(tile).join(''):'<div class="shelfMsg">Nothing here yet.</div>';
   $('#shelf').scrollLeft=0;sizeShelf();
  }catch(e){
   if(tabId!==id)return;
@@ -1563,7 +1565,7 @@ function flowGo(d){const n=Math.max(0,Math.min(flow.length-1,fi+d));if(n!==fi){f
 })();
 function sizeShelf(){const sh=$('#shelf');if(!sh||!sh.clientHeight)return;
  // Room under each cover for the title + subtitle, measured from a real tile when one exists.
- const t=sh.querySelector('.tile:not(.sk)'),txt=t?[...t.querySelectorAll('b,span')].reduce((a,e)=>a+e.offsetHeight,0)+8:44;
+ const t=sh.querySelector('.tile:not(.sk)');let txt=60;if(t){const b=t.querySelector('b'),lh=parseFloat(getComputedStyle(b).lineHeight)||19,sp=t.querySelector('span');txt=lh*2+(sp&&sp.offsetHeight?sp.offsetHeight+3:0)+10}
  const rowH=(sh.clientHeight-12-8)/2;const w=Math.max(56,Math.min(230,Math.floor(rowH-Math.max(40,txt)-4)));
  if(sh.style.getPropertyValue('--tile')!==w+'px')sh.style.setProperty('--tile',w+'px')}
 // Re-fit whenever the shelf's height changes (fonts loading, coverflow settling, window/zoom changes), not just on resize.
