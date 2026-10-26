@@ -1585,7 +1585,9 @@ async function loadTab(id){
  try{
   const items=((await provider.load(id))||[]).filter(Boolean).map(fixImg);
   if(tabId!==id)return;
-  renderFlow(items.slice(0,11));
+  // Ranked lists show every entry in the carousel, starting at #1
+  const ranked=items.some(x=>x.rank);
+  renderFlow(ranked?items:items.slice(0,11),ranked?0:null);
   const subs=new Set(items.map(x=>x.sub||''));const shown=subs.size===1&&items.length>2?items.map(x=>Object.assign({},x,{sub:''})):items.map(x=>/^jgriffin187's playlist$/i.test(x.sub||'')||(provider.me&&x.sub===`${provider.me.display_name}'s playlist`)?Object.assign({},x,{sub:''}):x);
   $('#shelf').innerHTML=items.length?shown.map(tile).join(''):'<div class="shelfMsg">Nothing here yet.</div>';
   $('#shelf').scrollLeft=0;sizeShelf();
@@ -1596,8 +1598,8 @@ async function loadTab(id){
  }
 }
 let flow=[],fi=0,lastFlowTouch=0;
-function renderFlow(items){
- flow=items;fi=items.length?Math.min(items.length-1,Math.floor(Math.min(items.length,7)/2)):0;
+function renderFlow(items,start){
+ flow=items;fi=items.length?(start!=null?Math.min(items.length-1,start):Math.min(items.length-1,Math.floor(Math.min(items.length,7)/2))):0;
  $('#flowStage').innerHTML=items.map((it,i)=>`<div class="fItem${it.type==='artist'?' round':''}" data-fi="${i}"><img src="${esc(it.img)}" alt="" draggable="false"></div>`).join('');
  layoutFlow();
 }
@@ -1608,7 +1610,7 @@ function layoutFlow(){
   const d=+el.dataset.fi-fi,ad=Math.abs(d),sg=Math.sign(d);
   const tx=d===0?0:sg*(size*.68+(ad-1)*size*.3),tz=d===0?50:-size*.5-ad*24,ry=d===0?0:-sg*50;
   el.style.transform=`translate(-50%,-50%) translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg)`;
-  el.style.zIndex=50-ad;el.style.opacity=ad>4?0:1;el.style.pointerEvents=ad>4?'none':'';
+  el.style.zIndex=50-ad;el.style.opacity=ad>4?0:1;el.style.pointerEvents=ad>4?'none':'';el.style.visibility=ad>6?'hidden':'';
   el.classList.toggle('center',d===0);
  });
  const it=flow[fi];$('#flowCaption').innerHTML=it?`<h3>${esc(it.name)}</h3><p>${esc(it.sub||'')}</p>`:'';
