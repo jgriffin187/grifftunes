@@ -1013,6 +1013,12 @@ async function api(path,opts={},retry=true){
  }
  return j;
 }
+// Follow Spotify's "next" links so long lists (playlists, big playlists, Liked Songs) aren't cut off at the first page
+async function allPages(get,path,cap){
+ let out=[],p=path;
+ while(p&&out.length<cap){const j=await get(p);if(!j)break;out=out.concat(j.items||[]);p=j.next?String(j.next).replace('https://api.spotify.com/v1',''):null}
+ return out.slice(0,cap);
+}
 const spImg=imgs=>imgs&&imgs.length?(imgs.find(i=>i.width&&i.width>=250&&i.width<=700)||imgs[0]).url:'';
 const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),album:(t.album&&t.album.name)||'',img:spImg(t.album&&t.album.images)||img||'',duration:t.duration_ms}:null;
 function newLabel(d){
@@ -1032,26 +1038,35 @@ function dedupeHits(list){
 }
 const SPOTIFY={
  key:'spotify',
- get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat(FAM.length?[{id:'family',name:'Family'}]:[],[{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}])},
+ get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat([{id:'family',name:'Family'}],[{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}])},
  me:null,
  async load(tab){
   if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
   if(tab==='playlists'){
    if(!this.me)this.me=await api('/me');
-   const j=await api('/me/playlists?limit=50');
-   const mine=((j&&j.items)||[]).filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
+   const all=await allPages(api,'/me/playlists?limit=50',1000);
+   const mine=all.filter(x=>x&&((x.owner&&x.owner.id===this.me.id)||x.collaborative));
    return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
   }
   if(tab==='new')return this.newReleases();
   if(tab==='family'){
-   const out=[];
+   const out=[],seen=new Set();
    for(const m of FAM){
     try{
-     const me=m.id,j=await famApi(m,'/me/playlists?limit=50');
+     const me=m.id,all=await allPages(p=>famApi(m,p),'/me/playlists?limit=50',1000);
      out.push({id:'liked-'+m.id,type:'fliked',member:m.id,name:`${m.name}'s Liked Songs`,sub:m.full,img:LIKED_ART});
-     ((j&&j.items)||[]).filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).forEach(x=>{const it=spItem(x,'playlist');it.type='fplaylist';it.member=m.id;it.sub=`${m.name}'s playlist`;out.push(it)});
+     all.filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);const it=spItem(x,'playlist');it.type='fplaylist';it.member=m.id;it.sub=`${m.name}'s playlist`;out.push(it)});
     }catch(e){out.push({id:'err-'+m.id,type:'ferr',member:m.id,name:m.name,sub:e.message,img:m.img||''})}
    }
+   // Playlists you follow that belong to someone not added yet: Spotify only lets this app open a playlist
+   // through its owner's own sign-in, so point to who to add.
+   try{
+    if(!this.me)this.me=await api('/me');
+    const mineAll=await allPages(api,'/me/playlists?limit=50',1000),added=new Set(FAM.map(m=>m.id).concat(this.me.id)),owners=new Map();
+    mineAll.forEach(x=>{const o=x&&x.owner;if(!o||added.has(o.id)||o.id==='spotify'||x.collaborative)return;const k=owners.get(o.id)||{name:o.display_name||o.id,n:0,img:spImg(x.images)};k.n++;owners.set(o.id,k)});
+    [...owners.entries()].sort((a,b)=>b[1].n-a[1].n).slice(0,8).forEach(([id,o])=>out.push({id:'lock-'+id,type:'ferr',name:`${o.name}'s playlists`,sub:`You follow ${o.n} of their playlist${o.n>1?'s':''}. If they're family, add them in Settings to play these`,img:o.img||LIKED_ART}));
+   }catch(e){}
+   if(!FAM.length)out.unshift({id:'fam-none',type:'ferr',name:'Add your family',sub:'In Settings, tap Add family member and have them sign in to Spotify. Their playlists show up here',img:LIKED_ART});
    return out;
   }
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
@@ -1066,12 +1081,13 @@ const SPOTIFY={
   }
   if(it.type==='fplaylist'||it.type==='fliked'){
    const m=FAM.find(x=>x.id===it.member);if(!m)throw new Error('That family member was removed');
-   if(it.type==='fliked'){const j=await famApi(m,'/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
-   const j=await famApi(m,`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
+   const fg=p=>famApi(m,p);
+   if(it.type==='fliked')return(await allPages(fg,'/me/tracks?limit=50',500)).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);
+   return(await allPages(fg,`/playlists/${it.id}/items?limit=100`,1000)).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
   }
   if(it.type==='ferr')throw new Error(it.sub);
-  if(it.type==='liked'){const j=await api('/me/tracks?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean)}
-  if(it.type==='playlist'){const j=await api(`/playlists/${it.id}/items?limit=100`);return((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
+  if(it.type==='liked')return(await allPages(api,'/me/tracks?limit=50',500)).filter(Boolean).map(x=>spT(x.track||x.item)).filter(Boolean);
+  if(it.type==='playlist')return(await allPages(api,`/playlists/${it.id}/items?limit=100`,1000)).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean);
   if(it.type==='artist'||it.type==='hits')return this.artistHits(it);
   return[];
  },
