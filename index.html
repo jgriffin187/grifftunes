@@ -298,6 +298,47 @@ html.remote #cdCard{display:none!important}
 .dk3Cap b{font-size:clamp(24px,2.6vw,42px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dk3Cap span{font-size:clamp(16px,1.5vw,24px);color:rgba(255,255,255,.75)}
 .dk3Load{position:absolute;inset:0;display:none;place-items:center;z-index:3}
+/* Turntable overlays: up-next record stack, transport controls, sing-along lyrics (video deck only) */
+.dkScrim,.dkLyr,.dkNext,.dkCtl{display:none}
+#deck.three .dkScrim,#deck.three .dkCtl{display:block}#deck.three .dkCtl{display:flex}
+.dkScrim{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .6s;background:linear-gradient(90deg,rgba(4,2,8,.82),rgba(4,2,8,.6) 34%,rgba(4,2,8,0) 62%)}
+#deck.lyrOn .dkScrim{opacity:1}
+#deck.three.lyrOn .dkLyr{display:block}
+.dkLyr{position:absolute;left:3vw;top:21vh;bottom:19vh;width:min(46vw,760px);overflow:hidden;z-index:4;pointer-events:none;-webkit-mask-image:linear-gradient(transparent,#000 12%,#000 80%,transparent);mask-image:linear-gradient(transparent,#000 12%,#000 80%,transparent)}
+.dkLyrLines{display:flex;flex-direction:column;gap:.5em;transition:transform .7s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.dkLyrLine{font-size:clamp(20px,2.15vw,38px);font-weight:800;line-height:1.18;color:rgba(255,255,255,.36);transform-origin:left center;transition:color .35s,transform .35s,text-shadow .35s;text-shadow:0 2px 14px rgba(0,0,0,.85)}
+.dkLyrLine.past{color:rgba(255,255,255,.2)}
+.dkLyrLine.gap{color:rgba(255,255,255,.28)}
+.dkLyrLine.cur{color:#fff;transform:scale(1.05);text-shadow:0 0 22px color-mix(in srgb,var(--accent2) 65%,transparent),0 2px 14px rgba(0,0,0,.85)}
+.dkLyrPlain .dkLyrLine{font-size:clamp(17px,1.55vw,27px);font-weight:700;color:rgba(255,255,255,.82)}
+.dkLyrMsg{margin-top:12vh;font-size:clamp(18px,1.6vw,26px);font-weight:700;color:rgba(255,255,255,.72);text-shadow:0 2px 14px rgba(0,0,0,.85)}
+#deck.three .dkNext.on{display:flex}
+.dkNext{--sl:clamp(84px,8.2vw,156px);position:absolute;right:2.2vw;bottom:4.5vh;z-index:4;align-items:flex-end;gap:clamp(14px,1.5vw,26px);max-width:min(36vw,560px);padding:clamp(12px,1.1vw,20px) clamp(16px,1.5vw,26px) calc(var(--sl)*.17 + 10px) calc(var(--sl)*.34 + 14px);border-radius:22px;background:linear-gradient(135deg,rgba(12,9,20,.86),rgba(12,9,20,.66));border:1px solid rgba(255,255,255,.14);box-shadow:0 18px 50px rgba(0,0,0,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);pointer-events:none}
+.dkStack{position:relative;width:var(--sl);height:var(--sl);flex:none}
+.dkSleeve{position:absolute;inset:0;border-radius:5px;overflow:hidden;background:#222;transform:translate(calc(var(--i)*-9%),calc(var(--i)*5%)) rotate(calc(var(--i)*-4deg));filter:brightness(calc(1 - var(--i)*.2));box-shadow:0 8px 18px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.12)}
+.dkSleeve img{width:100%;height:100%;object-fit:cover;display:block}
+.dkSleeve::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18),rgba(255,255,255,0) 40%)}
+.dkPeek{position:absolute;inset:4%;border-radius:50%;transform:translateY(-54%);background:radial-gradient(circle,rgba(255,255,255,.1) 0 1px,transparent 1.5px),repeating-radial-gradient(circle,#0c0c0f 0 1.5px,#1b1a20 1.5px 3px);box-shadow:0 6px 16px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.08)}
+.dkPeek::after{content:'';position:absolute;inset:0;border-radius:50%;background:linear-gradient(115deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.14) 45%,rgba(255,255,255,0) 60%)}
+.dkPeek i{position:absolute;inset:32%;border-radius:50%;background-size:cover;background-position:center;box-shadow:0 0 0 2px #0b0b0d}
+.dkPeek i::after{content:'';position:absolute;left:50%;top:50%;width:9%;height:9%;margin:-4.5%;border-radius:50%;background:#0b0b0d}
+.dkNext.swap .dkPeek{animation:dkPeek .9s cubic-bezier(.2,.8,.2,1)}
+.dkNext.swap .dkSleeve[style*="--i:0"]{animation:dkSleeveIn .6s cubic-bezier(.2,.8,.2,1)}
+@keyframes dkPeek{from{transform:translateY(0)}to{transform:translateY(-54%)}}
+@keyframes dkSleeveIn{from{opacity:0;transform:translateX(30%) rotate(8deg)}}
+.dkNextTxt{display:flex;flex-direction:column;gap:2px;min-width:0;padding-bottom:2px}
+.dkNextTxt small{font-family:Bungee;font-size:clamp(10px,.85vw,14px);letter-spacing:.24em;color:var(--accent2);text-shadow:0 0 10px color-mix(in srgb,var(--accent2) 60%,transparent)}
+.dkNextTxt b{font-size:clamp(16px,1.45vw,26px);font-weight:800;line-height:1.15;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.dkNextTxt span{font-size:clamp(13px,1.05vw,18px);color:rgba(255,255,255,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dkNextTxt em{font-style:normal;margin-top:6px;align-self:flex-start;font-size:clamp(11px,.85vw,14px);font-weight:700;color:#160b00;background:linear-gradient(180deg,#ffe27a,var(--gold));padding:3px 10px;border-radius:99px}
+.dkNextTxt em:empty{display:none}
+.dkCtl{position:absolute;left:50%;bottom:3.4vh;transform:translateX(-50%);z-index:5;align-items:center;gap:clamp(10px,1vw,16px);padding:clamp(7px,.6vw,10px);border-radius:999px;background:rgba(10,8,16,.72);border:1px solid rgba(255,255,255,.14);box-shadow:0 14px 40px rgba(0,0,0,.55);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+#deck.saver .dkCtl{display:none!important}
+.dkCtlBtn{width:clamp(48px,4vw,64px);height:clamp(48px,4vw,64px);border-radius:50%;display:grid;place-items:center;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);transition:transform .15s,background .25s,box-shadow .25s}
+.dkCtlBtn svg{width:42%;height:42%}
+.dkCtlBtn:active{transform:scale(.92)}
+.dkCtlBtn.big{width:clamp(60px,5vw,80px);height:clamp(60px,5vw,80px);border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)}
+.dkCtlBtn.on{color:var(--accent2);border-color:color-mix(in srgb,var(--accent2) 65%,transparent);box-shadow:0 0 18px color-mix(in srgb,var(--accent2) 45%,transparent)}
 #deck.loading3 .dk3Load{display:grid}#deck.loading3 .dk{opacity:0}
 .dkBg{position:absolute;left:50%;top:50%;width:14vw;height:14vh;margin:-7vh 0 0 -7vw;background-size:cover;background-position:center;filter:blur(12px) saturate(1.5) brightness(.32);transform:scale(9);will-change:transform}
 .dkClose{position:absolute;top:18px;right:18px;z-index:5}
@@ -770,7 +811,15 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 <div id="deck">
  <div class="dkBg" id="dkBg"></div>
  <canvas id="dk3d"></canvas>
+ <div class="dkScrim"></div>
  <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span></div>
+ <div class="dkLyr" id="dkLyr"><div class="dkLyrLines" id="dkLyrLines"></div></div>
+ <div class="dkNext" id="dkNext"><div class="dkStack" id="dkStack"></div><div class="dkNextTxt"><small>Up next</small><b id="dkNextTitle"></b><span id="dkNextArtist"></span><em id="dkNextMore"></em></div></div>
+ <div class="dkCtl" id="dkCtl">
+  <button class="dkCtlBtn" id="dkCtlLyr" aria-label="Lyrics" data-icon="lyrics"></button>
+  <button class="dkCtlBtn big" id="dkCtlPlay" aria-label="Play or pause"></button>
+  <button class="dkCtlBtn" id="dkCtlNext" aria-label="Next song" data-icon="skip"></button>
+ </div>
  <div class="dk3Load" id="dk3Load"><div class="spin"></div></div>
  <button class="closeBtn dkClose" id="dkClose" aria-label="Close turntable" data-icon="close"></button>
  <div class="dk" id="dk">
@@ -2761,7 +2810,7 @@ async function lyrFetch(t){
  if(res.synced&&!res.synced.length){res.none=true;delete res.synced}
  LYR.cache.set(t.id,res);return res;
 }
-const lyrNeeded=()=>LYR.open||(S.lyricsSaver&&galleryOn);
+const lyrNeeded=()=>LYR.open||(S.lyricsSaver&&galleryOn)||(DECK.open&&!!S.dkLyr);
 async function lyrTrack(){
  const t=P.current;
  if(!t){LYR.cur=null;LYR.data=null;lyrRender();return}
@@ -2788,7 +2837,7 @@ function lyrRender(){
   else body.innerHTML=`<div class="lyrLines lyrPlain" id="lyrLines">${d.plain.map(l=>`<div class="lyrLine">${esc(l)||'&nbsp;'}</div>`).join('')}</div>`;
   LYR.idx=-2;lyrSync();
  }
- lyrSaverLine();
+ lyrSaverLine();dkLyrRender();
 }
 function lyrCurIdx(){
  const d=LYR.data;if(!d||!d.synced)return -1;
@@ -2798,6 +2847,7 @@ function lyrCurIdx(){
 }
 function lyrSync(){
  const d=LYR.data;if(!d)return;
+ dkLyrSync();
  if(LYR.open){
   const box=$('#lyrLines'),body=$('#lyrBody');if(!box)return;
   if(d.synced){
@@ -2896,10 +2946,65 @@ function deck3Info(){
  const c=P.current;
  $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
+ dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
  if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
+}
+// Up next: the queue as a stack of record sleeves, with the next record sliding out of the top one
+function dkNextRender(){
+ const q=P.queue,sig=q.slice(0,4).map(t=>t.id).join('|')+'#'+q.length;
+ if(DECK.nextSig===sig)return;
+ const el=$('#dkNext'),swap=DECK.nextSig!=null&&!!q[0]&&DECK.nextTop!==q[0].id;
+ DECK.nextSig=sig;DECK.nextTop=q[0]&&q[0].id;
+ el.classList.toggle('on',q.length>0);if(!q.length)return;
+ const n=Math.min(4,q.length),art=t=>esc(t.img||PLACEHOLDER),top=q[0];
+ let h='';for(let i=n-1;i>=1;i--)h+=`<div class="dkSleeve" style="--i:${i}"><img src="${art(q[i])}" alt=""></div>`;
+ h+=`<div class="dkPeek"><i style="background-image:url('${art(top)}')"></i></div><div class="dkSleeve" style="--i:0"><img src="${art(top)}" alt=""></div>`;
+ $('#dkStack').innerHTML=h;
+ $('#dkNextTitle').textContent=top.name;$('#dkNextArtist').textContent=top.artist||'';
+ $('#dkNextMore').textContent=q.length>1?`+${q.length-1} more in the queue`:'';
+ if(swap){el.classList.remove('swap');void el.offsetWidth;el.classList.add('swap')}
+}
+// Sing-along lyrics on the turntable (same lyrics source as the lyrics screen)
+function dkLyrRender(){
+ const on=DECK.open&&!!S.dkLyr;$('#deck').classList.toggle('lyrOn',on);$('#dkCtlLyr').classList.toggle('on',!!S.dkLyr);
+ if(!on)return;
+ const t=P.current,d=t&&LYR.cur===t.id?LYR.data:null,box=$('#dkLyrLines');
+ const key=!t?'none':t.id+':'+(!d?'wait':d.synced?'s':d.plain?'p':d.instrumental?'i':'n');
+ if(DECK.lyrKey===key)return;DECK.lyrKey=key;DECK.lyrIdx=-2;box.style.transform='';box.classList.remove('dkLyrPlain');
+ const msg=txt=>`<div class="dkLyrMsg">${txt}</div>`;
+ if(!t)box.innerHTML=msg('Lyrics show up here when a song is playing');
+ else if(!d)box.innerHTML=msg('Finding the lyrics…');
+ else if(d.instrumental)box.innerHTML=msg('Instrumental. Enjoy the music!');
+ else if(d.none)box.innerHTML=msg('No lyrics found for this one');
+ else if(d.synced)box.innerHTML=d.synced.map(l=>`<div class="dkLyrLine${l.text?'':' gap'}">${l.text?esc(l.text):'♪ ♪ ♪'}</div>`).join('');
+ else{box.classList.add('dkLyrPlain');box.innerHTML=d.plain.map(l=>`<div class="dkLyrLine">${esc(l)||'&nbsp;'}</div>`).join('')}
+ dkLyrSync();
+}
+function dkLyrSync(){
+ if(!(DECK.open&&S.dkLyr))return;
+ const t=P.current,d=LYR.data,box=$('#dkLyrLines'),body=$('#dkLyr');
+ if(!t||!d||LYR.cur!==t.id||!box.children.length)return;
+ if(d.synced){
+  const i=lyrCurIdx();if(i===DECK.lyrIdx)return;DECK.lyrIdx=i;
+  const els=box.children;for(let k=0;k<els.length;k++){els[k].classList.toggle('cur',k===i);els[k].classList.toggle('past',k<i)}
+  const el=els[Math.max(0,i)];if(el)box.style.transform=`translateY(${Math.round(body.clientHeight*.34-el.offsetTop-el.offsetHeight/2)}px)`;
+ }else if(d.plain){
+  const frac=P.dur?Math.min(1,P.pos/P.dur):0,max=Math.max(0,box.scrollHeight-body.clientHeight*.6);
+  box.style.transform=`translateY(${Math.round(body.clientHeight*.15-frac*max)}px)`;
+ }
+}
+function dkCtlRender(){
+ const b=$('#dkCtlPlay'),playing=!!P.current&&!P.paused,k=playing?'pause':'play';
+ if(b.dataset.k!==k){b.dataset.k=k;b.innerHTML=I[k];b.setAttribute('aria-label',playing?'Pause':'Play')}
+}
+function dkToggleLyrics(){
+ sfx('tick');S.dkLyr=!S.dkLyr;saveS();DECK.lyrKey=null;
+ if(S.dkLyr&&P.current&&(LYR.cur!==P.current.id||!LYR.data)&&!LYR.loading){LYR.cur=null;lyrTrack()}
+ dkLyrRender();
 }
 function openDeck(saver){
  DECK.open=true;DECK.saver=!!saver;if(!saver)sfx('tick');
+ $('#deck').classList.toggle('saver',!!saver);DECK.nextSig=null;DECK.lyrKey=null;dkCtlRender();
  deckLayout();deckInfo();$('#deck').classList.add('on');$('#deckBtn').classList.add('on');
  const dk=$('#deck');
  if(!D3&&!D3fail)dk.classList.add('loading3');
@@ -2914,6 +3019,9 @@ $('#deckBtn').onclick=()=>openDeck(false);
 $('#dkClose').onclick=closeDeck;
 $('#dkStart').onclick=()=>{sfx('tick');togglePlay()};
 $('#dkSkip').onclick=()=>{sfx('tick');advance()};
+$('#dkCtlPlay').onclick=()=>{sfx('tick');togglePlay().then(dkCtlRender);dkCtlRender()};
+$('#dkCtlNext').onclick=()=>{sfx('tick');advance()};
+$('#dkCtlLyr').onclick=dkToggleLyrics;
 $('#dkVol').addEventListener('input',e=>setVol(+e.target.value));
 $('#deck').addEventListener('click',e=>{const b=e.target.closest('[data-dksp]');if(!b)return;DECK.rpm=+b.dataset.dksp;$$('#deck [data-dksp]').forEach(x=>x.classList.toggle('on',x===b));sfx('tick');deckInfo()});
 addEventListener('resize',()=>{if(DECK.open){deckLayout();if(D3)D3.resize()}});
@@ -2944,6 +3052,9 @@ const TIPS={
  devRefresh:'Look for speakers again',
  radioBtn:()=>S.radio?'Radio is on: tap to turn it off or change stations':'Radio: nonstop music when Up Next is empty',
  lyrBtn:'Show sing-along lyrics',
+ dkCtlPlay:()=>P.current&&!P.paused?'Pause':'Play',
+ dkCtlNext:'Next song',
+ dkCtlLyr:()=>S.dkLyr?'Hide the lyrics':'Show sing-along lyrics on the turntable',
  deckBtn:'Full-screen turntable',
  vol:()=>`Volume ${S.volume}%`,
  clearQueue:'Remove every song from Up Next',
