@@ -66,7 +66,8 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .browse{min-width:0;min-height:0;display:flex;flex-direction:column;gap:10px}
 .tabs{display:flex;gap:10px;flex:none;overflow-x:auto;scrollbar-width:none;padding:2px}
 .tabs::-webkit-scrollbar{display:none}
-.tab{height:48px;padding:0 24px;border-radius:999px;font-weight:700;font-size:17px;letter-spacing:.03em;background:rgba(255,255,255,.06);border:1px solid var(--stroke);color:var(--muted);white-space:nowrap;transition:.25s}
+.tabs.fitting .tab{transition:none}
+.tab{flex:none;height:48px;padding:0 var(--tabPad,24px);border-radius:999px;font-weight:700;font-size:var(--tabFs,17px);letter-spacing:.03em;background:rgba(255,255,255,.06);border:1px solid var(--stroke);color:var(--muted);white-space:nowrap;transition:.25s}
 .tab.on{color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 0 24px color-mix(in srgb,var(--accent) 55%,transparent)}
 
 .flow{position:relative;flex:none;height:clamp(230px,41vh,460px);perspective:1400px;touch-action:pan-y;overflow:hidden}
@@ -1564,7 +1565,16 @@ const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' roun
 const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
-function buildTabs(){$('#tabs').innerHTML=provider.tabs.concat(REMOTE?[]:[{id:'countdown',name:'Countdown'}]).map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('')}
+function buildTabs(){$('#tabs').innerHTML=provider.tabs.concat(REMOTE?[]:[{id:'countdown',name:'Countdown'}]).map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('');if(!tabsRO)try{tabsRO=new ResizeObserver(()=>fitTabs());tabsRO.observe($('#tabs'))}catch(e){}fitTabs()}
+// Shrink the tab pills just enough that every tab fits on smaller screens (laptops); big screens keep full size.
+function fitTabs(){const el=$('#tabs');if(!el||!el.clientWidth)return;
+ const steps=[[24,17,10],[18,16,8],[14,15,7],[11,14,6],[8,13,5]];
+ const room=el.clientWidth-4;el.classList.add('fitting');
+ for(const[p,f,g]of steps){el.style.setProperty('--tabPad',p+'px');el.style.setProperty('--tabFs',f+'px');el.style.gap=g+'px';
+  const kids=[...el.children],need=kids.reduce((w,k)=>w+k.getBoundingClientRect().width,0)+g*Math.max(0,kids.length-1);if(need<=room)break}
+ el.offsetWidth;el.classList.remove('fitting')}
+let tabsRO=null;addEventListener('resize',()=>fitTabs());
+try{document.fonts&&document.fonts.ready.then(()=>fitTabs())}catch(e){}
 async function loadTab(id){
  tabId=id;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
  const isCd=id==='countdown';$('#flow').style.display=$('.shelfHead').style.display=$('#shelf').style.display=isCd?'none':'';$('#cdPanel').style.display=isCd?'':'none';
