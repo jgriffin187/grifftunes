@@ -95,6 +95,7 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .tile .art{width:100%;aspect-ratio:1;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 10px 26px rgba(0,0,0,.45);flex:none;background:rgba(255,255,255,.06)}
 .tile img{width:100%;height:100%;object-fit:cover}
 .tile.round .art{border-radius:50%}
+.tile .rank{position:absolute;left:8px;top:8px;z-index:1;min-width:34px;height:34px;padding:0 7px;border-radius:17px;display:grid;place-items:center;font:400 16px/1 Bungee,'Outfit',sans-serif;font-style:normal;color:#160b00;background:linear-gradient(180deg,#ffe27a,var(--gold) 55%,#e0a800);box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 14px rgba(255,210,63,.55)}
 .tile .art::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);transition:.2s}
 .tile:active{transform:scale(.95)}
 .tile:active .art::after{box-shadow:inset 0 0 0 3px var(--accent2)}
@@ -906,12 +907,14 @@ const DEMO=(()=>{
  const shuffle=(a,seed)=>{const rr=rng(seed);return a.map(x=>[rr(),x]).sort((p,q)=>p[0]-q[0]).map(x=>x[1])};
  return{
   key:'demo',
-  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'family',name:'Family'},{id:'artists',name:'Artists'},{id:'new',name:'New Releases'}],
+  tabs:[{id:'featured',name:'Featured'},{id:'albums',name:'Albums'},{id:'playlists',name:'Playlists'},{id:'family',name:'Family'},{id:'artists',name:'Artists'},{id:'new',name:'New Releases'},{id:'greatest',name:'Greatest Albums'}],
   async load(tab){await sleep(120);
    if(tab==='albums')return albums;
    if(tab==='playlists')return playlists;
    if(tab==='family')return playlists.slice(0,6).map((p,i)=>Object.assign({},p,{name:['Road Trip Mix','Workout','Sunday Morning','Summer 2026','Dance Party','Chill Vibes'][i],sub:`${i%2?'Sam':'Alex'}'s playlist`}));
    if(tab==='artists')return artists;
+   if(tab==='greatest')return(await GA.list()).map(a=>{const h=[...(a.title+a.artist)].reduce((x,c)=>(x*31+c.charCodeAt(0))>>>0,7),h1=h%360,h2=(h1+90)%360,img=demoArt(a.title,a.artist,h1,h2,h%5);
+    return{id:'ga'+a.rank,type:'album',name:a.title,sub:GA.sub(a),rank:a.rank,img,tracks:Array.from({length:8+h%5},(_,k)=>({id:`ga${a.rank}-${k}`,uri:`demo:ga:${a.rank}:${k}`,name:`${a.title} · Track ${k+1}`,artist:a.artist,album:a.title,img,color:[`hsl(${h1} 100% 60%)`,`hsl(${h2} 100% 62%)`],duration:(170+(h>>k)%90)*1000}))}});
    if(tab==='new'){const now=Date.now();return shuffle(albums.slice(),day+7).slice(0,14).map((a,i)=>Object.assign({},a,{sub:`${a.sub} · ${newLabel(new Date(now-(i*2+1)*864e5).toISOString().slice(0,10))}`}))}
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
   },
@@ -1044,9 +1047,19 @@ function dedupeHits(list){
  for(const t of list){const k=songKey(t.name);const cur=m.get(k);if(!cur)m.set(k,t);else if(live(cur)&&!live(t))m.set(k,t)}
  return[...m.values()];
 }
+/* ---------- Greatest Albums of All Time (Rolling Stone top 50) ---------- */
+const GA={data:null,loading:null,
+ async list(){if(this.data)return this.data;if(!this.loading)this.loading=fetch('greatest-albums.json').then(r=>{if(!r.ok)throw new Error('greatest-albums.json is missing');return r.json()}).then(j=>this.data=j.albums).finally(()=>{this.loading=null});return this.loading},
+ sub:a=>`#${a.rank} · ${a.artist} · ${a.year}`
+};
+// Album titles without the "(2012 Remaster)", "[Deluxe Edition]", " - The Best Of…" noise, so Spotify's names line up with the list's.
+const albumKey=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()
+ .replace(/\s*[\(\[][^\)\]]*(remaster|deluxe|edition|anniversary|expanded|version|mono|stereo|bonus|legacy|reissue|super|collector)[^\)\]]*[\)\]]/g,'')
+ .replace(/\s+[-–—]\s+.*$/,'').replace(/&/g,' and ').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim().replace(/^the /,'');
+const artistKey=s=>albumKey(s).replace(/\band\b/g,'').replace(/\s+/g,' ').trim();
 const SPOTIFY={
  key:'spotify',
- get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat([{id:'family',name:'Family'}],[{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'}])},
+ get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat([{id:'family',name:'Family'}],[{id:'artists',name:'Top Artists'},{id:'new',name:'New Releases'},{id:'greatest',name:'Greatest Albums'}])},
  me:null,
  async load(tab){
   if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
@@ -1057,6 +1070,7 @@ const SPOTIFY={
    return[{id:'liked',type:'liked',name:'Liked Songs',sub:'Your saved tracks',img:LIKED_ART},...mine.map(x=>spItem(x,'playlist'))];
   }
   if(tab==='new')return this.newReleases();
+  if(tab==='greatest')return this.greatest();
   if(tab==='family'){
    const out=[],seen=new Set();
    for(const m of FAM){
@@ -1129,6 +1143,37 @@ const SPOTIFY={
   if(!out.length&&limited)throw limited;
   if(out.length&&!limited){this.nrCache=out;this.nrAt=Date.now()}
   return out;
+ },
+ // Rolling Stone's top 50, matched to Spotify once and then remembered on this device
+ // (50 searches would otherwise run every time someone opens the tab).
+ async greatest(){
+  const list=await GA.list();
+  const cache=store.get('greatest.v1',{});let limited=null,changed=false;
+  const find=async a=>{
+   const want=albumKey(a.q||a.title),who=artistKey(a.artist);
+   const byArtist=x=>(x.artists||[]).some(y=>{const n=artistKey(y.name);return n&&(n.includes(who)||who.includes(n))});
+   const score=x=>{const k=albumKey(x.name);let s=k===want?100:(k.startsWith(want)||want.startsWith(k))&&k?60:-1;if(s<0)return-1;
+    s+=x.album_type==='album'?10:x.album_type==='compilation'?5:0;if(/deluxe|expanded|super|anniversary|\blive\b|edition/i.test(x.name))s-=8;return s};
+   for(const q of[`album:"${a.q||a.title}" artist:"${a.artist}"`,`${a.q||a.title} ${a.artist}`]){
+    if(limited)return null;
+    const j=await api('/search?type=album&limit=10&q='+encodeURIComponent(q)).catch(e=>{if(e.status===429)limited=e;return null});
+    const best=((j&&j.albums&&j.albums.items)||[]).filter(x=>x&&x.id&&byArtist(x)).map((x,i)=>[score(x)-i*.1,x]).filter(p=>p[0]>=0).sort((p,q)=>q[0]-p[0])[0];
+    if(best)return best[1];
+   }
+   return null;
+  };
+  const out=await pmap(list,3,async a=>{
+   let hit=cache[a.rank];
+   if(!hit||hit.t!==a.title){const x=await find(a);if(!x)return null;hit={t:a.title,id:x.id,uri:x.uri,img:spImg(x.images)};cache[a.rank]=hit;changed=true}
+   return{id:hit.id,type:'album',uri:hit.uri,img:hit.img,name:a.title,sub:GA.sub(a),rank:a.rank};
+  });
+  if(changed)store.set('greatest.v1',cache);
+  const found=out.filter(Boolean);
+  if(!found.length&&limited)throw limited;
+  const miss=list.length-found.length;
+  if(limited)toast('Spotify needs a breather. The rest of the list will fill in next time','warn');
+  else if(miss)toast(`${miss} of the top ${list.length} aren't on Spotify`);
+  return found;
  },
  async artistHits(it){
   const pages=await Promise.all([0,10,20].map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(`artist:"${it.name}"`)).catch(()=>null)));
@@ -1515,7 +1560,7 @@ setInterval(()=>{
 },200);
 
 /* ---------- Browse: tabs, coverflow, shelf ---------- */
-const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' round':''}" data-open="${reg(it)}"><div class="art"><img src="${esc(it.img)}" alt="" loading="lazy"></div><b>${esc(it.name)}</b><span>${esc(it.sub||'')}</span></button>`};
+const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' round':''}" data-open="${reg(it)}"><div class="art"><img src="${esc(it.img)}" alt="" loading="lazy">${it.rank?`<i class="rank">${+it.rank}</i>`:''}</div><b>${esc(it.name)}</b><span>${esc(it.sub||'')}</span></button>`};
 const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
@@ -1940,7 +1985,7 @@ const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcde
 function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
 const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
 const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio,cd:t.cd};
-const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner};
+const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
 function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits}}
