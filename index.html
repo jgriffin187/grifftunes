@@ -1476,6 +1476,49 @@ function djScratch(){
  }catch(e){}
 }
 
+// Live scratch for the full-screen turntable: the sound follows the hand. Pitch and loudness track how
+// fast the record is being pushed, so a back-and-forth drag gives the classic wicka-wicka.
+const SCR={v:null,acc:0,at:0,tick:null};
+function scrAudio(){
+ actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+ if(actx.state==='suspended')actx.resume();
+ if(!noiseBuf){const len=actx.sampleRate;noiseBuf=actx.createBuffer(1,len,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}
+}
+function scratchStart(){
+ scratchEnd(false);if(!S.sfx)return;
+ try{
+  scrAudio();const t=actx.currentTime;
+  const out=actx.createGain();out.gain.value=.34;const comp=actx.createDynamicsCompressor();out.connect(comp).connect(actx.destination);
+  const osc=actx.createOscillator();osc.type='sawtooth';
+  const f1=actx.createBiquadFilter(),f2=actx.createBiquadFilter(),nf=actx.createBiquadFilter();
+  f1.type=f2.type=nf.type='bandpass';f1.Q.value=5;f2.Q.value=7;nf.Q.value=1.2;
+  const g=actx.createGain();g.gain.value=0;const ng=actx.createGain();ng.gain.value=.5;
+  const n=actx.createBufferSource();n.buffer=noiseBuf;n.loop=true;
+  osc.connect(f1).connect(g);osc.connect(f2).connect(g);n.connect(nf).connect(ng).connect(g);g.connect(out);
+  osc.start(t);n.start(t);
+  // the "grab": a soft thump of the hand landing on the vinyl
+  const th=actx.createOscillator(),tg=actx.createGain();th.type='sine';th.frequency.setValueAtTime(120,t);th.frequency.exponentialRampToValueAtTime(45,t+.09);
+  tg.gain.setValueAtTime(.5,t);tg.gain.exponentialRampToValueAtTime(.001,t+.1);th.connect(tg).connect(out);th.start(t);th.stop(t+.12);
+  SCR.v={osc,f1,f2,nf,g,n,out,set(s){const k=Math.max(.04,s),now=actx.currentTime,c=.012;
+   osc.frequency.setTargetAtTime(105*k,now,c);f1.frequency.setTargetAtTime(620*k,now,c);f2.frequency.setTargetAtTime(1080*k,now,c);nf.frequency.setTargetAtTime(1900*k,now,c);
+   g.gain.setTargetAtTime(Math.min(1,s/1.1),now,s>.05?.008:.03)}};
+  SCR.acc=0;SCR.at=performance.now();
+  SCR.tick=setInterval(()=>{const now=performance.now(),dt=Math.max(.001,(now-SCR.at)/1000);SCR.at=now;
+   const speed=Math.min(4,Math.abs(SCR.acc)/dt);SCR.acc=0;if(SCR.v)SCR.v.set(speed)},25);
+ }catch(e){SCR.v=null}
+}
+function scratchMove(turns){SCR.acc+=turns}
+function scratchEnd(){
+ clearInterval(SCR.tick);SCR.tick=null;const v=SCR.v;SCR.v=null;if(!v)return;
+ try{const t=actx.currentTime;v.g.gain.cancelScheduledValues(t);v.g.gain.setTargetAtTime(0,t,.02);v.osc.stop(t+.2);v.n.stop(t+.2);setTimeout(()=>{try{v.out.disconnect()}catch(e){}},400)}catch(e){}
+}
+// A quick tap on the record: a short forward-back "baby scratch"
+function scratchTap(){
+ if(!S.sfx)return;
+ try{scrAudio();const out=actx.createGain();out.gain.value=.32;const comp=actx.createDynamicsCompressor();out.connect(comp).connect(actx.destination);
+  let t=actx.currentTime+.01;for(const[d,pk]of[[.08,2.5],[.11,1.9]]){scratchStroke(t,d,pk,out);t+=d+.015}}catch(e){}
+}
+
 /* ---------- UI helpers ---------- */
 function toast(msg,img){
  const warn=img==='warn';
@@ -2982,7 +3025,7 @@ async function deck3d(){
    const m=await import('./deckvideo.js');
    D3=m.createDeck($('#dk3d'),{
     state:()=>({playing:!!P.current&&!P.paused,pos:P.pos,dur:P.dur,has:!!P.current}),
-    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song (the RESET button)',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Tap the record to start or stop. Drag it to scratch'}[a],x,y,true)}
+    onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onScratchStart:scratchStart,onScratchMove:scratchMove,onScratchEnd:scratchEnd,onScratchTap:scratchTap,onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song (the RESET button)',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Grab the record and drag it to scratch'}[a],x,y,true)}
    });
    window.__gtDeck=D3;
   }catch(e){console.warn('Video turntable unavailable, using the 2D deck',e);D3fail=true}

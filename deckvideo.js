@@ -188,8 +188,9 @@ export function createDeck(canvas, hooks) {
     }
     if (onRecord(p) && ready) {
       canvas.setPointerCapture(e.pointerId);
-      dragging = { a0: angleAt(p), t0: vid.currentTime, moved: 0, total: 0, at: performance.now(), wasPaused: vid.paused };
+      dragging = { a0: angleAt(p), t0: vid.currentTime, moved: 0, total: 0, at: performance.now(), wasPaused: vid.paused, prev: angleAt(p) };
       vid.pause();
+      hooks.onScratchStart && hooks.onScratchStart();
     }
   });
   canvas.addEventListener('pointermove', e => {
@@ -204,13 +205,18 @@ export function createDeck(canvas, hooks) {
     const t = dragging.t0 + (da / TAU) * SEC_PER_TURN;
     vid.currentTime = ((t % LOOP_SEC) + LOOP_SEC) % LOOP_SEC;
     dragging.total += Math.abs(da - (dragging.lastDa || 0)); dragging.lastDa = da;
-    if (Math.abs(da) > 1.4) { hooks.onScratch(); dragging.a0 = angleAt(p); dragging.t0 = vid.currentTime; dragging.lastDa = 0; }
+    // live scratch sound: report how far the hand turned the record (radians, + = forward / clockwise)
+    let step = angleAt(p) - dragging.prev; if (step > Math.PI) step -= TAU; if (step < -Math.PI) step += TAU;
+    dragging.prev = angleAt(p);
+    if (hooks.onScratchMove) hooks.onScratchMove(step / (TAU / SEC_PER_TURN));
+    if (Math.abs(da) > 1.4) { if (!hooks.onScratchMove) hooks.onScratch(); dragging.a0 = angleAt(p); dragging.t0 = vid.currentTime; dragging.lastDa = 0; }
   });
   const up = () => {
     if (!dragging) return;
     const tap = dragging.total < .08 && performance.now() - dragging.at < 400;
     dragging = null;
-    if (tap) hooks.onStart();
+    hooks.onScratchEnd && hooks.onScratchEnd(tap);
+    if (tap) { if (hooks.onScratchTap) hooks.onScratchTap(); else hooks.onStart(); }
   };
   canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
   canvas.addEventListener('pointerleave', () => { if (hoverAct && hooks.onHover) { hoverAct = null; hooks.onHover(null); } });
