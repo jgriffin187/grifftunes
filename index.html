@@ -1428,6 +1428,8 @@ const qKey=()=>'queue_'+provider.key;
 const saveQueue=()=>{if(!REMOTE)store.set(qKey(),P.queue)};
 
 /* ---------- Sound effects ---------- */
+// Bump BUILD whenever deckvideo.js changes, so browsers fetch the new file instead of a cached copy.
+const BUILD='2026-10-26-scratch2';
 let actx=null;
 function sfx(type){
  if(!S.sfx)return;
@@ -3022,7 +3024,7 @@ async function deck3d(){
  if(D3||D3fail)return D3;
  if(!D3loading)D3loading=(async()=>{
   try{
-   const m=await import('./deckvideo.js');
+   const m=await import('./deckvideo.js?v='+BUILD);
    D3=m.createDeck($('#dk3d'),{
     state:()=>({playing:!!P.current&&!P.paused,pos:P.pos,dur:P.dur,has:!!P.current}),
     onStart:()=>{sfx('tick');togglePlay()},onSkip:()=>{sfx('tick');advance()},onScratch:()=>djScratch(),onScratchStart:scratchStart,onScratchMove:scratchMove,onScratchEnd:scratchEnd,onScratchTap:scratchTap,onRpm:r=>{DECK.rpm=r;sfx('tick')},onHover:(a,x,y)=>{if(!a){window.__gtTip.hide();return}window.__gtTip.show({start:'Start or stop the record',skip:'Next song (the RESET button)',rpm33:'33⅓ RPM',rpm45:'45 RPM',platter:'Grab the record and drag it to scratch'}[a],x,y,true)}
