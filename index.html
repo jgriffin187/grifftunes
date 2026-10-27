@@ -2591,6 +2591,11 @@ async function hueLoadLights(){
   const[g,ls]=await Promise.all([hueFetch(`/${S.hue.user}/groups/${S.hue.group}`),hueFetch(`/${S.hue.user}/lights`)]);
   const ids=(g&&g.lights)||[];
   HUE.all=ls||{};
+  // First time plugs named for the speakers show up (e.g. "Evolve Left" / "Evolve Right"), use them for speaker power automatically
+  if(!(S.huePlugs||[]).length&&!S.plugsAutoDone){
+   const sp=Object.entries(ls||{}).filter(([id,L])=>isPlug(L)&&/evolve|speaker|amp|sound|audio/i.test(L.name||'')).map(([id])=>id);
+   if(sp.length){S.huePlugs=sp;S.plugsAutoDone=true;saveS();SPK.on=null;toast(`Speaker power: using ${sp.map(id=>ls[id].name).join(' & ')}`);setTimeout(()=>{renderLightsBtn();renderSpkRow&&renderSpkRow()},0)}
+  }
   const plug=id=>isPlug(ls[id])||(S.huePlugs||[]).includes(id);
   const roomIds=(S.hue.group==='0'?Object.keys(ls||{}):ids);
   HUE.lights=roomIds.filter(id=>ls[id]&&!plug(id)).map(id=>{const L=ls[id]||{},ty=String(L.type||'').toLowerCase(),c=(L.capabilities&&L.capabilities.control)||{};
