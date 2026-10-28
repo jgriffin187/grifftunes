@@ -266,10 +266,19 @@ html.remote #lightsBtn{display:none!important}
 .cdTxt b{font-size:clamp(24px,2.6vw,38px);font-weight:800;line-height:1.1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cdTxt span{font-size:clamp(17px,1.6vw,22px);color:rgba(255,255,255,.8)}
 .cdTxt em{font-style:normal;font-size:14px;color:var(--muted);margin-top:6px}
-.npFact{display:none;margin-top:10px;padding:9px 12px;border-radius:12px;background:rgba(255,210,63,.08);border:1px solid rgba(255,210,63,.28);font-size:15px;line-height:1.35;color:rgba(255,255,255,.9);transition:opacity .45s}
-.npFact.on{display:block}.npFact.fade{opacity:0}
-.npFact i{display:block;margin-bottom:3px}
-.npFact i,#gfList i{font-style:normal;font-family:Bungee;font-size:12px;letter-spacing:.14em;color:var(--gold);margin-right:10px;white-space:nowrap}
+.npTicker{display:none;position:relative;align-items:stretch;height:42px;margin-top:12px;border-radius:12px;overflow:hidden;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 22%,transparent),rgba(8,4,20,.55) 40%,rgba(8,4,20,.55) 60%,color-mix(in srgb,var(--accent2) 22%,transparent));box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 0 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.npTicker.on{display:flex}
+.npTicker::before,.npTicker::after{content:'';position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--gold),var(--accent2));background-size:200% 100%;animation:tkGlow 6s linear infinite;z-index:2}
+.npTicker::before{top:0}.npTicker::after{bottom:0;animation-direction:reverse}
+@keyframes tkGlow{to{background-position:200% 0}}
+.tkBadge{flex:none;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0618;font-family:Bungee;font-size:10px;letter-spacing:.12em;line-height:1.05;z-index:1;box-shadow:6px 0 14px rgba(0,0,0,.45)}
+.tkBadge b{font-size:17px;letter-spacing:.04em}
+.tkWin{flex:1;min-width:0;position:relative;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,transparent,#000 22px,#000 calc(100% - 30px),transparent)}
+.tkTrack{position:absolute;left:0;top:0;bottom:0;display:flex;align-items:center;white-space:nowrap;will-change:transform}
+.tkItem{font-size:16px;font-weight:600;color:rgba(255,255,255,.92);padding-left:4px}
+.tkItem i{margin-right:8px}
+.tkSep{color:var(--gold);margin:0 18px;font-size:13px;text-shadow:0 0 10px var(--gold)}
+.tkItem i,#gfList i{font-style:normal;font-family:Bungee;font-size:12px;letter-spacing:.14em;color:var(--gold);margin-right:10px;white-space:nowrap}
 #gfCard{position:fixed;left:50%;top:170px;z-index:71;width:min(760px,92vw);padding:26px 34px 28px;border-radius:28px;background:rgba(14,7,30,.94);border:1px solid rgba(255,93,162,.55);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,93,162,.28);pointer-events:none;opacity:0;transform:translate(-50%,-30px) scale(.94);transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1)}
 #gfCard.show{opacity:1;transform:translate(-50%,0) scale(1)}
 .gfHead{font-family:Bungee;font-size:clamp(22px,2.4vw,32px);color:var(--accent2);text-shadow:0 0 16px rgba(255,93,162,.6);margin-bottom:14px}
@@ -632,7 +641,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  .np.playing .vinyl{left:66px}
  .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
  .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
- .npFact{grid-column:1/-1;font-size:14px;margin-top:8px;padding:7px 11px}
+ .npTicker{grid-column:1/-1;height:38px;margin-top:10px}.tkItem{font-size:15px}
  #viz,.radio,.prog,.times,.ctrls,.houseBtn{grid-column:1/-1}
  .houseBtn{height:46px;font-size:16px;margin-top:10px}
  .radio{margin:6px 0 2px}.dial{height:56px}.rTop{margin-bottom:6px}.rName{font-size:15px}
@@ -749,7 +758,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
     <div class="npStage"><div class="vinyl"><div class="lbl" id="vinylLabel"></div></div><div class="npArt"><img id="npImg" alt=""></div></div>
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
-    <div class="npFact" id="npFact" aria-live="polite"></div>
+    <div class="npTicker" id="npTicker"><div class="tkBadge" id="tkBadge"></div><div class="tkWin"><div class="tkTrack" id="tkTrack"></div></div></div>
     <button class="houseBtn" id="houseBtn" data-icon="sparkle" style="display:none"><span>Start House Mix</span></button>
     <canvas id="viz"></canvas>
     <div class="radio" id="radio" style="display:none">
@@ -2966,24 +2975,52 @@ function gfPickStat(d){
  const[f,i]=free[Math.floor(Math.random()*free.length)];GF.usedS.add(i);return{when:f[0],text:f[1]};
 }
 function gfLine(el,f){el.innerHTML='';if(!f)return;const i=document.createElement('i');i.textContent=f.when;el.append(i,document.createTextNode(f.text))}
-// Now Playing fact: starts with something from the months this song was on the chart, then a new one every 30s
-function gfShow(f){
- const el=$('#npFact');
- if(!f){el.classList.remove('on','fade');el.innerHTML='';return}
- const put=()=>{gfLine(el,{when:f.ev?`Meanwhile · ${f.when}`:f.when,text:f.text});el.classList.add('on');el.classList.remove('fade')};
- if(el.classList.contains('on')){el.classList.add('fade');setTimeout(put,450)}else put();
+// Now Playing ticker: facts scroll right to left; as one leaves on the left a new one joins at the end.
+// A new song puts something from the months it was on the chart next in line.
+const TK={on:false,x:0,last:0,next:[],n:0,raf:0,speed:62};
+function tkFact(){
+ const c=P.current&&P.current.cd,d=c&&gfYear(c.year);if(!d)return null;
+ if(TK.next.length)return TK.next.shift();
+ TK.n++;return(TK.n%2?gfPickStat(d):gfPickEvent(d))||gfPickStat(d);
 }
+function tkAdd(){
+ const f=tkFact();if(!f)return false;
+ const it=document.createElement('span');it.className='tkItem';
+ gfLine(it,{when:f.ev?`Meanwhile · ${f.when}`:f.when,text:f.text});
+ const sep=document.createElement('span');sep.className='tkSep';sep.textContent='★';
+ $('#tkTrack').append(it,sep);return true;
+}
+function tkFill(){const w=$('#npTicker .tkWin').clientWidth||300,tr=$('#tkTrack');let g=0;while(tr.scrollWidth-TK.x<w*1.6&&g++<12&&tkAdd());}
+function tkFrame(t){
+ TK.raf=0;if(!TK.on)return;
+ const dt=Math.min(100,t-(TK.last||t));TK.last=t;
+ if(!P.paused&&!matchMedia('(prefers-reduced-motion: reduce)').matches)TK.x+=TK.speed*dt/1000;
+ const tr=$('#tkTrack');let f;
+ while((f=tr.firstElementChild)&&f.offsetWidth){const sp=f.nextElementSibling,w=f.offsetWidth+(sp?sp.offsetWidth+36:0);if(w>=TK.x)break;TK.x-=w;sp&&sp.remove();f.remove()}
+ tkFill();
+ tr.style.transform=`translateX(${-TK.x}px)`;
+ TK.raf=requestAnimationFrame(tkFrame);
+}
+function tkStart(y){
+ const el=$('#npTicker');
+ $('#tkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
+ if(TK.on)return;
+ TK.on=true;TK.x=0;$('#tkTrack').innerHTML='';el.classList.add('on');TK.last=0;
+ requestAnimationFrame(()=>{TK.x=-$('#npTicker .tkWin').clientWidth*.5;tkFill();if(!TK.raf)TK.raf=requestAnimationFrame(tkFrame)});
+}
+function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
 function gfSong(x){
  const c=x.cd,d=gfYear(c.year);
- if(!d||S.gradFacts===false){gfShow(null);return}
- if(GF.shown!==x.track.id){GF.shown=x.track.id;GF.songs++;GF.npAt=performance.now();GF.npN=0;gfShow(gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7))||gfPickStat(d))}
+ if(!d||S.gradFacts===false){tkStop();return}
+ if(GF.shown!==x.track.id){
+  GF.shown=x.track.id;GF.songs++;
+  const f=gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7));if(f)TK.next.unshift(f);
+ }
+ tkStart(c.year);
 }
 function gfNP(){
  const c=P.current&&P.current.cd;
- if(!c||c.chart!=='grad'||!CD.active){if($('#npFact').classList.contains('on'))gfShow(null);return}
- if(GF.shown!==P.current.id||P.paused||performance.now()-GF.npAt<30000)return;
- const d=gfYear(c.year);if(!d)return;
- GF.npAt=performance.now();GF.npN++;gfShow((GF.npN%2?gfPickStat(d):gfPickEvent(d))||gfPickStat(d));
+ if(!c||c.chart!=='grad'||!CD.active)tkStop();
 }
 // Every 4th song of the Senior Countdown, a "Class of 'YY flashback" card shows in the song's last seconds, as it hands over to the next one
 function gfTick(){
