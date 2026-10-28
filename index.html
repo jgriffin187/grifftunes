@@ -606,7 +606,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .gBtn svg{width:22px;height:22px}
 .gBtn.gPlay{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 55%,transparent)}
 .gNow.hasTk{border-radius:26px;width:min(560px,44vw);max-width:none;padding:10px 12px 12px 10px}
-.gTicker{flex:1 1 100%;margin-top:10px}.gTicker .tkItem{font-size:inherit}.gBtn svg{fill:#fff}
+.gTicker{flex:1 1 100%;margin-top:10px}.dkTicker{width:min(36vw,620px);margin-top:16px;zoom:1.3}.dkTicker .tkItem{font-size:inherit}.dkTicker .tkBadge b{font-size:17px;font-weight:400;margin:0;overflow:visible;white-space:normal}.dkTicker .tkItem{color:rgba(255,255,255,.92)}.gTicker .tkItem{font-size:inherit}.gBtn svg{fill:#fff}
 #attract{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .9s;background:#05020c;overflow:hidden}
 #attract.on{opacity:1;pointer-events:auto}
 .attBg{position:absolute;inset:-120px;background-size:cover;background-position:center;filter:blur(80px) saturate(1.9) brightness(.5);transform:scale(1.2)}
@@ -860,7 +860,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  <div class="dkBg" id="dkBg"></div>
  <canvas id="dk3d"></canvas>
  <div class="dkScrim"></div>
- <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span></div>
+ <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span><div class="npTicker dkTicker" id="dkTicker"><div class="tkBadge" id="dkTkBadge"></div><div class="tkWin"><div class="tkTrack" id="dkTkTrack"></div></div></div></div>
  <div class="dkLyr" id="dkLyr"><div class="dkLyrLines" id="dkLyrLines"></div></div>
  <div class="dkNext" id="dkNext"><div class="dkStack" id="dkStack"></div><div class="dkNextTxt"><small>Up next</small><b id="dkNextTitle"></b><span id="dkNextArtist"></span><em id="dkNextMore"></em></div></div>
  <div class="dkCtl" id="dkCtl">
@@ -3002,8 +3002,8 @@ function tkAdd(){
  const sep=document.createElement('span');sep.className='tkSep';sep.textContent='★';
  $('#tkTrack').append(it,sep);return true;
 }
-function tkMirror(){const m=$('#gTkTrack'),tr=$('#tkTrack');if(m.innerHTML!==tr.innerHTML)m.innerHTML=tr.innerHTML;m.style.fontSize=getComputedStyle(tr.firstElementChild||tr).fontSize}
-function tkFill(){const w=Math.max($('#npTicker .tkWin').clientWidth,$('#gTicker .tkWin').clientWidth)||300,tr=$('#tkTrack');let g=0;while(tr.scrollWidth-TK.x<w*1.6&&g++<12&&tkAdd());}
+function tkMirror(m){const tr=$('#tkTrack');if(m.innerHTML!==tr.innerHTML)m.innerHTML=tr.innerHTML;m.style.fontSize=getComputedStyle(tr.firstElementChild||tr).fontSize;m.style.transform=tr.style.transform}
+function tkFill(){const w=Math.max($('#npTicker .tkWin').clientWidth,$('#gTicker .tkWin').clientWidth,$('#dkTicker .tkWin').clientWidth)||300,tr=$('#tkTrack');let g=0;while(tr.scrollWidth-TK.x<w*1.6&&g++<12&&tkAdd());}
 function tkFrame(t){
  TK.raf=0;if(!TK.on)return;
  const dt=Math.min(100,t-(TK.last||t));TK.last=t;
@@ -3012,18 +3012,19 @@ function tkFrame(t){
  while((f=tr.firstElementChild)&&f.offsetWidth){const sp=f.nextElementSibling,w=f.offsetWidth+(sp?sp.offsetWidth+36:0);if(w>=TK.x)break;TK.x-=w;sp&&sp.remove();f.remove()}
  tkFill();
  tr.style.transform=`translateX(${-TK.x}px)`;
- if(galleryOn){tkMirror();$('#gTkTrack').style.transform=tr.style.transform}
+ if(galleryOn)tkMirror($('#gTkTrack'));
+ if(DECK.open)tkMirror($('#dkTkTrack'));
  TK.raf=requestAnimationFrame(tkFrame);
 }
 function tkStart(y,fresh){
  const el=$('#npTicker');
- $('#tkBadge').innerHTML=$('#gTkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
- $('#gTicker').classList.add('on');$('#gNow').classList.add('hasTk');
+ $('#tkBadge').innerHTML=$('#gTkBadge').innerHTML=$('#dkTkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
+ $('#gTicker').classList.add('on');$('#dkTicker').classList.add('on');$('#gNow').classList.add('hasTk');
  if(TK.on&&!fresh)return;
  TK.on=true;TK.x=0;$('#tkTrack').innerHTML='';el.classList.add('on');TK.last=0;
  requestAnimationFrame(()=>{TK.x=-$('#npTicker .tkWin').clientWidth*.5;tkFill();if(!TK.raf)TK.raf=requestAnimationFrame(tkFrame)});
 }
-function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';$('#gTicker').classList.remove('on');$('#gNow').classList.remove('hasTk');$('#gTkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
+function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';$('#gTicker').classList.remove('on');$('#dkTicker').classList.remove('on');$('#dkTkTrack').innerHTML='';$('#gNow').classList.remove('hasTk');$('#gTkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
 /* Artist facts for the ticker: a line or two from Wikipedia, their age when the song charted (Wikidata), and chart stats from our own Hot 100 data */
 const AF={mem:new Map(),idx:null};
 const afNorm=n=>songKey(n).replace(/^the\s+/,'').replace(/[^a-z0-9]/g,'');
@@ -3290,7 +3291,7 @@ function deckInfo(){
  $('#dkLbl').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkBg').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkTitle').textContent=c?c.name:'Pick a song';$('#dkArtist').textContent=c?c.artist:'GriffTunes';
- $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING');
+ $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING');
  $('#dkTime').textContent=`${fmt(P.pos)} / ${fmt(P.dur)}`;
  $('#dkVol').value=S.volume;
 }
@@ -3328,7 +3329,7 @@ async function deck3d(){
 }
 function deck3Info(){
  const c=P.current;
- $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?`COUNTDOWN #${c.cd.pos}`:c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
+ $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
  if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
