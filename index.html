@@ -2969,6 +2969,7 @@ async function startCountdown(fromPos){
   CD.list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r,cd:r.cd}));
   CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);
   if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
+  await gfLoad();GF.y=null;
   CD.active=true;CD.grad=null;CD.idx=0;CD.view=v;CD.date=v.date;CD.year=v.year;
   sfx('coin');toast((CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
   if(fromPos)await cdJump(fromPos);
@@ -3002,7 +3003,11 @@ async function gfLoad(){
  return GF.loading;
 }
 function gfReset(y){GF.y=y;GF.usedE=new Set();GF.usedS=new Set();GF.songs=0;GF.shown=null}
-function gfYear(y){const d=GF.data&&GF.data.years&&GF.data.years[y];if(d&&GF.y!==y)gfReset(y);return d}
+// Grad Year uses the senior-year window (Sep–Jun); Hot 100 Rewind and Country Gold use the calendar year
+function gfYear(c){if(!c||!GF.data)return null;const g=c.chart==='grad',k=(g?'g':'c')+c.year,d=g?GF.data.years&&GF.data.years[c.year]:GF.data.cal&&GF.data.cal[c.year];if(d&&GF.y!==k)gfReset(k);return d}
+const gfMonth=(d,n)=>{const[y,m]=d.split('-').map(Number),t=y*12+m-1+n;return`${Math.floor(t/12)}-${String(t%12+1).padStart(2,'0')}`};
+function gfRange(c){if(c.chart==='grad')return[(c.first||'').slice(0,7),(c.last||'').slice(0,7)];const d=c.date||c.first;return d?[gfMonth(d,-1),gfMonth(d,1)]:['','']}
+const gfBadge=c=>`${c.chart==='grad'?'CLASS OF':c.chart==='country'?'COUNTRY':'HOT 100'}<b>'${String(c.year).slice(2)}</b>`;
 const gfWhen=m=>`${MON[+m.slice(5,7)-1]} '${m.slice(2,4)}`;
 // An event from while this song was on the chart, else any unused event, else a whole-year fact
 function gfPickEvent(d,from,to){
@@ -3023,7 +3028,7 @@ function gfLine(el,f){el.innerHTML='';if(!f)return;const i=document.createElemen
 // A new song puts something from the months it was on the chart next in line.
 const TK={on:false,x:0,last:0,next:[],n:0,raf:0,speed:62};
 function tkFact(){
- const c=P.current&&P.current.cd,d=c&&gfYear(c.year);if(!d)return null;
+ const c=P.current&&P.current.cd,d=c&&gfYear(c);if(!d)return null;
  if(TK.next.length)return TK.next.shift();
  TK.n++;return(TK.n%2?gfPickStat(d):gfPickEvent(d))||gfPickStat(d);
 }
@@ -3048,9 +3053,9 @@ function tkFrame(t){
  if(DECK.open)tkMirror($('#dkTkTrack'));
  TK.raf=requestAnimationFrame(tkFrame);
 }
-function tkStart(y,fresh){
+function tkStart(c,fresh){
  const el=$('#npTicker');
- $('#tkBadge').innerHTML=$('#gTkBadge').innerHTML=$('#dkTkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
+ $('#tkBadge').innerHTML=$('#gTkBadge').innerHTML=$('#dkTkBadge').innerHTML=gfBadge(c);
  $('#gTicker').classList.add('on');$('#dkTicker').classList.add('on');$('#gNow').classList.add('hasTk');
  if(TK.on&&!fresh)return;
  TK.on=true;TK.x=0;$('#tkTrack').innerHTML='';el.classList.add('on');TK.last=0;
@@ -3130,45 +3135,45 @@ async function afFacts(x){
  if(!songs||(songs.size<2&&parts.length>1)){const p=parts[0];if(p&&idx.get(afNorm(p))){act=w&&afNorm(w.title)===afNorm(act)&&songs?act:p;songs=idx.get(afNorm(act))}}
  const label=`About ${act}`;
  if(w&&w.lines[0])out.push({when:label,text:w.lines[0]});
- if(w&&w.born&&c.first){const a=ageAt(w.born,c.first);if(a>=8&&a<90)out.push({when:act,text:`Was ${a} when this song first hit the Top 20.`})}
+ if(w&&w.born&&(c.first||c.date)){const a=ageAt(w.born,c.first||c.date);if(a>=8&&a<90)out.push({when:act,text:`Was ${a} when this song first hit the Top 20.`})}
  if(songs&&songs.size){
   const list=[...songs.entries()].sort((a,b)=>a[1].first<b[1].first?-1:1),k=list.findIndex(([t])=>t===songKey(x.r.title||x.track.name))+1,n=list.length;
   const y1=list[0][1].first.slice(0,4),y2=list[n-1][1].first.slice(0,4),ones=list.filter(([,v])=>v.ones).length;
-  out.push({when:`${act} · chart stats`,text:n===1?'Their one and only Top 20 hit on the Hot 100.':k?`Top 20 hit No. ${k} of ${n}${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`:`${n} Top 20 hits${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`});
+  out.push({when:`${act} · chart stats`,text:n===1&&k?'Their one and only Top 20 hit on the Hot 100.':k?`Hot 100 Top 20 hit No. ${k} of ${n}${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`:`${n} Hot 100 Top 20 hit${n>1?'s':''}${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`});
   if(ones)out.push({when:`${act} · chart stats`,text:`${ones} No. 1 hit${ones>1?'s':''} on the Hot 100.`});
  }
- if(c.year&&CD.data){const mine=ybRows(c.year).filter(r=>afParts(r.artist).concat(afLead(r.artist)).some(p=>afNorm(p)===afNorm(act))).length;if(mine>1)out.push({when:`${act} · Class of '${String(c.year).slice(2)}`,text:`${mine} songs in the senior year Top 40.`})}
+ if(c.chart==='grad'&&CD.data){const mine=ybRows(c.year).filter(r=>afParts(r.artist).concat(afLead(r.artist)).some(p=>afNorm(p)===afNorm(act))).length;if(mine>1)out.push({when:`${act} · Class of '${String(c.year).slice(2)}`,text:`${mine} songs in the senior year Top 40.`})}
  if(w&&w.lines[1])out.push({when:label,text:w.lines[1]});
  return out;
 }
 function gfSong(x){
- const c=x.cd,d=gfYear(c.year);
+ const c=x.cd,d=gfYear(c);
  if(!d||S.gradFacts===false){tkStop();return}
- if(GF.shown===x.track.id){tkStart(c.year);return}
+ if(GF.shown===x.track.id){tkStart(c);return}
  GF.shown=x.track.id;GF.songs++;
- const id=x.track.id,ev=gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7));
+ const id=x.track.id,ev=gfPickEvent(d,...gfRange(c));
  const nx=CD.list[CD.idx];if(nx)afWiki(afLead(nx.r.artist||nx.track.artist)); // warm up the next artist
  Promise.race([afFacts(x),sleep(3000).then(()=>null)]).catch(()=>null).then(af=>{
   if(GF.shown!==id)return;
   TK.next=[...(af||[]),...(ev?[ev]:[])];
-  tkStart(c.year,true);
+  tkStart(c,true);
  });
 }
 function gfNP(){
  const c=P.current&&P.current.cd;
- if(!c||c.chart!=='grad'||!CD.active)tkStop();
+ if(!c||!CD.active)tkStop();
 }
 // Every 4th song of the Senior Countdown, a "Class of 'YY flashback" card shows in the song's last seconds, as it hands over to the next one
 function gfTick(){
  gfNP();
  const c=P.current&&P.current.cd;
- if(!c||c.chart!=='grad'||!CD.active||P.paused||!P.dur||P.dur<60000||S.gradFacts===false)return;
+ if(!c||!CD.active||P.paused||!P.dur||P.dur<60000||S.gradFacts===false)return;
  if(GF.songs<1||GF.songs%4||GF.flashFor===GF.shown)return;
  const left=P.dur-P.pos;if(left>15000||left<5000)return;
- const d=gfYear(c.year);if(!d)return;
+ const d=gfYear(c);if(!d)return;
  GF.flashFor=GF.shown;
  const facts=[gfPickEvent(d),gfPickStat(d),gfPickStat(d)].filter(Boolean);if(!facts.length)return;
- $('#gfHead').textContent=`Class of '${String(c.year).slice(2)} Flashback`;
+ $('#gfHead').textContent=c.chart==='grad'?`Class of '${String(c.year).slice(2)} Flashback`:`${c.year} Flashback`;
  const L=$('#gfList');L.innerHTML='';for(const f of facts){const p=document.createElement('p');gfLine(p,f);L.append(p)}
  const card=$('#gfCard');$('#cdCard').classList.remove('show');card.classList.add('show');sfx('tick');
  clearTimeout(GF.timer);GF.timer=setTimeout(()=>card.classList.remove('show'),Math.min(12000,left+3000));
@@ -3181,7 +3186,6 @@ function cdCard(x){
  if(c.chart==='grad'){
   $('#cdWhen').textContent=c.pos===1?`The Class of ${c.year}'s #1 song of senior year`:`Class of ${c.year} · #${c.pos} of senior year`;
   $('#cdStats').textContent=[c.wk1?`#1 for ${c.wk1} week${c.wk1>1?'s':''}`:`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks>1?'s':''} in the Top 20`].join(' · ');
-  gfSong(x);
  }else if(c.chart==='country'){
   $('#cdWhen').textContent=c.chrono?`Country Gold · #1 on ${fmtWeek(c.first)}`:c.pos===1?`${c.year}'s biggest country #1`:`Country Gold · Number ${c.pos} of ${c.year}`;
   $('#cdStats').textContent=c.radio?`Hit #1 on country radio in ${c.year}`:`#1 for ${c.weeks} week${c.weeks===1?'':'s'} · first hit #1 ${fmtWeek(c.first)}`;
@@ -3190,7 +3194,7 @@ function cdCard(x){
   $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
   $('#cdStats').textContent=[`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks===1?'':'s'} on the chart`,cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)}`:`Down ${mv.slice(1)}`].join(' · ');
  }
- $('#gfCard').classList.remove('show');
+ $('#gfCard').classList.remove('show');gfSong(x);
  const el=$('#cdCard');el.classList.add('show');clearTimeout(cdCardT);cdCardT=setTimeout(()=>el.classList.remove('show'),7500);
  if(c.pos<=3&&S.sfx)sfx('coin');
 }
@@ -3652,7 +3656,7 @@ async function gradBegin(y,allRows,found,fromPos){
  const rows=[...allRows].sort((a,b)=>b.pos-a.pos);
  const list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r:{artist:r.artist},cd:{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last}}));
  if(!list.length){toast("Couldn't find these songs on Spotify. Try again in a few minutes",'warn');return false}
- await gfLoad();gfReset(y);
+ await gfLoad();GF.y=null;
  CD.active=true;CD.grad=y;CD.list=list;CD.idx=0;CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);CD.year=y;CD.date=null;
  CD.view={year:y,date:null,heading:`Class of ${y} · senior year Top 40`,rows:allRows.map(r=>({pos:r.pos,title:r.title,artist:r.artist,sub:`${r.artist} · ${ybStats(r)}`,badge:r.wk1?['up',r.wk1+' WK #1']:['same','#'+r.peak]}))};
  store.set('yb_recent',[y].concat(store.get('yb_recent',[]).filter(x=>x!==y)).slice(0,6));
