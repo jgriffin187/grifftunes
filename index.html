@@ -479,6 +479,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .hero .kind{font-size:13px;letter-spacing:.3em;font-weight:800;color:var(--accent2)}
 .hero h1{font-size:46px;font-weight:800;line-height:1.05;margin:8px 0;text-shadow:0 4px 24px rgba(0,0,0,.5)}
 .hero p{font-size:20px;color:rgba(255,255,255,.8)}
+.albumAll{margin-top:16px;height:54px;padding:0 22px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 24px color-mix(in srgb,var(--accent) 50%,transparent);transition:transform .12s}
+.albumAll:active{transform:scale(.95)}.albumAll svg{width:22px;height:22px}.albumAll .cost{background:rgba(0,0,0,.35)}
 .closeBtn{position:absolute;top:18px;right:18px;width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.42);border:1px solid var(--stroke);z-index:2;display:grid;place-items:center;flex:none}
 .closeBtn svg{width:24px;height:24px}
 .closeBtn.static{position:static}
@@ -795,7 +797,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 </div>
 
 <div class="modal top" id="albumModal"><div class="sheet card">
- <div class="hero"><div class="heroBg" id="heroBg"></div><img id="heroImg" alt=""><div class="info"><div class="kind" id="heroKind"></div><h1 id="heroName"></h1><p id="heroSub"></p></div><button class="closeBtn" data-close aria-label="Close" data-icon="close"></button></div>
+ <div class="hero"><div class="heroBg" id="heroBg"></div><img id="heroImg" alt=""><div class="info"><div class="kind" id="heroKind"></div><h1 id="heroName"></h1><p id="heroSub"></p><button class="albumAll" id="albumAll" style="display:none"></button></div><button class="closeBtn" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="tracks" id="trackList"></div>
 </div></div>
 
@@ -1751,6 +1753,27 @@ async function advance(){
 }
 const COST={q:1,n:2,w:3};
 const normMode=m=>m==='w'||m==='n'||m==='q'?m:(m===true?'n':'q');
+// Greatest Albums: the whole album into the queue for one price
+const ALBUM_COST=5,ALB={it:null,tracks:[]};
+function enqueueAlbum(tracks,name,img,src){
+ tracks=(tracks||[]).map(slimT).filter(t=>t&&t.uri&&t.name);if(!tracks.length)return false;
+ if(REMOTE){remoteAlbum(tracks,name,img);return true}
+ if(!spend(ALBUM_COST))return false;
+ sfx('add');hueFlash('now');
+ const tag=src==='phone'?'Phone request · ':'',idle=!P.current||P.current.house||P.current.radio||P.current.cd;
+ let rest=tracks;
+ if(idle){if(P.current&&P.current.cd&&CD.active)CD.idx=Math.max(0,CD.idx-1);startTrack(tracks[0]);rest=tracks.slice(1)}
+ P.queue.push(...rest);saveQueue();renderQueue();
+ toast(`${tag}${name} · ${tracks.length} songs ${idle?'playing now':'added to the queue'}`,img);
+ return true;
+}
+async function remoteAlbum(tracks,name,img){
+ sfx('add');
+ try{const r=await rcall({t:'album',tracks,name,img});
+  if(r&&r.ok)toast(`${name} · ${tracks.length} songs added to the queue`,img);
+  else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
+ }catch(e){sfx('err');toast(e.message,'warn')}
+}
 function enqueue(t,mode,src){
  mode=normMode(mode);const next=mode==='n';
  if(REMOTE){remoteEnqueue(t,mode);return true}
@@ -1875,7 +1898,9 @@ async function openItem(it){
  $('#heroName').textContent=it.name;$('#heroSub').textContent=it.sub||'';
  const list=$('#trackList');list.innerHTML='<div class="loading"><div class="spin"></div></div>';list.scrollTop=0;
  openModal($('#albumModal'));
- try{const tr=await provider.tracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>'}
+ const all=$('#albumAll');all.style.display='none';ALB.it=it;ALB.tracks=[];
+ try{const tr=await provider.tracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';
+  if(it.rank&&tr.length>1&&ALB.it===it){ALB.tracks=tr;all.innerHTML=`+ Queue the whole album · ${tr.length} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
  catch(e){list.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
 }
 
@@ -2192,6 +2217,7 @@ $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
+$('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img))closeModal($('#albumModal'))};
 $('#gPlay').onclick=e=>{e.stopPropagation();sfx('tick');togglePlay()};
 $('#gSkip').onclick=e=>{e.stopPropagation();sfx('tick');advance()};
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
@@ -2245,6 +2271,12 @@ async function hostHandle(c,d){
    if(!S.phoneVol){sendTo(c,hostState());return}
    const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
    setVol(v,c);
+  }
+  else if(d.t==='album'){
+   const tr=(Array.isArray(d.tracks)?d.tracks:[]).slice(0,60);
+   if(!tr.length)throw new Error('That album could not be added');
+   if(!S.freePlay&&credits<ALBUM_COST){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:S.phoneCoins?`A whole album takes ${ALBUM_COST} credits. Tap Insert coin!`:`A whole album takes ${ALBUM_COST} credits. Insert coins at the jukebox!`});return}
+   enqueueAlbum(tr,String(d.name||'Album').slice(0,120),d.img,'phone');reply({ok:true});
   }
   else if(d.t==='enqueue'){
    const t=slimT(d.track),mode=normMode(d.mode||(d.next?'n':'q')),cost=COST[mode];
@@ -3426,6 +3458,7 @@ const TIPS={
  modeBadge:'Music source. Click for settings',
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
+ albumAll:'Add every song on this album to the queue, in order',
  lightsBtn:'Hue lights: pick a lighting mode',
  gear:'Settings',
  openSearch:'Search for any song, artist or album',
