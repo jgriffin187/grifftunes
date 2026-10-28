@@ -3001,22 +3001,110 @@ function tkFrame(t){
  tr.style.transform=`translateX(${-TK.x}px)`;
  TK.raf=requestAnimationFrame(tkFrame);
 }
-function tkStart(y){
+function tkStart(y,fresh){
  const el=$('#npTicker');
  $('#tkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
- if(TK.on)return;
+ if(TK.on&&!fresh)return;
  TK.on=true;TK.x=0;$('#tkTrack').innerHTML='';el.classList.add('on');TK.last=0;
  requestAnimationFrame(()=>{TK.x=-$('#npTicker .tkWin').clientWidth*.5;tkFill();if(!TK.raf)TK.raf=requestAnimationFrame(tkFrame)});
 }
 function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
+/* Artist facts for the ticker: a line or two from Wikipedia, their age when the song charted (Wikidata), and chart stats from our own Hot 100 data */
+const AF={mem:new Map(),idx:null};
+const afNorm=n=>songKey(n).replace(/^the\s+/,'').replace(/[^a-z0-9]/g,'');
+const afLead=a=>String(a||'').split(/\s*\(|\s+(?:featuring|feat\.?|ft\.?|with|duet with)\s+/i)[0].trim();
+const afParts=a=>String(a||'').split(/\s*\(|\)|\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with|vs\.?)\s+|\s*[,/]\s*/i).map(x=>x.trim()).filter(Boolean);
+function afIndex(){
+ if(AF.idx||!CD.data)return AF.idx;
+ const M=new Map(),W=CD.data.weeks;
+ for(const d of Object.keys(W).sort())for(const[pos,title,artist]of W[d]){
+  const names=new Set([afNorm(afLead(artist)),...afParts(artist).map(afNorm)]),k=songKey(title);
+  for(const n of names){if(!n)continue;let m=M.get(n);if(!m)M.set(n,m=new Map());let x=m.get(k);if(!x)m.set(k,x={first:d,ones:0});if(pos===1)x.ones++}
+ }
+ return AF.idx=M;
+}
+const MUSIC=/\b(singer|band|rapper|musician|group|duo|trio|songwriter|record producer|vocalist|entertainer|DJ|composer|hip hop|rock|pop|soul|country|R&B|music)\b/i;
+async function afWikiPage(name){
+ const tries=[name];
+ try{const r=await fetch(`https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(name)}&limit=4&namespace=0&format=json&origin=*`);if(r.ok){const j=await r.json();for(const t of j[1]||[])if(!tries.includes(t))tries.push(t)}}catch(e){}
+ for(const sfx of['singer','band','rapper','musician'])tries.push(`${name} (${sfx})`);
+ for(const t of tries.slice(0,8)){
+  try{
+   const r=await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(t.replace(/ /g,'_'))}?redirect=true`);
+   if(r.status===404)continue;if(!r.ok)return undefined;
+   const j=await r.json();
+   if(j.type==='disambiguation'||!MUSIC.test(`${j.description||''} ${(j.extract||'').slice(0,240)}`))continue;
+   return j;
+  }catch(e){return undefined}
+ }
+ return null;
+}
+function afSentences(txt){
+ const t=String(txt||'').replace(/\s*\([^()]*(\([^()]*\)[^()]*)*\)/g,'').replace(/\s*\[[^\]]*\]/g,'').replace(/\s+,/g,',').replace(/\s{2,}/g,' ').trim();
+ const out=[];let cur='';
+ for(const part of t.split(/(?<=[.!?])\s+(?=[A-Z"“])/)){cur=cur?cur+' '+part:part;if(/\b(?:[A-Z]|Jr|Sr|St|Mr|Mrs|Ms|Dr|Mt|No|U\.S|vs|Bros|Inc|Co)\.$/.test(cur))continue;out.push(cur);cur=''}
+ if(cur)out.push(cur);
+ return out.filter(x=>x.length>=25&&x.length<=260).slice(0,2);
+}
+async function afWiki(name){
+ const key=afNorm(name);if(!key)return null;
+ if(AF.mem.has(key))return AF.mem.get(key);
+ const saved=store.get('gt_artist_wiki',{});
+ if(saved[key]&&Date.now()-saved[key].at<30*864e5){AF.mem.set(key,Promise.resolve(saved[key].v));return saved[key].v}
+ const job=(async()=>{
+  let j=await afWikiPage(name);
+  if(j===null){const p=afParts(name)[0];if(p&&afNorm(p)!==key)j=await afWikiPage(p)}
+  if(j===undefined)return null; // network trouble: don't remember the miss
+  let v=null;
+  if(j){
+   v={title:String(j.title||name).replace(/\s*\([^)]*\)$/,''),lines:afSentences(j.extract),born:null};
+   if(j.wikibase_item){try{
+    const r=await fetch(`https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${j.wikibase_item}&props=claims&format=json&origin=*`);const w=await r.json();
+    const c=w.entities&&w.entities[j.wikibase_item]&&w.entities[j.wikibase_item].claims||{};
+    const human=(c.P31||[]).some(x=>x.mainsnak&&x.mainsnak.datavalue&&x.mainsnak.datavalue.value.id==='Q5');
+    const b=c.P569&&c.P569[0]&&c.P569[0].mainsnak.datavalue&&c.P569[0].mainsnak.datavalue.value;
+    if(human&&b&&b.precision>=11)v.born=b.time.slice(1,11);
+   }catch(e){}}
+  }
+  const all=store.get('gt_artist_wiki',{});all[key]={at:Date.now(),v};
+  const ks=Object.keys(all);if(ks.length>600)ks.sort((a,b)=>all[a].at-all[b].at).slice(0,ks.length-600).forEach(k=>delete all[k]);
+  store.set('gt_artist_wiki',all);
+  return v;
+ })();
+ AF.mem.set(key,job);return job;
+}
+const ageAt=(born,day)=>{const[a,b]=[born.split('-').map(Number),day.split('-').map(Number)];return b[0]-a[0]-((b[1]<a[1]||(b[1]===a[1]&&b[2]<a[2]))?1:0)};
+async function afFacts(x){
+ const c=x.cd,lead=afLead(x.r.artist||x.track.artist),parts=afParts(lead);
+ const w=await afWiki(lead);
+ const idx=afIndex()||new Map(),out=[];
+ let act=w?w.title:lead,songs=idx.get(afNorm(act));
+ if(!songs||(songs.size<2&&parts.length>1)){const p=parts[0];if(p&&idx.get(afNorm(p))){act=w&&afNorm(w.title)===afNorm(act)&&songs?act:p;songs=idx.get(afNorm(act))}}
+ const label=`About ${act}`;
+ if(w&&w.lines[0])out.push({when:label,text:w.lines[0]});
+ if(w&&w.born&&c.first){const a=ageAt(w.born,c.first);if(a>=8&&a<90)out.push({when:act,text:`Was ${a} when this song first hit the Top 20.`})}
+ if(songs&&songs.size){
+  const list=[...songs.entries()].sort((a,b)=>a[1].first<b[1].first?-1:1),k=list.findIndex(([t])=>t===songKey(x.r.title||x.track.name))+1,n=list.length;
+  const y1=list[0][1].first.slice(0,4),y2=list[n-1][1].first.slice(0,4),ones=list.filter(([,v])=>v.ones).length;
+  out.push({when:`${act} · chart stats`,text:n===1?'Their one and only Top 20 hit on the Hot 100.':k?`Top 20 hit No. ${k} of ${n}${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`:`${n} Top 20 hits${y1===y2?` in ${y1}`:`, from ${y1} to ${y2}`}.`});
+  if(ones)out.push({when:`${act} · chart stats`,text:`${ones} No. 1 hit${ones>1?'s':''} on the Hot 100.`});
+ }
+ if(c.year&&CD.data){const mine=ybRows(c.year).filter(r=>afParts(r.artist).concat(afLead(r.artist)).some(p=>afNorm(p)===afNorm(act))).length;if(mine>1)out.push({when:`${act} · Class of '${String(c.year).slice(2)}`,text:`${mine} songs in the senior year Top 40.`})}
+ if(w&&w.lines[1])out.push({when:label,text:w.lines[1]});
+ return out;
+}
 function gfSong(x){
  const c=x.cd,d=gfYear(c.year);
  if(!d||S.gradFacts===false){tkStop();return}
- if(GF.shown!==x.track.id){
-  GF.shown=x.track.id;GF.songs++;
-  const f=gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7));if(f)TK.next.unshift(f);
- }
- tkStart(c.year);
+ if(GF.shown===x.track.id){tkStart(c.year);return}
+ GF.shown=x.track.id;GF.songs++;
+ const id=x.track.id,ev=gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7));
+ const nx=CD.list[CD.idx];if(nx)afWiki(afLead(nx.r.artist||nx.track.artist)); // warm up the next artist
+ Promise.race([afFacts(x),sleep(3000).then(()=>null)]).catch(()=>null).then(af=>{
+  if(GF.shown!==id)return;
+  TK.next=[...(af||[]),...(ev?[ev]:[])];
+  tkStart(c.year,true);
+ });
 }
 function gfNP(){
  const c=P.current&&P.current.cd;
