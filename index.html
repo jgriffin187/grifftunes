@@ -1051,7 +1051,7 @@ async function famApi(m,path){
 async function tokenReq(params){
  const r=await fetch(SP_AUTH+'/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams(params)});
  const j=await r.json().catch(()=>({}));
- if(!r.ok)throw new Error(j.error_description||j.error||'Token error');
+ if(!r.ok){const er=new Error(j.error_description||j.error||'Token error');er.code=j.error;er.status=r.status;throw er}
  tok={access:j.access_token,refresh:j.refresh_token||(tok&&tok.refresh),exp:Date.now()+((j.expires_in||3600)-60)*1000};
  store.set('sp_tokens',tok);return tok;
 }
@@ -1064,14 +1064,44 @@ async function handleRedirect(){
  try{await tokenReq({grant_type:'authorization_code',code,redirect_uri:REDIRECT,client_id:S.clientId,code_verifier:store.get('pkce','')});S.mode='spotify';saveS();toast('Spotify connected!')}
  catch(e){toast('Spotify login failed: '+e.message,'warn')}
 }
-let refreshing=null;
+let refreshing=null,tokWarnAt=0;
+// Spotify hands out a new refresh key every time one is used, so:
+//  · another GriffTunes window may already have refreshed: always check what's saved first
+//  · only one window refreshes at a time (Web Locks)
+//  · a dropped Wi-Fi, a sleeping Chromebox waking up or a Spotify hiccup is NOT a sign-out: keep the keys and try again later
+const savedTok=()=>store.get('sp_tokens',null);
+function adoptSaved(){const t=savedTok();if(t&&t.access&&(!tok||t.exp>tok.exp||t.refresh!==tok.refresh))tok=t;return tok}
+async function refreshTok(){
+ const run=async()=>{
+  adoptSaved();if(tok&&Date.now()<tok.exp)return tok;
+  try{return await tokenReq({grant_type:'refresh_token',refresh_token:tok.refresh,client_id:S.clientId})}
+  catch(e){
+   if(e.code==='invalid_grant'){
+    const t=savedTok();
+    if(t&&t.refresh&&t.refresh!==tok.refresh){tok=t;if(Date.now()<tok.exp)return tok;return await tokenReq({grant_type:'refresh_token',refresh_token:tok.refresh,client_id:S.clientId})}
+   }
+   throw e;
+  }
+ };
+ return navigator.locks&&navigator.locks.request?navigator.locks.request('grifftunes-spotify-token',run):run();
+}
 async function getToken(){
+ if(!tok)adoptSaved();
  if(!tok)throw new Error('Spotify not connected');
  if(Date.now()<tok.exp)return tok.access;
- if(!refreshing)refreshing=tokenReq({grant_type:'refresh_token',refresh_token:tok.refresh,client_id:S.clientId}).finally(()=>{refreshing=null});
- try{await refreshing}catch(e){tok=null;store.del('sp_tokens');toast('Spotify session expired — reconnect in Settings','warn');throw e}
+ if(!refreshing)refreshing=refreshTok().finally(()=>{refreshing=null});
+ try{await refreshing}
+ catch(e){
+  if(e.code==='invalid_grant'||e.code==='invalid_client'){tok=null;store.del('sp_tokens');toast('Spotify sign-in was revoked — reconnect in Settings','warn')}
+  else if(Date.now()-tokWarnAt>120000){tokWarnAt=Date.now();toast("Can't reach Spotify right now. Retrying…",'warn')}
+  throw e;
+ }
  return tok.access;
 }
+// keep the sign-in fresh while GriffTunes is open, and right after the Chromebox wakes up or Wi-Fi comes back
+const keepTok=()=>{if(tok&&tok.exp-Date.now()<10*60e3)getToken().catch(()=>{})};
+setInterval(keepTok,4*60e3);addEventListener('online',keepTok);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')keepTok()});
+addEventListener('storage',e=>{if(e.key==='jbx.sp_tokens')adoptSaved()});
 async function api(path,opts={},retry=true){
  const r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:'Bearer '+await getToken()},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined});
  if(r.status===401&&retry&&tok){tok.exp=0;return api(path,opts,false)}
@@ -2327,7 +2357,8 @@ function renderDevChip(){
 }
 function renderDevList(list){
  const cur=engine.target||null;
- DEVS=[{id:null,name:S.name,type:'computer',sub:'This jukebox · its own speakers'}].concat(list.map(d=>({id:d.id,name:d.name,type:d.type,restricted:!!d.is_restricted,sub:devType(d.type)+(d.is_restricted?' · can’t be controlled by apps':'')})));
+ const unnamed=n=>/^[0-9a-f]{24,}$/i.test(String(n||''));
+ DEVS=[{id:null,name:S.name,type:'computer',sub:'This jukebox · its own speakers'}].concat(list.map(d=>({id:d.id,name:unnamed(d.name)?`Unnamed ${devType(d.type).toLowerCase()}`:d.name,type:d.type,restricted:!!d.is_restricted,sub:devType(d.type)+(unnamed(d.name)?' · Spotify didn’t send its name':'')+(d.is_restricted?' · can’t be controlled by apps':'')})));
  const eq='<span class="devLive"><i></i><i></i><i></i></span>';
  $('#devList').innerHTML=DEVS.map((d,i)=>{const on=d.id===cur;return`<button class="devRow${on?' on':''}" data-dev="${i}"${d.restricted?' disabled':''}><span class="devIco">${devIcon(d.type)}</span><span class="devTxt"><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></span>${on?eq:''}</button>`}).join('')
   +(list.length?'':'<div class="devNote">No other Spotify speakers found. Make sure the speaker is on and on your Wi-Fi (opening Spotify on it once can wake it up), then tap Refresh.</div>');
