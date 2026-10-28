@@ -3528,7 +3528,7 @@ function renderGradPanel(){if(GY.mode==='book'){renderYearbookShelf();return}ren
 function renderGradList(){
  const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
- panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick a graduation year to hear the 40 biggest songs of senior year, September to graduation</p></div>${GY_SEG()}</div>
+ panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick your graduation year to hear the 40 biggest songs of your senior year!</p></div>${GY_SEG()}</div>
   <div class="gyPick"><button class="gyStep" data-gys="-1" aria-label="Earlier year">−</button><div class="gyYear"><small>CLASS OF</small><b id="gyYearNum">${y}</b></div><button class="gyStep" data-gys="1" aria-label="Later year">+</button>
    <input type="range" id="gyRange" min="${lo}" max="${hi}" value="${y}" aria-label="Graduation year"></div>
   <div class="cdBar"><span class="cdWeek" id="gyWhen"></span><button class="cdGo" id="gyGo"></button></div>
