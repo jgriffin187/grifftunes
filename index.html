@@ -1104,7 +1104,7 @@ function newLabel(d){
  return 'Out '+new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric'});
 }
 const spItem=(x,type)=>x?{id:x.id,type,name:x.name,sub:type==='album'?(x.artists||[]).map(a=>a.name).join(', '):type==='playlist'?('By '+((x.owner&&x.owner.display_name)||'Spotify')):'Artist',img:spImg(x.images),uri:x.uri}:null;
-const songKey=n=>String(n||'').toLowerCase()
+const songKey=n=>String(n||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’‘`]/g,"'").toLowerCase()
  .replace(/\s*[\(\[](feat|ft|with)\.?[^\)\]]*[\)\]]/g,'')
  .replace(/\s*[\(\[][^\)\]]*(remaster|live|version|edit|mix|mono|stereo|acoustic|demo|bonus)[^\)\]]*[\)\]]/g,'')
  .replace(/\s+[-–—]\s+.*$/,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim().replace(/^the /,'');
@@ -1172,13 +1172,15 @@ const SPOTIFY={
   return[];
  },
  async findSong(title,artist){
-  const main=String(artist).split(/\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with)\s+|,\s*/i)[0].trim();
+  const main=String(artist).split(/\s*\(|\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with)\s+|,\s*/i)[0].trim();
   const clean=String(title).replace(/\s*\([^)]*\)\s*/g,' ').replace(/\s+/g,' ').trim();
-  const k=songKey(clean),a=main.toLowerCase();
-  for(const q of[`track:"${clean}" artist:"${main}"`,`${clean} ${main}`]){
-   const j=await api('/search?type=track&limit=8&q='+encodeURIComponent(q)).catch(()=>null);
+  // compare names without accents, punctuation or spaces: "Sinead O'Connor" = "Sinéad O’Connor", "M.C. Hammer" = "MC Hammer"
+  const flat=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]/g,'');
+  const k=songKey(clean),a=flat(main);
+  for(const q of[`track:"${clean}" artist:"${main}"`,`${clean} ${main}`,`track:"${clean}"`]){
+   const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(q)).catch(e=>{if(e.status===429)throw e;return null});
    const items=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists);
-   const byArtist=t=>t.artists.some(x=>{const n=x.name.toLowerCase();return n.includes(a)||a.includes(n)});
+   const byArtist=t=>t.artists.some(x=>{const n=flat(x.name);return n&&a&&(n.includes(a)||a.includes(n))});
    const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
    if(best)return spT(best);
   }
@@ -2841,7 +2843,7 @@ async function startCountdown(fromPos){
  try{
   const found=CD.cache[key]||{};
   for(let i=0;i<rows.length;i+=4){
-   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await provider.findSong(r.title,r.artist)}catch(err){found[r.pos]=null}}done++;btn()}));
+   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await provider.findSong(r.title,r.artist)}catch(err){if(err.status!==429)found[r.pos]=null}}done++;btn()}));
   }
   CD.cache[key]=found;
   CD.list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r,cd:r.cd}));
@@ -3334,8 +3336,10 @@ async function gyStart(fromPos){
  rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t});
  const todo=rows.filter(r=>!found[r.pos]);
  GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradList();
- try{await pmap(todo,2,async r=>{let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
+ let limited=null;
+ try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
  finally{GY.matching=false}
+ if(limited){toast(limited.message,'warn');if(tabId==='gradyear')renderGradList();return}
  await gradBegin(y,rows,found,fromPos);
  if(tabId==='gradyear')renderGradList();
 }
