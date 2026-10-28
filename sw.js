@@ -1,5 +1,5 @@
 // Minimal service worker: lets GriffTunes install as an app and open even if the network blips.
-const CACHE = 'grifftunes-shell-v2';
+const CACHE = 'grifftunes-shell-v3';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', e => {
