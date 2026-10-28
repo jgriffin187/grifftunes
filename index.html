@@ -3426,7 +3426,7 @@ async function boot(){
  renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
 }
 /* ---------- Grad Year: a yearbook for any senior year (Billboard Hot 100, September through graduation) ---------- */
-const YB={open:false,year:null,rows:null,found:{},matching:false,matchP:null,done:0,spread:0,spreads:[],lastNav:0,curKey:null,pickYear:null,flipping:false};
+const YB={art:{},artRun:null,open:false,year:null,rows:null,found:{},matching:false,matchP:null,done:0,spread:0,spreads:[],lastNav:0,curKey:null,pickYear:null,flipping:false};
 const ybPeople=()=>store.get('yb_people',[]);
 window.__gtYB=YB;
 const ybPeopleSet=v=>store.set('yb_people',v);
@@ -3542,7 +3542,7 @@ function ybMatch(){
    if(YB.year!==y)return;
    if(t){t=slimT(t);YB.found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c);ybFill(r.pos)}
    YB.done++;ybProgress();
-  })}finally{if(YB.year===y){YB.matching=false;YB.matchP=null;ybProgress();ybBuild(true)}}
+  })}finally{if(YB.year===y){YB.matching=false;YB.matchP=null;ybProgress();ybBuild(true);ybArtLoop()}}
  })();
  return YB.matchP;
 }
@@ -3553,17 +3553,44 @@ function ybProgress(){
  b.textContent=YB.matching?`Finding songs… ${YB.done}/${YB.rows.length}`:mine?'■ Stop countdown':'▶ Senior Countdown · #40 → #1';
  const s=$('#ybIntroSmall');if(s)s.textContent=YB.matching?`Finding the songs on Spotify… ${YB.done} of ${YB.rows.length}`:`${Object.keys(YB.found).length} of ${YB.rows.length} songs found on Spotify`;
 }
-function ybFill(pos){const t=YB.found[pos];if(!t||!t.img)return;$$(`#yb [data-pos="${pos}"] .ph0`).forEach(el=>{const im=document.createElement('img');im.alt='';im.src=t.img;if(el.dataset.ht)im.className='ht';el.replaceWith(im)})}
+// Cover art for a portrait: Spotify's when connected, otherwise the real album cover from Apple's public iTunes search
+function ybArt(pos){const t=YB.found[pos];if(provider===SPOTIFY&&t&&t.img)return t.img;return YB.art[pos]||(YB.art[pos]===''&&t&&t.img)||null}
+function ybFill(pos){const src=ybArt(pos);if(!src)return;$$(`#yb [data-pos="${pos}"] .ph0`).forEach(el=>{const im=document.createElement('img');im.alt='';im.src=src;if(el.dataset.ht)im.className='ht';el.replaceWith(im)});$$(`#yb [data-pos="${pos}"] img`).forEach(im=>{if(im.getAttribute('src')!==src)im.src=src})}
+function jsonp(url,ms=9000){return new Promise((res,rej)=>{const cb='__gtj'+Math.random().toString(36).slice(2),sc=document.createElement('script');const done=()=>{clearTimeout(t);try{delete window[cb]}catch(e){}sc.remove()};const t=setTimeout(()=>{done();rej(new Error('timeout'))},ms);window[cb]=d=>{done();res(d)};sc.onerror=()=>{done();rej(new Error('network'))};sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb;document.head.appendChild(sc)})}
+async function itunesArt(title,artist){
+ const main=String(artist).split(/\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with)\s+|,\s*|\//i)[0].trim(),clean=String(title).replace(/\s*\([^)]*\)\s*/g,' ').split('/')[0].trim();
+ const j=await jsonp('https://itunes.apple.com/search?media=music&entity=song&limit=10&term='+encodeURIComponent(clean+' '+main));
+ const L=(j&&j.results)||[],a=main.toLowerCase(),k=songKey(clean);
+ const byA=r=>{const n=String(r.artistName||'').toLowerCase();return n.includes(a)||a.includes(n)};
+ const best=L.find(r=>byA(r)&&songKey(r.trackName||'')===k)||L.find(r=>byA(r))||null;
+ return best&&best.artworkUrl100?best.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'):'';
+}
+// Apple allows about 20 lookups a minute, so go slowly, in book order, and remember every cover
+async function ybArtLoop(){
+ const y=YB.year;if(YB.artRun===y)return;YB.artRun=y;
+ try{
+  for(const r of[...YB.rows].sort((a,b)=>b.pos-a.pos)){
+   if(!YB.open||YB.year!==y)break;
+   if(YB.art[r.pos]!=null)continue;
+   const t=YB.found[r.pos];if(provider===SPOTIFY&&t&&t.img)continue;
+   const c=store.get('yb_art',{}),k=ybRowKey(r);
+   if(k in c){YB.art[r.pos]=c[k];ybFill(r.pos);continue}
+   let url=null;try{url=await itunesArt(r.title,r.artist)}catch(e){}
+   if(url!=null){YB.art[r.pos]=url;const c2=store.get('yb_art',{});c2[k]=url;store.set('yb_art',c2);ybFill(r.pos)}
+   await sleep(3100);
+  }
+ }finally{if(YB.artRun===y)YB.artRun=null}
+}
 
 /* ----- the book ----- */
 function openYearbook(y){
  const[lo,hi]=ybRange();if(!(y>=lo&&y<=hi))return;
- YB.year=y;YB.rows=ybRows(y);YB.matchP=null;YB.found={};YB.spread=0;YB.lastNav=0;YB.open=true;
+ YB.year=y;YB.rows=ybRows(y);YB.matchP=null;YB.found={};YB.art={};{const c=store.get('yb_art',{});YB.rows.forEach(r=>{const k=ybRowKey(r);if(k in c)YB.art[r.pos]=c[k]})}YB.spread=0;YB.lastNav=0;YB.open=true;
  store.set('yb_recent',[y].concat(store.get('yb_recent',[]).filter(x=>x!==y)).slice(0,6));store.set('yb_pick',y);
  const st=ybStyle(y),el=$('#yb');
  el.style.setProperty('--ybPaper',st.paper);el.style.setProperty('--ybInk',st.ink);el.style.setProperty('--ybA',st.acc);el.style.setProperty('--ybRule',st.rule);el.style.setProperty('--ybRuleOn',st.ruleOn);
  el.className='on '+st.kind;$('#ybTitle').textContent=YB_BOOKS[y]?`${st.name} · Class of ${y}`:`Class of ${y}`;
- sfx('tick');ybLayout();ybMatch();ybBuild();
+ sfx('tick');ybLayout();ybMatch();ybBuild();ybArtLoop();
  // the cover swings open
  const bk=$('#ybBookEl'),cv=document.createElement('div');cv.className='ybCoverBig';cv.innerHTML=ybCover(y,Math.round(bk.clientWidth/2))+'<div class="inside"></div>';bk.appendChild(cv);setTimeout(()=>cv.remove(),1500);
  if(hueOn()&&S.hueMode!=='off')hueGroup({effect:'none',xy:rgbToXy(...cssRgb(st.light)),bri:hueB(),transitiontime:30});
@@ -3576,7 +3603,7 @@ function ybLayout(){
  const el=$('#yb');el.style.setProperty('--ybW',W+'px');el.style.setProperty('--ybH',H+'px');
 }
 addEventListener('resize',()=>{if(YB.open)ybLayout()});
-function ybPh(pos,cls){const t=YB.found[pos],r=YB.rows[pos-1];return t&&t.img?`<img class="${cls||''}" src="${esc(t.img)}" alt="">`:`<div class="ph0"${cls?' data-ht="1"':''}>${esc(r?r.title:'')}</div>`}
+function ybPh(pos,cls){const src=ybArt(pos),r=YB.rows[pos-1];return src?`<img class="${cls||''}" src="${esc(src)}" alt="">`:`<div class="ph0"${cls?' data-ht="1"':''}>${esc(r?r.title:'')}</div>`}
 function ybName(text,two){
  if(!two)return esc(text);
  const w=String(text).split(/\s+/);if(w.length<2)return esc(text);
