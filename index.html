@@ -3509,8 +3509,7 @@ function renderYearbookShelf(){
 }
 $('#ybPanel').addEventListener('click',e=>{
  const m=e.target.closest('[data-gym]');if(m){GY.mode=m.dataset.gym;store.set('gy_mode',GY.mode);sfx('tick');renderGradPanel();return}
- const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',YB.pickYear);sfx('tick');renderGradList();return}
- const ch=e.target.closest('[data-gyc]');if(ch){if(GY.matching)return;YB.pickYear=+ch.dataset.gyc;store.set('yb_pick',YB.pickYear);sfx('tick');renderGradList();return}
+ const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',YB.pickYear);$('#gyRange').value=YB.pickYear;sfx('tick');gyFill(YB.pickYear);return}
  if(e.target.closest('#gyGo')){gyStart();return}
  const row=e.target.closest('[data-gpos]');if(row){sfx('tick');gyStart(+row.dataset.gpos);return}
  const b=e.target.closest('[data-yb]');if(b){openYearbook(+b.dataset.yb);return}
@@ -3518,8 +3517,8 @@ $('#ybPanel').addEventListener('click',e=>{
  if(e.target.closest('#ybOpen')){openYearbook(YB.pickYear);return}
  if(e.target.closest('#ybPhotosBtn'))openYbPhotos();
 });
-$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='ybRange'){YB.pickYear=+e.target.value;$('#ybYear').textContent=YB.pickYear}if(e.target.id==='gyRange'){$('#gyYearNum').textContent=e.target.value}});
-$('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'){if(GY.matching){e.target.value=YB.pickYear;$('#gyYearNum').textContent=YB.pickYear;return}YB.pickYear=+e.target.value;store.set('yb_pick',YB.pickYear);renderGradList()}});
+$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='ybRange'){YB.pickYear=+e.target.value;$('#ybYear').textContent=YB.pickYear}if(e.target.id==='gyRange'){if(GY.matching){e.target.value=YB.pickYear;return}YB.pickYear=+e.target.value;gyFill(YB.pickYear)}});
+$('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'&&!GY.matching)store.set('yb_pick',YB.pickYear)});
 
 /* ----- Grad Year, list view (same look as Hot 100 Rewind); the yearbook is the other view ----- */
 const GY={mode:store.get('gy_mode','list'),matching:false,done:0,key:null};
@@ -3528,16 +3527,22 @@ function gyYear(){const[lo,hi]=ybRange();if(!YB.pickYear)YB.pickYear=store.get('
 function renderGradPanel(){if(GY.mode==='book'){renderYearbookShelf();return}renderGradList()}
 function renderGradList(){
  const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
- const chips=[...new Set(ybPeople().map(p=>+p.year).concat(store.get('yb_recent',[])))].filter(v=>v>=lo&&v<=hi).sort((a,b)=>a-b).slice(-8);
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
  panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick a graduation year to hear the 40 biggest songs of senior year, September to graduation</p></div>${GY_SEG()}</div>
   <div class="gyPick"><button class="gyStep" data-gys="-1" aria-label="Earlier year">−</button><div class="gyYear"><small>CLASS OF</small><b id="gyYearNum">${y}</b></div><button class="gyStep" data-gys="1" aria-label="Later year">+</button>
-   <input type="range" id="gyRange" min="${lo}" max="${hi}" value="${y}" aria-label="Graduation year">
-   ${chips.length?`<div class="cdYears gyChips">${chips.map(v=>`<button class="cdYear${v===y?' on':''}" data-gyc="${v}"><b>${v}</b><small>Class of</small></button>`).join('')}</div>`:''}</div>
-  <div class="cdBar"><span class="cdWeek">Senior year · September ${y-1} – June ${y}</span>
-   <button class="cdGo${active?' stop':''}" id="gyGo"${GY.matching||!rows.length?' disabled':''}>${GY.matching?`Finding songs… ${GY.done}/${rows.length}`:active?'Stop countdown':`Start countdown · #${rows.length} → #1`}</button></div>
-  <div class="cdList" id="gyList">${rows.length?rows.map(r=>`<div class="cdRow" data-gpos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.artist)} · ${stat(r)}</span></span><span class="mv ${r.wk1?'up':'same'}">${r.wk1?'★ #1':'#'+r.peak}</span></div>`).join(''):'<div class="loading">No chart data for this year</div>'}</div>`;
- GY.key=null;markGy();
+   <input type="range" id="gyRange" min="${lo}" max="${hi}" value="${y}" aria-label="Graduation year"></div>
+  <div class="cdBar"><span class="cdWeek" id="gyWhen"></span><button class="cdGo" id="gyGo"></button></div>
+  <div class="cdList" id="gyList"></div>`;
+ gyFill(y);
+}
+function gyFill(y){
+ const rows=ybRows(y),active=CD.active&&CD.grad===y;
+ const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
+ $('#gyYearNum').textContent=y;$('#gyWhen').textContent=`Senior year · September ${y-1} – June ${y}`;
+ const b=$('#gyGo');b.className='cdGo'+(active?' stop':'');b.disabled=GY.matching||!rows.length;
+ b.textContent=GY.matching?`Finding songs… ${GY.done}/${rows.length}`:active?'Stop countdown':`Start countdown · #${rows.length} → #1`;
+ $('#gyList').innerHTML=rows.length?rows.map(r=>`<div class="cdRow" data-gpos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.artist)} · ${stat(r)}</span></span><span class="mv ${r.wk1?'up':'same'}">${r.wk1?'★ #1':'#'+r.peak}</span></div>`).join(''):'<div class="loading">No chart data for this year</div>';
+ $('#gyList').scrollTop=0;GY.key=null;markGy();
 }
 function markGy(){
  if(tabId!=='gradyear'||GY.mode!=='list')return;
