@@ -266,9 +266,10 @@ html.remote #lightsBtn{display:none!important}
 .cdTxt b{font-size:clamp(24px,2.6vw,38px);font-weight:800;line-height:1.1;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cdTxt span{font-size:clamp(17px,1.6vw,22px);color:rgba(255,255,255,.8)}
 .cdTxt em{font-style:normal;font-size:14px;color:var(--muted);margin-top:6px}
-#cdFact{margin:12px 0 0;padding-top:10px;border-top:1px solid rgba(255,255,255,.12);font-size:clamp(15px,1.4vw,19px);line-height:1.35;color:rgba(255,255,255,.88);max-width:640px;display:none}
-#cdFact.on{display:block}
-#cdFact i,#gfList i{font-style:normal;font-family:Bungee;font-size:12px;letter-spacing:.14em;color:var(--gold);margin-right:10px;white-space:nowrap}
+.npFact{display:none;margin-top:10px;padding:9px 12px;border-radius:12px;background:rgba(255,210,63,.08);border:1px solid rgba(255,210,63,.28);font-size:15px;line-height:1.35;color:rgba(255,255,255,.9);transition:opacity .45s}
+.npFact.on{display:block}.npFact.fade{opacity:0}
+.npFact i{display:block;margin-bottom:3px}
+.npFact i,#gfList i{font-style:normal;font-family:Bungee;font-size:12px;letter-spacing:.14em;color:var(--gold);margin-right:10px;white-space:nowrap}
 #gfCard{position:fixed;left:50%;top:170px;z-index:71;width:min(760px,92vw);padding:26px 34px 28px;border-radius:28px;background:rgba(14,7,30,.94);border:1px solid rgba(255,93,162,.55);box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,93,162,.28);pointer-events:none;opacity:0;transform:translate(-50%,-30px) scale(.94);transition:opacity .5s,transform .6s cubic-bezier(.2,.8,.2,1)}
 #gfCard.show{opacity:1;transform:translate(-50%,0) scale(1)}
 .gfHead{font-family:Bungee;font-size:clamp(22px,2.4vw,32px);color:var(--accent2);text-shadow:0 0 16px rgba(255,93,162,.6);margin-bottom:14px}
@@ -631,6 +632,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  .np.playing .vinyl{left:66px}
  .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
  .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
+ .npFact{grid-column:1/-1;font-size:14px;margin-top:8px;padding:7px 11px}
  #viz,.radio,.prog,.times,.ctrls,.houseBtn{grid-column:1/-1}
  .houseBtn{height:46px;font-size:16px;margin-top:10px}
  .radio{margin:6px 0 2px}.dial{height:56px}.rTop{margin-bottom:6px}.rName{font-size:15px}
@@ -747,6 +749,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
     <div class="npStage"><div class="vinyl"><div class="lbl" id="vinylLabel"></div></div><div class="npArt"><img id="npImg" alt=""></div></div>
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
+    <div class="npFact" id="npFact" aria-live="polite"></div>
     <button class="houseBtn" id="houseBtn" data-icon="sparkle" style="display:none"><span>Start House Mix</span></button>
     <canvas id="viz"></canvas>
     <div class="radio" id="radio" style="display:none">
@@ -832,7 +835,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas></div>
 </div>
 
-<div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em><p id="cdFact"></p></div></div>
+<div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 <div id="gfCard" aria-live="polite"><div class="gfHead" id="gfHead"></div><div id="gfList"></div></div>
 
 <div id="deck">
@@ -2963,15 +2966,28 @@ function gfPickStat(d){
  const[f,i]=free[Math.floor(Math.random()*free.length)];GF.usedS.add(i);return{when:f[0],text:f[1]};
 }
 function gfLine(el,f){el.innerHTML='';if(!f)return;const i=document.createElement('i');i.textContent=f.when;el.append(i,document.createTextNode(f.text))}
+// Now Playing fact: starts with something from the months this song was on the chart, then a new one every 30s
+function gfShow(f){
+ const el=$('#npFact');
+ if(!f){el.classList.remove('on','fade');el.innerHTML='';return}
+ const put=()=>{gfLine(el,{when:f.ev?`Meanwhile · ${f.when}`:f.when,text:f.text});el.classList.add('on');el.classList.remove('fade')};
+ if(el.classList.contains('on')){el.classList.add('fade');setTimeout(put,450)}else put();
+}
 function gfSong(x){
- const el=$('#cdFact'),c=x.cd,d=gfYear(c.year);
- if(!d||S.gradFacts===false){el.classList.remove('on');return}
- if(GF.shown!==x.track.id){GF.shown=x.track.id;GF.songs++;GF.cur=gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7))||gfPickStat(d)}
- const f=GF.cur;
- gfLine(el,f&&{when:f.ev?`Meanwhile · ${f.when}`:f.when,text:f.text});el.classList.toggle('on',!!f);
+ const c=x.cd,d=gfYear(c.year);
+ if(!d||S.gradFacts===false){gfShow(null);return}
+ if(GF.shown!==x.track.id){GF.shown=x.track.id;GF.songs++;GF.npAt=performance.now();GF.npN=0;gfShow(gfPickEvent(d,(c.first||'').slice(0,7),(c.last||'').slice(0,7))||gfPickStat(d))}
+}
+function gfNP(){
+ const c=P.current&&P.current.cd;
+ if(!c||c.chart!=='grad'||!CD.active){if($('#npFact').classList.contains('on'))gfShow(null);return}
+ if(GF.shown!==P.current.id||P.paused||performance.now()-GF.npAt<30000)return;
+ const d=gfYear(c.year);if(!d)return;
+ GF.npAt=performance.now();GF.npN++;gfShow((GF.npN%2?gfPickStat(d):gfPickEvent(d))||gfPickStat(d));
 }
 // Every 4th song of the Senior Countdown, a "Class of 'YY flashback" card shows in the song's last seconds, as it hands over to the next one
 function gfTick(){
+ gfNP();
  const c=P.current&&P.current.cd;
  if(!c||c.chart!=='grad'||!CD.active||P.paused||!P.dur||P.dur<60000||S.gradFacts===false)return;
  if(GF.songs<1||GF.songs%4||GF.flashFor===GF.shown)return;
@@ -3001,9 +3017,8 @@ function cdCard(x){
   $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
   $('#cdStats').textContent=[`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks===1?'':'s'} on the chart`,cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)}`:`Down ${mv.slice(1)}`].join(' · ');
  }
- if(c.chart!=='grad')$('#cdFact').classList.remove('on');
  $('#gfCard').classList.remove('show');
- const el=$('#cdCard');el.classList.add('show');clearTimeout(cdCardT);cdCardT=setTimeout(()=>el.classList.remove('show'),c.chart==='grad'&&$('#cdFact').classList.contains('on')?11000:7500);
+ const el=$('#cdCard');el.classList.add('show');clearTimeout(cdCardT);cdCardT=setTimeout(()=>el.classList.remove('show'),7500);
  if(c.pos<=3&&S.sfx)sfx('coin');
 }
 
