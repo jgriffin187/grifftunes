@@ -890,7 +890,11 @@ const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCre
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
-const saveS=()=>{if(!REMOTE)store.set('settings',S)};
+const saveS=()=>{if(REMOTE)return;if(S.hue)store.set('hue_conn',S.hue);store.set('settings',S)};
+// Hue pairing lives in its own slot too: restore it if the settings ever lose it (only "Disconnect Hue" clears it)
+if(!REMOTE&&!S.hue&&store.get('hue_conn',null))S.hue=store.get('hue_conn',null);
+// Another GriffTunes window changed settings: take its changes instead of later saving an old copy over them
+addEventListener('storage',e=>{if(e.key!=='jbx.settings'||!e.newValue||REMOTE)return;try{const n=JSON.parse(e.newValue);Object.keys(n).forEach(k=>{S[k]=n[k]});if(!S.hue&&store.get('hue_conn',null))S.hue=store.get('hue_conn',null)}catch(err){}});
 let credits=store.get('credits',6);
 
 const I={
@@ -2486,7 +2490,23 @@ async function hueFetch(path,method,body,ip){
  const r=await fetch(`http://${host}/api${path}`,{method:method||'GET',body:body?JSON.stringify(body):undefined,targetAddressSpace:'local'});
  return r.json();
 }
-function hueErr(e){if(Date.now()-HUE.errAt>60000){HUE.errAt=Date.now();toast("Can't reach the Hue Bridge","warn")}console.warn('Hue',e)}
+function hueErr(e){
+ console.warn('Hue',e);
+ if(e&&e.message==='unauthorized'){if(Date.now()-HUE.errAt>60000){HUE.errAt=Date.now();toast("The Hue Bridge no longer recognizes GriffTunes. Reconnect Hue in Settings",'warn')}return}
+ hueRelocate();
+ if(Date.now()-HUE.errAt>60000){HUE.errAt=Date.now();toast("Can't reach the Hue Bridge","warn")}
+}
+// If the bridge got a new address from the router, look it up and switch to it (keeps the same pairing)
+async function hueRelocate(){
+ if(!hueOn()||HUE.relocating||Date.now()-(HUE.relocAt||0)<10*60e3)return;HUE.relocating=true;HUE.relocAt=Date.now();
+ try{
+  const j=await fetch('https://discovery.meethue.com/').then(r=>r.json());
+  for(const b of(Array.isArray(j)?j:[])){
+   const ip=b&&b.internalipaddress;if(!ip||ip===S.hue.ip)continue;
+   try{const c=await hueFetch(`/${S.hue.user}/config`,'GET',null,ip);if(c&&c.name&&!Array.isArray(c)){S.hue.ip=ip;saveS();toast('Found the Hue Bridge at its new address '+ip);hueLoadLights().then(hueApply);return}}catch(e){}
+  }
+ }catch(e){}finally{HUE.relocating=false}
+}
 function hueSend(path,body,group){if(!hueOn())return;HUE.q.push({path,body,gap:group?1000:120});huePump()}
 async function huePump(){
  if(HUE.busy)return;HUE.busy=true;
@@ -2754,7 +2774,7 @@ async function renderHueSettings(){
   renderSpkSettings();
   $('#hTest').onclick=async()=>{if(!(await hueOnLights()).size){toast('The lights are off. Turn them on first.','warn');return}const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
   $('#hOpen').onclick=()=>{closeModal($('#settingsModal'));openLights()};
-  $('#hOff').onclick=()=>{S.hue=null;saveS();HUE.lights=[];renderLightsBtn();renderHueSettings();toast('Hue disconnected')};
+  $('#hOff').onclick=()=>{S.hue=null;store.del('hue_conn');saveS();HUE.lights=[];renderLightsBtn();renderHueSettings();toast('Hue disconnected')};
   try{
    const groups=await hueFetch(`/${S.hue.user}/groups`);
    const opts=Object.entries(groups||{}).filter(([,g])=>g&&['Room','Zone','Entertainment'].includes(g.type)).sort((a,b)=>a[1].name.localeCompare(b[1].name));
@@ -2768,12 +2788,13 @@ async function renderHueSettings(){
   <div class="field two" style="margin-bottom:0"><div><label for="hueIp">Hue Bridge address</label><input type="text" id="hueIp" placeholder="Finding your bridge…" inputmode="decimal"></div><div style="display:flex;align-items:flex-end"><button class="btn primary" id="huePair" style="width:100%">Connect Hue Bridge</button></div></div>
   <p style="margin-top:10px;font-size:13px">Chrome will ask to "connect to devices on your local network". Choose Allow.</p></div>`;
  const ip=$('#hueIp');
- fetch('https://discovery.meethue.com/').then(r=>r.json()).then(j=>{if(Array.isArray(j)&&j[0]&&!ip.value)ip.value=j[0].internalipaddress;ip.placeholder='e.g. 192.168.1.20'}).catch(()=>{ip.placeholder='e.g. 192.168.1.20'});
+ const last=(store.get('hue_conn',null)||{}).ip||'192.168.4.75';ip.value=last;ip.placeholder='e.g. 192.168.4.75';
+ fetch('https://discovery.meethue.com/').then(r=>r.json()).then(j=>{const f=Array.isArray(j)&&j[0]&&j[0].internalipaddress;if(f&&ip.value===last&&!j.some(b=>b.internalipaddress===last))ip.value=f}).catch(()=>{});
  $('#huePair').onclick=()=>huePair(ip.value.trim());
 }
 async function huePair(ip){
  const box=$('#hueSet');
- if(!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)){toast('Enter the bridge address, like 192.168.1.20','warn');return}
+ if(!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)){toast('Enter the bridge address, like 192.168.4.75','warn');return}
  if(HUE.pairing)return;HUE.pairing=true;
  try{await hueFetch('/config','GET',null,ip)}catch(e){HUE.pairing=false;toast(`Can't reach a Hue Bridge at ${ip}. Check the address, and allow local network access if Chrome asks.`,'warn');return}
  box.innerHTML=`<div class="hueBox"><div class="huePress"><div class="hueBridge"></div><div><b style="font-size:20px">Press the round button on top of your Hue Bridge</b><p>Waiting for the bridge… <span class="hueCount" id="hueCount">30</span></p></div></div></div>`;
