@@ -689,6 +689,18 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  .sResults{padding:4px 12px 12px}
 }
 @media (prefers-reduced-motion:reduce){.blob,.floor,.logo .l2,.attArt{animation:none}}
+/* ---------- Grad Year list view ---------- */
+.gyHeadR{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.gySeg{min-width:250px}
+.gyPick{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.gyStep{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--stroke);font-size:30px;line-height:1;color:#fff;flex:none}
+.gyStep:active{transform:scale(.92)}
+.gyYear{display:flex;flex-direction:column;align-items:center;min-width:140px}
+.gyYear small{font-size:11px;letter-spacing:.22em;color:var(--muted);font-weight:700}
+.gyYear b{font-family:Bungee;font-weight:400;font-size:46px;line-height:1.05;color:#fff;text-shadow:0 0 6px #fff,0 0 18px var(--accent)}
+#gyRange{flex:1;min-width:160px;max-width:360px}
+.gyChips{flex:0 1 auto}
+#gyList .mv{width:58px}
 /* ---------- Grad Year yearbooks ---------- */
 .ybPanel{overflow-y:auto}
 .ybShelf{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;padding:8px 4px 18px}
@@ -3485,24 +3497,71 @@ async function openGradPanel(){
  if(tabId!=='gradyear')return;
  renderGradPanel();
 }
-function renderGradPanel(){
+function renderYearbookShelf(){
  const panel=$('#ybPanel'),[lo,hi]=ybRange();
  if(!YB.pickYear)YB.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));
  const people=ybPeople(),shelf=[...new Set(Object.keys(YB_BOOKS).map(Number).concat(people.map(p=>+p.year),store.get('yb_recent',[])))].filter(y=>y>=lo&&y<=hi).slice(0,8);
  const sub=y=>{const ps=people.filter(p=>+p.year===y);return ps.length?ps.map(p=>esc(p.name.split(' ')[0])).join(' & ')+' inside':YB_BOOKS[y]?esc(YB_BOOKS[y].theme):'Senior year Top 40'};
- panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Open any graduating class's yearbook: the 40 biggest songs from September of senior year to graduation, played as a countdown.</p></div><button class="btn" id="ybPhotosBtn">Class photos${people.length?` · ${people.length}`:''}</button></div>
+ panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Open any graduating class's yearbook: the 40 biggest songs from September of senior year to graduation, played as a countdown.</p></div><div class="gyHeadR"><button class="btn" id="ybPhotosBtn">Class photos${people.length?` · ${people.length}`:''}</button>${GY_SEG()}</div></div>
   <div class="ybShelf">${shelf.map(y=>`<button class="ybBook" data-yb="${y}">${ybCover(y,180)}<span class="lbl">Class of ${y}<small>${sub(y)}</small></span></button>`).join('')}
    <div class="ybPick"><h3>YOUR GRAD YEAR</h3><div class="ybDial"><button data-ybd="-1" aria-label="Earlier year">−</button><b id="ybYear">${YB.pickYear}</b><button data-ybd="1" aria-label="Later year">+</button></div>
     <input type="range" id="ybRange" min="${lo}" max="${hi}" value="${YB.pickYear}"><button class="btn primary" id="ybOpen">Open the yearbook</button><p>Any class from ${lo} to ${hi}</p></div></div>`;
 }
 $('#ybPanel').addEventListener('click',e=>{
+ const m=e.target.closest('[data-gym]');if(m){GY.mode=m.dataset.gym;store.set('gy_mode',GY.mode);sfx('tick');renderGradPanel();return}
+ const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',YB.pickYear);sfx('tick');renderGradList();return}
+ const ch=e.target.closest('[data-gyc]');if(ch){if(GY.matching)return;YB.pickYear=+ch.dataset.gyc;store.set('yb_pick',YB.pickYear);sfx('tick');renderGradList();return}
+ if(e.target.closest('#gyGo')){gyStart();return}
+ const row=e.target.closest('[data-gpos]');if(row){sfx('tick');gyStart(+row.dataset.gpos);return}
  const b=e.target.closest('[data-yb]');if(b){openYearbook(+b.dataset.yb);return}
  const d=e.target.closest('[data-ybd]');if(d){const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,YB.pickYear+ +d.dataset.ybd));$('#ybYear').textContent=YB.pickYear;$('#ybRange').value=YB.pickYear;sfx('tick');return}
  if(e.target.closest('#ybOpen')){openYearbook(YB.pickYear);return}
  if(e.target.closest('#ybPhotosBtn'))openYbPhotos();
 });
-$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='ybRange'){YB.pickYear=+e.target.value;$('#ybYear').textContent=YB.pickYear}});
+$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='ybRange'){YB.pickYear=+e.target.value;$('#ybYear').textContent=YB.pickYear}if(e.target.id==='gyRange'){$('#gyYearNum').textContent=e.target.value}});
+$('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'){if(GY.matching){e.target.value=YB.pickYear;$('#gyYearNum').textContent=YB.pickYear;return}YB.pickYear=+e.target.value;store.set('yb_pick',YB.pickYear);renderGradList()}});
 
+/* ----- Grad Year, list view (same look as Hot 100 Rewind); the yearbook is the other view ----- */
+const GY={mode:store.get('gy_mode','list'),matching:false,done:0,key:null};
+const GY_SEG=()=>`<div class="seg gySeg"><button data-gym="list" class="${GY.mode==='list'?'on':''}">List</button><button data-gym="book" class="${GY.mode==='book'?'on':''}">Yearbook</button></div>`;
+function gyYear(){const[lo,hi]=ybRange();if(!YB.pickYear)YB.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));YB.pickYear=Math.max(lo,Math.min(hi,YB.pickYear));return YB.pickYear}
+function renderGradPanel(){if(GY.mode==='book'){renderYearbookShelf();return}renderGradList()}
+function renderGradList(){
+ const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
+ const chips=[...new Set(ybPeople().map(p=>+p.year).concat(store.get('yb_recent',[])))].filter(v=>v>=lo&&v<=hi).sort((a,b)=>a-b).slice(-8);
+ const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
+ panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick a graduation year to hear the 40 biggest songs of senior year, September to graduation</p></div>${GY_SEG()}</div>
+  <div class="gyPick"><button class="gyStep" data-gys="-1" aria-label="Earlier year">−</button><div class="gyYear"><small>CLASS OF</small><b id="gyYearNum">${y}</b></div><button class="gyStep" data-gys="1" aria-label="Later year">+</button>
+   <input type="range" id="gyRange" min="${lo}" max="${hi}" value="${y}" aria-label="Graduation year">
+   ${chips.length?`<div class="cdYears gyChips">${chips.map(v=>`<button class="cdYear${v===y?' on':''}" data-gyc="${v}"><b>${v}</b><small>Class of</small></button>`).join('')}</div>`:''}</div>
+  <div class="cdBar"><span class="cdWeek">Senior year · September ${y-1} – June ${y}</span>
+   <button class="cdGo${active?' stop':''}" id="gyGo"${GY.matching||!rows.length?' disabled':''}>${GY.matching?`Finding songs… ${GY.done}/${rows.length}`:active?'Stop countdown':`Start countdown · #${rows.length} → #1`}</button></div>
+  <div class="cdList" id="gyList">${rows.length?rows.map(r=>`<div class="cdRow" data-gpos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.artist)} · ${stat(r)}</span></span><span class="mv ${r.wk1?'up':'same'}">${r.wk1?'★ #1':'#'+r.peak}</span></div>`).join(''):'<div class="loading">No chart data for this year</div>'}</div>`;
+ GY.key=null;markGy();
+}
+function markGy(){
+ if(tabId!=='gradyear'||GY.mode!=='list')return;
+ const y=YB.pickYear,c=P.current&&P.current.cd,cur=c&&c.chart==='grad'&&c.year===y?c.pos:null,mine=CD.grad===y;
+ const k=[cur,mine?CD.idx:'',mine?CD.active:''].join(':');if(k===GY.key)return;GY.key=k;
+ const done=new Set(mine?CD.list.slice(0,CD.idx).map(x=>x.cd.pos):[]),miss=new Set(mine?CD.missing:[]);
+ $$('#gyList .cdRow').forEach(r=>{const p=+r.dataset.gpos;r.classList.toggle('now',p===cur);r.classList.toggle('done',done.has(p)&&p!==cur);r.classList.toggle('miss',miss.has(p))});
+ const now=$('#gyList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
+ const b=$('#gyGo');if(b&&!GY.matching){const active=CD.active&&CD.grad===y;b.classList.toggle('stop',active);b.textContent=active?'Stop countdown':`Start countdown · #${ybRows(y).length} → #1`}
+}
+setInterval(markGy,700);
+async function gyStart(fromPos){
+ const y=gyYear();
+ if(CD.active&&CD.grad===y){if(fromPos){await cdJump(fromPos);return}stopCountdown();GY.key=null;markGy();return}
+ if(GY.matching)return;
+ const rows=ybRows(y),key=ybKey(y),cache=store.get(key,{}),found={};
+ rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t});
+ const todo=rows.filter(r=>!found[r.pos]);
+ GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradPanel();
+ try{await pmap(todo,2,async r=>{let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
+ finally{GY.matching=false}
+ await gradBegin(y,rows,found,fromPos);
+ if(tabId==='gradyear')renderGradPanel();
+}
 /* ----- class photos (kept only in this browser, never uploaded) ----- */
 function openYbPhotos(){renderYbPhotos();openModal($('#ybPhotosModal'))}
 function renderYbPhotos(){
@@ -3714,20 +3773,26 @@ setInterval(()=>{
   if(i>=0&&i!==YB.spread)ybGo(i);
  }
 },600);
+// Start a Senior Countdown for class year y from found Spotify tracks (shared by the list view and the yearbook)
+async function gradBegin(y,allRows,found,fromPos){
+ const rows=[...allRows].sort((a,b)=>b.pos-a.pos);
+ const list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r:{artist:r.artist},cd:{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last}}));
+ if(!list.length){toast("Couldn't find these songs on Spotify. Try again in a few minutes",'warn');return false}
+ CD.active=true;CD.grad=y;CD.list=list;CD.idx=0;CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);CD.year=y;CD.date=null;
+ CD.view={year:y,date:null,heading:`Class of ${y} · senior year Top 40`,rows:allRows.map(r=>({pos:r.pos,title:r.title,artist:r.artist,sub:`${r.artist} · ${ybStats(r)}`,badge:r.wk1?['up',r.wk1+' WK #1']:['same','#'+r.peak]}))};
+ store.set('yb_recent',[y].concat(store.get('yb_recent',[]).filter(x=>x!==y)).slice(0,6));
+ sfx('coin');toast(`Class of ${y} · Senior Countdown`+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+ if(fromPos)await cdJump(fromPos);
+ else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
+ else toast('The countdown starts after the songs already in line');
+ return true;
+}
 async function ybStart(fromPos){
  if(CD.active&&CD.grad===YB.year&&!fromPos){stopCountdown();ybProgress();return}
  if(CD.active&&CD.grad===YB.year&&fromPos){YB.lastNav=0;await cdJump(fromPos);return}
  if(YB.matching){$('#ybPlay').textContent=`Finding songs… ${YB.done}/${YB.rows.length}`;await ybMatch()}
- const y=YB.year,rows=[...YB.rows].sort((a,b)=>b.pos-a.pos);
- const list=rows.filter(r=>YB.found[r.pos]).map(r=>({track:YB.found[r.pos],r:{artist:r.artist},cd:{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last}}));
- if(!list.length){toast("Couldn't find these songs on Spotify. Try again in a few minutes",'warn');return}
- CD.active=true;CD.grad=y;CD.list=list;CD.idx=0;CD.missing=rows.filter(r=>!YB.found[r.pos]).map(r=>r.pos);CD.year=y;CD.date=null;
- CD.view={year:y,date:null,heading:`Class of ${y} · senior year Top 40`,rows:YB.rows.map(r=>({pos:r.pos,title:r.title,artist:r.artist,sub:`${r.artist} · ${ybStats(r)}`,badge:r.wk1?['up',r.wk1+' WK #1']:['same','#'+r.peak]}))};
- sfx('coin');toast(`Class of ${y} · Senior Countdown`+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
  YB.lastNav=0;
- if(fromPos)await cdJump(fromPos);
- else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
- else toast('The countdown starts after the songs already in line');
+ await gradBegin(YB.year,YB.rows,YB.found,fromPos);
  ybProgress();ybMark();
 }
 $('#yb').addEventListener('click',e=>{
