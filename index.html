@@ -593,11 +593,20 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 @keyframes peek{0%,10%{opacity:0}20%,75%{opacity:1}100%{opacity:0}}
 .gNow{position:absolute;left:3vw;bottom:4vh;z-index:3;transition:opacity 1.2s;display:flex;align-items:center;gap:14px;padding:10px 22px 10px 10px;border-radius:999px;background:rgba(10,6,20,.74);border:1px solid var(--stroke);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);max-width:40vw;box-shadow:0 12px 34px rgba(0,0,0,.5)}
 .gNow img{width:54px;height:54px;border-radius:50%;object-fit:cover;flex:none;animation:spin 6s linear infinite}
-.gNow div{min-width:0;display:flex;flex-direction:column}
+.gNow .gMeta{min-width:0;display:flex;flex-direction:column;flex:1}
 .gNow b,.gNow span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gNow b{font-size:17px}.gNow span{font-size:14px;color:var(--muted)}
 #gViz{width:84px;height:30px;flex:none}
 .gNow.hide{opacity:0}
+.gNow{flex-wrap:wrap;padding-right:12px}
+.gNow.paused img{animation-play-state:paused}
+.gCtl{display:flex;gap:8px;flex:none;margin-left:4px}
+.gBtn{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.1);border:1px solid var(--stroke);color:#fff;cursor:pointer;transition:transform .15s}
+.gBtn:active{transform:scale(.9)}
+.gBtn svg{width:22px;height:22px}
+.gBtn.gPlay{background:linear-gradient(135deg,var(--accent),var(--accent2));border:0;box-shadow:0 0 18px color-mix(in srgb,var(--accent) 55%,transparent)}
+.gNow.hasTk{border-radius:26px;width:min(560px,44vw);max-width:none;padding:10px 12px 12px 10px}
+.gTicker{flex:1 1 100%;margin-top:10px}.gTicker .tkItem{font-size:inherit}.gBtn svg{fill:#fff}
 #attract{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;opacity:0;pointer-events:none;transition:opacity .9s;background:#05020c;overflow:hidden}
 #attract.on{opacity:1;pointer-events:auto}
 .attBg{position:absolute;inset:-120px;background-size:cover;background-position:center;filter:blur(80px) saturate(1.9) brightness(.5);transform:scale(1.2)}
@@ -841,7 +850,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 
 <div id="gallery">
  <div class="gLyric" id="gLyric"></div>
- <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas></div>
+ <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div class="gMeta"><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas><div class="gCtl"><button class="gBtn gPlay" id="gPlay" aria-label="Play or pause"></button><button class="gBtn" id="gSkip" aria-label="Next song" data-icon="skip"></button></div><div class="npTicker gTicker" id="gTicker"><div class="tkBadge" id="gTkBadge"></div><div class="tkWin"><div class="tkTrack" id="gTkTrack"></div></div></div></div>
 </div>
 
 <div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
@@ -2051,7 +2060,7 @@ function syncAttract(){
 }
 function syncGalleryNow(){
  const c=P.current,g=$('#gNow');if(!g)return;
- g.style.display=c&&!P.paused?'':'none';
+ g.style.display=c?'':'none';g.classList.toggle('paused',!!P.paused);$('#gPlay').innerHTML=(!c||P.paused)?I.play:I.pause;
  if(c){$('#gNowImg').src=c.img||PLACEHOLDER;$('#gNowTitle').textContent=c.name;$('#gNowArtist').textContent=c.artist+(c.radio?' · '+c.radio+' radio':'')}
 }
 
@@ -2158,6 +2167,7 @@ addEventListener('click',e=>{
  lastInput=Date.now();
  if(actx&&actx.state==='suspended')actx.resume();
  if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
+ if(attractOn&&galleryOn&&e.target.closest&&e.target.closest('.gCtl'))return;
  if(attractOn){hideAttract();swallowClick=true;setTimeout(()=>{swallowClick=false},700);e.stopPropagation();e.preventDefault()}
 },true));
 setInterval(()=>{if(!attractOn&&!LYR.open&&!(DECK.open&&!DECK.saver)&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
@@ -2182,6 +2192,8 @@ $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
+$('#gPlay').onclick=e=>{e.stopPropagation();sfx('tick');togglePlay()};
+$('#gSkip').onclick=e=>{e.stopPropagation();sfx('tick');advance()};
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
 $('#shPrev').onclick=()=>$('#shelf').scrollBy({left:-$('#shelf').clientWidth*.8});
 $('#shNext').onclick=()=>$('#shelf').scrollBy({left:$('#shelf').clientWidth*.8});
@@ -2990,7 +3002,8 @@ function tkAdd(){
  const sep=document.createElement('span');sep.className='tkSep';sep.textContent='★';
  $('#tkTrack').append(it,sep);return true;
 }
-function tkFill(){const w=$('#npTicker .tkWin').clientWidth||300,tr=$('#tkTrack');let g=0;while(tr.scrollWidth-TK.x<w*1.6&&g++<12&&tkAdd());}
+function tkMirror(){const m=$('#gTkTrack'),tr=$('#tkTrack');if(m.innerHTML!==tr.innerHTML)m.innerHTML=tr.innerHTML;m.style.fontSize=getComputedStyle(tr.firstElementChild||tr).fontSize}
+function tkFill(){const w=Math.max($('#npTicker .tkWin').clientWidth,$('#gTicker .tkWin').clientWidth)||300,tr=$('#tkTrack');let g=0;while(tr.scrollWidth-TK.x<w*1.6&&g++<12&&tkAdd());}
 function tkFrame(t){
  TK.raf=0;if(!TK.on)return;
  const dt=Math.min(100,t-(TK.last||t));TK.last=t;
@@ -2999,16 +3012,18 @@ function tkFrame(t){
  while((f=tr.firstElementChild)&&f.offsetWidth){const sp=f.nextElementSibling,w=f.offsetWidth+(sp?sp.offsetWidth+36:0);if(w>=TK.x)break;TK.x-=w;sp&&sp.remove();f.remove()}
  tkFill();
  tr.style.transform=`translateX(${-TK.x}px)`;
+ if(galleryOn){tkMirror();$('#gTkTrack').style.transform=tr.style.transform}
  TK.raf=requestAnimationFrame(tkFrame);
 }
 function tkStart(y,fresh){
  const el=$('#npTicker');
- $('#tkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
+ $('#tkBadge').innerHTML=$('#gTkBadge').innerHTML=`CLASS OF<b>'${String(y).slice(2)}</b>`;
+ $('#gTicker').classList.add('on');$('#gNow').classList.add('hasTk');
  if(TK.on&&!fresh)return;
  TK.on=true;TK.x=0;$('#tkTrack').innerHTML='';el.classList.add('on');TK.last=0;
  requestAnimationFrame(()=>{TK.x=-$('#npTicker .tkWin').clientWidth*.5;tkFill();if(!TK.raf)TK.raf=requestAnimationFrame(tkFrame)});
 }
-function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
+function tkStop(){if(!TK.on)return;TK.on=false;TK.next=[];$('#npTicker').classList.remove('on');$('#tkTrack').innerHTML='';$('#gTicker').classList.remove('on');$('#gNow').classList.remove('hasTk');$('#gTkTrack').innerHTML='';if(TK.raf)cancelAnimationFrame(TK.raf);TK.raf=0}
 /* Artist facts for the ticker: a line or two from Wikipedia, their age when the song charted (Wikidata), and chart stats from our own Hot 100 data */
 const AF={mem:new Map(),idx:null};
 const afNorm=n=>songKey(n).replace(/^the\s+/,'').replace(/[^a-z0-9]/g,'');
