@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Monoton&family=Outfit:wght@400;500;600;700;800&family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600;1,700&family=Playfair+Display:wght@700;900&family=Caveat:wght@500;600;700&family=Yellowtail&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Monoton&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 @property --accent{syntax:'<color>';inherits:true;initial-value:#ff2bd6}
 @property --accent2{syntax:'<color>';inherits:true;initial-value:#22e4ff}
@@ -690,8 +690,6 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 }
 @media (prefers-reduced-motion:reduce){.blob,.floor,.logo .l2,.attArt{animation:none}}
 /* ---------- Grad Year list view ---------- */
-.gyHeadR{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.gySeg{min-width:250px}
 .gyPick{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .gyStep{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--stroke);font-size:30px;line-height:1;color:#fff;flex:none}
 .gyStep:active{transform:scale(.92)}
@@ -699,157 +697,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 .gyYear small{font-size:11px;letter-spacing:.22em;color:var(--muted);font-weight:700}
 .gyYear b{font-family:Bungee;font-weight:400;font-size:46px;line-height:1.05;color:#fff;text-shadow:0 0 6px #fff,0 0 18px var(--accent)}
 #gyRange{flex:1;min-width:160px;max-width:360px}
-.gyChips{flex:0 1 auto}
 #gyList .mv{width:58px}
-/* ---------- Grad Year yearbooks ---------- */
-.ybPanel{overflow-y:auto}
-.ybShelf{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-end;padding:8px 4px 18px}
-.ybBook{display:flex;flex-direction:column;align-items:center;gap:10px;transition:transform .2s}
-.ybBook:active{transform:scale(.96)}
-.ybBook .lbl{font-weight:700;font-size:16px}.ybBook small{display:block;font-size:12px;color:var(--muted);font-weight:500;text-align:center}
-.ybPick{display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;width:230px;min-height:300px;padding:18px;border-radius:16px;border:2px dashed rgba(255,255,255,.22);background:rgba(255,255,255,.04)}
-.ybPick h3{font-family:Bungee;font-size:15px;letter-spacing:.06em;color:var(--gold)}
-.ybDial{display:flex;align-items:center;gap:10px}
-.ybDial button{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid var(--stroke);font-size:26px;color:#fff}
-.ybDial b{font:800 46px Outfit;min-width:120px;text-align:center;font-variant-numeric:tabular-nums}
-.ybPick input[type=range]{width:100%}
-.ybPick .btn{width:100%}
-.ybPick p{font-size:12px;color:var(--muted);text-align:center;line-height:1.4}
-.ybCover{--cw:190px;position:relative;width:var(--cw);aspect-ratio:.76;border-radius:calc(var(--cw)*.025) calc(var(--cw)*.045) calc(var(--cw)*.045) calc(var(--cw)*.025);overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.55),inset 6px 0 10px rgba(0,0,0,.35),inset -1px 0 0 rgba(255,255,255,.15);flex:none;color:#fff;text-align:left}
-.ybCover::after{content:'';position:absolute;inset:0;background:linear-gradient(115deg,rgba(255,255,255,.22),transparent 35%,transparent 70%,rgba(255,255,255,.08));pointer-events:none}
-.foilS{background:linear-gradient(100deg,#9a9aa8,#f5f2ff 22%,#c6f0ff 34%,#a3a3b2 46%,#fff4d6 60%,#8f8f9d 76%,#e6e6f2);-webkit-background-clip:text;background-clip:text;color:transparent}
-.foilC{background:linear-gradient(100deg,#9a5235,#f6cfb0 22%,#b06a45 40%,#ffe2c8 56%,#8a4428 74%,#e9b48f);-webkit-background-clip:text;background-clip:text;color:transparent}
-.foilG{background:linear-gradient(100deg,#9c7a2e,#fff0b8 24%,#c0973f 42%,#ffeaa6 58%,#8e6a22 76%,#f3d27a);-webkit-background-clip:text;background-clip:text;color:transparent}
-.c93{background:radial-gradient(120% 90% at 70% 30%,#8a3dff,#6526d6 55%,#4c17a8)}
-.c93 .t{position:absolute;left:7%;top:3%;font:700 calc(var(--cw)*.105) 'Playfair Display',serif;letter-spacing:.42em}
-.c93 .y{position:absolute;right:6%;top:3%;font:700 calc(var(--cw)*.105) 'Playfair Display',serif}
-.c93 .globe{position:absolute;left:54%;top:41%;width:24%}
-.c93 .sl{position:absolute;left:9%;bottom:7%;width:120%;transform:rotate(-24deg);transform-origin:0 100%}
-.c93 .h1{font:900 calc(var(--cw)*.125) 'Playfair Display',serif;white-space:nowrap;color:#fffdf2;line-height:.95;text-shadow:0 2px 0 rgba(0,0,0,.25)}
-.c93 .h2{white-space:nowrap;font:900 calc(var(--cw)*.2) Outfit,sans-serif;line-height:.9;letter-spacing:-.01em;background:linear-gradient(180deg,#fff 30%,#b9a2f5);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:calc(var(--cw)*.004) #fff}
-.c95{background:#2c7a6d;background-image:radial-gradient(circle at 20% 30%,rgba(255,255,255,.08) 1px,transparent 2px),radial-gradient(circle at 70% 60%,rgba(0,0,0,.12) 1px,transparent 2px),linear-gradient(160deg,#3a8c7e,#256a5f);background-size:5px 5px,7px 7px,100% 100%}
-.c95 .band{position:absolute;left:29%;width:42%;top:0;bottom:0;background:linear-gradient(180deg,#a8392d,#922d23)}
-.c95 .u{position:absolute;left:50%;top:20%;font:900 calc(var(--cw)*.2) 'Playfair Display',serif;transform:translateX(-50%) scaleX(.47);white-space:nowrap;letter-spacing:-.01em}
-.c95 .iw{position:absolute;left:30%;top:42%;font:calc(var(--cw)*.16) Yellowtail,cursive;line-height:.82;transform:rotate(-30deg);transform-origin:0 0;width:70%}
-.c95 .iw span{display:block}
-.c95 .iw span:nth-child(2){padding-left:12%}.c95 .iw span:nth-child(3){padding-left:30%}
-.c95 .t{position:absolute;left:29%;width:42%;bottom:4%;text-align:center;white-space:nowrap;font:700 calc(var(--cw)*.075) 'Playfair Display',serif;letter-spacing:.06em;color:#2f8a7a}
-.cg{background:radial-gradient(120% 90% at 60% 25%,color-mix(in srgb,var(--cv) 78%,#fff),var(--cv) 55%,color-mix(in srgb,var(--cv) 70%,#000))}
-.cg .stitch{position:absolute;inset:4.5%;border:calc(var(--cw)*.006) dashed color-mix(in srgb,var(--fo) 55%,transparent);border-radius:calc(var(--cw)*.03)}
-.cg .co{position:absolute;left:0;right:0;top:20%;text-align:center;font:700 calc(var(--cw)*.075) 'Playfair Display',serif;letter-spacing:.35em;padding-left:.35em}
-.cg .yr{position:absolute;left:0;right:0;top:29%;text-align:center;font:900 calc(var(--cw)*.27) 'Playfair Display',serif;line-height:1}
-.cg .th{position:absolute;left:10%;right:10%;top:63%;text-align:center;font:calc(var(--cw)*.105) Yellowtail,cursive;line-height:1.05}
-.cg .dc{position:absolute;left:0;right:0;bottom:8%;text-align:center;font:600 calc(var(--cw)*.045) Outfit;letter-spacing:.3em;opacity:.7}
-#yb{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;align-items:center;background:radial-gradient(120% 80% at 50% 0%,#3a2516,#1c110a 60%,#0e0805);opacity:0;pointer-events:none;transition:opacity .45s;overflow:hidden}
-#yb.on{opacity:1;pointer-events:auto}
-#yb::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(92deg,rgba(255,255,255,.025) 0 2px,transparent 2px 9px),repeating-linear-gradient(88deg,rgba(0,0,0,.08) 0 1px,transparent 1px 23px);pointer-events:none}
-.ybTop{position:relative;z-index:2;width:100%;display:flex;align-items:center;gap:16px;padding:14px 22px 6px}
-.ybX{width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);display:grid;place-items:center;color:#fff;flex:none}
-.ybX svg{width:22px;height:22px}
-.ybTitle{font:700 22px 'Playfair Display',serif;color:#f6e7cf;white-space:nowrap}
-.ybNow{flex:1;min-width:0;font-size:15px;color:rgba(255,240,220,.78);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-.ybNow b{color:#fff}
-.ybPlay{height:52px;padding:0 24px;border-radius:999px;font:800 16px Outfit;color:#fff;background:linear-gradient(135deg,var(--ybA,#b8432f),color-mix(in srgb,var(--ybA,#b8432f) 60%,#000));box-shadow:0 8px 24px rgba(0,0,0,.45);flex:none;white-space:nowrap}
-.ybPlay[disabled]{opacity:.6}
-.ybStage{position:relative;z-index:1;flex:1;width:100%;display:flex;align-items:center;justify-content:center;gap:10px;min-height:0;touch-action:pan-y}
-.ybNav{width:58px;height:58px;border-radius:50%;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.18);display:grid;place-items:center;color:#fff;flex:none}
-.ybNav svg{width:26px;height:26px}.ybNav[disabled]{opacity:.2}
-.ybBookEl{position:relative;width:var(--ybW);height:var(--ybH);perspective:calc(var(--ybW)*2.2);--u:calc(var(--ybH)/100)}
-.ybSpread{position:absolute;inset:0;display:flex;border-radius:calc(var(--u)*.8);box-shadow:0 30px 70px rgba(0,0,0,.6);background:var(--ybPaper)}
-.ybSpread::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:calc(var(--u)*7);transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.16) 42%,rgba(0,0,0,.3) 50%,rgba(0,0,0,.16) 58%,transparent);pointer-events:none;z-index:5}
-.ybPage{position:relative;width:50%;height:100%;padding:calc(var(--u)*4.4) calc(var(--u)*4) calc(var(--u)*5.5);color:var(--ybInk);background:linear-gradient(90deg,var(--ybPaper),color-mix(in srgb,var(--ybPaper) 94%,#c9b48f));overflow:hidden}
-.ybPage.r{background:linear-gradient(270deg,var(--ybPaper),color-mix(in srgb,var(--ybPaper) 94%,#c9b48f))}
-.ybPage.l{border-radius:calc(var(--u)*.8) 0 0 calc(var(--u)*.8)}.ybPage.r{border-radius:0 calc(var(--u)*.8) calc(var(--u)*.8) 0}
-.ybPage::before{content:'';position:absolute;inset:calc(var(--u)*2.2);border:calc(var(--u)*.18) solid var(--ybRule);outline:calc(var(--u)*.1) solid var(--ybRule);outline-offset:calc(var(--u)*.45);opacity:var(--ybRuleOn,0);pointer-events:none}
-.ybFoot{position:absolute;bottom:calc(var(--u)*2);font:600 calc(var(--u)*2) 'EB Garamond',serif;color:var(--ybInk)}
-.ybPage.l .ybFoot{left:calc(var(--u)*4)}.ybPage.r .ybFoot{right:calc(var(--u)*4)}
-.k93 .ybFoot{font-style:italic;font-weight:700;text-transform:uppercase;letter-spacing:.04em;font-size:calc(var(--u)*2.4)}
-.ybGrid{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(var(--u)*1.3) calc(var(--u)*1.6);align-content:start}
-.ybP{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0;color:inherit;position:relative}
-.ybP .ph{position:relative;width:100%;aspect-ratio:4/5;overflow:hidden;background:#d9d2c4;box-shadow:0 1px 2px rgba(0,0,0,.25)}
-.ybP .ph img{width:100%;height:100%;object-fit:cover;display:block}
-.ybP .ph .ph0{position:absolute;inset:0;display:grid;place-items:center;padding:8%;font:600 calc(var(--u)*1.5) 'EB Garamond',serif;color:#776b57;background:repeating-linear-gradient(45deg,#e5dccb 0 6px,#ddd3c0 6px 12px)}
-.ybP .nm{margin-top:calc(var(--u)*.6);font:500 calc(var(--u)*1.75)/1.12 'EB Garamond',serif;max-width:100%;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.k93 .ybP .nm{font-style:italic;font-weight:400}
-.ybP small{font:400 calc(var(--u)*1.25) 'EB Garamond',serif;color:color-mix(in srgb,var(--ybInk) 62%,transparent);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ybP .rk{position:absolute;left:4%;top:4%;font:800 calc(var(--u)*1.3) Outfit;color:#fff;background:rgba(0,0,0,.45);padding:.1em .45em;border-radius:99px}
-.ybP.me .ph{box-shadow:0 0 0 calc(var(--u)*.35) var(--ybA),0 2px 6px rgba(0,0,0,.3)}
-.ybP.me small{color:var(--ybA);font-weight:700}
-.ybP.now .ph{box-shadow:0 0 0 calc(var(--u)*.4) var(--ybA),0 0 calc(var(--u)*3) color-mix(in srgb,var(--ybA) 60%,transparent);transform:scale(1.04)}
-.ybP.now .rk{background:var(--ybA)}
-.ybP.done .ph img{filter:saturate(.75)}
-.ybP .ph,.ybP{transition:transform .3s,box-shadow .3s}
-.ybP:active .ph{transform:scale(.96)}
-.ht{filter:grayscale(1) contrast(1.22) brightness(1.04)}
-.htw{position:relative}
-.htw::after{content:'';position:absolute;inset:0;background:radial-gradient(circle,rgba(0,0,0,.4) 30%,transparent 42%) 0 0/3px 3px;mix-blend-mode:multiply;opacity:.5;pointer-events:none}
-.sig{position:absolute;left:3%;right:3%;bottom:7%;font:700 calc(var(--u)*2.5)/1 Caveat,cursive;color:#1f3fc4;transform:rotate(-9deg);clip-path:inset(0 100% 0 0);text-shadow:0 0 2px #fff,0 0 5px #fff,0 0 8px #fff;pointer-events:none;z-index:2}
-.now .sig{animation:sigIn 1.9s .35s ease-out forwards}
-@keyframes sigIn{to{clip-path:inset(0 0 0 0)}}
-.ybDood{position:absolute;font:600 calc(var(--u)*2.2) Caveat,cursive;color:color-mix(in srgb,var(--ybInk) 45%,transparent);pointer-events:none;white-space:nowrap}
-.ybHead{font:700 calc(var(--u)*3.2) 'Playfair Display',serif;color:var(--ybInk);margin-bottom:calc(var(--u)*1.6);letter-spacing:.01em}
-.k93 .ybHead{font-family:'EB Garamond',serif;font-style:italic;text-transform:uppercase;letter-spacing:.06em}
-.ybAwGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*2.4) calc(var(--u)*1.8)}
-.ybAw{text-align:center;min-width:0}
-.ybAw .pair{display:flex;gap:2px;background:#cfc6b6;aspect-ratio:1.2;box-shadow:0 1px 2px rgba(0,0,0,.3)}
-.ybAw .pair button{flex:1;min-width:0;position:relative;overflow:hidden;background:#d9d2c4}
-.ybAw .pair img{width:100%;height:100%;object-fit:cover;display:block}
-.ybAw .pair .ph0{position:absolute;inset:0;display:grid;place-items:center;font:600 calc(var(--u)*1.3) 'EB Garamond',serif;color:#776b57;padding:6%}
-.ybAw b{display:block;margin-top:calc(var(--u)*.8);font:700 calc(var(--u)*1.55) 'EB Garamond',serif;letter-spacing:.06em;text-transform:uppercase}
-.ybAw span{display:block;font:400 calc(var(--u)*1.35)/1.2 'EB Garamond',serif;color:color-mix(in srgb,var(--ybInk) 78%,transparent)}
-.ybAw.now .pair{box-shadow:0 0 0 calc(var(--u)*.4) var(--ybA)}
-.ybFull{position:absolute;inset:0;border-radius:calc(var(--u)*.8);overflow:hidden}
-.ybGym{position:absolute;inset:0;background:linear-gradient(180deg,#d7dbe2 0 9%,#b9bec8 9% 11%,#a5551f 11%,#c46a2a 14%,#b05c22 16%,#c46a2a 19%,#a5551f 21%,#c46a2a 24%,#b05c22 27%,#c46a2a 30%,#a5551f 33%,#c46a2a 36%,#b05c22 39%,#c46a2a 42%,#a5551f 45%,#c46a2a 48%,#b25d23 51%,#7a3d16 53%)}
-.ybGym::before{content:'';position:absolute;left:0;right:0;top:53%;bottom:0;background:linear-gradient(180deg,#c98a4a,#e0a462 30%,#b8783a);background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.07) 0 1px,transparent 1px 7%),linear-gradient(180deg,#b97a3e,#dfa35f 35%,#c38542)}
-.ybGym::after{content:'';position:absolute;left:0;right:0;top:53%;height:9%;background:linear-gradient(180deg,rgba(255,255,255,.35),transparent)}
-.ybCrowd{position:absolute;left:8%;right:8%;top:24%;height:30%;display:grid;grid-template-columns:repeat(34,1fr);grid-auto-rows:1fr;gap:2px 3px;align-items:end}
-.ybCrowd i{display:block;height:100%;opacity:.95}
-.ybSigns{position:absolute;left:12%;top:49%;display:flex;gap:calc(var(--u)*.9);-webkit-box-reflect:below 2px linear-gradient(transparent 30%,rgba(0,0,0,.28))}
-.ybSigns span{width:calc(var(--u)*5.6);height:calc(var(--u)*7.2);background:#fbfaf6;display:grid;place-items:center;font:700 calc(var(--u)*5.4) Caveat,cursive;color:#b0201c;box-shadow:0 2px 4px rgba(0,0,0,.35);border-radius:2px}
-.ybSigns span.gap{background:none;box-shadow:none;width:calc(var(--u)*1.5)}
-.k93 .ybSigns span{border-radius:calc(var(--u)*1.4) calc(var(--u)*1.4) 2px 2px}
-.ybCourt{position:absolute;left:50%;top:84%;transform:translate(-50%,-50%);width:calc(var(--u)*24);height:calc(var(--u)*9);border-radius:50%;border:calc(var(--u)*.35) solid rgba(30,30,60,.55);display:grid;place-items:center}
-.ybCourt b{width:calc(var(--u)*13);height:calc(var(--u)*5.6);border-radius:50%;background:#b0201c;display:grid;place-items:center;font:900 calc(var(--u)*4) 'Playfair Display',serif;color:#f3e6c8;transform:scaleY(.8)}
-.ybIntro{position:absolute;right:4%;top:62%;width:38%;padding:calc(var(--u)*2.4) calc(var(--u)*2.8);background:rgba(251,248,240,.95);color:#2b2318;border-radius:calc(var(--u)*.8);box-shadow:0 10px 30px rgba(0,0,0,.45);transform:rotate(1.2deg)}
-.ybIntro h2{font:900 calc(var(--u)*4.4)/1 'Playfair Display',serif}
-.ybIntro p{font:500 calc(var(--u)*1.8)/1.35 'EB Garamond',serif;margin:calc(var(--u)*1) 0 calc(var(--u)*1.6)}
-.ybIntro .go{display:inline-flex;align-items:center;gap:.5em;height:calc(var(--u)*5.6);padding:0 calc(var(--u)*2.4);border-radius:999px;background:var(--ybA);color:#fff;font:800 calc(var(--u)*1.9) Outfit}
-.ybIntro small{display:block;margin-top:calc(var(--u)*1);font:500 calc(var(--u)*1.4) Outfit;color:#7a6c58}
-.ybSpot{display:flex;flex-direction:column;align-items:center;text-align:center;gap:calc(var(--u)*1.2)}
-.ybSpot .ph{width:62%;aspect-ratio:1;box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden;background:#d9d2c4;position:relative}
-.ybSpot .ph img{width:100%;height:100%;object-fit:cover}
-.ybSpot h3{font:900 calc(var(--u)*3.6)/1.05 'Playfair Display',serif}
-.ybSpot p{font:500 calc(var(--u)*1.8)/1.35 'EB Garamond',serif;color:color-mix(in srgb,var(--ybInk) 80%,transparent)}
-.ybSpot .ribbon{font:800 calc(var(--u)*1.6) Outfit;letter-spacing:.2em;color:#fff;background:var(--ybA);padding:.4em 1.2em;border-radius:99px}
-.ybSigs{position:absolute;inset:calc(var(--u)*9) calc(var(--u)*4) calc(var(--u)*6)}
-.ybSigs span{position:absolute;max-width:46%;font:600 calc(var(--u)*2.1)/1 Caveat,cursive;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ybSigs small{font-size:.82em;opacity:.85}
-.ybFlip{position:absolute;top:0;bottom:0;width:50%;z-index:20;transform-style:preserve-3d;pointer-events:none}
-.ybFlip.fwd{left:50%;transform-origin:0 50%;animation:flipF .75s cubic-bezier(.45,.05,.3,1) forwards}
-.ybFlip.back{left:0;transform-origin:100% 50%;animation:flipB .75s cubic-bezier(.45,.05,.3,1) forwards}
-@keyframes flipF{to{transform:rotateY(-180deg)}}@keyframes flipB{to{transform:rotateY(180deg)}}
-.ybFace{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--ybPaper)}
-.ybFace.bk{transform:rotateY(180deg)}
-.ybFace>.ybSpread{width:200%;right:auto;box-shadow:none;border-radius:0}
-.ybFlip.fwd .ybFace.fr>.ybSpread{left:-100%}.ybFlip.fwd .ybFace.bk>.ybSpread{left:0}
-.ybFlip.back .ybFace.fr>.ybSpread{left:0}.ybFlip.back .ybFace.bk>.ybSpread{left:-100%}
-.ybFace::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.18),transparent 30%);pointer-events:none}
-.ybCoverBig{position:absolute;left:50%;top:0;width:50%;height:100%;z-index:30;transform-origin:0 50%;transform-style:preserve-3d;animation:coverOpen 1.15s .25s cubic-bezier(.5,.05,.3,1) forwards}
-.ybCoverBig .ybCover{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto;border-radius:0 calc(var(--u)*1) calc(var(--u)*1) 0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.ybCoverBig .inside{position:absolute;inset:0;background:#efe7d6;transform:rotateY(180deg);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-@keyframes coverOpen{to{transform:rotateY(-178deg)}}
-.ybDots{position:relative;z-index:2;display:flex;gap:10px;padding:8px 0 16px}
-.ybDots button{width:12px;height:12px;border-radius:50%;background:rgba(255,255,255,.25)}
-.ybDots button.on{background:var(--ybA,#fff);transform:scale(1.25)}
-.ybPhotoList{display:flex;flex-direction:column;gap:10px;margin:6px 0 16px}
-.ybPhotoRow{display:flex;align-items:center;gap:14px;padding:8px;border-radius:12px;background:rgba(255,255,255,.05)}
-.ybPhotoRow img{width:56px;height:70px;object-fit:cover;border-radius:6px;flex:none}
-.ybPhotoRow span{flex:1;min-width:0;display:flex;flex-direction:column}.ybPhotoRow small{color:var(--muted)}
-.ybAdd{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.ybAdd .full{grid-column:1/-1}
-.ybAdd input,.ybAdd select{width:100%;height:48px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 14px;font:500 16px Outfit}
-.ybAdd label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
-.ybPhotosM .sheet{width:min(640px,94vw);height:auto;max-height:92vh;padding:22px 26px;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -976,21 +824,6 @@ html.remote.noPhoneVol .ctrls{display:none!important}
 
 <div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 
-<div id="yb">
- <div class="ybTop"><button class="ybX" id="ybClose" aria-label="Close the yearbook" data-icon="close"></button><div class="ybTitle" id="ybTitle"></div><div class="ybNow" id="ybNow"></div><button class="ybPlay" id="ybPlay">▶ Senior Countdown</button></div>
- <div class="ybStage" id="ybStage"><button class="ybNav" id="ybPrev" data-icon="left" aria-label="Previous page"></button><div class="ybBookEl" id="ybBookEl"><div id="ybSpreadWrap" style="position:absolute;inset:0"></div></div><button class="ybNav" id="ybNext" data-icon="right" aria-label="Next page"></button></div>
- <div class="ybDots" id="ybDots"></div>
-</div>
-<div class="modal ybPhotosM" id="ybPhotosModal"><div class="sheet card">
- <div class="sHead"><h2>Class photos</h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
- <p class="note">Portraits you add here are saved only on this device and never uploaded. Each one appears in the yearbook for the class year you choose.</p>
- <div class="ybPhotoList" id="ybPhotoList"></div>
- <div class="ybAdd"><div class="full"><label for="ybAddFile">Photo</label><input type="file" id="ybAddFile" accept="image/*"></div>
-  <div><label for="ybAddName">Name printed under the photo</label><input id="ybAddName" placeholder="First Last" autocomplete="off"></div>
-  <div><label for="ybAddYear">Yearbook (Class of)</label><input type="number" id="ybAddYear"></div>
-  <div><label for="ybAddLabel">Shown as</label><select id="ybAddLabel"><option>Senior</option><option>Junior</option><option>Sophomore</option><option>Freshman</option><option>Teacher</option></select></div>
-  <div style="align-self:end"><button class="btn primary" id="ybAddBtn" style="width:100%">Add to yearbook</button></div></div>
-</div></div>
 <div id="deck">
  <div class="dkBg" id="dkBg"></div>
  <canvas id="dk3d"></canvas>
@@ -2267,7 +2100,7 @@ addEventListener('click',e=>{
  if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
  if(attractOn){hideAttract();swallowClick=true;setTimeout(()=>{swallowClick=false},700);e.stopPropagation();e.preventDefault()}
 },true));
-setInterval(()=>{if(!attractOn&&!LYR.open&&!(DECK.open&&!DECK.saver)&&!YB.open&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
+setInterval(()=>{if(!attractOn&&!LYR.open&&!(DECK.open&&!DECK.saver)&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
 
 /* ---------- Global events ---------- */
 document.addEventListener('click',e=>{
@@ -3350,7 +3183,6 @@ const TIPS={
  huePair:'Connect to your Hue Bridge. Press the button on the bridge first',
  hTest:'Flash the lights to test them',hOpen:'Pick a lighting mode',lsettings:'Open Hue settings',
  spkBtn:'Turn the speaker power plugs on or off',
- ybPlay:()=>CD.active&&CD.grad===YB.year?'Stop the Senior Countdown':'Play the 40 biggest songs of senior year, #40 to #1',ybClose:'Close the yearbook',ybOpen:'Open this year\'s yearbook',ybPhotosBtn:'Add yearbook portraits (kept on this device only)',
 };
 const TIP_ATTR={
  act:el=>{const k=el.dataset.act,c=S.freePlay?'':` (${COST[k]} credit${COST[k]>1?'s':''})`;return({q:'Add to the end of Up Next',n:'Play right after the current song',w:'Stop the current song and play this now'})[k]+c},
@@ -3367,11 +3199,6 @@ const TIP_ATTR={
  dev:()=>'Play on this speaker',
  famdel:()=>'Remove this family member',
  key:el=>({BS:'Backspace',CLR:'Clear',GO:'Search',' ':'Space'})[el.dataset.key],
- pos:el=>el.closest('#yb')?'Play this song in the Senior Countdown':undefined,
- pid:()=>'Class photo',
- ybgo:()=>'Go to this page',
- yb:el=>`Open the Class of ${el.dataset.yb} yearbook`,
- ybdel:()=>'Remove this photo',
 };
 function tipFor(el){
  if(el.dataset.tip)return el.dataset.tip;
@@ -3437,22 +3264,8 @@ async function boot(){
  startHost();
  renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
 }
-/* ---------- Grad Year: a yearbook for any senior year (Billboard Hot 100, September through graduation) ---------- */
-const YB={art:{},artRun:null,open:false,year:null,rows:null,found:{},matching:false,matchP:null,done:0,spread:0,spreads:[],lastNav:0,curKey:null,pickYear:null,flipping:false};
-const ybPeople=()=>store.get('yb_people',[]);
-window.__gtYB=YB;
-const ybPeopleSet=v=>store.set('yb_people',v);
-// Books with their own cover design; every other year gets a cover in the style of its decade
-const YB_BOOKS={
- 1993:{kind:'k93',cover:'c93',paper:'#fbf8f2',ink:'#2a2140',acc:'#6a2bd9',rule:'#5b33b8',ruleOn:.85,light:'#7b3cff',name:'Tatler ’93',theme:"Here's the Future",foot:'Seniors',two:true},
- 1995:{kind:'k95',cover:'c95',paper:'#fbf7ee',ink:'#1f2926',acc:'#a8392d',rule:'#2f7a6c',ruleOn:0,light:'#1f9a86',name:'Tatler ’95',theme:'Unforgettable in Every Way',foot:'Seniors',two:false}
-};
-const YB_DECADES=[[1959,'#1f2d55','#e3c47a','foilG','#2c4a8a'],[1970,'#6b3a1b','#f0b862','foilG','#c0612b'],[1980,'#17131f','#ff7ad1','foilS','#d4368f'],[1990,'#2c1f63','#d9d9e8','foilS','#5a3fc0'],[2000,'#26406b','#e3e8f2','foilS','#2f6fb3'],[2010,'#e9e3d6','#a78232','foilG','#a78232'],[2020,'#151515','#e2c27a','foilG','#a8862f']];
-function ybStyle(y){
- if(YB_BOOKS[y])return YB_BOOKS[y];
- const d=[...YB_DECADES].reverse().find(x=>y>=x[0])||YB_DECADES[0],light=d[0]===2010;
- return{kind:'kg',cover:'cg',cv:d[1],fo:d[2],foil:d[3],paper:light?'#fdfbf6':'#fbf8f1',ink:'#26221c',acc:d[4],rule:d[1],ruleOn:.6,light:d[2],name:'Class of '+y,foot:'Seniors',two:false};
-}
+/* ---------- Grad Year: the 40 biggest songs of a class's senior year (Billboard Hot 100, September through graduation) ---------- */
+const GRAD={pickYear:null};
 const ybRange=()=>{const W=Object.keys((CD.data&&CD.data.weeks)||{});const last=W.length?W.reduce((a,b)=>a>b?a:b):'2026-06-30';let max=+last.slice(0,4);if(last.slice(5)<'06-15')max--;return[1959,max]};
 async function ybData(){if(!CD.data){if(!CD.loading)CD.loading=fetchJSON('hot100-top20.json').finally(()=>{CD.loading=null});CD.data=await CD.loading}return CD.data}
 const ybRowsCache={};
@@ -3472,63 +3285,22 @@ function ybRows(y){
 }
 const ybMon=d=>new Date(d+'T12:00:00').toLocaleDateString(undefined,{month:'short',year:'numeric'});
 const ybStats=r=>[r.wk1?`#1 for ${r.wk1} week${r.wk1>1?'s':''}`:`Peaked at #${r.peak}`,`${r.weeks} week${r.weeks>1?'s':''} in the Top 20`,r.first.slice(0,7)===r.last.slice(0,7)?`charting ${ybMon(r.first)}`:`charting ${ybMon(r.first)} – ${ybMon(r.last)}`].join(' · ');
-const YB_SIGS=['Stay cool!','Never change!','K.I.T. ☺','2 good 2 be 4gotten','Have a rad summer!','Remember 3rd hour?!','Party at my house!','Don\'t ever forget me!','Love ya! ♥','You rock!','See ya at the reunion','Call me this summer!','Best friends 4ever','Good luck next year!','Ur so sweet ♥'];
-const YB_DOODLES=['★','♥','K.I.T.','2 cool 2 be 4gotten','~ Class of ’YY ~','☺','Never change!','Seniors rule!','♥ ♥ ♥','B4N'];
-const ybHash=s=>[...String(s)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const ybKey=y=>`yb_${provider===SPOTIFY?'sp':'demo'}_${y}`;
 const ybRowKey=r=>r.title+'|'+r.artist;
 
-/* ----- covers ----- */
-function ybCover(y,cw){
- const st=ybStyle(y),u=ybHash(y+''+cw);
- if(st.cover==='c93')return`<div class="ybCover c93" style="--cw:${cw}px"><div class="t foilS">TATLER</div><div class="y foilS">'93</div>
-  <svg class="globe" viewBox="0 0 100 100"><defs><linearGradient id="gl${u}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4f2ff"/><stop offset=".35" stop-color="#b9f0ff"/><stop offset=".6" stop-color="#9c9cab"/><stop offset=".8" stop-color="#fff2d0"/><stop offset="1" stop-color="#8d8d9c"/></linearGradient></defs><circle cx="50" cy="50" r="47" fill="url(#gl${u})"/><path d="M14 34q10-16 30-14q14 4 10 15q-12 5-9 17q-2 13-14 9q-14-8-17-27z M57 48q16-6 26 5q6 15-7 25q-15 4-17-10q-6-12-2-20z M58 14q14-2 22 8q-8 4-14 2q-8-2-8-10z" fill="#6526d6" opacity=".9"/></svg>
-  <div class="sl"><div class="h1">HERE'S THE</div><div class="h2">FUTURE</div></div></div>`;
- if(st.cover==='c95')return`<div class="ybCover c95" style="--cw:${cw}px"><div class="band"></div><div class="u foilC">UNFORGETTABLE</div><div class="iw foilC"><span>in</span><span>every</span><span>way</span></div><div class="t">TATLER '95</div></div>`;
- const rows=CD.data?ybRows(y):[],top=rows[0];
- return`<div class="ybCover cg" style="--cw:${cw}px;--cv:${st.cv};--fo:${st.fo}"><div class="stitch"></div><div class="co ${st.foil}">CLASS OF</div><div class="yr ${st.foil}">${y}</div>${top?`<div class="th ${st.foil}">${esc(top.title.replace(/\s*\(.*?\)\s*/g,' ').trim())}</div>`:''}<div class="dc">SENIOR YEAR</div></div>`;
-}
-
-/* ----- Grad Year tab: the shelf ----- */
 async function openGradPanel(){
  const panel=$('#ybPanel');
  if(!CD.data){panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
   try{await ybData()}catch(e){panel.innerHTML=`<div class="loading">Couldn't load the chart archive<br><small>${esc(e.message)}</small></div>`;return}}
  if(tabId!=='gradyear')return;
- renderGradPanel();
+ renderGradList();
 }
-function renderYearbookShelf(){
- const panel=$('#ybPanel'),[lo,hi]=ybRange();
- if(!YB.pickYear)YB.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));
- const people=ybPeople(),shelf=[...new Set(Object.keys(YB_BOOKS).map(Number).concat(people.map(p=>+p.year),store.get('yb_recent',[])))].filter(y=>y>=lo&&y<=hi).slice(0,8);
- const sub=y=>{const ps=people.filter(p=>+p.year===y);return ps.length?ps.map(p=>esc(p.name.split(' ')[0])).join(' & ')+' inside':YB_BOOKS[y]?esc(YB_BOOKS[y].theme):'Senior year Top 40'};
- panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Open any graduating class's yearbook: the 40 biggest songs from September of senior year to graduation, played as a countdown.</p></div><div class="gyHeadR"><button class="btn" id="ybPhotosBtn">Class photos${people.length?` · ${people.length}`:''}</button>${GY_SEG()}</div></div>
-  <div class="ybShelf">${shelf.map(y=>`<button class="ybBook" data-yb="${y}">${ybCover(y,180)}<span class="lbl">Class of ${y}<small>${sub(y)}</small></span></button>`).join('')}
-   <div class="ybPick"><h3>YOUR GRAD YEAR</h3><div class="ybDial"><button data-ybd="-1" aria-label="Earlier year">−</button><b id="ybYear">${YB.pickYear}</b><button data-ybd="1" aria-label="Later year">+</button></div>
-    <input type="range" id="ybRange" min="${lo}" max="${hi}" value="${YB.pickYear}"><button class="btn primary" id="ybOpen">Open the yearbook</button><p>Any class from ${lo} to ${hi}</p></div></div>`;
-}
-$('#ybPanel').addEventListener('click',e=>{
- const m=e.target.closest('[data-gym]');if(m){GY.mode=m.dataset.gym;store.set('gy_mode',GY.mode);sfx('tick');renderGradPanel();return}
- const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',YB.pickYear);$('#gyRange').value=YB.pickYear;sfx('tick');gyFill(YB.pickYear);return}
- if(e.target.closest('#gyGo')){gyStart();return}
- const row=e.target.closest('[data-gpos]');if(row){sfx('tick');gyStart(+row.dataset.gpos);return}
- const b=e.target.closest('[data-yb]');if(b){openYearbook(+b.dataset.yb);return}
- const d=e.target.closest('[data-ybd]');if(d){const[lo,hi]=ybRange();YB.pickYear=Math.max(lo,Math.min(hi,YB.pickYear+ +d.dataset.ybd));$('#ybYear').textContent=YB.pickYear;$('#ybRange').value=YB.pickYear;sfx('tick');return}
- if(e.target.closest('#ybOpen')){openYearbook(YB.pickYear);return}
- if(e.target.closest('#ybPhotosBtn'))openYbPhotos();
-});
-$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='ybRange'){YB.pickYear=+e.target.value;$('#ybYear').textContent=YB.pickYear}if(e.target.id==='gyRange'){if(GY.matching){e.target.value=YB.pickYear;return}YB.pickYear=+e.target.value;gyFill(YB.pickYear)}});
-$('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'&&!GY.matching)store.set('yb_pick',YB.pickYear)});
-
-/* ----- Grad Year, list view (same look as Hot 100 Rewind); the yearbook is the other view ----- */
-const GY={mode:store.get('gy_mode','list'),matching:false,done:0,key:null};
-const GY_SEG=()=>`<div class="seg gySeg"><button data-gym="list" class="${GY.mode==='list'?'on':''}">List</button><button data-gym="book" class="${GY.mode==='book'?'on':''}">Yearbook</button></div>`;
-function gyYear(){const[lo,hi]=ybRange();if(!YB.pickYear)YB.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));YB.pickYear=Math.max(lo,Math.min(hi,YB.pickYear));return YB.pickYear}
-function renderGradPanel(){if(GY.mode==='book'){renderYearbookShelf();return}renderGradList()}
+const GY={matching:false,done:0,key:null};
+function gyYear(){const[lo,hi]=ybRange();if(!GRAD.pickYear)GRAD.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));GRAD.pickYear=Math.max(lo,Math.min(hi,GRAD.pickYear));return GRAD.pickYear}
 function renderGradList(){
  const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
- panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick your graduation year to hear the 40 biggest songs of your senior year!</p></div>${GY_SEG()}</div>
+ panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick your graduation year to hear the 40 biggest songs of your senior year!</p></div></div>
   <div class="gyPick"><button class="gyStep" data-gys="-1" aria-label="Earlier year">−</button><div class="gyYear"><small>CLASS OF</small><b id="gyYearNum">${y}</b></div><button class="gyStep" data-gys="1" aria-label="Later year">+</button>
    <input type="range" id="gyRange" min="${lo}" max="${hi}" value="${y}" aria-label="Graduation year"></div>
   <div class="cdBar"><span class="cdWeek" id="gyWhen"></span><button class="cdGo" id="gyGo"></button></div>
@@ -3545,8 +3317,8 @@ function gyFill(y){
  $('#gyList').scrollTop=0;GY.key=null;markGy();
 }
 function markGy(){
- if(tabId!=='gradyear'||GY.mode!=='list')return;
- const y=YB.pickYear,c=P.current&&P.current.cd,cur=c&&c.chart==='grad'&&c.year===y?c.pos:null,mine=CD.grad===y;
+ if(tabId!=='gradyear'||!$('#gyList'))return;
+ const y=GRAD.pickYear,c=P.current&&P.current.cd,cur=c&&c.chart==='grad'&&c.year===y?c.pos:null,mine=CD.grad===y;
  const k=[cur,mine?CD.idx:'',mine?CD.active:''].join(':');if(k===GY.key)return;GY.key=k;
  const done=new Set(mine?CD.list.slice(0,CD.idx).map(x=>x.cd.pos):[]),miss=new Set(mine?CD.missing:[]);
  $$('#gyList .cdRow').forEach(r=>{const p=+r.dataset.gpos;r.classList.toggle('now',p===cur);r.classList.toggle('done',done.has(p)&&p!==cur);r.classList.toggle('miss',miss.has(p))});
@@ -3561,224 +3333,13 @@ async function gyStart(fromPos){
  const rows=ybRows(y),key=ybKey(y),cache=store.get(key,{}),found={};
  rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t});
  const todo=rows.filter(r=>!found[r.pos]);
- GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradPanel();
+ GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradList();
  try{await pmap(todo,2,async r=>{let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
  finally{GY.matching=false}
  await gradBegin(y,rows,found,fromPos);
- if(tabId==='gradyear')renderGradPanel();
+ if(tabId==='gradyear')renderGradList();
 }
-/* ----- class photos (kept only in this browser, never uploaded) ----- */
-function openYbPhotos(){renderYbPhotos();openModal($('#ybPhotosModal'))}
-function renderYbPhotos(){
- const L=ybPeople(),[lo,hi]=ybRange();
- $('#ybPhotoList').innerHTML=L.length?L.map(p=>`<div class="ybPhotoRow"><img src="${p.img}" alt=""><span><b>${esc(p.name)}</b><small>${esc(p.label)} in the Class of ${p.year} yearbook</small></span><button class="btn" data-ybdel="${esc(p.id)}">Remove</button></div>`).join(''):'<p class="note">No photos yet. Add a yearbook portrait and it shows up in that year\'s book.</p>';
- const yr=$('#ybAddYear');if(yr&&!yr.value)yr.value=YB.pickYear||hi;yr&&(yr.min=lo,yr.max=hi);
-}
-function ybResize(file){
- return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=()=>rej(new Error("Couldn't read that file"));fr.onload=()=>{const im=new Image();im.onerror=()=>rej(new Error("That file isn't a photo"));im.onload=()=>{const w=Math.min(480,im.width),h=Math.round(im.height*w/im.width),c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(im,0,0,w,h);res(c.toDataURL('image/jpeg',.85))};im.src=fr.result};fr.readAsDataURL(file)});
-}
-$('#ybPhotosModal').addEventListener('click',async e=>{
- const del=e.target.closest('[data-ybdel]');if(del){ybPeopleSet(ybPeople().filter(p=>p.id!==del.dataset.ybdel));renderYbPhotos();if(tabId==='gradyear')renderGradPanel();return}
- if(e.target.closest('#ybAddBtn')){
-  const f=$('#ybAddFile').files[0],name=$('#ybAddName').value.trim(),year=+$('#ybAddYear').value,label=$('#ybAddLabel').value,[lo,hi]=ybRange();
-  if(!f){toast('Pick a photo first','warn');return}if(!name){toast('Type the name to print under the photo','warn');return}
-  if(!(year>=lo&&year<=hi)){toast(`Pick a year from ${lo} to ${hi}`,'warn');return}
-  try{const img=await ybResize(f);const L=ybPeople();L.push({id:'p'+Date.now().toString(36),name,year,label,img});ybPeopleSet(L);
-   if(!ybPeople().some(p=>p.name===name&&+p.year===year))throw new Error('This browser is out of room for photos');
-   $('#ybAddFile').value='';$('#ybAddName').value='';sfx('add');toast(`${name} added to the Class of ${year} yearbook`);renderYbPhotos();if(tabId==='gradyear')renderGradPanel();if(YB.open&&YB.year===year)ybBuild()}
-  catch(err){toast(err.message,'warn')}
- }
-});
-
-/* ----- find the songs on Spotify (2 at a time, remembered per year) ----- */
-function ybMatch(){
- if(YB.matchP)return YB.matchP;
- const y=YB.year,key=ybKey(y),cache=store.get(key,{});
- YB.found={};YB.rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)YB.found[r.pos]=t});
- const todo=YB.rows.filter(r=>!YB.found[r.pos]);
- YB.done=YB.rows.length-todo.length;
- if(!todo.length){ybProgress();return Promise.resolve()}
- YB.matching=true;ybProgress();
- YB.matchP=(async()=>{
-  try{await pmap(todo,2,async r=>{
-   if(YB.year!==y)return;
-   let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){}
-   if(YB.year!==y)return;
-   if(t){t=slimT(t);YB.found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c);ybFill(r.pos)}
-   YB.done++;ybProgress();
-  })}finally{if(YB.year===y){YB.matching=false;YB.matchP=null;ybProgress();ybBuild(true);ybArtLoop()}}
- })();
- return YB.matchP;
-}
-function ybProgress(){
- const b=$('#ybPlay');if(!b)return;
- const mine=CD.active&&CD.grad===YB.year;
- b.disabled=false;
- b.textContent=YB.matching?`Finding songs… ${YB.done}/${YB.rows.length}`:mine?'■ Stop countdown':'▶ Senior Countdown · #40 → #1';
- const s=$('#ybIntroSmall');if(s)s.textContent=YB.matching?`Finding the songs on Spotify… ${YB.done} of ${YB.rows.length}`:`${Object.keys(YB.found).length} of ${YB.rows.length} songs found on Spotify`;
-}
-// Cover art for a portrait: Spotify's when connected, otherwise the real album cover from Apple's public iTunes search
-function ybArt(pos){const t=YB.found[pos];if(provider===SPOTIFY&&t&&t.img)return t.img;return YB.art[pos]||(YB.art[pos]===''&&t&&t.img)||null}
-function ybFill(pos){const src=ybArt(pos);if(!src)return;$$(`#yb [data-pos="${pos}"] .ph0`).forEach(el=>{const im=document.createElement('img');im.alt='';im.src=src;if(el.dataset.ht)im.className='ht';el.replaceWith(im)});$$(`#yb [data-pos="${pos}"] img`).forEach(im=>{if(im.getAttribute('src')!==src)im.src=src})}
-function jsonp(url,ms=9000){return new Promise((res,rej)=>{const cb='__gtj'+Math.random().toString(36).slice(2),sc=document.createElement('script');const done=()=>{clearTimeout(t);try{delete window[cb]}catch(e){}sc.remove()};const t=setTimeout(()=>{done();rej(new Error('timeout'))},ms);window[cb]=d=>{done();res(d)};sc.onerror=()=>{done();rej(new Error('network'))};sc.src=url+(url.includes('?')?'&':'?')+'callback='+cb;document.head.appendChild(sc)})}
-async function itunesArt(title,artist){
- const main=String(artist).split(/\s+(?:featuring|feat\.?|ft\.?|with|x|&|and|duet with)\s+|,\s*|\//i)[0].trim(),clean=String(title).replace(/\s*\([^)]*\)\s*/g,' ').split('/')[0].trim();
- const j=await jsonp('https://itunes.apple.com/search?media=music&entity=song&limit=10&term='+encodeURIComponent(clean+' '+main));
- const L=(j&&j.results)||[],a=main.toLowerCase(),k=songKey(clean);
- const byA=r=>{const n=String(r.artistName||'').toLowerCase();return n.includes(a)||a.includes(n)};
- const best=L.find(r=>byA(r)&&songKey(r.trackName||'')===k)||L.find(r=>byA(r))||null;
- return best&&best.artworkUrl100?best.artworkUrl100.replace(/\d+x\d+bb/,'600x600bb'):'';
-}
-// Apple allows about 20 lookups a minute, so go slowly, in book order, and remember every cover
-async function ybArtLoop(){
- const y=YB.year;if(YB.artRun===y)return;YB.artRun=y;
- try{
-  for(const r of[...YB.rows].sort((a,b)=>b.pos-a.pos)){
-   if(!YB.open||YB.year!==y)break;
-   if(YB.art[r.pos]!=null)continue;
-   const t=YB.found[r.pos];if(provider===SPOTIFY&&t&&t.img)continue;
-   const c=store.get('yb_art',{}),k=ybRowKey(r);
-   if(k in c){YB.art[r.pos]=c[k];ybFill(r.pos);continue}
-   let url=null;try{url=await itunesArt(r.title,r.artist)}catch(e){}
-   if(url!=null){YB.art[r.pos]=url;const c2=store.get('yb_art',{});c2[k]=url;store.set('yb_art',c2);ybFill(r.pos)}
-   await sleep(3100);
-  }
- }finally{if(YB.artRun===y)YB.artRun=null}
-}
-
-/* ----- the book ----- */
-function openYearbook(y){
- const[lo,hi]=ybRange();if(!(y>=lo&&y<=hi))return;
- YB.year=y;YB.rows=ybRows(y);YB.matchP=null;YB.found={};YB.art={};{const c=store.get('yb_art',{});YB.rows.forEach(r=>{const k=ybRowKey(r);if(k in c)YB.art[r.pos]=c[k]})}YB.spread=0;YB.lastNav=0;YB.open=true;
- store.set('yb_recent',[y].concat(store.get('yb_recent',[]).filter(x=>x!==y)).slice(0,6));store.set('yb_pick',y);
- const st=ybStyle(y),el=$('#yb');
- el.style.setProperty('--ybPaper',st.paper);el.style.setProperty('--ybInk',st.ink);el.style.setProperty('--ybA',st.acc);el.style.setProperty('--ybRule',st.rule);el.style.setProperty('--ybRuleOn',st.ruleOn);
- el.className='on '+st.kind;$('#ybTitle').textContent=YB_BOOKS[y]?`${st.name} · Class of ${y}`:`Class of ${y}`;
- sfx('tick');ybLayout();ybMatch();ybBuild();ybArtLoop();
- // the cover swings open
- const bk=$('#ybBookEl'),cv=document.createElement('div');cv.className='ybCoverBig';cv.innerHTML=ybCover(y,Math.round(bk.clientWidth/2))+'<div class="inside"></div>';bk.appendChild(cv);setTimeout(()=>cv.remove(),1500);
- if(hueOn()&&S.hueMode!=='off')hueGroup({effect:'none',xy:rgbToXy(...cssRgb(st.light)),bri:hueB(),transitiontime:30});
- ybNowLine();
- if(tabId==='gradyear')renderGradPanel();
-}
-function closeYearbook(){if(!YB.open)return;YB.open=false;$('#yb').classList.remove('on');hideTip();if(hueOn())hueApply()}
-function ybLayout(){
- const H=Math.max(300,Math.min(innerHeight-150,(innerWidth-170)/1.52)),W=H*1.52;
- const el=$('#yb');el.style.setProperty('--ybW',W+'px');el.style.setProperty('--ybH',H+'px');
-}
-addEventListener('resize',()=>{if(YB.open)ybLayout()});
-function ybPh(pos,cls){const src=ybArt(pos),r=YB.rows[pos-1];return src?`<img class="${cls||''}" src="${esc(src)}" alt="">`:`<div class="ph0"${cls?' data-ht="1"':''}>${esc(r?r.title:'')}</div>`}
-function ybName(text,two){
- if(!two)return esc(text);
- const w=String(text).split(/\s+/);if(w.length<2)return esc(text);
- let best=1,bd=1e9;for(let i=1;i<w.length;i++){const d=Math.abs(w.slice(0,i).join(' ').length-w.slice(i).join(' ').length);if(d<bd){bd=d;best=i}}
- return esc(w.slice(0,best).join(' '))+'<br>'+esc(w.slice(best).join(' '));
-}
-function ybCouple(y){
- const L=ybPeople(),names=[...new Set(L.map(p=>p.name))];if(names.length<2||!L.some(p=>+p.year===y))return null;
- const pick=n=>{const mine=L.filter(p=>p.name===n);return mine.find(p=>+p.year===y)||mine.find(p=>/senior/i.test(p.label))||mine[0]};
- const inBook=names.filter(n=>L.some(p=>p.name===n&&+p.year===y));const order=inBook.concat(names.filter(n=>!inBook.includes(n)));
- return[pick(order[0]),pick(order[1])];
-}
-function ybAwards(rows,y){
- const used=new Set(),out=[];
- const take=(t,list)=>{const c=list.filter(r=>!used.has(r.pos)).slice(0,2);if(c.length<2)return;c.forEach(r=>used.add(r.pos));out.push({t,a:{pos:c[0].pos},b:{pos:c[1].pos}})};
- const by=f=>[...rows].sort((p,q)=>f(q)-f(p)||p.pos-q.pos),rx=re=>rows.filter(r=>re.test(r.title));
- const cp=ybCouple(y);
- if(cp)out.push({t:'Class Couple',a:{pid:cp[0].id},b:{pid:cp[1].id}});else take('Class Couple',rx(/\b(love|heart|kiss|baby|forever|always|knee|marry|together)\b/i));
- take('Most Likely to Succeed',by(r=>r.wk1*1000+r.pts));
- take('Most Popular',by(r=>r.weeks));
- const art=new Map();rows.forEach(r=>{const a=String(r.artist).split(/\s+(?:featuring|feat\.?|ft\.?|&|and|with|x)\s+|,/i)[0].trim().toLowerCase();art.set(a,(art.get(a)||[]).concat(r))});
- const multi=[...art.values()].filter(l=>l.length>=2).sort((p,q)=>q.length-p.length||p[0].pos-q[0].pos)[0];if(multi)take('Class Overachievers',multi);
- take('Class Flirts',rx(/\b(love|kiss|baby|girl|boy|sexy|honey|tonight|lover|freak|touch|want you|need you)\b/i));
- take('Class Partiers',rx(/\b(dance|party|jump|shake|groove|move|jam|club|funk|boogie|night|rock|hot|thang|bounce|wild|fun|celebrat)/i));
- take('Most Improved',by(r=>r.firstPos-r.peak));
- take('Class Rebels',by(r=>r.jump));
- take('Class Loudmouth',by(r=>r.title.length));
- take('Class Clown',by(r=>-r.title.length));
- take('Class Slackers',by(r=>r.peak));
- take('Most Shy',by(r=>-r.weeks));
- return out.slice(0,12);
-}
-function ybBuild(keep){
- if(!YB.open)return;
- const y=YB.year,st=ybStyle(y),rows=YB.rows,yy=String(y).slice(2),people=ybPeople().filter(p=>+p.year===y);
- const S2=[];
- // 1) the class photo in the gym
- const skins=['#f1c7a5','#e2b08a','#c98c66','#8f5c3d','#f6d7bf'],hair=['#2b1d14','#5a3a22','#9a6a3a','#d9b26a','#1a1a1a','#7a2e1a'];
- const crowd=Array.from({length:34*7},(_,i)=>{const h=ybHash(y*1000+i),hue=[0,210,30,280,140,355,45,0][h%8],l=h%8===7?92:22+h%45;return`<i style="background:radial-gradient(circle at 50% 24%,${hair[(h>>3)%6]} 0 20%,transparent 21%),radial-gradient(circle at 50% 33%,${skins[(h>>6)%5]} 0 21%,transparent 22%),linear-gradient(180deg,transparent 52%,hsl(${hue} ${h%3?38:8}% ${l}%) 52%)"></i>`}).join('');
- S2.push({key:'gym',full:`<div class="ybFull"><div class="ybGym"><div class="ybCrowd">${crowd}</div><div class="ybSigns">${'SENIORS'.split('').map(c=>`<span>${c}</span>`).join('')}<span class="gap"></span><span>${yy[0]}</span><span>${yy[1]}</span></div>${YB_BOOKS[y]?'<div class="ybCourt"><b>M</b></div>':''}
-  <div class="ybIntro"><h2>Class of ${y}</h2><p>The 40 biggest songs of senior year, September ${y-1} to graduation in June ${y}${YB_BOOKS[y]?` · ${esc(st.theme)}`:''}.</p><button class="go" id="ybIntroGo">▶ Play the Senior Countdown</button><small id="ybIntroSmall"></small></div></div></div>`});
- // 2) senior portraits, #40 first so the countdown reads front to back; family photos mixed in
- const cells=[...rows].sort((a,b)=>b.pos-a.pos).map(r=>({r}));
- people.forEach((p,i)=>cells.splice(Math.min(cells.length,3+i*9),0,{p}));
- const per=12,pages=[];for(let i=0;i<cells.length;i+=per)pages.push(cells.slice(i,i+per));
- let pn=18;const dood=(seed)=>{const h=ybHash(seed);return[0,1].map(k=>{const t=YB_DOODLES[(h>>(k*4))%YB_DOODLES.length].replace('YY',yy);return`<span class="ybDood" style="${k?'right':'left'}:${10+(h>>(k*3))%26}%;top:calc(var(--u)*${.9+((h>>5)%3)*.25});transform:rotate(${((h>>(k*2))%13)-6}deg)">${esc(t)}</span>`}).join('')};
- const page=(cs,side,num)=>`<div class="ybPage ${side}"><div class="ybGrid">${cs.map(c=>{
-   if(c.p){const p=c.p,ht=!/senior/i.test(p.label);return`<button class="ybP me" data-pid="${esc(p.id)}"><div class="ph${ht?' htw':''}"><img class="${ht?'ht':''}" src="${p.img}" alt=""></div><div class="nm">${ybName(p.name,st.two)}</div><small>${esc(p.label)}</small></button>`}
-   const r=c.r;return`<button class="ybP" data-pos="${r.pos}"><div class="ph">${ybPh(r.pos)}<span class="rk">#${r.pos}</span><span class="sig">${esc(YB_SIGS[ybHash(r.title)%YB_SIGS.length])} #${r.pos}</span></div><div class="nm">${ybName(r.title,st.two)}</div><small>${esc(r.artist)}</small></button>`}).join('')}</div>${dood(y+side+num)}<div class="ybFoot">${num%2?`${st.foot} ${num}`:`${num} ${st.foot}`}</div></div>`;
- for(let i=0;i<pages.length;i+=2){const l=pages[i],r=pages[i+1]||[];S2.push({key:'sen'+i,pos:[...l,...r].filter(c=>c.r).map(c=>c.r.pos),left:page(l,'l',pn),right:page(r,'r',pn+1)});pn+=2}
- // 3) senior survey
- const aw=ybAwards(rows,y),L=ybPeople();
- const side=(it)=>{if(it.pid){const p=L.find(x=>x.id===it.pid);return p?`<button data-pid="${esc(p.id)}" class="htw"><img class="ht" src="${p.img}" alt=""></button>`:'<button></button>'}return`<button data-pos="${it.pos}" class="htw">${ybPh(it.pos,'ht')}</button>`};
- const nm=it=>{if(it.pid){const p=L.find(x=>x.id===it.pid);return p?esc(p.name):''}const r=rows[it.pos-1];return r?esc(r.title):''};
- const awPage=(list,sideName,num)=>`<div class="ybPage ${sideName}"><div class="ybHead">Senior Survey</div><div class="ybAwGrid">${list.map(a=>`<div class="ybAw" data-aw="${[a.a.pos,a.b.pos].filter(Boolean).join(',')}"><div class="pair">${side(a.a)}${side(a.b)}</div><b>${esc(a.t)}</b><span>${nm(a.a)} and ${nm(a.b)}</span></div>`).join('')}</div><div class="ybFoot">${num%2?`Senior Survey ${num}`:`${num} Senior Survey`}</div></div>`;
- S2.push({key:'survey',left:awPage(aw.slice(0,6),'l',pn),right:awPage(aw.slice(6,12),'r',pn+1)});pn+=2;
- // 4) song of the year + signatures
- const top=rows[0],sigs=rows.slice(1).map(r=>r.title).concat(L.map(p=>`${p.name.split(' ')[0]} '${String(p.year).slice(2)}`));
- const inks=['#1f3fc4','#16161a','#b0201c','#6a2bd9','#0f7a5c'];
- const sigHtml=sigs.slice(0,26).map((t,i)=>{const h=ybHash(t+i),short=t.replace(/\s*[(/].*$/,'').trim(),nm=short.length>20?short.slice(0,19)+'…':short;return`<span style="left:${(i%2)*50+(h%6)}%;top:${Math.floor(i/2)*7.6+(h>>3)%2}%;color:${inks[h%inks.length]};transform:rotate(${(h%11)-5}deg)">${esc(YB_SIGS[(h>>4)%YB_SIGS.length])}<br><small>– ${esc(nm)}</small></span>`}).join('');
- S2.push({key:'end',pos:[1],left:`<div class="ybPage l"><div class="ybHead">Song of the Year</div><div class="ybSpot" data-pos="1"><div class="ph">${top?ybPh(1):''}</div><span class="ribbon">CLASS OF ${y} · #1</span><h3>${esc(top?top.title:'')}</h3><p>${esc(top?top.artist:'')}<br>${top?esc(ybStats(top)):''}</p></div><div class="ybFoot">${pn}</div></div>`,
-  right:`<div class="ybPage r"><div class="ybHead">Sign my yearbook!</div><div class="ybSigs">${sigHtml}</div><div class="ybFoot">${pn+1}</div></div>`});
- YB.spreads=S2;if(!keep)YB.spread=Math.min(YB.spread,S2.length-1);
- ybRender();ybProgress();
-}
-function ybSpreadHtml(i){const s=YB.spreads[i];return s?`<div class="ybSpread">${s.full||s.left+s.right}</div>`:''}
-function ybRender(){
- $('#ybSpreadWrap').innerHTML=ybSpreadHtml(YB.spread);
- $('#ybPrev').disabled=YB.spread<=0;$('#ybNext').disabled=YB.spread>=YB.spreads.length-1;
- $('#ybDots').innerHTML=YB.spreads.map((s,i)=>`<button class="${i===YB.spread?'on':''}" data-ybgo="${i}" aria-label="Page ${i+1}"></button>`).join('');
- ybMark(true);
-}
-function ybGo(i,user){
- if(i<0||i>=YB.spreads.length||i===YB.spread||YB.flipping)return;
- if(user)YB.lastNav=Date.now();
- const fwd=i>YB.spread,oldHtml=ybSpreadHtml(YB.spread),newHtml=ybSpreadHtml(i);
- YB.spread=i;sfx('tick');
- const bk=$('#ybBookEl'),f=document.createElement('div');f.className='ybFlip '+(fwd?'fwd':'back');
- f.innerHTML=`<div class="ybFace fr">${oldHtml}</div><div class="ybFace bk">${newHtml}</div>`;
- // underneath: new spread, except the half the turning page still covers shows the old one
- ybRender();
- const wrap=$('#ybSpreadWrap'),under=document.createElement('div');under.className='ybUnder';under.style.cssText=`position:absolute;top:0;bottom:0;${fwd?'left:0':'left:50%'};width:50%;overflow:hidden;z-index:10`;
- under.innerHTML=oldHtml;const us=under.firstElementChild;us.style.width='200%';us.style.right='auto';us.style.left=fwd?'0':'-100%';us.style.boxShadow='none';
- wrap.appendChild(under);bk.appendChild(f);YB.flipping=true;
- setTimeout(()=>{under.remove()},380);
- setTimeout(()=>{f.remove();YB.flipping=false},780);
-}
-function ybMark(fresh){
- if(!YB.open)return;
- const c=P.current&&P.current.cd,mine=c&&c.chart==='grad'&&c.year===YB.year?c.pos:null;
- const played=new Set(CD.grad===YB.year?CD.list.slice(0,CD.idx).map(x=>x.cd.pos):[]);
- $$('#ybSpreadWrap .ybP[data-pos]').forEach(b=>{const p=+b.dataset.pos;b.classList.toggle('now',p===mine);b.classList.toggle('done',played.has(p)&&p!==mine)});
- $$('#ybSpreadWrap .ybAw').forEach(a=>a.classList.toggle('now',!!mine&&a.dataset.aw.split(',').includes(String(mine))));
- const btn=$('#ybPlay');if(btn&&!YB.matching)ybProgress();
-}
-function ybNowLine(){
- const el=$('#ybNow');if(!el)return;const c=P.current;
- if(c&&c.cd&&c.cd.chart==='grad'){const r=YB.rows&&c.cd.year===YB.year?YB.rows[c.cd.pos-1]:null;el.innerHTML=`<b>#${c.cd.pos} · ${esc(c.name)}</b> — ${esc(c.artist)}${r?' · '+esc(ybStats(r)):''}`}
- else el.innerHTML=c?`Now playing: <b>${esc(c.name)}</b> — ${esc(c.artist)}`:'';
-}
-// follow the countdown: turn to the page with the song that's playing (unless someone is flipping through)
-setInterval(()=>{
- if(!YB.open)return;
- const c=P.current,k=c?c.id+':'+(c.cd?c.cd.pos:''):null;
- if(k===YB.curKey)return;YB.curKey=k;ybNowLine();ybMark();
- if(c&&c.cd&&c.cd.chart==='grad'&&c.cd.year===YB.year&&Date.now()-YB.lastNav>12000){
-  const pos=c.cd.pos,i=pos===1?YB.spreads.findIndex(s=>s.key==='end'):YB.spreads.findIndex(s=>(s.pos||[]).includes(pos)&&s.key!=='end');
-  if(i>=0&&i!==YB.spread)ybGo(i);
- }
-},600);
-// Start a Senior Countdown for class year y from found Spotify tracks (shared by the list view and the yearbook)
+// Start a Senior Countdown for class year y from the songs found on Spotify
 async function gradBegin(y,allRows,found,fromPos){
  const rows=[...allRows].sort((a,b)=>b.pos-a.pos);
  const list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r:{artist:r.artist},cd:{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last}}));
@@ -3792,28 +3353,15 @@ async function gradBegin(y,allRows,found,fromPos){
  else toast('The countdown starts after the songs already in line');
  return true;
 }
-async function ybStart(fromPos){
- if(CD.active&&CD.grad===YB.year&&!fromPos){stopCountdown();ybProgress();return}
- if(CD.active&&CD.grad===YB.year&&fromPos){YB.lastNav=0;await cdJump(fromPos);return}
- if(YB.matching){$('#ybPlay').textContent=`Finding songs… ${YB.done}/${YB.rows.length}`;await ybMatch()}
- YB.lastNav=0;
- await gradBegin(YB.year,YB.rows,YB.found,fromPos);
- ybProgress();ybMark();
-}
-$('#yb').addEventListener('click',e=>{
- if(e.target.closest('#ybClose')){closeYearbook();return}
- if(e.target.closest('#ybPrev')){ybGo(YB.spread-1,true);return}
- if(e.target.closest('#ybNext')){ybGo(YB.spread+1,true);return}
- const d=e.target.closest('[data-ybgo]');if(d){ybGo(+d.dataset.ybgo,true);return}
- if(e.target.closest('#ybPlay')||e.target.closest('#ybIntroGo')){ybStart();return}
- const pp=e.target.closest('[data-pid]');if(pp){const p=ybPeople().find(x=>x.id===pp.dataset.pid);if(p){sfx('add');toast(`${p.name} · ${p.label}, Class of ${YB.year} yearbook`,p.img)}return}
- const s=e.target.closest('[data-pos]');if(s){sfx('tick');ybStart(+s.dataset.pos);return}
+$('#ybPanel').addEventListener('click',e=>{
+ const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();GRAD.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',GRAD.pickYear);$('#gyRange').value=GRAD.pickYear;sfx('tick');gyFill(GRAD.pickYear);return}
+ if(e.target.closest('#gyGo')){gyStart();return}
+ const row=e.target.closest('[data-gpos]');if(row){sfx('tick');gyStart(+row.dataset.gpos);return}
 });
-(()=>{let x0=null,y0=0;const st=$('#ybStage');
- st.addEventListener('pointerdown',e=>{x0=e.clientX;y0=e.clientY});
- st.addEventListener('pointerup',e=>{if(x0==null)return;const dx=e.clientX-x0,dy=e.clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.4)ybGo(YB.spread+(dx<0?1:-1),true)});
-})();
-addEventListener('keydown',e=>{if(!YB.open)return;if(e.key==='Escape')closeYearbook();else if(e.key==='ArrowRight')ybGo(YB.spread+1,true);else if(e.key==='ArrowLeft')ybGo(YB.spread-1,true)});
+$('#ybPanel').addEventListener('input',e=>{if(e.target.id==='gyRange'){if(GY.matching){e.target.value=GRAD.pickYear;return}GRAD.pickYear=+e.target.value;gyFill(GRAD.pickYear)}});
+$('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'&&!GY.matching)store.set('yb_pick',GRAD.pickYear)});
+// the yearbook view was removed: clear the photos and covers it kept on this device
+['yb_people','yb_art','gy_mode'].forEach(k=>store.del(k));
 
 /* ---------- Auto-update: the jukebox picks up new versions on its own ---------- */
 // Checks GitHub Pages every 10 minutes; when a new version is out, reloads at a quiet moment (nothing playing, no menus open).
