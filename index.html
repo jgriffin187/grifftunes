@@ -1796,8 +1796,9 @@ async function advance(){
 }
 const COST={q:1,n:2,w:3};
 const normMode=m=>m==='w'||m==='n'||m==='q'?m:(m===true?'n':'q');
-// Greatest Albums: the whole album into the queue for one price
-const ALBUM_COST=5,ALB={it:null,tracks:[],back:null};
+// Greatest Albums and playlists: the whole thing into the queue for one price
+const ALBUM_COST=5,PLAYLIST_MAX=50,ALB={it:null,tracks:[],back:null};
+const isPlaylist=it=>!!it&&['playlist','liked','fplaylist','fliked'].includes(it.type);
 // Artist page: a row of their albums above the greatest hits; tapping one opens that album
 async function artAlbums(it){
  const paint=list=>{
@@ -1807,9 +1808,9 @@ async function artAlbums(it){
  };
  try{paint(await itemAlbums(it,paint))}catch(e){}
 }
-function enqueueAlbum(tracks,name,img,src){
+function enqueueAlbum(tracks,name,img,src,kind){
  tracks=(tracks||[]).map(slimT).filter(t=>t&&t.uri&&t.name);if(!tracks.length)return false;
- if(REMOTE){remoteAlbum(tracks,name,img);return true}
+ if(REMOTE){remoteAlbum(tracks,name,img,kind);return true}
  if(!spend(ALBUM_COST))return false;
  sfx('add');hueFlash('now');
  const tag=src==='phone'?'Phone request · ':'',idle=!P.current||P.current.house||P.current.radio||P.current.cd;
@@ -1819,9 +1820,9 @@ function enqueueAlbum(tracks,name,img,src){
  toast(`${tag}${name} · ${tracks.length} songs ${idle?'playing now':'added to the queue'}`,img);
  return true;
 }
-async function remoteAlbum(tracks,name,img){
+async function remoteAlbum(tracks,name,img,kind){
  sfx('add');
- try{const r=await rcall({t:'album',tracks,name,img});
+ try{const r=await rcall({t:'album',tracks,name,img,kind});
   if(r&&r.ok)toast(`${name} · ${tracks.length} songs added to the queue`,img);
   else{sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}
  }catch(e){sfx('err');toast(e.message,'warn')}
@@ -2002,7 +2003,10 @@ async function openItem(it){
  if(it.type==='artist'&&provider.artistAlbums){list.innerHTML='<div id="artAlb"></div><div id="artHits"><div class="loading"><div class="spin"></div></div></div>';rows=$('#artHits');artAlbums(it)}
  const paint=tr=>{if(ALB.it!==it)return;const st=list.scrollTop;rows.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';list.scrollTop=st};
  try{const tr=await itemTracks(it,fresh=>{if(ALB.it===it&&$('#albumModal').classList.contains('open'))paint(fresh)});if(ALB.it!==it)return;paint(tr);
-  if(it.rank&&tr.length>1&&ALB.it===it){ALB.tracks=tr;all.innerHTML=`+ Queue the whole album · ${tr.length} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
+  if((it.rank||isPlaylist(it))&&tr.length>1&&ALB.it===it){
+   // playlists can run to hundreds of songs, so one purchase takes the first PLAYLIST_MAX in order
+   const pl=isPlaylist(it),n=pl?Math.min(tr.length,PLAYLIST_MAX):tr.length;ALB.tracks=tr.slice(0,n);
+   all.innerHTML=pl&&tr.length>n?`+ Queue the first ${n} songs ${cost(ALBUM_COST)}`:`+ Queue the whole ${pl?'playlist':'album'} · ${n} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
  catch(e){if(ALB.it===it)rows.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
 }
 
@@ -2330,7 +2334,7 @@ $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
 $('#albumBack').onclick=()=>{if(ALB.back)openItem(ALB.back)};
-$('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img))closeModal($('#albumModal'))};
+$('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img,'',isPlaylist(ALB.it)?'playlist':'album'))closeModal($('#albumModal'))};
 $('#npArt').onclick=async()=>{
  const t=P.current;if(!t)return;
  try{const a=provider.albumOf&&await provider.albumOf(t);if(a)openItem(a);else toast("Couldn't find the album for this song",'warn')}
@@ -2420,8 +2424,9 @@ async function hostHandle(c,d){
   }
   else if(d.t==='album'){
    const tr=(Array.isArray(d.tracks)?d.tracks:[]).slice(0,60);
-   if(!tr.length)throw new Error('That album could not be added');
-   if(!S.freePlay&&credits<ALBUM_COST){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:S.phoneCoins?`A whole album takes ${ALBUM_COST} credits. Tap Insert coin!`:`A whole album takes ${ALBUM_COST} credits. Insert coins at the jukebox!`});return}
+   const what=d.kind==='playlist'?'playlist':'album';
+   if(!tr.length)throw new Error(`That ${what} could not be added`);
+   if(!S.freePlay&&credits<ALBUM_COST){sfx('err');bump($('#coinBtn'),'shake');reply({ok:false,msg:S.phoneCoins?`A whole ${what} takes ${ALBUM_COST} credits. Tap Insert coin!`:`A whole ${what} takes ${ALBUM_COST} credits. Insert coins at the jukebox!`});return}
    enqueueAlbum(tr,String(d.name||'Album').slice(0,120),d.img,'phone');reply({ok:true});
   }
   else if(d.t==='enqueue'){
@@ -3651,7 +3656,7 @@ const TIPS={
  qrMini:'Show a QR code so guests can add songs from their phones',
  albumBack:'Back to the artist',
  npArt:'See the whole album and pick another song from it',
- albumAll:'Add every song on this album to the queue, in order',
+ albumAll:()=>isPlaylist(ALB.it)?`Add this playlist to the queue, in order (up to ${PLAYLIST_MAX} songs)`:'Add every song on this album to the queue, in order',
  lightsBtn:'Hue lights: pick a lighting mode',
  gear:'Settings',
  openSearch:'Search for any song, artist or album',
