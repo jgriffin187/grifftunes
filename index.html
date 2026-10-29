@@ -1337,7 +1337,8 @@ const SPOTIFY={
   }
   const q=st.kind==='year'?`year:${st.from}-${st.to}`:`genre:"${st.genre}"`;
   const offs=[0,10,20,30,40,60,80,100,130,160,200,250].sort(()=>Math.random()-.5).slice(0,4);
-  const pages=await Promise.all(offs.map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(q)).catch(()=>null)));
+  let err=null;const pages=await Promise.all(offs.map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(q)).catch(e=>{err=e;return null})));
+  if(err&&pages.every(x=>!x))throw err;
   return dedupeHits(pages.flatMap(j=>(j&&j.tracks&&j.tracks.items)||[]).map(t=>spT(t)).filter(Boolean));
  },
  async housePool(){
@@ -2471,7 +2472,7 @@ async function radioFill(st){
  RADIO.loading=(async()=>{
   let got=[];
   for(let tries=0;tries<2&&got.length<4;tries++){
-   try{got=((await provider.stationTracks(st))||[]).filter(t=>t&&t.uri&&!RADIO.recent.has(t.id))}catch(e){console.warn('Radio',e)}
+   try{got=((await provider.stationTracks(st))||[]).filter(t=>t&&t.uri&&!RADIO.recent.has(t.id));RADIO.err=got.length?null:'Spotify sent back no songs for it'}catch(e){console.warn('Radio',e);RADIO.err=e.message}
   }
   if(RADIO.for!==st.id)return;
   const have=new Set(RADIO.buf.map(t=>t.id));
@@ -2486,7 +2487,7 @@ async function radioNext(){
  if(RADIO.recent.size>150)RADIO.recent=new Set([...RADIO.recent].slice(-100));
  const t=RADIO.buf.shift();
  if(RADIO.buf.length<5)radioFill(st);
- if(!t)toast(`Couldn't tune in to ${st.name} right now`,'warn');
+ if(!t)toast(`Couldn't tune in to ${st.name} right now${RADIO.err?' · '+RADIO.err:''}`,'warn');
  return t||null;
 }
 function staticNoise(){
@@ -2512,25 +2513,31 @@ function renderRadio(){
  $$('#band .st').forEach((el,k)=>el.classList.toggle('on',k===i));
  const dl=$('#dial');dl.scrollLeft=0;if(!dl.classList.contains('dragging'))placeBand(i);
 }
+// Radio starts right away unless a paid pick is actually playing: nothing on, house mix, radio, a countdown, or a paused song all give way
+const radioNow=()=>{const c=P.current;return!c||c.house||c.radio||c.cd||P.paused};
+async function radioStart(st){
+ if(CD.active){CD.active=false;CD.grad=null;CD.list=[];CD.idx=0;if(typeof renderCountdown==='function')renderCountdown()}
+ const t=await radioNext();
+ if(t&&S.radio&&S.station===st.id){await startTrack(t,false,st.name);return true}
+ return false;
+}
 async function tune(idx){
  const st=STATIONS[Math.max(0,Math.min(STATIONS.length-1,idx))];
  const changed=st.id!==S.station;
  S.station=st.id;saveS();RADIO.buf=[];RADIO.for=null;
  const d=$('#dial');d.classList.add('tuning');setTimeout(()=>d.classList.remove('tuning'),700);
  renderRadio();
- if(!changed)return;
+ if(!changed&&P.current&&P.current.radio&&!P.paused)return;
  staticNoise();
- if(!P.current||P.current.house||P.current.radio){
-  const t=await radioNext();if(t&&S.station===st.id)startTrack(t,false,st.name);
- }else toast(`Tuned to ${st.name}. It starts after the current picks.`);
+ if(radioNow())await radioStart(st);
+ else toast(`Tuned to ${st.name}. It starts after the current picks.`);
 }
 async function toggleRadio(){
  S.radio=!S.radio;saveS();renderRadio();renderQueue();sfx('tick');
  if(S.radio){
   staticNoise();const st=stationById(S.station);
-  toast(`Radio on · ${st.name} · FM ${st.fm}`);
-  if(!P.current||P.current.house){const t=await radioNext();if(t&&S.radio)startTrack(t,false,st.name)}
-  else radioFill(st);
+  if(radioNow()){toast(`Radio on · ${st.name} · FM ${st.fm}`);await radioStart(st)}
+  else{radioFill(st);toast(`Radio on · ${st.name} starts after the current picks`)}
  }else toast(P.current&&P.current.radio?'Radio off. This song will finish.':'Radio off');
 }
 (()=>{
