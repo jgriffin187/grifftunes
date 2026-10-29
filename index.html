@@ -927,7 +927,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // Radio now follows album art colors like every other song; station colors are opt-in
 if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
@@ -1427,7 +1427,7 @@ const SpotifyEngine={
   window.onSpotifyWebPlaybackSDKReady=()=>{
    const p=new Spotify.Player({name:S.name||'Basement Jukebox',getOAuthToken:cb=>{getToken().then(cb).catch(()=>{})},volume:S.volume/100});
    this.player=p;
-   p.addListener('ready',async({device_id})=>{const first=!this.deviceId;this.deviceId=device_id;clearTimeout(to);if(first&&!this.target&&!S.spkDevice){try{await api('/me/player',{method:'PUT',body:{device_ids:[device_id],play:false}})}catch(e){}}res()});
+   p.addListener('ready',async({device_id})=>{const first=!this.deviceId;this.deviceId=device_id;clearTimeout(to);if(first&&!this.target){if(S.spkDevice)spkRoute(true);else{try{await api('/me/player',{method:'PUT',body:{device_ids:[device_id],play:false}})}catch(e){}}}res()});
    p.addListener('not_ready',()=>toast('Spotify player went offline','warn'));
    p.addListener('initialization_error',({message})=>{clearTimeout(to);rej(new Error(message))});
    p.addListener('authentication_error',({message})=>{clearTimeout(to);rej(new Error(message))});
@@ -1442,7 +1442,20 @@ const SpotifyEngine={
   try{await api(`/me/player/play?device_id=${this.dev()}`,{method:'PUT',body:{uris:[t.uri]}})}
   catch(e){
    if(!this.target)throw e;
-   toast(`${this.targetName} isn't available, so playing here instead`,'warn');this.useLocal();
+   // Speakers like the WiiM drop off Spotify after sitting idle, or come back with a new id. Find it again and wake it before giving up.
+   const name=this.targetName;
+   for(let i=0;i<2;i++){
+    try{
+     if(i)await sleep(2500);
+     const d=findSpeaker(await this.devices(),{id:this.target,name:name});
+     if(!d)continue;
+     this.target=d.id;this.targetName=d.name;rememberSpeaker(d);
+     await api('/me/player',{method:'PUT',body:{device_ids:[d.id],play:false}});await sleep(400);
+     await api(`/me/player/play?device_id=${d.id}`,{method:'PUT',body:{uris:[t.uri]}});
+     this.startPoll();renderDevChip();return;
+    }catch(err){console.warn('[GriffTunes] speaker retry',err)}
+   }
+   toast(`${spkLabel(name)} isn't answering, so playing on the jukebox for now. Tap the speaker button to switch back`,'warn');this.useLocal();
    await api(`/me/player/play?device_id=${this.deviceId}`,{method:'PUT',body:{uris:[t.uri]}});
   }},
  async adopt(){
@@ -2592,6 +2605,14 @@ function remoteConnect(){
 
 /* ---------- Speaker picker (Spotify Connect) ---------- */
 const devIcon=t=>{t=String(t||'').toLowerCase();return t==='tv'||t==='castvideo'||t==='stb'?I.tv:t==='computer'?I.computer:t==='smartphone'||t==='tablet'?I.phone:t==='automobile'?I.car:I.speaker};
+// Speakers are remembered by id and name: ids can change when a speaker re-registers, names are often a hex code
+const unnamedDev=n=>/^[0-9a-f]{24,}$/i.test(String(n||''));
+const spkLabel=n=>unnamedDev(n)?'Your speaker':(n||'The speaker');
+function findSpeaker(list,want){want=want||{id:S.spkDeviceId,name:S.spkDevice};list=list||[];
+ return(want.id&&list.find(d=>d.id===want.id))||(want.name&&list.find(d=>d.name===want.name))||null}
+function rememberSpeaker(d){const name=d?d.name:'',id=d?d.id:'';if(S.spkDevice===name&&S.spkDeviceId===id)return;S.spkDevice=name;S.spkDeviceId=id;saveS()}
+// Every reload leaves an old "GriffTunes" player listed in Spotify for a while; those are dead, so hide them
+const staleSelf=d=>d.id!==engine.deviceId&&String(d.type).toLowerCase()==='computer'&&d.name===(S.name||'Basement Jukebox');
 const devType=t=>({speaker:'Speaker',tv:'TV',computer:'Computer',smartphone:'Phone',tablet:'Tablet',castaudio:'Cast speaker',castvideo:'Chromecast',avr:'Receiver',stb:'TV box',audiodongle:'Speaker',gameconsole:'Game console',automobile:'Car'})[String(t||'').toLowerCase()]||'Speaker';
 let DEVS=[];
 function renderDevChip(){
@@ -2600,9 +2621,9 @@ function renderDevChip(){
  b.setAttribute('aria-label',name?'Playing on '+name+'. Choose speaker':'Choose speaker');
 }
 function renderDevList(list){
- const cur=engine.target||null;
- const unnamed=n=>/^[0-9a-f]{24,}$/i.test(String(n||''));
- DEVS=[{id:null,name:S.name,type:'computer',sub:'This jukebox · its own speakers'}].concat(list.map(d=>({id:d.id,name:unnamed(d.name)?`Unnamed ${devType(d.type).toLowerCase()}`:d.name,type:d.type,restricted:!!d.is_restricted,sub:devType(d.type)+(unnamed(d.name)?' · Spotify didn’t send its name':'')+(d.is_restricted?' · can’t be controlled by apps':'')})));
+ const cur=engine.target||null,unnamed=unnamedDev;
+ list=list.filter(d=>!staleSelf(d));const saved=findSpeaker(list);
+ DEVS=[{id:null,name:S.name,type:'computer',sub:'This jukebox · its own speakers (screen or Bluetooth)'}].concat(list.map(d=>({id:d.id,raw:d.name,usual:saved&&saved.id===d.id,name:unnamed(d.name)?`Unnamed ${devType(d.type).toLowerCase()}`:d.name,type:d.type,restricted:!!d.is_restricted,sub:devType(d.type)+(saved&&saved.id===d.id?' · Your usual speaker':'')+(unnamed(d.name)?' · Spotify didn’t send its name':'')+(d.is_restricted?' · can’t be controlled by apps':'')})));
  const eq='<span class="devLive"><i></i><i></i><i></i></span>';
  $('#devList').innerHTML=DEVS.map((d,i)=>{const on=d.id===cur;return`<button class="devRow${on?' on':''}" data-dev="${i}"${d.restricted?' disabled':''}><span class="devIco">${devIcon(d.type)}</span><span class="devTxt"><b>${esc(d.name)}</b><small>${esc(d.sub)}</small></span>${on?eq:''}</button>`}).join('')
   +(list.length?'':'<div class="devNote">No other Spotify speakers found. Make sure the speaker is on and on your Wi-Fi (opening Spotify on it once can wake it up), then tap Refresh.</div>');
@@ -2618,7 +2639,7 @@ $('#devList').addEventListener('click',async e=>{
  const r=e.target.closest('[data-dev]');if(!r||r.disabled)return;
  const d=DEVS[+r.dataset.dev];if(!d||d.id===(engine.target||null)){closeModal($('#devModal'));return}
  r.classList.add('on');
- try{await engine.transferTo(d.id?{id:d.id,name:d.name}:null);sfx('add');toast(d.id?'Now playing on '+d.name:'Back on the jukebox speakers');closeModal($('#devModal'))}
+ try{await engine.transferTo(d.id?{id:d.id,name:d.raw||d.name}:null);rememberSpeaker(d.id?{id:d.id,name:d.raw||d.name}:null);sfx('add');toast(d.id?'Now playing on '+d.name+'. GriffTunes will keep using it':'Back on the jukebox speakers');closeModal($('#devModal'))}
  catch(err){r.classList.remove('on');toast("Couldn't switch speakers: "+err.message,'warn')}
 });
 
@@ -2945,13 +2966,18 @@ async function spkSet(on){
  await Promise.all(S.huePlugs.map(id=>hueFetch(`/${S.hue.user}/lights/${id}/state`,'PUT',{on}).catch(hueErr)));
  renderSpkRow();
 }
-async function spkRoute(){
- if(!S.spkDevice||!engine.devices||!engine.useDevice||engine.targetName===S.spkDevice)return;
+async function spkRoute(quiet){
+ if(!S.spkDevice||!engine.devices||!engine.useDevice)return;
+ if(engine.target&&(engine.target===S.spkDeviceId||engine.targetName===S.spkDevice))return;
  try{
-  const list=await Promise.race([engine.devices(),sleep(3500).then(()=>[])]);
-  const d=list.find(x=>x.name===S.spkDevice);
-  if(d)engine.useDevice({id:d.id,name:d.name});
-  else toast(`${S.spkDevice} isn't showing up in Spotify, so playing here`,'warn');
+  // the speaker may still be waking up after its smart plug turned on, so look a few times
+  for(let i=0;i<(quiet?1:3);i++){
+   if(i)await sleep(3000);
+   const list=await Promise.race([engine.devices(),sleep(3500).then(()=>[])]);
+   const d=findSpeaker(list);
+   if(d){rememberSpeaker(d);engine.useDevice({id:d.id,name:d.name});return}
+  }
+  if(!quiet)toast(`${spkLabel(S.spkDevice)} isn't showing up in Spotify yet, so playing on the jukebox`,'warn');
  }catch(e){}
 }
 async function speakersAuto(){
@@ -2995,9 +3021,10 @@ async function renderSpkSettings(){
 async function fillSpkDevices(){
  const sel=$('#hSpkDev');if(!sel||!engine.devices)return;
  try{
-  const list=(await engine.devices()).filter(d=>d.id!==engine.deviceId&&!d.is_restricted);
+  const list=(await engine.devices()).filter(d=>d.id!==engine.deviceId&&!d.is_restricted&&!staleSelf(d));
   const names=[...new Set(list.map(d=>d.name).concat(S.spkDevice?[S.spkDevice]:[]))];
-  sel.innerHTML='<option value="">Don\'t change</option>'+names.map(n=>`<option${n===S.spkDevice?' selected':''}>${esc(n)}</option>`).join('');
+  const lab=n=>{const d=list.find(x=>x.name===n);return unnamedDev(n)?`Unnamed ${devType(d&&d.type).toLowerCase()}`:n};
+  sel.innerHTML='<option value="">Don\'t change</option>'+names.map(n=>`<option value="${esc(n)}"${n===S.spkDevice?' selected':''}>${esc(lab(n))}</option>`).join('');
  }catch(e){}
 }
 
@@ -3019,7 +3046,7 @@ async function renderHueSettings(){
    <div class="btnRow"><button class="btn primary" id="hTest">Test flash</button><button class="btn" id="hOpen">Light modes</button><button class="btn" id="hOff">Disconnect Hue</button></div></div>`;
   const tgl=(id,key)=>{$(id).onchange=e=>{S[key]=e.target.checked;saveS()}};tgl('#hFx','hueFx');tgl('#hSaver','hueSaver');tgl('#hRadio','hueRadio');tgl('#hSpkAuto','spkAuto');
   $('#hSpkIdle').onchange=e=>{S.spkIdle=Math.max(0,+e.target.value||0);saveS()};
-  $('#hSpkDev').onchange=e=>{S.spkDevice=e.target.value;saveS()};
+  $('#hSpkDev').onchange=e=>{S.spkDevice=e.target.value;S.spkDeviceId='';saveS()};
   renderSpkSettings();
   $('#hTest').onclick=async()=>{if(!(await hueOnLights()).size){toast('The lights are off. Turn them on first.','warn');return}const fx=S.hueFx,m=S.hueMode;S.hueFx=true;if(m==='off')S.hueMode='auto';hueFlash('coin');S.hueFx=fx;S.hueMode=m;toast('Flashing the lights')};
   $('#hOpen').onclick=()=>{closeModal($('#settingsModal'));openLights()};
