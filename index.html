@@ -920,8 +920,10 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:true,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',lyricsSaver:false};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
+// Radio now follows album art colors like every other song; station colors are opt-in
+if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
 if(REMOTE)Object.assign(S,{radio:false,attractSecs:0,house:false,osk:false,autoFs:false,wake:false,saver:'np'});
 if(!S.coin10){if(S.coinCredits===3)S.coinCredits=10;S.coin10=true;if(!REMOTE)store.set('settings',S)}
 const saveS=()=>{if(REMOTE)return;if(S.hue)store.set('hue_conn',S.hue);store.set('settings',S)};
@@ -2650,7 +2652,7 @@ function lightPlan(cols,n){
  for(let k=0;k<n;k++){let bi=-1,bv=-1e9;ints.forEach((v,i)=>{if(used[i]<v){const def=v*(k+1)/n-used[i];if(def>bv){bv=def;bi=i}}});used[bi]++;out.push(cols[bi])}
  return out;
 }
-const STATION_COLORS={'60s':['#ff5e7e','#ffd23f','#3ee8ff'],'70s':['#ff9a1f','#c2410c','#facc15'],'80s':['#ff2bd6','#7b2bff','#22e4ff'],'90s':['#00e0a4','#ff4fd8','#7b2bff'],'00s':['#3b82f6','#a855f7','#22d3ee'],now:['#22e4ff','#ff2bd6','#ffffff'],country:['#1e6bff','#ffb000','#ff7a1a'],classic:['#ff8c1a','#ffd23f','#ff3b1f'],rock:['#ff2020','#7a00ff','#ff7a00'],pop:['#ff2bd6','#22e4ff','#ffd23f'],hiphop:['#ffd23f','#a855f7','#ff2bd6'],rnb:['#c026d3','#be123c','#7c3aed'],alt:['#14b8a6','#6366f1','#22c55e'],dance:['#ff00a8','#00f0ff','#7cff00']};
+const STATION_COLORS={'60s':['#ff5e7e','#ffd23f','#3ee8ff'],'70s':['#ff9a1f','#c2410c','#facc15'],'80s':['#ff2bd6','#7b2bff','#22e4ff'],'90s':['#00e0a4','#ff4fd8','#7b2bff'],'00s':['#3b82f6','#a855f7','#22d3ee'],now:['#22e4ff','#ff2bd6','#ffffff'],country:['#1e6bff','#ffb000','#ff7a1a'],classic:['#ff8c1a','#ffd23f','#ff3b1f'],rock:['#ff2020','#7a00ff','#ff7a00'],pop:['#ff2bd6','#22e4ff','#ffd23f'],hiphop:['#ffd23f','#a855f7','#ff2bd6'],rnb:['#c026d3','#be123c','#7c3aed'],alt:['#14b8a6','#6366f1','#22c55e'],dance:['#ff00a8','#00f0ff','#7cff00'],yacht:['#ff8a5c','#14b8c4','#ffd27a']};
 // Lights switched off (e.g. at the Hue dimmer) stay off: GriffTunes only recolors lights that are already on.
 async function hueOnLights(){
  try{const ls=await hueFetch(`/${S.hue.user}/lights`)||{};HUE.all=ls;
@@ -2845,7 +2847,7 @@ async function renderHueSettings(){
    <div class="field"><label for="hueRoom">Room or zone GriffTunes controls</label><select id="hueRoom"><option>Loading…</option></select></div>
    <label class="tg"><span>Flash on Insert coin and Play now</span><input type="checkbox" id="hFx" ${S.hueFx?'checked':''}><i></i></label>
    <label class="tg"><span>Dim the room during the screensaver</span><input type="checkbox" id="hSaver" ${S.hueSaver?'checked':''}><i></i></label>
-   <label class="tg"><span>Radio stations get their own colors</span><input type="checkbox" id="hRadio" ${S.hueRadio?'checked':''}><i></i></label>
+   <label class="tg"><span>Radio stations use their own colors instead of album art</span><input type="checkbox" id="hRadio" ${S.hueRadio?'checked':''}><i></i></label>
    <div class="field" style="margin-top:20px"><span class="lab">Speaker power (Hue smart plugs)</span><div class="spkPlugList" id="spkPlugs"><p class="note">Looking for smart plugs…</p></div></div>
    <div id="spkOpts" style="display:${(S.huePlugs||[]).length?'':'none'}">
     <label class="tg"><span>Turn the speakers on when music starts</span><input type="checkbox" id="hSpkAuto" ${S.spkAuto?'checked':''}><i></i></label>
