@@ -1156,7 +1156,7 @@ async function api(path,opts={},retry=true){
  if(r.status===401&&retry&&tok){tok.exp=0;return api(path,opts,false)}
  if(r.status===429){
   const ra=+r.headers.get('Retry-After'),wait=ra||2;
-  if(retry&&wait<=8){await sleep(wait*1000+300);return api(path,opts,false)}
+  if(retry&&wait<=8){if(wait>=2&&Date.now()-(api.busyAt||0)>10e3){api.busyAt=Date.now();toast(`Spotify is busy, retrying in ${wait} second${wait>1?'s':''}…`)}await sleep(wait*1000+300);return api(path,opts,false)}
   const er=new Error(`Spotify says GriffTunes is asking too fast. Try again in ${!ra?'a few minutes':wait>90?Math.ceil(wait/60)+' minutes':wait+' seconds'}`);er.status=429;er.wait=wait;throw er;
  }
  if(r.status===204||r.status===202)return null;
@@ -1800,12 +1800,12 @@ const normMode=m=>m==='w'||m==='n'||m==='q'?m:(m===true?'n':'q');
 const ALBUM_COST=5,ALB={it:null,tracks:[],back:null};
 // Artist page: a row of their albums above the greatest hits; tapping one opens that album
 async function artAlbums(it){
- let list=[];try{list=await provider.artistAlbums(it)}catch(e){return}
- if(ALB.it!==it||!list.length)return;
- const box=document.createElement('div');box.className='artAlbums';
- list=list.map(a=>Object.assign({},a,{sub:a.sub&&a.sub!==it.name?`${it.name} · ${a.sub}`:it.name}));
- box.innerHTML=`<div class="aaHead">Albums <small>${list.length}</small></div><div class="aaRow">${list.map(a=>tile(a)).join('')}</div><div class="aaHead">Greatest hits</div>`;
- $('#trackList').prepend(box);
+ const paint=list=>{
+  const box=$('#artAlb');if(ALB.it!==it||!box||!list||!list.length)return;
+  list=list.map(a=>Object.assign({},a,{sub:a.sub&&a.sub!==it.name?`${it.name} · ${a.sub}`:it.name}));
+  box.className='artAlbums';box.innerHTML=`<div class="aaHead">Albums <small>${list.length}</small></div><div class="aaRow">${list.map(a=>tile(a)).join('')}</div><div class="aaHead">Greatest hits</div>`;
+ };
+ try{paint(await itemAlbums(it,paint))}catch(e){}
 }
 function enqueueAlbum(tracks,name,img,src){
  tracks=(tracks||[]).map(slimT).filter(t=>t&&t.uri&&t.name);if(!tracks.length)return false;
@@ -1883,13 +1883,36 @@ async function tabItems(id,onFresh){
  if(items.length)TABC.set(k,{at:Date.now(),items});
  return items;
 }
-async function itemTracks(it){
- const k=provider.key+':'+it.type+':'+it.id+':'+(it.member||''),c=TRKC.get(k);
- if(c&&Date.now()-c.at<10*60e3)return c.tracks;
- const tracks=await provider.tracks(it);
- if(tracks&&tracks.length){TRKC.delete(k);TRKC.set(k,{at:Date.now(),tracks});if(TRKC.size>40)TRKC.delete(TRKC.keys().next().value)}
- return tracks;
+// Song lists and artist albums: shown instantly when GriffTunes has them, then checked with Spotify quietly.
+// Artists and albums barely change, so they're kept a day and survive reloads; playlists are re-checked after 2 minutes.
+const KEEP_LONG=new Set(['album','artist','hits','albums']);
+const longC=()=>store.get('gt_lists',{});
+function cacheGet(k,type){
+ let c=TRKC.get(k);
+ if(!c&&KEEP_LONG.has(type)&&provider!==REMOTE_PROVIDER){const L=longC()[k];if(L&&Date.now()-L.at<7*864e5){c={at:L.at,tracks:L.tracks};TRKC.set(k,c)}}
+ return c;
 }
+function cachePut(k,type,tracks){
+ TRKC.delete(k);TRKC.set(k,{at:Date.now(),tracks});if(TRKC.size>40)TRKC.delete(TRKC.keys().next().value);
+ if(KEEP_LONG.has(type)&&provider!==REMOTE_PROVIDER){
+  const L=longC();L[k]={at:Date.now(),tracks:type==='albums'?tracks.map(slimI):tracks.map(slimT)};
+  const ks=Object.keys(L);if(ks.length>60)ks.sort((a,b)=>L[a].at-L[b].at).slice(0,ks.length-60).forEach(x=>delete L[x]);
+  try{store.set('gt_lists',L)}catch(e){}
+ }
+}
+async function cached(type,id,member,fetcher,onFresh){
+ const k=provider.key+':'+type+':'+id+':'+(member||''),c=cacheGet(k,type);
+ const fresh=KEEP_LONG.has(type)?864e5:2*60e3;
+ if(c){
+  if(Date.now()-c.at>fresh&&!c.refreshing){c.refreshing=true;fetcher().then(t=>{if(t&&t.length){const same=JSON.stringify(t.map(x=>x.id))===JSON.stringify(c.tracks.map(x=>x.id));cachePut(k,type,t);if(!same&&onFresh)onFresh(t)}}).catch(()=>{}).finally(()=>{c.refreshing=false})}
+  return c.tracks;
+ }
+ const t=await fetcher();
+ if(t&&t.length)cachePut(k,type,t);
+ return t;
+}
+const itemTracks=(it,onFresh)=>cached(it.type,it.id,it.member,()=>provider.tracks(it),onFresh);
+const itemAlbums=(it,onFresh)=>cached('albums',it.id||it.name,'',()=>provider.artistAlbums(it),onFresh);
 function showTabItems(items){
  const ranked=items.some(x=>x.rank);
  renderFlow(ranked?items:items.slice(0,11),ranked?0:null);
@@ -1974,10 +1997,13 @@ async function openItem(it){
  openModal($('#albumModal'));
  const all=$('#albumAll');all.style.display='none';ALB.back=it.type==='album'&&wasOpen&&ALB.it&&ALB.it.type==='artist'?ALB.it:null;ALB.it=it;ALB.tracks=[];
  $('#albumBack').style.display=ALB.back?'':'none';if(ALB.back)$('#albumBack').lastChild.textContent=ALB.back.name;
- try{const tr=await itemTracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';
-  if((it.type==='artist')&&provider.artistAlbums&&ALB.it===it)artAlbums(it);
+ // artists: the albums row and the greatest hits load side by side, each showing as soon as it arrives
+ let rows=list;
+ if(it.type==='artist'&&provider.artistAlbums){list.innerHTML='<div id="artAlb"></div><div id="artHits"><div class="loading"><div class="spin"></div></div></div>';rows=$('#artHits');artAlbums(it)}
+ const paint=tr=>{if(ALB.it!==it)return;const st=list.scrollTop;rows.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';list.scrollTop=st};
+ try{const tr=await itemTracks(it,fresh=>{if(ALB.it===it&&$('#albumModal').classList.contains('open'))paint(fresh)});if(ALB.it!==it)return;paint(tr);
   if(it.rank&&tr.length>1&&ALB.it===it){ALB.tracks=tr;all.innerHTML=`+ Queue the whole album · ${tr.length} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
- catch(e){list.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
+ catch(e){if(ALB.it===it)rows.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
 }
 
 /* ---------- Search + on-screen keyboard ---------- */
