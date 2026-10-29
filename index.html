@@ -440,7 +440,6 @@ html.remote #deckBtn{display:none!important}
 .devFoot p{font-size:14px;color:var(--muted);line-height:1.45}
 .devNote{font-size:15px;color:var(--muted);line-height:1.5;padding:14px 4px}
 html.remote #devChip{display:none!important}
-html.remote #radio{display:none!important}
 .vol{flex:1;display:flex;align-items:center;gap:10px;color:var(--muted)}
 .vol svg{width:22px;height:22px;flex:none}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.16);outline:none}
@@ -640,10 +639,10 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .btnRow.center{justify-content:center}
 html.remote.noPhoneCoins #coinBtn,html.remote #gear,html.remote #phoneBtn,html.remote #qrMini,html.remote .qX,html.remote .clock{display:none!important}
 html.remote .badge{display:flex!important}
-html.remote .ctrls>:not(.vol){display:none!important}
+html.remote .ctrls>:not(.vol):not(.radioBtn){display:none!important}
 html.remote .ctrls .vol{padding:6px 2px 0;min-width:0;max-width:100%}
 html.remote .ctrls .vol input{width:100%;min-width:0;margin:0}
-html.remote.noPhoneVol .ctrls{display:none!important}
+html.remote.noPhoneVol .ctrls .vol{display:none!important}
 @media (max-height:1000px) and (min-width:821px){
  .np{display:grid;grid-template-columns:186px minmax(0,1fr);column-gap:14px;padding:16px 20px 16px}
  .npLabel{grid-column:1/-1}
@@ -2277,7 +2276,7 @@ const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,a
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare()}}
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare(),radio:!!S.radio,station:S.station}}
 // What the phones need to draw the Countdown and Grad Year tabs
 function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
@@ -2300,6 +2299,13 @@ async function hostHandle(c,d){
    if(!S.phoneVol){sendTo(c,hostState());return}
    const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
    setVol(v,c);
+  }
+  else if(d.t==='radio'){
+   // phone turned the radio on/off or picked a station
+   const i=d.station?STATIONS.findIndex(x=>x.id===d.station):-1;
+   if(i>=0){if(!S.radio){S.radio=true;saveS();renderRadio();renderQueue()}reply({ok:true});await tune(i)}
+   else{if(!!d.on!==!!S.radio)toggleRadio();reply({ok:true})}
+   hostSync();
   }
   else if(d.t==='cd'){
    // phone asked for a Hot 100 Rewind / Country Gold countdown: start, stop, or jump to a song
@@ -2439,6 +2445,7 @@ function applyHostState(m){
  renderNP();renderQueue();
  if(P.current&&P.current.id!==prev){accentFrom(P.current);markNow()}
  if(m.cd)applyHostCd(m.cd);
+ if('radio' in m&&(S.radio!==!!m.radio||S.station!==m.station)){S.radio=!!m.radio;if(m.station)S.station=m.station;renderRadio()}
  if(m.tabs&&m.tabs.length&&!RM.tabsLoaded){RM.tabsLoaded=true;REMOTE_PROVIDER.tabs=m.tabs;buildTabs();loadTab(m.tabs[0].id)}
 }
 // Phone: mirror the jukebox's countdown so the lists show what's playing; the buttons ask the jukebox to do it
@@ -2569,6 +2576,7 @@ function buildDial(){$('#band').innerHTML=STATIONS.map((st,i)=>`<div class="st" 
 let dialOffset=0;
 function placeBand(idx){dialOffset=-(idx*90+45);$('#band').style.transform=`translateX(${dialOffset}px)`}
 function renderRadio(){
+ if(!REMOTE)try{hostSync()}catch(e){}
  const np=$('#np');if(!np)return;
  np.classList.toggle('radioOn',!!S.radio);$('#radio').style.display=S.radio?'':'none';
  $('#radioBtn').classList.toggle('on',!!S.radio);
@@ -2587,6 +2595,7 @@ async function radioStart(st){
 }
 async function tune(idx){
  const st=STATIONS[Math.max(0,Math.min(STATIONS.length-1,idx))];
+ if(REMOTE){S.station=st.id;renderRadio();remoteCd({t:'radio',on:true,station:st.id});return}
  const changed=st.id!==S.station;
  S.station=st.id;saveS();RADIO.buf=[];RADIO.for=null;
  const d=$('#dial');d.classList.add('tuning');setTimeout(()=>d.classList.remove('tuning'),700);
@@ -2597,6 +2606,7 @@ async function tune(idx){
  await radioStart(st);
 }
 async function toggleRadio(){
+ if(REMOTE){remoteCd({t:'radio',on:!S.radio});return}
  S.radio=!S.radio;saveS();renderRadio();renderQueue();sfx('tick');
  if(S.radio){
   staticNoise();const st=stationById(S.station);
@@ -2999,7 +3009,7 @@ async function openCountdown(){
  renderCountdown();
 }
 function renderCountdown(){
- if(!REMOTE)hostSync();
+ if(!REMOTE)try{hostSync()}catch(e){}
  const panel=$('#cdPanel');if(!(CD.chart==='country'?CD.cdata:CD.data))return;
  if(REMOTE)CD.view=CD.active&&!CD.grad?cdView(CD.years):null;
  const yr=new Date().getFullYear(),v=CD.active&&CD.view?CD.view:cdView(CD.years),cty=CD.chart==='country';
@@ -3691,7 +3701,7 @@ async function openGradPanel(){
 const GY={matching:false,done:0,key:null};
 function gyYear(){const[lo,hi]=ybRange();if(!GRAD.pickYear)GRAD.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));GRAD.pickYear=Math.max(lo,Math.min(hi,GRAD.pickYear));return GRAD.pickYear}
 function renderGradList(){
- if(!REMOTE)hostSync();
+ if(!REMOTE)try{hostSync()}catch(e){}
  const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
  panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick your graduation year to hear the 40 biggest songs of your senior year!</p></div></div>
