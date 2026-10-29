@@ -480,7 +480,12 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .hero h1{font-size:46px;font-weight:800;line-height:1.05;margin:8px 0;text-shadow:0 4px 24px rgba(0,0,0,.5)}
 .hero p{font-size:20px;color:rgba(255,255,255,.8)}
 .albumAll{margin-top:16px;height:54px;padding:0 22px;border-radius:999px;display:inline-flex;align-items:center;gap:10px;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 24px color-mix(in srgb,var(--accent) 50%,transparent);transition:transform .12s}
-.albumAll:active{transform:scale(.95)}.albumAll svg{width:22px;height:22px}.albumAll .cost{background:rgba(0,0,0,.35)}
+.albumAll:active{transform:scale(.95)}
+.albumBack{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px 0 10px;margin-bottom:10px;border-radius:999px;background:rgba(0,0,0,.35);border:1px solid var(--stroke);color:#fff;font-weight:700;font-size:14px}
+.artAlbums{margin:4px 0 14px}
+.aaHead{font-family:Bungee;font-size:14px;letter-spacing:.08em;color:var(--accent2);margin:6px 4px 10px}.aaHead small{color:var(--muted);font-family:Outfit,sans-serif;margin-left:6px}
+.aaRow{display:grid;grid-auto-flow:column;grid-auto-columns:150px;gap:16px;overflow-x:auto;padding:2px 4px 12px;scrollbar-width:thin}
+.aaRow .tile b{font-size:14px}.albumAll svg{width:22px;height:22px}.albumAll .cost{background:rgba(0,0,0,.35)}
 .closeBtn{position:absolute;top:18px;right:18px;width:56px;height:56px;border-radius:50%;background:rgba(0,0,0,.42);border:1px solid var(--stroke);z-index:2;display:grid;place-items:center;flex:none}
 .closeBtn svg{width:24px;height:24px}
 .closeBtn.static{position:static}
@@ -797,7 +802,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 
 <div class="modal top" id="albumModal"><div class="sheet card">
- <div class="hero"><div class="heroBg" id="heroBg"></div><img id="heroImg" alt=""><div class="info"><div class="kind" id="heroKind"></div><h1 id="heroName"></h1><p id="heroSub"></p><button class="albumAll" id="albumAll" style="display:none"></button></div><button class="closeBtn" data-close aria-label="Close" data-icon="close"></button></div>
+ <div class="hero"><div class="heroBg" id="heroBg"></div><img id="heroImg" alt=""><div class="info"><button class="albumBack" id="albumBack" style="display:none" aria-label="Back to the artist">‹ <span></span></button><div class="kind" id="heroKind"></div><h1 id="heroName"></h1><p id="heroSub"></p><button class="albumAll" id="albumAll" style="display:none"></button></div><button class="closeBtn" data-close aria-label="Close" data-icon="close"></button></div>
  <div class="tracks" id="trackList"></div>
 </div></div>
 
@@ -1025,6 +1030,7 @@ const DEMO=(()=>{
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
   },
   async tracks(it){await sleep(150);const real=[...albums,...playlists,...artists].find(x=>x.id===it.id);return((real||it).tracks)||[]},
+  async artistAlbums(it){await sleep(80);return albums.filter(a=>a.sub===it.name)},
   async albumOf(t){await sleep(60);return albums.find(a=>(a.tracks||[]).some(x=>x.id===t.id))||albums.find(a=>a.name===t.album)||null},
   async search(q){await sleep(150);q=q.toLowerCase();const words=q.split(/\s+/).filter(Boolean),m=s=>s.toLowerCase().includes(q);
    const mw=t=>{const h=(t.name+' '+t.artist).toLowerCase();return words.every(w=>h.includes(w))};
@@ -1222,6 +1228,18 @@ const SPOTIFY={
   }
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
   return[];
+ },
+ // An artist's studio albums, newest first, with deluxe/remaster duplicates folded together
+ async artistAlbums(it){
+  if(!it.id)return[];
+  const pages=await Promise.all([0,10,20].map(o=>api(`/artists/${it.id}/albums?include_groups=album&limit=10&offset=${o}`).catch(e=>o?null:Promise.reject(e))));
+  const seen=new Map();
+  for(const a of pages.flatMap(j=>(j&&j.items)||[]).filter(Boolean)){
+   const k=albumKey(String(a.name).replace(/\s*[\(\[][^)\]]*(deluxe|remaster|edition|expanded|anniversary|version|live)[^)\]]*[\)\]]/ig,''));
+   const fancy=/deluxe|remaster|edition|expanded|anniversary/i.test(a.name),had=seen.get(k);
+   if(!had||(had.fancy&&!fancy))seen.set(k,{a,fancy});
+  }
+  return[...seen.values()].map(x=>x.a).sort((p,q)=>String(q.release_date||'').localeCompare(String(p.release_date||''))).map(a=>({id:a.id,type:'album',uri:a.uri,name:a.name,img:spImg(a.images),sub:String(a.release_date||'').slice(0,4)}));
  },
  // The album a song came from, for opening it from Now Playing
  async albumOf(t){
@@ -1774,7 +1792,16 @@ async function advance(){
 const COST={q:1,n:2,w:3};
 const normMode=m=>m==='w'||m==='n'||m==='q'?m:(m===true?'n':'q');
 // Greatest Albums: the whole album into the queue for one price
-const ALBUM_COST=5,ALB={it:null,tracks:[]};
+const ALBUM_COST=5,ALB={it:null,tracks:[],back:null};
+// Artist page: a row of their albums above the greatest hits; tapping one opens that album
+async function artAlbums(it){
+ let list=[];try{list=await provider.artistAlbums(it)}catch(e){return}
+ if(ALB.it!==it||!list.length)return;
+ const box=document.createElement('div');box.className='artAlbums';
+ list=list.map(a=>Object.assign({},a,{sub:a.sub&&a.sub!==it.name?`${it.name} · ${a.sub}`:it.name}));
+ box.innerHTML=`<div class="aaHead">Albums <small>${list.length}</small></div><div class="aaRow">${list.map(a=>tile(a)).join('')}</div><div class="aaHead">Greatest hits</div>`;
+ $('#trackList').prepend(box);
+}
 function enqueueAlbum(tracks,name,img,src){
  tracks=(tracks||[]).map(slimT).filter(t=>t&&t.uri&&t.name);if(!tracks.length)return false;
  if(REMOTE){remoteAlbum(tracks,name,img);return true}
@@ -1911,15 +1938,17 @@ try{document.fonts&&document.fonts.ready.then(()=>sizeShelf())}catch(e){}
 const openModal=m=>m.classList.add('open');
 const closeModal=m=>m.classList.remove('open');
 async function openItem(it){
- if(!it)return;sfx('tick');fixImg(it);
+ if(!it)return;const wasOpen=$('#albumModal').classList.contains('open');sfx('tick');fixImg(it);
  $('#heroBg').style.backgroundImage=`url("${it.img}")`;
  const hi=$('#heroImg');hi.src=it.img;hi.classList.toggle('round',it.type==='artist'||it.type==='hits');
  $('#heroKind').textContent=({album:'ALBUM',playlist:'PLAYLIST',liked:'PLAYLIST',fplaylist:'FAMILY PLAYLIST',fliked:'FAMILY · LIKED SONGS',artist:'ARTIST · GREATEST HITS',hits:'GREATEST HITS'})[it.type]||'';
  $('#heroName').textContent=it.name;$('#heroSub').textContent=it.sub||'';
  const list=$('#trackList');list.innerHTML='<div class="loading"><div class="spin"></div></div>';list.scrollTop=0;
  openModal($('#albumModal'));
- const all=$('#albumAll');all.style.display='none';ALB.it=it;ALB.tracks=[];
+ const all=$('#albumAll');all.style.display='none';ALB.back=it.type==='album'&&wasOpen&&ALB.it&&ALB.it.type==='artist'?ALB.it:null;ALB.it=it;ALB.tracks=[];
+ $('#albumBack').style.display=ALB.back?'':'none';if(ALB.back)$('#albumBack').lastChild.textContent=ALB.back.name;
  try{const tr=await provider.tracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';
+  if((it.type==='artist')&&provider.artistAlbums&&ALB.it===it)artAlbums(it);
   if(it.rank&&tr.length>1&&ALB.it===it){ALB.tracks=tr;all.innerHTML=`+ Queue the whole album · ${tr.length} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
  catch(e){list.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
 }
@@ -2237,6 +2266,7 @@ $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
+$('#albumBack').onclick=()=>{if(ALB.back)openItem(ALB.back)};
 $('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img))closeModal($('#albumModal'))};
 $('#npArt').onclick=async()=>{
  const t=P.current;if(!t)return;
@@ -2289,6 +2319,7 @@ async function hostHandle(c,d){
  try{
   if(d.t==='search'){const r=await provider.search(String(d.q||'').slice(0,80));reply({tracks:r.tracks.map(slimT),albums:r.albums.map(fixImg).map(slimI),artists:r.artists.map(fixImg).map(slimI)})}
   else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
+  else if(d.t==='artistAlbums'){reply(((await provider.artistAlbums(slimI(d.item)))||[]).map(slimI))}
   else if(d.t==='albumOf'){const a=await provider.albumOf(slimT(d.track));reply(a?slimI(a):null)}
   else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
   else if(d.t==='coin'){
@@ -2404,6 +2435,7 @@ const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
  async load(tab){if(tab==='_wait')return[];return rcall({t:'browse',tab})},
  tracks(item){return rcall({t:'tracks',item:slimI(item)})},
  albumOf(t){return rcall({t:'albumOf',track:slimT(t)})},
+ artistAlbums(item){return rcall({t:'artistAlbums',item:slimI(item)})},
  search(q){return rcall({t:'search',q})},
  async housePool(){return[]},
  async stationTracks(){return[]},
@@ -3554,6 +3586,7 @@ const TIPS={
  modeBadge:'Music source. Click for settings',
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
+ albumBack:'Back to the artist',
  npArt:'See the whole album and pick another song from it',
  albumAll:'Add every song on this album to the queue, in order',
  lightsBtn:'Hue lights: pick a lighting mode',
