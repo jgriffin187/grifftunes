@@ -287,7 +287,7 @@ html.remote #lightsBtn{display:none!important}
 #gfCard.show #gfList p{opacity:1;transform:none}
 #gfCard.show #gfList p:nth-child(2){transition-delay:.6s}#gfCard.show #gfList p:nth-child(3){transition-delay:1.2s}
 html.remote #cdCard,html.remote #gfCard{display:none!important}
-@media (max-width:820px){.cdList{grid-template-columns:1fr}.cdPanel{min-height:600px}}
+@media (max-width:820px){.cdList{grid-template-columns:minmax(0,1fr)}.cdRow{min-width:0}.browse,.cdPanel{min-width:0;max-width:100%}.cdPanel{min-height:600px}}
 .lyrBtn.on{color:#22e4ff;border-color:rgba(34,228,255,.6);box-shadow:0 0 16px rgba(34,228,255,.4)}
 #lyr{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;background:#06030d;opacity:0;pointer-events:none;transition:opacity .45s;overflow:hidden}
 #lyr.on{opacity:1;pointer-events:auto}
@@ -676,7 +676,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
  .logo .l2{font-size:30px}
  .searchBtn{order:9;flex-basis:100%;max-width:none;height:54px;font-size:17px}
  .credits,.coinBtn{height:52px}
- .layout{grid-template-columns:1fr}
+ .layout{grid-template-columns:minmax(0,1fr)}
  .side{order:-1}
  .queue{max-height:340px}
  .flow{height:300px}
@@ -1821,7 +1821,7 @@ const tile=it=>{fixImg(it);return`<button class="tile${it.type==='artist'?' roun
 const row=(t,i)=>{const k=reg(t);return`<div class="tRow${P.current&&P.current.id===t.id?' now':''}" data-k="${k}"><div class="tNum">${i+1}</div><img class="tArt" src="${esc(t.img||PLACEHOLDER)}" alt="" loading="lazy"><div class="tMeta"><b>${esc(t.name)}</b><span>${esc(t.artist)}</span></div><div class="tDur">${fmt(t.duration)}</div><button class="act q" data-act="q" data-k="${k}"><span class="lg">+ Queue</span><span class="sh">Queue</span>${cost(1)}</button><button class="act n" data-act="n" data-k="${k}"><span class="lg">Play next</span><span class="sh">Next</span>${cost(2)}</button><button class="act w" data-act="w" data-k="${k}"><span class="lg">Play now</span><span class="sh">Now</span>${cost(3)}</button></div>`};
 
 let tabId=null;
-function buildTabs(){$('#tabs').innerHTML=provider.tabs.concat(REMOTE?[]:[{id:'countdown',name:'Countdown'},{id:'gradyear',name:'Grad Year'}]).map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('');if(!tabsRO)try{tabsRO=new ResizeObserver(()=>fitTabs());tabsRO.observe($('#tabs'))}catch(e){}fitTabs()}
+function buildTabs(){$('#tabs').innerHTML=provider.tabs.concat(REMOTE&&!RM.tabsLoaded?[]:[{id:'countdown',name:'Countdown'},{id:'gradyear',name:'Grad Year'}]).map(t=>`<button class="tab" data-tab="${t.id}">${esc(t.name)}</button>`).join('');if(!tabsRO)try{tabsRO=new ResizeObserver(()=>fitTabs());tabsRO.observe($('#tabs'))}catch(e){}fitTabs()}
 // Shrink the tab pills just enough that every tab fits on smaller screens (laptops); big screens keep full size.
 function fitTabs(){const el=$('#tabs');if(!el||!el.clientWidth)return;
  const steps=[[24,17,10],[18,16,8],[14,15,7],[11,14,6],[8,13,5]];
@@ -2264,7 +2264,9 @@ const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,i
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits}}
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare()}}
+// What the phones need to draw the Countdown and Grad Year tabs
+function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
 let syncT=null;
 function hostSync(){if(REMOTE||!HOST.conns.size)return;clearTimeout(syncT);syncT=setTimeout(()=>{const m=hostState();HOST.conns.forEach(c=>sendTo(c,m))},150)}
@@ -2284,6 +2286,23 @@ async function hostHandle(c,d){
    if(!S.phoneVol){sendTo(c,hostState());return}
    const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
    setVol(v,c);
+  }
+  else if(d.t==='cd'){
+   // phone asked for a Hot 100 Rewind / Country Gold countdown: start, stop, or jump to a song
+   const chart=d.chart==='country'?'country':'hot100',years=+d.years,pos=+d.pos||0;
+   if(!CD_YEARS.includes(years))throw new Error('That year is not on the list');
+   const same=CD.active&&!CD.grad&&CD.view&&CD.view.rows[0]&&CD.view.rows[0].cd.chart===chart&&CD.year===new Date().getFullYear()-years;
+   if(CD.matching||GY.matching){reply({ok:false,msg:'The jukebox is still finding songs. Give it a moment.'});return}
+   if(same){if(pos)cdJump(pos);else stopCountdown();reply({ok:true});return}
+   if(CD.active&&!d.force){reply({ok:false,msg:'Another countdown is playing. Stop it first.'});return}
+   CD.chart=chart;CD.years=years;await cdData();startCountdown(pos||undefined);reply({ok:true});
+  }
+  else if(d.t==='grad'){
+   const[lo,hi]=ybRange(),y=+d.year,pos=+d.pos||0;
+   if(!(y>=lo&&y<=hi))throw new Error('That year is not in the chart archive');
+   if(CD.matching||GY.matching){reply({ok:false,msg:'The jukebox is still finding songs. Give it a moment.'});return}
+   if(CD.active&&CD.grad!==y){reply({ok:false,msg:'Another countdown is playing. Stop it first.'});return}
+   await ybData();GRAD.pickYear=y;gyStart(pos||undefined);reply({ok:true});
   }
   else if(d.t==='album'){
    const tr=(Array.isArray(d.tracks)?d.tracks:[]).slice(0,60);
@@ -2404,7 +2423,25 @@ function applyHostState(m){
  RemoteEngine.st={pos:P.pos,dur:P.dur,paused:P.paused};RemoteEngine.at=performance.now();
  renderNP();renderQueue();
  if(P.current&&P.current.id!==prev){accentFrom(P.current);markNow()}
+ if(m.cd)applyHostCd(m.cd);
  if(m.tabs&&m.tabs.length&&!RM.tabsLoaded){RM.tabsLoaded=true;REMOTE_PROVIDER.tabs=m.tabs;buildTabs();loadTab(m.tabs[0].id)}
+}
+// Phone: mirror the jukebox's countdown so the lists show what's playing; the buttons ask the jukebox to do it
+function applyHostCd(c){
+ const was=JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]);
+ CD.active=c.active;CD.grad=c.grad||null;CD.year=c.year;CD.date=c.date;CD.idx=c.idx|0;CD.missing=c.missing||[];
+ CD.list=(c.list||[]).map(pos=>({cd:{pos}}));CD.matching=GY.matching=!!c.matching;GY.done=c.done|0;
+ if(c.active&&c.chart&&c.chart!=='grad'){CD.chart=c.chart;CD.years=new Date().getFullYear()-c.year}
+ if(c.active&&c.grad)GRAD.pickYear=c.grad;
+ if(was===JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]))return;
+ if(tabId==='countdown'&&(CD.chart==='country'?CD.cdata:CD.data))renderCountdown();
+ else if(tabId==='countdown'&&CD.active&&!CD.grad)openCountdown();
+ if(tabId==='gradyear'&&CD.data){GY.key=null;renderGradList()}
+}
+async function remoteCd(msg){
+ sfx('tick');
+ try{const r=await rcall(msg);if(!(r&&r.ok)){sfx('err');toast((r&&r.msg)||'The jukebox said no','warn')}}
+ catch(e){sfx('err');toast(e.message,'warn')}
 }
 function remoteConnect(){
  clearTimeout(RM.retry);
@@ -2947,8 +2984,10 @@ async function openCountdown(){
  renderCountdown();
 }
 function renderCountdown(){
+ if(!REMOTE)hostSync();
  const panel=$('#cdPanel');if(!(CD.chart==='country'?CD.cdata:CD.data))return;
- const yr=new Date().getFullYear(),v=CD.active?CD.view:cdView(CD.years),cty=CD.chart==='country';
+ if(REMOTE)CD.view=CD.active&&!CD.grad?cdView(CD.years):null;
+ const yr=new Date().getFullYear(),v=CD.active&&CD.view?CD.view:cdView(CD.years),cty=CD.chart==='country';
  const hasYear=n=>!cty||!!(CD.cdata.years[String(yr-n)]||[]).length;
  panel.innerHTML=`<div class="cdHead"><div><h2>${cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
   <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button></div></div>
@@ -2963,9 +3002,18 @@ function renderCdRows(){
  const cur=P.current&&P.current.cd,missing=new Set(CD.missing||[]);
  $$('#cdList .cdRow').forEach(r=>{const pos=+r.dataset.pos;r.classList.toggle('now',!!cur&&cur.pos===pos);r.classList.toggle('miss',missing.has(pos));
   r.classList.toggle('done',CD.list.slice(0,CD.idx).some(x=>x.cd.pos===pos)&&!(cur&&cur.pos===pos))});
- const now=$('#cdList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
+ const now=!REMOTE&&$('#cdList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
 }
 $('#cdPanel').addEventListener('click',async e=>{
+ if(REMOTE){
+  const row=e.target.closest('.cdRow');
+  if(row){remoteCd({t:'cd',chart:CD.chart,years:CD.years,pos:+row.dataset.pos});return}
+  if(e.target.closest('#cdGo')){remoteCd({t:'cd',chart:CD.chart,years:CD.years});return}
+  if(CD.active)return;
+  const c=e.target.closest('[data-cdc]');if(c){CD.chart=c.dataset.cdc;sfx('tick');await openCountdown();return}
+  const y=e.target.closest('[data-cdy]');if(y&&!y.disabled){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown()}
+  return;
+ }
  const row=e.target.closest('.cdRow');
  if(row){const pos=+row.dataset.pos;if(CD.matching)return;sfx('tick');if(CD.active)cdJump(pos);else startCountdown(pos);return}
  if(CD.active&&!e.target.closest('#cdGo'))return;
@@ -2978,7 +3026,7 @@ async function startCountdown(fromPos){
  const v=cdView(CD.years),key=CD.chart+':'+v.year+':'+(v.date||''),rows=[...v.rows].sort((a,b)=>b.pos-a.pos);
  if(!rows.length)return;
  CD.matching=true;renderCountdown();
- let done=0;const btn=()=>{const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${rows.length}`};
+ let done=0;const btn=()=>{GY.done=done;if(done%5===0)hostSync();const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${rows.length}`};
  try{
   const found=CD.cache[key]||{};
   for(let i=0;i<rows.length;i+=4){
@@ -3627,6 +3675,7 @@ async function openGradPanel(){
 const GY={matching:false,done:0,key:null};
 function gyYear(){const[lo,hi]=ybRange();if(!GRAD.pickYear)GRAD.pickYear=store.get('yb_pick',Math.min(hi,new Date().getFullYear()-30));GRAD.pickYear=Math.max(lo,Math.min(hi,GRAD.pickYear));return GRAD.pickYear}
 function renderGradList(){
+ if(!REMOTE)hostSync();
  const panel=$('#ybPanel'),[lo,hi]=ybRange(),y=gyYear(),rows=ybRows(y),active=CD.active&&CD.grad===y;
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
  panel.innerHTML=`<div class="cdHead"><div><h2>Grad Year</h2><p>Pick your graduation year to hear the 40 biggest songs of your senior year!</p></div></div>
@@ -3651,7 +3700,7 @@ function markGy(){
  const k=[cur,mine?CD.idx:'',mine?CD.active:''].join(':');if(k===GY.key)return;GY.key=k;
  const done=new Set(mine?CD.list.slice(0,CD.idx).map(x=>x.cd.pos):[]),miss=new Set(mine?CD.missing:[]);
  $$('#gyList .cdRow').forEach(r=>{const p=+r.dataset.gpos;r.classList.toggle('now',p===cur);r.classList.toggle('done',done.has(p)&&p!==cur);r.classList.toggle('miss',miss.has(p))});
- const now=$('#gyList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
+ const now=!REMOTE&&$('#gyList .cdRow.now');if(now)now.scrollIntoView({block:'nearest',behavior:'smooth'});
  const b=$('#gyGo');if(b&&!GY.matching){const active=CD.active&&CD.grad===y;b.classList.toggle('stop',active);b.textContent=active?'Stop countdown':`Start countdown · #${ybRows(y).length} → #1`}
 }
 setInterval(markGy,700);
@@ -3664,7 +3713,7 @@ async function gyStart(fromPos){
  const todo=rows.filter(r=>!found[r.pos]);
  GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradList();
  let limited=null;
- try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
+ try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;if(GY.done%5===0)hostSync();const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
  finally{GY.matching=false}
  if(limited){toast(limited.message,'warn');if(tabId==='gradyear')renderGradList();return}
  await gradBegin(y,rows,found,fromPos);
@@ -3686,7 +3735,11 @@ async function gradBegin(y,allRows,found,fromPos){
  return true;
 }
 $('#ybPanel').addEventListener('click',e=>{
- const st=e.target.closest('[data-gys]');if(st){if(GY.matching)return;const[lo,hi]=ybRange();GRAD.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',GRAD.pickYear);$('#gyRange').value=GRAD.pickYear;sfx('tick');gyFill(GRAD.pickYear);return}
+ if(REMOTE){
+  if(e.target.closest('#gyGo')){remoteCd({t:'grad',year:gyYear()});return}
+  const row=e.target.closest('[data-gpos]');if(row){remoteCd({t:'grad',year:gyYear(),pos:+row.dataset.gpos});return}
+ }
+ const st=e.target.closest('[data-gys]');if(st){if(GY.matching||(REMOTE&&CD.active&&CD.grad))return;const[lo,hi]=ybRange();GRAD.pickYear=Math.max(lo,Math.min(hi,gyYear()+ +st.dataset.gys));store.set('yb_pick',GRAD.pickYear);$('#gyRange').value=GRAD.pickYear;sfx('tick');gyFill(GRAD.pickYear);return}
  if(e.target.closest('#gyGo')){gyStart();return}
  const row=e.target.closest('[data-gpos]');if(row){sfx('tick');gyStart(+row.dataset.gpos);return}
 });
