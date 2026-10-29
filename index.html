@@ -128,6 +128,7 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 @keyframes scratch{0%{transform:rotate(0)}18%{transform:rotate(-34deg)}36%{transform:rotate(8deg)}54%{transform:rotate(-26deg)}74%{transform:rotate(12deg)}100%{transform:rotate(0)}}
 .npArt{position:absolute;left:0;top:0;width:226px;height:226px;border-radius:18px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.6),0 0 44px color-mix(in srgb,var(--accent) 40%,transparent);z-index:2;background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .npArt img{width:100%;height:100%;object-fit:cover}
+.npArt{cursor:pointer}.npArt:active{transform:scale(.97)}
 .npTitle{font-size:26px;font-weight:800;white-space:nowrap;overflow:hidden;position:relative;line-height:1.25}
 .npTitle span{display:inline-block;white-space:nowrap}
 .npTitle.scroll span{animation:marq 14s linear infinite}
@@ -766,7 +767,7 @@ html.remote.noPhoneVol .ctrls{display:none!important}
   <aside class="side">
    <div class="np card" id="np">
     <div class="npLabel"><span class="dot"></span>NOW PLAYING<span class="houseTag" id="houseTag">HOUSE MIX</span></div>
-    <div class="npStage"><div class="vinyl"><div class="lbl" id="vinylLabel"></div></div><div class="npArt"><img id="npImg" alt=""></div></div>
+    <div class="npStage"><div class="vinyl"><div class="lbl" id="vinylLabel"></div></div><div class="npArt" id="npArt"><img id="npImg" alt=""></div></div>
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
     <div class="npTicker" id="npTicker"><div class="tkBadge" id="tkBadge"></div><div class="tkWin"><div class="tkTrack" id="tkTrack"></div></div></div>
@@ -1025,6 +1026,7 @@ const DEMO=(()=>{
    const mix=shuffle(albums,day+1);const pls=shuffle(playlists,day+2);const out=[];mix.forEach((a,i)=>{out.push(a);if(i%3===1&&pls.length)out.push(pls.pop())});return out;
   },
   async tracks(it){await sleep(150);const real=[...albums,...playlists,...artists].find(x=>x.id===it.id);return((real||it).tracks)||[]},
+  async albumOf(t){await sleep(60);return albums.find(a=>(a.tracks||[]).some(x=>x.id===t.id))||albums.find(a=>a.name===t.album)||null},
   async search(q){await sleep(150);q=q.toLowerCase();const words=q.split(/\s+/).filter(Boolean),m=s=>s.toLowerCase().includes(q);
    const mw=t=>{const h=(t.name+' '+t.artist).toLowerCase();return words.every(w=>h.includes(w))};
    return{tracks:all.filter(t=>m(t.name)||m(t.artist)||mw(t)).sort((a,b)=>mw(b)-mw(a)).slice(0,20),albums:albums.filter(a=>m(a.name)||m(a.sub)),artists:artists.filter(a=>m(a.name))}},
@@ -1167,7 +1169,7 @@ async function allPages(get,path,cap){
  return out.slice(0,cap);
 }
 const spImg=imgs=>imgs&&imgs.length?(imgs.find(i=>i.width&&i.width>=250&&i.width<=700)||imgs[0]).url:'';
-const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),album:(t.album&&t.album.name)||'',img:spImg(t.album&&t.album.images)||img||'',duration:t.duration_ms}:null;
+const spT=(t,img)=>t&&t.uri&&t.type!=='episode'&&!t.is_local?{id:t.id,uri:t.uri,name:t.name,artist:(t.artists||[]).map(a=>a.name).join(', '),album:(t.album&&t.album.name)||'',albumId:(t.album&&t.album.id)||undefined,img:spImg(t.album&&t.album.images)||img||'',duration:t.duration_ms}:null;
 function newLabel(d){
  if(!d)return 'New';const days=Math.round((Date.now()-new Date(d+'T12:00:00'))/864e5);
  if(days<=0)return 'Out today';if(days===1)return 'Out yesterday';if(days<7)return `Out ${days} days ago`;
@@ -1222,12 +1224,18 @@ const SPOTIFY={
   if(tab==='artists'){const j=await api('/me/top/artists?limit=30&time_range=medium_term');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x,'artist'))}
   return[];
  },
+ // The album a song came from, for opening it from Now Playing
+ async albumOf(t){
+  let id=t.albumId,name=t.album,img=t.img,sub=t.artist;
+  if(!id&&t.id){const j=await api('/tracks/'+t.id);const a=j&&j.album;if(a){id=a.id;name=a.name;img=spImg(a.images)||img;sub=(a.artists||[]).map(x=>x.name).join(', ')||sub}}
+  return id?{id,type:'album',name:name||'Album',img,sub}:null;
+ },
  async tracks(it){
   if(it.type==='album'){
    let items;
    try{const j=await api(`/albums/${it.id}`);items=(j.tracks&&j.tracks.items)||[]}
    catch(e){const j=await api(`/albums/${it.id}/tracks?limit=50`);items=j.items||[]}
-   return items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name}));
+   return items.map(t=>spT(t,it.img)).filter(Boolean).map(t=>Object.assign(t,{album:it.name,albumId:it.id}));
   }
   if(it.type==='fplaylist'||it.type==='fliked'){
    const m=FAM.find(x=>x.id===it.member);if(!m)throw new Error('That family member was removed');
@@ -2231,6 +2239,11 @@ $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
 $('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img))closeModal($('#albumModal'))};
+$('#npArt').onclick=async()=>{
+ const t=P.current;if(!t)return;
+ try{const a=provider.albumOf&&await provider.albumOf(t);if(a)openItem(a);else toast("Couldn't find the album for this song",'warn')}
+ catch(e){toast("Couldn't open the album: "+e.message,'warn')}
+};
 $('#gPlay').onclick=e=>{e.stopPropagation();sfx('tick');togglePlay()};
 $('#gSkip').onclick=e=>{e.stopPropagation();sfx('tick');advance()};
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
@@ -2260,7 +2273,7 @@ const peerOpts=()=>Object.assign({debug:0},store.get('peerServer',{}));
 const genRoom=()=>Array.from(crypto.getRandomValues(new Uint8Array(6)),b=>'abcdefghjkmnpqrstuvwxyz23456789'[b%31]).join('');
 function roomCode(){let r=store.get('room',null);if(!r){r=genRoom();store.set('room',r)}return r}
 const remoteURL=()=>location.origin+location.pathname.replace(/index\.html$/i,'')+'?remote='+roomCode();
-const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio,cd:t.cd};
+const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,albumId:t.albumId,img:t.img,duration:t.duration,color:t.color,house:t.house,radio:t.radio,cd:t.cd};
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
@@ -2277,6 +2290,7 @@ async function hostHandle(c,d){
  try{
   if(d.t==='search'){const r=await provider.search(String(d.q||'').slice(0,80));reply({tracks:r.tracks.map(slimT),albums:r.albums.map(fixImg).map(slimI),artists:r.artists.map(fixImg).map(slimI)})}
   else if(d.t==='browse'){reply(((await provider.load(String(d.tab)))||[]).filter(Boolean).map(fixImg).map(slimI))}
+  else if(d.t==='albumOf'){const a=await provider.albumOf(slimT(d.track));reply(a?slimI(a):null)}
   else if(d.t==='tracks'){reply(((await provider.tracks(slimI(d.item)))||[]).map(slimT))}
   else if(d.t==='coin'){
    if(!S.phoneCoins||S.freePlay){reply({ok:false,msg:S.freePlay?'Free play is on, no coins needed':'Coins can only be added at the jukebox'});return}
@@ -2383,6 +2397,7 @@ function rcall(msg){
 const REMOTE_PROVIDER={key:'remote',tabs:[{id:'_wait',name:'Connecting…'}],
  async load(tab){if(tab==='_wait')return[];return rcall({t:'browse',tab})},
  tracks(item){return rcall({t:'tracks',item:slimI(item)})},
+ albumOf(t){return rcall({t:'albumOf',track:slimT(t)})},
  search(q){return rcall({t:'search',q})},
  async housePool(){return[]},
  async stationTracks(){return[]},
@@ -3529,6 +3544,7 @@ const TIPS={
  modeBadge:'Music source. Click for settings',
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
+ npArt:'See the whole album and pick another song from it',
  albumAll:'Add every song on this album to the queue, in order',
  lightsBtn:'Hue lights: pick a lighting mode',
  gear:'Settings',
