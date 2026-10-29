@@ -2529,8 +2529,8 @@ async function tune(idx){
  renderRadio();
  if(!changed&&P.current&&P.current.radio&&!P.paused)return;
  staticNoise();
- if(radioNow())await radioStart(st);
- else toast(`Tuned to ${st.name}. It starts after the current picks.`);
+ // Picking a station always switches now; songs people queued still play after this one
+ await radioStart(st);
 }
 async function toggleRadio(){
  S.radio=!S.radio;saveS();renderRadio();renderQueue();sfx('tick');
