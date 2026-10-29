@@ -288,6 +288,8 @@ html.remote #lightsBtn{display:none!important}
 #gfCard.show #gfList p{opacity:1;transform:none}
 #gfCard.show #gfList p:nth-child(2){transition-delay:.6s}#gfCard.show #gfList p:nth-child(3){transition-delay:1.2s}
 html.remote #cdCard,html.remote #gfCard{display:none!important}
+html.bgPause #bg *{animation-play-state:paused!important}
+html.covered .layout *,html.covered .top *{animation-play-state:paused!important}
 @media (max-width:820px){.cdList{grid-template-columns:minmax(0,1fr)}.cdRow{min-width:0}.browse,.cdPanel{min-width:0;max-width:100%}.cdPanel{min-height:600px}}
 .lyrBtn.on{color:#22e4ff;border-color:rgba(34,228,255,.6);box-shadow:0 0 16px rgba(34,228,255,.4)}
 #lyr{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;background:#06030d;opacity:0;pointer-events:none;transition:opacity .45s;overflow:hidden}
@@ -1078,7 +1080,7 @@ async function famAdd(code){
  if(me.id===mine){toast("That's your own account. On the Spotify sign-in page, tap 'Not you?' and sign in as the family member.",'warn');return}
  const first=String(me.display_name||me.id).split(' ')[0];
  const m={id:me.id,name:first,full:me.display_name||me.id,img:spImg(me.images),tok:t};
- FAM=FAM.filter(x=>x.id!==m.id).concat([m]);saveFam();
+ FAM=FAM.filter(x=>x.id!==m.id).concat([m]);saveFam();if(typeof TABC!=='undefined')TABC.clear();
  toast(`${first}'s playlists added to the Family tab`);
 }
 async function famToken(m){
@@ -1651,6 +1653,8 @@ function toast(msg,img){
 function bump(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
 const cost=n=>S.freePlay?'':`<span class="cost">${n}</span>`;
 const REG=new Map();let regN=0;const reg=x=>{const k='k'+(regN++);REG.set(k,x);return k};
+// Forget rows and tiles that are no longer on screen (the jukebox runs for days)
+setInterval(()=>{if(REG.size<1500)return;const keep=new Set();document.querySelectorAll('[data-open],[data-k]').forEach(el=>{keep.add(el.dataset.open);keep.add(el.dataset.k)});for(const k of REG.keys())if(!keep.has(k))REG.delete(k)},5*60e3);
 
 function applyName(){
  const w=(S.name||'Jukebox').trim().split(/\s+/);const last=w.pop();
@@ -1866,6 +1870,33 @@ function fitTabs(){const el=$('#tabs');if(!el||!el.clientWidth)return;
  el.offsetWidth;el.classList.remove('fitting')}
 let tabsRO=null;addEventListener('resize',()=>fitTabs());
 try{document.fonts&&document.fonts.ready.then(()=>fitTabs())}catch(e){}
+// Browse pages are remembered for a while: shown instantly from memory, refreshed quietly in the background after 3 minutes
+const TABC=new Map(),TRKC=new Map();
+const tabKey=id=>provider.key+':'+id;
+async function tabItems(id,onFresh){
+ const k=tabKey(id),c=TABC.get(k),age=c?Date.now()-c.at:Infinity;
+ if(c&&age<15*60e3){
+  if(age>3*60e3&&!c.refreshing){c.refreshing=true;provider.load(id).then(items=>{items=(items||[]).filter(Boolean).map(fixImg);const same=JSON.stringify(items.map(x=>x.id))===JSON.stringify(c.items.map(x=>x.id));TABC.set(k,{at:Date.now(),items});if(!same&&onFresh)onFresh(items)}).catch(()=>{}).finally(()=>{c.refreshing=false})}
+  return c.items;
+ }
+ const items=((await provider.load(id))||[]).filter(Boolean).map(fixImg);
+ if(items.length)TABC.set(k,{at:Date.now(),items});
+ return items;
+}
+async function itemTracks(it){
+ const k=provider.key+':'+it.type+':'+it.id+':'+(it.member||''),c=TRKC.get(k);
+ if(c&&Date.now()-c.at<10*60e3)return c.tracks;
+ const tracks=await provider.tracks(it);
+ if(tracks&&tracks.length){TRKC.delete(k);TRKC.set(k,{at:Date.now(),tracks});if(TRKC.size>40)TRKC.delete(TRKC.keys().next().value)}
+ return tracks;
+}
+function showTabItems(items){
+ const ranked=items.some(x=>x.rank);
+ renderFlow(ranked?items:items.slice(0,11),ranked?0:null);
+ const subs=new Set(items.map(x=>x.sub||''));const shown=subs.size===1&&items.length>2?items.map(x=>Object.assign({},x,{sub:''})):items.map(x=>/^jgriffin187's playlist$/i.test(x.sub||'')||(provider.me&&x.sub===`${provider.me.display_name}'s playlist`)?Object.assign({},x,{sub:''}):x);
+ $('#shelf').innerHTML=items.length?shown.map(tile).join(''):'<div class="shelfMsg">Nothing here yet.</div>';
+ $('#shelf').scrollLeft=0;sizeShelf();
+}
 async function loadTab(id){
  tabId=id;$$('.tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===id));
  const isCd=id==='countdown',isYb=id==='gradyear';$('#flow').style.display=$('.shelfHead').style.display=$('#shelf').style.display=isCd||isYb?'none':'';$('#cdPanel').style.display=isCd?'':'none';$('#ybPanel').style.display=isYb?'':'none';
@@ -1873,16 +1904,11 @@ async function loadTab(id){
  if(isYb){openGradPanel();return}
  requestAnimationFrame(()=>{layoutFlow();sizeShelf()});
  const tb=provider.tabs.find(t=>t.id===id);$('#shelfTitle').textContent=tb?tb.name:'';
- $('#shelf').innerHTML=Array.from({length:14},()=>'<div class="tile sk"><div class="art"></div></div>').join('');
+ if(!TABC.has(tabKey(id)))$('#shelf').innerHTML=Array.from({length:14},()=>'<div class="tile sk"><div class="art"></div></div>').join('');
  try{
-  const items=((await provider.load(id))||[]).filter(Boolean).map(fixImg);
+  const items=await tabItems(id,fresh=>{if(tabId===id&&!$('.modal.open'))showTabItems(fresh)});
   if(tabId!==id)return;
-  // Ranked lists show every entry in the carousel, starting at #1
-  const ranked=items.some(x=>x.rank);
-  renderFlow(ranked?items:items.slice(0,11),ranked?0:null);
-  const subs=new Set(items.map(x=>x.sub||''));const shown=subs.size===1&&items.length>2?items.map(x=>Object.assign({},x,{sub:''})):items.map(x=>/^jgriffin187's playlist$/i.test(x.sub||'')||(provider.me&&x.sub===`${provider.me.display_name}'s playlist`)?Object.assign({},x,{sub:''}):x);
-  $('#shelf').innerHTML=items.length?shown.map(tile).join(''):'<div class="shelfMsg">Nothing here yet.</div>';
-  $('#shelf').scrollLeft=0;sizeShelf();
+  showTabItems(items);
  }catch(e){
   if(tabId!==id)return;
   renderFlow([]);
@@ -1948,7 +1974,7 @@ async function openItem(it){
  openModal($('#albumModal'));
  const all=$('#albumAll');all.style.display='none';ALB.back=it.type==='album'&&wasOpen&&ALB.it&&ALB.it.type==='artist'?ALB.it:null;ALB.it=it;ALB.tracks=[];
  $('#albumBack').style.display=ALB.back?'':'none';if(ALB.back)$('#albumBack').lastChild.textContent=ALB.back.name;
- try{const tr=await provider.tracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';
+ try{const tr=await itemTracks(it);list.innerHTML=tr.length?tr.map(row).join(''):'<div class="loading">No playable songs here.</div>';
   if((it.type==='artist')&&provider.artistAlbums&&ALB.it===it)artAlbums(it);
   if(it.rank&&tr.length>1&&ALB.it===it){ALB.tracks=tr;all.innerHTML=`+ Queue the whole album · ${tr.length} songs ${cost(ALBUM_COST)}`;all.style.display=''}}
  catch(e){list.innerHTML=`<div class="loading">Couldn't load songs<br><small>${esc(e.message)}</small></div>`}
@@ -2090,11 +2116,11 @@ function openSettings(){
  renderHueSettings();
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
  const fa=$('#famAdd');if(fa)fa.onclick=()=>{collect();saveS();spLogin(true)};
- const fl=$('#famList');if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
+ const fl=$('#famList');if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();TABC.clear();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
- $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();hostSync();closeModal($('#settingsModal'));toast('Settings saved')};
+ $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();hostSync();closeModal($('#settingsModal'));TABC.clear();TRKC.clear();toast('Settings saved')};
  openModal($('#settingsModal'));
 }
 
@@ -2105,9 +2131,12 @@ function drawViz(cv,n,mirror){
  const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
  const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.round(w*dpr),H=Math.round(h*dpr);
  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
- const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
  let bars=vizBars.get(cv);if(!bars){bars=new Float32Array(n);vizBars.set(cv,bars)}
- const t=performance.now(),on=!!P.current&&!P.paused,beat=Math.pow(Math.max(0,Math.cos(t/500*Math.PI)),6);
+ const on=!!P.current&&!P.paused;
+ // nothing playing and the bars have settled: the picture can't change, so skip the redraw
+ if(!on&&cv.width===W&&cv.height===H&&bars.every(v=>Math.abs(v-.03)<.002)){if(bars.still)return;bars.still=true}else bars.still=false;
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const t=performance.now(),beat=Math.pow(Math.max(0,Math.cos(t/500*Math.PI)),6);
  const{a,b}=accents();const g=x.createLinearGradient(0,0,w,0);try{g.addColorStop(0,a);g.addColorStop(1,b)}catch(e){g.addColorStop(0,'#ff2bd6');g.addColorStop(1,'#22e4ff')}
  x.fillStyle=g;const slot=w/n,gap=slot*.28,bw=slot-gap,base=mirror?h*.64:h,r=Math.min(bw/2,4);
  for(let i=0;i<n;i++){
@@ -2120,7 +2149,14 @@ function drawViz(cv,n,mirror){
  }
  x.globalAlpha=1;
 }
-function frame(){drawViz($('#viz'),36,true);if(attractOn&&!galleryOn)drawViz($('#attViz'),80,false);if(galleryOn)drawViz($('#gViz'),12,false);requestAnimationFrame(frame)}
+// Pause the moving background while a window, the screensaver, lyrics or the turntable covers it
+let bgState='';
+setInterval(()=>{
+ const cover=attractOn||(typeof DECK!=='undefined'&&DECK.open)||LYR.open,modal=!!document.querySelector('.modal.open');
+ const st=(cover?'c':'')+(modal?'m':'');if(st===bgState)return;bgState=st;
+ document.documentElement.classList.toggle('bgPause',cover||modal);document.documentElement.classList.toggle('covered',cover);
+},500);
+function frame(){if(!attractOn&&!(typeof DECK!=='undefined'&&DECK.open)&&!LYR.open)drawViz($('#viz'),36,true);if(attractOn&&!galleryOn)drawViz($('#attViz'),80,false);if(galleryOn)drawViz($('#gViz'),12,false);requestAnimationFrame(frame)}
 
 /* ---------- Attract mode ---------- */
 let lastInput=Date.now(),attractOn=false;
@@ -3354,7 +3390,7 @@ async function lyrFetch(t){
  }
  const res=!hit?{none:true}:hit.instrumental?{instrumental:true}:hit.syncedLyrics?{synced:parseLRC(hit.syncedLyrics)}:hit.plainLyrics?{plain:String(hit.plainLyrics).split(/\r?\n/)}:{none:true};
  if(res.synced&&!res.synced.length){res.none=true;delete res.synced}
- LYR.cache.set(t.id,res);return res;
+ LYR.cache.set(t.id,res);if(LYR.cache.size>50)LYR.cache.delete(LYR.cache.keys().next().value);return res;
 }
 const lyrNeeded=()=>LYR.open||(S.lyricsSaver&&galleryOn)||(DECK.open&&!!S.dkLyr);
 async function lyrTrack(){
