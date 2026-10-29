@@ -1335,6 +1335,16 @@ const SPOTIFY={
    const lists=await Promise.all(picks.map(a=>this.artistHits({id:a.id,name:a.name}).catch(()=>[])));
    return lists.flatMap(l=>l.sort(()=>Math.random()-.5).slice(0,7));
   }
+  if(st.kind==='crew'){
+   // A hand-picked crew of artists from the era, plus Spotify's own genre tag for a little variety
+   const picks=shuffle([...st.artists]).slice(0,4),yr=`year:${st.from}-${st.to}`;
+   const qs=picks.map(a=>`artist:"${a}" ${yr}`).concat([`genre:"${st.genre}" ${yr}`]);
+   let err=null;const pages=await Promise.all(qs.map(q=>api(`/search?type=track&limit=10&q=`+encodeURIComponent(q)).catch(e=>{err=e;return null})));
+   if(err&&pages.every(x=>!x))throw err;
+   const want=new Set(st.artists.map(a=>artistKey(a)));
+   const hits=pages.flatMap((j,i)=>((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&(i===picks.length||(t.artists||[]).some(a=>want.has(artistKey(a.name))))));
+   return dedupeHits(hits.map(t=>spT(t)).filter(Boolean));
+  }
   const q=st.kind==='year'?`year:${st.from}-${st.to}`:`genre:"${st.genre}"`;
   const offs=[0,10,20,30,40,60,80,100,130,160,200,250].sort(()=>Math.random()-.5).slice(0,4);
   let err=null;const pages=await Promise.all(offs.map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(q)).catch(e=>{err=e;return null})));
@@ -2458,7 +2468,7 @@ const STATIONS=[
  {id:'60s',name:'60s',kind:'year',from:1960,to:1969},{id:'70s',name:'70s',kind:'year',from:1970,to:1979},
  {id:'80s',name:'80s',kind:'year',from:1980,to:1989},{id:'90s',name:'90s',kind:'year',from:1990,to:1999},
  {id:'00s',name:'2000s',kind:'year',from:2000,to:2009},{id:'now',name:'Today',kind:'year',from:YR-2,to:YR},
- {id:'country',name:'Country',kind:'genre',genre:'country'},{id:'classic',name:'Classic Rock',kind:'genre',genre:'classic rock'},
+ {id:'country',name:'Country',kind:'genre',genre:'country'},{id:'classic',name:'Classic Rock',kind:'genre',genre:'classic rock'},{id:'yacht',name:'Yacht Rock',kind:'crew',from:1974,to:1986,genre:'yacht rock',artists:['Michael McDonald','The Doobie Brothers','Christopher Cross','Steely Dan','Kenny Loggins','Toto','Daryl Hall & John Oates','Boz Scaggs','Ambrosia','Player','Pablo Cruise','Little River Band','Robbie Dupree','Michael Franks','Seals and Crofts','England Dan & John Ford Coley','Orleans','Bobby Caldwell','Al Stewart','Gerry Rafferty','Firefall','Rupert Holmes','Ace','Looking Glass','Stephen Bishop','Nicolette Larson','Kenny Rankin','Loggins & Messina','Steve Winwood','Chicago','10cc','Atlanta Rhythm Section','Dan Fogelberg','Bill LaBounty','Peter Allen','Starbuck']},
  {id:'rock',name:'Rock',kind:'genre',genre:'rock'},{id:'pop',name:'Pop',kind:'genre',genre:'pop'},
  {id:'hiphop',name:'Hip-Hop',kind:'genre',genre:'hip hop'},{id:'rnb',name:'R&B',kind:'genre',genre:'r&b'},
  {id:'alt',name:'Alternative',kind:'genre',genre:'alternative'},{id:'dance',name:'Dance',kind:'genre',genre:'dance'}
