@@ -1366,16 +1366,30 @@ const SPOTIFY={
   }
   if(st.kind==='crew'){
    // A hand-picked crew of artists for the station (Spotify's genre search lets in too many strays)
-   const picks=shuffle([...st.artists]).slice(0,5),yr=st.from||st.to?` year:${st.from||1950}-${st.to||new Date().getFullYear()}`:'';
-   const qs=picks.map(a=>`artist:"${a}"${yr}`);
-   let err=null;const pages=await Promise.all(qs.map(q=>api(`/search?type=track&limit=10&q=`+encodeURIComponent(q)).catch(e=>{err=e;return null})));
-   if(err&&pages.every(x=>!x))throw err;
-   const want=new Set(st.artists.map(a=>artistKey(a)));
-   const hits=pages.flatMap(j=>((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&(t.artists||[]).some(a=>want.has(artistKey(a.name)))));
-   return dedupeHits(hits.map(t=>spT(t)).filter(Boolean));
+   // Each artist's songs are remembered for 3 days, so most refills cost Spotify nothing; at most 2 new artists are looked up per refill, one at a time
+   const yr=st.from||st.to?` year:${st.from||1950}-${st.to||new Date().getFullYear()}`:'';
+   const want=new Set(st.artists.map(a=>artistKey(a))),C=store.get('gt_radio_art',{}),fresh=k=>C[k]&&Date.now()-C[k].at<3*864e5;
+   const order=shuffle([...st.artists]),got=[];let looked=0,err=null,changed=false;
+   for(const a of order){
+    if(got.length>=5)break;
+    const k=a+'|'+yr;
+    if(fresh(k)){if(C[k].tracks.length)got.push(C[k].tracks);continue}
+    if(looked>=2||err)continue;
+    if(looked)await sleep(400);looked++;
+    try{
+     const j=await api(`/search?type=track&limit=10&q=`+encodeURIComponent(`artist:"${a}"${yr}`));
+     const tr=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&(t.artists||[]).some(x=>want.has(artistKey(x.name)))).map(t=>slimT(spT(t))).filter(Boolean);
+     C[k]={at:Date.now(),tracks:tr};changed=true;if(tr.length)got.push(tr);
+    }catch(e){err=e}
+   }
+   // Spotify busy: fall back on any remembered songs for this station, even older ones
+   if(!got.length)for(const a of order){const k=a+'|'+yr;if(C[k]&&C[k].tracks.length)got.push(C[k].tracks);if(got.length>=5)break}
+   if(changed){const ks=Object.keys(C);if(ks.length>200)ks.sort((x,y)=>C[x].at-C[y].at).slice(0,ks.length-200).forEach(x=>delete C[x]);try{store.set('gt_radio_art',C)}catch(e){}}
+   if(!got.length&&err)throw err;
+   return dedupeHits(got.flat());
   }
   const q=st.kind==='year'?`year:${st.from}-${st.to}`:`genre:"${st.genre}"`;
-  const offs=[0,10,20,30,40,60,80,100,130,160,200,250].sort(()=>Math.random()-.5).slice(0,4);
+  const offs=[0,10,20,30,40,60,80,100,130,160,200,250].sort(()=>Math.random()-.5).slice(0,2);
   let err=null;const pages=await Promise.all(offs.map(o=>api(`/search?type=track&limit=10&offset=${o}&q=`+encodeURIComponent(q)).catch(e=>{err=e;return null})));
   if(err&&pages.every(x=>!x))throw err;
   const items=pages.flatMap(j=>(j&&j.tracks&&j.tracks.items)||[]).filter(Boolean),known=items.filter(t=>typeof t.popularity!=='number'||t.popularity>=35);
@@ -2668,7 +2682,7 @@ async function radioFill(st){
  RADIO.loading=(async()=>{
   let got=[];
   for(let tries=0;tries<2&&got.length<4;tries++){
-   try{got=((await provider.stationTracks(st))||[]).filter(t=>t&&t.uri&&!RADIO.recent.has(t.id));RADIO.err=got.length?null:'Spotify sent back no songs for it'}catch(e){console.warn('Radio',e);RADIO.err=e.message}
+   try{got=((await provider.stationTracks(st))||[]).filter(t=>t&&t.uri&&!RADIO.recent.has(t.id));RADIO.err=got.length?null:'Spotify sent back no songs for it'}catch(e){console.warn('Radio',e);RADIO.err=e.message;if(e.status===429)break}
   }
   if(RADIO.for!==st.id)return;
   const have=new Set(RADIO.buf.map(t=>t.id));
@@ -2682,7 +2696,7 @@ async function radioNext(){
  if(!RADIO.buf.length)await radioFill(st);
  if(RADIO.recent.size>150)RADIO.recent=new Set([...RADIO.recent].slice(-100));
  const t=RADIO.buf.shift();
- if(RADIO.buf.length<5)radioFill(st);
+ if(RADIO.buf.length<3)radioFill(st);
  if(!t)toast(`Couldn't tune in to ${st.name} right now${RADIO.err?' · '+RADIO.err:''}`,'warn');
  return t||null;
 }
