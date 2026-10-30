@@ -310,7 +310,7 @@ html.covered .layout *,html.covered .top *{animation-play-state:paused!important
 .lyrMsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:rgba(255,255,255,.7);font-size:24px;text-align:center;padding:20px}
 .lyrMsg svg{width:56px;height:56px;color:var(--accent2)}
 .lyrFoot{position:relative;padding:8px 34px 20px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.35)}
-.gLyric{position:absolute;left:50%;bottom:13vh;transform:translateX(-50%);z-index:3;max-width:80vw;text-align:center;font-size:clamp(26px,3vw,48px);font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 30px rgba(0,0,0,.7);opacity:0;transition:opacity .5s;pointer-events:none}
+.gLyric{position:absolute;left:50%;bottom:calc(4vh + 170px);transform:translateX(-50%);z-index:3;max-width:80vw;text-align:center;font-size:clamp(26px,3vw,48px);font-weight:800;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 30px rgba(0,0,0,.7);opacity:0;transition:opacity .5s;pointer-events:none}
 .gLyric.on{opacity:1}
 @media (max-width:820px){.lyrHead{padding:16px 16px 6px}.lyrHead img{width:56px;height:56px}.lyrHead b{font-size:20px}.lyrLines{padding:0 6vw}}
 #deck{position:fixed;inset:0;z-index:76;display:grid;place-items:center;background:#050308;opacity:0;pointer-events:none;transition:opacity .5s;overflow:hidden}
@@ -3505,6 +3505,8 @@ function lyrSaverLine(){
  const g=$('#gLyric');if(!g)return;
  const d=LYR.data,show=S.lyricsSaver&&galleryOn&&!!P.current&&!P.paused&&d&&d.synced;
  if(!show){g.classList.remove('on');return}
+ // Sit just above the mini player (it grows when the ticker is on) so the line never runs behind it
+ const n=$('#gNow');if(n&&!n.classList.contains('hide')){const top=n.getBoundingClientRect().top;if(top>0){const b=Math.round(innerHeight-top+Math.max(16,innerHeight*.025))+'px';if(g.style.bottom!==b)g.style.bottom=b}}
  const i=lyrCurIdx(),txt=i>=0?d.synced[i].text:'';
  if(g.textContent!==txt)g.textContent=txt;g.classList.toggle('on',!!txt);
 }
