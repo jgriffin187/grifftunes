@@ -289,6 +289,30 @@ html.remote #lightsBtn{display:none!important}
 #gfCard.show #gfList p:nth-child(2){transition-delay:.6s}#gfCard.show #gfList p:nth-child(3){transition-delay:1.2s}
 html.remote #cdCard,html.remote #gfCard{display:none!important}
 html.bgPause #bg *{animation-play-state:paused!important}
+.xmasBtn{display:flex;align-items:center;gap:8px;height:52px;padding:0 14px 0 10px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--stroke);flex:none;color:#fff;font-family:Bungee;font-size:13px;letter-spacing:.04em}
+.xmasBtn svg{width:30px;height:34px;filter:drop-shadow(0 0 6px rgba(255,210,63,.5))}
+.xmasBtn.on{background:linear-gradient(135deg,#b3001b,#0d7a3a);border-color:rgba(255,215,120,.7);box-shadow:0 0 20px rgba(255,40,40,.45)}
+.xmasBtn.on svg{animation:treeGlow 2.4s ease-in-out infinite}
+@keyframes treeGlow{50%{filter:drop-shadow(0 0 12px rgba(255,230,140,.95))}}
+#snow{position:fixed;inset:0;z-index:92;pointer-events:none;display:none}
+html.xmas #snow{display:block}
+#sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(440px,60vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 8px rgba(255,220,150,.55))}
+#sleigh svg{width:100%;height:auto;display:block}
+#sleigh.fly{animation:sleighFly 16s linear forwards}
+@keyframes sleighFly{0%{opacity:1;transform:translate(110vw,4vh)}25%{transform:translate(70vw,-1vh)}50%{transform:translate(35vw,3vh)}75%{transform:translate(5vw,-2vh)}99%{opacity:1}100%{opacity:0;transform:translate(-60vw,2vh)}}
+#xlights{position:fixed;top:0;left:0;right:0;height:24px;z-index:61;pointer-events:none;display:none}
+html.xmas #xlights{display:block}
+#xlights::before,#xlights::after{content:'';position:absolute;inset:0;background-repeat:repeat-x;background-size:96px 24px}
+#xlights::before{background-image:linear-gradient(#2b2b2b,#2b2b2b),radial-gradient(circle at 12px 14px,#ff2a2a 0 5px,transparent 6px),radial-gradient(circle at 36px 16px,#27d65e 0 5px,transparent 6px),radial-gradient(circle at 60px 14px,#ffd23f 0 5px,transparent 6px),radial-gradient(circle at 84px 16px,#3bb7ff 0 5px,transparent 6px);background-size:100% 2px,96px 24px,96px 24px,96px 24px,96px 24px;background-position:0 6px,0 0,0 0,0 0,0 0;filter:drop-shadow(0 0 4px rgba(255,255,255,.5))}
+#xlights::after{background-image:radial-gradient(circle at 12px 14px,#27d65e 0 5px,transparent 6px),radial-gradient(circle at 36px 16px,#ffd23f 0 5px,transparent 6px),radial-gradient(circle at 60px 14px,#3bb7ff 0 5px,transparent 6px),radial-gradient(circle at 84px 16px,#ff2a2a 0 5px,transparent 6px);animation:xTwinkle 2.4s steps(1) infinite;filter:drop-shadow(0 0 6px rgba(255,255,255,.6))}
+@keyframes xTwinkle{0%{opacity:0}50%{opacity:1}}
+html.xmas .np{box-shadow:0 0 0 1px rgba(255,60,60,.45),0 0 30px rgba(255,40,40,.25),0 0 60px rgba(20,180,80,.18)}
+html.xmas .npTicker::before,html.xmas .npTicker::after{background:repeating-linear-gradient(90deg,#e8102a 0 10px,#fff 10px 20px);animation:tkCane 1.6s linear infinite}
+@keyframes tkCane{to{background-position:20px 0}}
+html.xmas .flyCoin{border-radius:6px;color:transparent;background:linear-gradient(90deg,transparent 42%,#ffd23f 42% 58%,transparent 58%),linear-gradient(transparent 42%,#ffd23f 42% 58%,transparent 58%),#d4142a}
+html.covered #xlights::after{animation-play-state:paused}
+html.remote .xmasBtn span{display:none}html.remote .xmasBtn{padding:0 9px;height:44px}
+
 html.covered .layout *,html.covered .top *{animation-play-state:paused!important}
 @media (max-width:820px){.cdList{grid-template-columns:minmax(0,1fr)}.cdRow{min-width:0}.browse,.cdPanel{min-width:0;max-width:100%}.cdPanel{min-height:600px}}
 .lyrBtn.on{color:#22e4ff;border-color:rgba(34,228,255,.6);box-shadow:0 0 16px rgba(34,228,255,.4)}
@@ -749,6 +773,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
   <button class="searchBtn" id="openSearch"><span data-icon="search"></span>Search songs, artists &amp; albums</button>
   <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
+  <button class="xmasBtn" id="xmasBtn" aria-label="Christmas Mode" style="display:none"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 2l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#ffd23f"/><path d="M16 11l7 9h-3.5l6 8H19l3 4H10l3-4H5.5l6-8H8z" fill="#1fbf5a"/><rect x="14" y="32" width="4" height="4" rx="1" fill="#8b5a2b"/><circle cx="13" cy="20" r="1.4" fill="#ff3b3b"/><circle cx="19" cy="24" r="1.4" fill="#ffd23f"/><circle cx="12.5" cy="28" r="1.4" fill="#3bb7ff"/><circle cx="20" cy="29" r="1.4" fill="#ff3b3b"/></svg><span id="xmasDays"></span></button>
   <div class="clock" id="clock"></div>
   <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
   <button class="iconBtn" id="phoneBtn" aria-label="Add songs from your phone" data-icon="phone"></button>
@@ -862,6 +887,15 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
  <div class="gNow" id="gNow"><img id="gNowImg" alt=""><div class="gMeta"><b id="gNowTitle"></b><span id="gNowArtist"></span></div><canvas id="gViz"></canvas><div class="gCtl"><button class="gBtn gPlay" id="gPlay" aria-label="Play or pause"></button><button class="gBtn" id="gSkip" aria-label="Next song" data-icon="skip"></button></div><div class="npTicker gTicker" id="gTicker"><div class="tkBadge" id="gTkBadge"></div><div class="tkWin"><div class="tkTrack" id="gTkTrack"></div></div></div></div>
 </div>
 
+<canvas id="snow" aria-hidden="true"></canvas>
+<div id="sleigh" aria-hidden="true"><svg viewBox="0 0 440 90"><g fill="#ffe9c4" stroke="#ffe9c4" stroke-linecap="round">
+<path d="M30 34 L300 50" fill="none" stroke-width="1.2" opacity=".8"/>
+<g transform="translate(20,26)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(82,30)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(144,26)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(206,30)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g>
+<path d="M296 44 h66 q14 0 15 -18 l7 0 q0 32 -26 32 h-52 q-12 0 -14 -14 z" stroke="none"/>
+<path d="M282 68 h98 q12 0 14 -9" fill="none" stroke-width="3"/><path d="M300 58 v10 M360 58 v10" stroke-width="2.5"/>
+<circle cx="330" cy="18" r="6.5" stroke="none"/><ellipse cx="331" cy="33" rx="11" ry="10" stroke="none"/><path d="M324 14 L341 6 L336 17 z" stroke="none"/><circle cx="342" cy="6" r="2.4" stroke="none"/><circle cx="352" cy="30" r="11" stroke="none"/>
+</g></svg></div>
+<div id="xlights" aria-hidden="true"></div>
 <div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 <div id="gfCard" aria-live="polite"><div class="gfHead" id="gfHead"></div><div id="gfList"></div></div>
 
@@ -927,7 +961,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00'};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00',xmas:false,xmasSrc:'top'};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // Radio now follows album art colors like every other song; station colors are opt-in
 if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
@@ -1592,6 +1626,7 @@ const BUILD='2026-10-26-scratch2';
 let actx=null;
 function sfx(type){
  if(!S.sfx)return;
+ if(type==='coin'&&XM.active){xmasBells();return}
  try{
   actx=actx||new (window.AudioContext||window.webkitAudioContext)();
   const t0=actx.currentTime;
@@ -1758,7 +1793,7 @@ function renderNP(){
  $('#npArtist').textContent=c?c.artist:(REMOTE?'Tap any album to get the party started':'Tap any album, or…');
  $('#houseBtn').style.display=c||REMOTE?'none':'';
  $('#houseTag').style.display=c&&(c.house||c.radio||c.cd)?'':'none';
- $('#houseTag').textContent=c&&c.cd?(c.cd.chart==='grad'?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`):c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
+ $('#houseTag').textContent=c&&c.cd?(c.cd.chart==='xmas'?'CHRISTMAS MODE':c.cd.chart==='xmascd'?`CHRISTMAS COUNTDOWN · #${c.cd.pos}`:c.cd.chart==='grad'?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`):c&&c.radio?'RADIO · '+c.radio:'HOUSE MIX';
  $('#houseTag').classList.toggle('cdTag',!!(c&&c.cd));
  $('#houseTag').classList.toggle('radioTag',!!(c&&c.radio));
  renderRadio();
@@ -1826,6 +1861,7 @@ async function advance(){
   const next=P.queue.shift();saveQueue();renderQueue();
   if(next){await startTrack(next);return}
   if(CD.active){const e=cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
+  if(XM.active){const t=await xmasNext();if(t){await startTrack(t,false,null,t.cd);xmasPlayed(t);return}}
   if(P.current&&P.current.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
   if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
   if(S.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
@@ -2169,6 +2205,10 @@ function openSettings(){
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
+ <div class="field"><span class="lab">Christmas Mode</span>
+  ${tg('fXmas','Show the Christmas tree button',S.xmas)}
+  <div class="field" style="margin:8px 0 0"><label for="fXmasSrc">Christmas music</label><select id="fXmasSrc"><option value="top">GriffTunes Christmas Top 40</option>${S.xmasSrc&&S.xmasSrc!=='top'?`<option value="${esc(S.xmasSrc)}" selected>${esc(S.xmasSrcName||'Your playlist')}</option>`:''}</select></div>
+  <div class="note">Tap the tree in the top bar to start Christmas music, Christmas light colors, snow and a few surprises. Songs people pay for still play first. To use your own list, make a Christmas playlist in your Spotify account and pick it here.</div></div>
  <div class="field"><span class="lab">Wall display</span>
   ${tg('fAutoFs','Go full screen on first tap',S.autoFs)}
   ${tg('fWake','Keep the screen awake',S.wake)}
@@ -2179,7 +2219,8 @@ function openSettings(){
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ tabItems('playlists').then(L=>{const sel=$('#fXmasSrc');if(!sel)return;(L||[]).filter(x=>x.type==='playlist'||x.type==='liked').forEach(x=>{if(x.id===S.xmasSrc)return;const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)})}).catch(()=>{});
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
@@ -2292,9 +2333,10 @@ function artLoad(){
 const artUrl=(a,w)=>`${ART.iiif}/${a.img}/full/${w},/0/default.jpg`;
 const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
 async function artNext(){
- for(let n=0;n<6&&ART.list.length;n++){
-  const sar=innerWidth/Math.max(1,innerHeight),fits=ART.list.filter(x=>x.r&&x.r>=sar*.8&&x.r<=sar*1.28);
-  const pool=fits.length>=10?fits:ART.list;
+ const AL=XM.active&&XAL.length>=8?XART.list:AL;
+ for(let n=0;n<6&&AL.length;n++){
+  const sar=innerWidth/Math.max(1,innerHeight),fits=AL.filter(x=>x.r&&x.r>=sar*.8&&x.r<=sar*1.28);
+  const pool=fits.length>=10?fits:AL;
   const a=pool[ART.idx++%pool.length];let src=artUrl(a,1686);
   try{await loadImg(src)}catch(e){src=artUrl(a,843);try{await loadImg(src)}catch(e2){continue}}
   if(!galleryOn)return true;
@@ -2375,6 +2417,7 @@ $('#gear').onclick=openSettings;
 $('#playBtn').onclick=togglePlay;
 $('#houseBtn').onclick=startHouse;
 $('#skipBtn').onclick=()=>{sfx('tick');advance()};
+$('#xmasBtn').onclick=()=>{if(REMOTE){remoteCd({t:'xmas',on:!XM.active});return}xmasSet(!XM.active)};
 $('#albumBack').onclick=()=>{if(ALB.back)openItem(ALB.back)};
 $('#albumAll').onclick=()=>{if(!ALB.tracks.length)return;if(enqueueAlbum(ALB.tracks,ALB.it.name,ALB.it.img,'',isPlaylist(ALB.it)?'playlist':'album'))closeModal($('#albumModal'))};
 $('#npArt').onclick=async()=>{
@@ -2415,7 +2458,7 @@ const slimT=t=>t&&{id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t.album,a
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare(),radio:!!S.radio,station:S.station}}
+function hostState(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare(),radio:!!S.radio,station:S.station,xmas:{en:!!S.xmas,on:!!XM.active}}}
 // What the phones need to draw the Countdown and Grad Year tabs
 function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
@@ -2440,6 +2483,7 @@ async function hostHandle(c,d){
    const v=Math.max(0,Math.min(100,Math.round(+d.v)));if(!isFinite(v))return;
    setVol(v,c);
   }
+  else if(d.t==='xmas'){if(!S.xmas){reply({ok:false,msg:'Christmas Mode is turned off in Settings'});return}reply({ok:true});await xmasSet(!!d.on)}
   else if(d.t==='radio'){
    // phone turned the radio on/off or picked a station
    const i=d.station?STATIONS.findIndex(x=>x.id===d.station):-1;
@@ -2449,9 +2493,9 @@ async function hostHandle(c,d){
   }
   else if(d.t==='cd'){
    // phone asked for a Hot 100 Rewind / Country Gold countdown: start, stop, or jump to a song
-   const chart=d.chart==='country'?'country':'hot100',years=+d.years,pos=+d.pos||0;
-   if(!CD_YEARS.includes(years))throw new Error('That year is not on the list');
-   const same=CD.active&&!CD.grad&&CD.view&&CD.view.rows[0]&&CD.view.rows[0].cd.chart===chart&&CD.year===new Date().getFullYear()-years;
+   const chart=d.chart==='country'?'country':d.chart==='xmas'&&S.xmas?'xmas':'hot100',years=+d.years,pos=+d.pos||0;
+   if(chart!=='xmas'&&!CD_YEARS.includes(years))throw new Error('That year is not on the list');
+   const same=CD.active&&!CD.grad&&CD.view&&CD.view.rows[0]&&(CD.view.rows[0].cd.chart===chart||(chart==='xmas'&&CD.view.rows[0].cd.chart==='xmascd'))&&(chart==='xmas'||CD.year===new Date().getFullYear()-years);
    if(CD.matching||GY.matching){reply({ok:false,msg:'The jukebox is still finding songs. Give it a moment.'});return}
    if(same){if(pos)cdJump(pos);else stopCountdown();reply({ok:true});return}
    if(CD.active&&!d.force){reply({ok:false,msg:'Another countdown is playing. Stop it first.'});return}
@@ -2587,6 +2631,7 @@ function applyHostState(m){
  renderNP();renderQueue();
  if(P.current&&P.current.id!==prev){accentFrom(P.current);markNow()}
  if(m.cd)applyHostCd(m.cd);
+ if(m.xmas){S.xmas=m.xmas.en;XM.active=m.xmas.on;xmasRender()}
  if('radio' in m&&(S.radio!==!!m.radio||S.station!==m.station)){S.radio=!!m.radio;if(m.station)S.station=m.station;renderRadio()}
  if(m.tabs&&m.tabs.length&&!RM.tabsLoaded){RM.tabsLoaded=true;REMOTE_PROVIDER.tabs=m.tabs;buildTabs();loadTab(m.tabs[0].id)}
 }
@@ -2595,7 +2640,7 @@ function applyHostCd(c){
  const was=JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]);
  CD.active=c.active;CD.grad=c.grad||null;CD.year=c.year;CD.date=c.date;CD.idx=c.idx|0;CD.missing=c.missing||[];
  CD.list=(c.list||[]).map(pos=>({cd:{pos}}));CD.matching=GY.matching=!!c.matching;GY.done=c.done|0;
- if(c.active&&c.chart&&c.chart!=='grad'){CD.chart=c.chart;CD.years=new Date().getFullYear()-c.year}
+ if(c.active&&c.chart&&c.chart!=='grad'){CD.chart=c.chart==='xmascd'?'xmas':c.chart;CD.years=new Date().getFullYear()-c.year}
  if(c.active&&c.grad)GRAD.pickYear=c.grad;
  if(was===JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]))return;
  if(tabId==='countdown'&&(CD.chart==='country'?CD.cdata:CD.data))renderCountdown();
@@ -2876,6 +2921,7 @@ async function hueMood(){
  if(!t){hueGroup({effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
  const st=t.radio&&S.radio&&STATIONS.find(x=>x.name===t.radio);
  let pal=st&&S.hueRadio&&STATION_COLORS[st.id]?{cols:STATION_COLORS[st.id].map(c=>({rgb:cssRgb(c),w:1}))}:await artPalette(t);
+ if(XM.active)pal=xmasPal(t);
  if(pal.fail||(!pal.gray&&!pal.cols.length))pal={cols:['#ff2bd6','#22e4ff'].map(c=>({rgb:cssRgb(c),w:1})),fallback:true};
  if(t!==P.current)return;
  const onIds=await hueOnLights();
@@ -3131,6 +3177,7 @@ const CD_YEARS=[5,10,15,20,25,30,35,40];
 const fetchJSON=f=>fetch(f).then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()});
 async function cdData(){
  if(CD.chart==='country'){if(!CD.cdata)CD.cdata=await fetchJSON('country-top20.json');return CD.cdata}
+ if(CD.chart==='xmas'&&!S.xmas)CD.chart='hot100';
  if(!CD.data){if(!CD.loading)CD.loading=fetchJSON('hot100-top20.json').finally(()=>{CD.loading=null});CD.data=await CD.loading}
  return CD.data;
 }
@@ -3145,6 +3192,10 @@ function cdMove(pos,lw){if(!lw)return['new','NEW'];if(lw===pos)return['same','�
 // Unified view of the selected chart: rows are {pos,title,artist,sub,badge:[cls,txt],cd}
 function cdView(years){
  const yr=new Date().getFullYear()-years;
+ if(CD.chart==='xmas'){
+  const L=xmasChart();
+  return{year:0,date:null,heading:'The biggest Christmas songs in Hot 100 Top 20 history',rows:L.map(s=>({pos:s.pos,title:s.title,artist:s.artist,sub:`${s.artist} · peak #${s.peak} · ${s.weeks} holiday wk${s.weeks===1?'':'s'} in the Top 20`,badge:['up','#'+s.peak],cd:{chart:'xmascd',pos:s.pos,peak:s.peak,weeks:s.weeks,first:s.first}}))};
+ }
  if(CD.chart==='country'){
   let L=(CD.cdata&&CD.cdata.years[String(yr)])||[];
   const chrono=L.length>1&&L.every(s=>s.weeks===L[0].weeks&&s.chart!=='airplay');
@@ -3170,11 +3221,11 @@ function renderCountdown(){
  if(REMOTE)CD.view=CD.active&&!CD.grad?cdView(CD.years):null;
  const yr=new Date().getFullYear(),v=CD.active&&CD.view?CD.view:cdView(CD.years),cty=CD.chart==='country';
  const hasYear=n=>!cty||!!(CD.cdata.years[String(yr-n)]||[]).length;
- panel.innerHTML=`<div class="cdHead"><div><h2>${cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
-  <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button></div></div>
-  <div class="cdYears">${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div>
+ panel.innerHTML=`<div class="cdHead"><div><h2>${CD.chart==='xmas'?'Christmas Countdown':cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${CD.chart==='xmas'?'The biggest Christmas songs ever on the Billboard Hot 100':cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
+  <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button>${S.xmas?`<button data-cdc="xmas" class="${CD.chart==='xmas'?'on':''}"${CD.active?' disabled':''}>Christmas</button>`:''}</div></div>
+  <div class="cdYears"${CD.chart==='xmas'?' style="display:none"':''}>${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div>
   <div class="cdBar"><span class="cdWeek">${esc(v.heading)}</span>
-  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${Math.min(20,v.rows.length)} → #1`}</button></div>
+  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${CD.chart==='xmas'?v.rows.length:Math.min(20,v.rows.length)} → #1`}</button></div>
   <div class="cdList" id="cdList">${v.rows.length?v.rows.map(r=>`<div class="cdRow" data-pos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.sub)}</span></span><span class="mv ${r.badge[0]}">${r.badge[1]}</span></div>`).join(''):'<div class="loading">No chart for this year yet</div>'}</div>`;
  renderCdRows();
 }
@@ -3219,7 +3270,7 @@ async function startCountdown(fromPos){
   if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
   await gfLoad();GF.y=null;
   CD.active=true;CD.grad=null;CD.idx=0;CD.view=v;CD.date=v.date;CD.year=v.year;
-  sfx('coin');toast((CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+  sfx('coin');toast((CD.chart==='xmas'?'Christmas Countdown':CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
   if(fromPos)await cdJump(fromPos);
   else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
   else toast('The countdown starts after the current picks');
@@ -3237,10 +3288,193 @@ function cdNext(){
  if(!CD.active)return null;
  if(CD.idx<CD.list.length)return CD.list[CD.idx++];
  CD.active=false;const top=CD.list[CD.list.length-1];
- toast(top?(top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
+ toast(top?(top.cd.chart==='xmascd'?`That's the Christmas Countdown! #1: ${top.track.name}`:top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
  if(tabId==='countdown')renderCountdown();
  return null;
 }
+/* ---------- Christmas Mode ---------- */
+// The built-in Christmas Top 40 (y = year the version was first released, only where it's certain)
+const XSONGS=[
+ {t:'All I Want for Christmas Is You',a:'Mariah Carey',y:1994},{t:"Rockin' Around the Christmas Tree",a:'Brenda Lee',y:1958},
+ {t:'Jingle Bell Rock',a:'Bobby Helms',y:1957},{t:'Last Christmas',a:'Wham!',y:1984},{t:'A Holly Jolly Christmas',a:'Burl Ives'},
+ {t:'Feliz Navidad',a:'José Feliciano',y:1970},{t:"It's the Most Wonderful Time of the Year",a:'Andy Williams',y:1963},
+ {t:'The Christmas Song (Merry Christmas to You)',a:'Nat King Cole'},{t:'Sleigh Ride',a:'The Ronettes',y:1963},
+ {t:'Happy Xmas (War Is Over)',a:'John Lennon',y:1971},{t:'Underneath the Tree',a:'Kelly Clarkson',y:2013},
+ {t:'Santa Tell Me',a:'Ariana Grande',y:2014},{t:"It's Beginning to Look a Lot Like Christmas",a:'Michael Bublé',y:2011},
+ {t:'White Christmas',a:'Bing Crosby',y:1942},{t:'Let It Snow! Let It Snow! Let It Snow!',a:'Dean Martin'},
+ {t:'Run Rudolph Run',a:'Chuck Berry',y:1958},{t:'Blue Christmas',a:'Elvis Presley',y:1957},
+ {t:'Christmas (Baby Please Come Home)',a:'Darlene Love',y:1963},{t:'Wonderful Christmastime',a:'Paul McCartney',y:1979},
+ {t:'Here Comes Santa Claus',a:'Gene Autry',y:1947},{t:'Rudolph the Red-Nosed Reindeer',a:'Gene Autry',y:1949},
+ {t:'Mistletoe',a:'Justin Bieber',y:2011},{t:'Christmas Tree Farm',a:'Taylor Swift',y:2019},{t:'Snowman',a:'Sia',y:2017},
+ {t:'Santa Baby',a:'Eartha Kitt',y:1953},{t:'Have Yourself a Merry Little Christmas',a:'Frank Sinatra'},
+ {t:"Do They Know It's Christmas?",a:'Band Aid',y:1984},{t:'Little Saint Nick',a:'The Beach Boys',y:1963},
+ {t:'Merry Christmas Darling',a:'Carpenters',y:1970},{t:'Christmas Eve / Sarajevo 12/24',a:'Trans-Siberian Orchestra',y:1996},
+ {t:'Someday at Christmas',a:'Stevie Wonder',y:1967},{t:"Santa Claus Is Comin' to Town",a:'Bruce Springsteen'},
+ {t:"You're a Mean One, Mr. Grinch",a:'Thurl Ravenscroft',y:1966},{t:'Christmas Time Is Here',a:'Vince Guaraldi Trio',y:1965},
+ {t:'Step Into Christmas',a:'Elton John',y:1973},{t:'Driving Home for Christmas',a:'Chris Rea'},
+ {t:'Mary, Did You Know?',a:'Pentatonix',y:2014},{t:'Christmas Lights',a:'Coldplay',y:2010},
+ {t:'Christmas Wrapping',a:'The Waitresses',y:1981},{t:'Jingle Bells',a:'Frank Sinatra'}
+];
+const XTRIVIA=[
+ ['White Christmas','Bing Crosby’s “White Christmas” is the best-selling single of all time.'],
+ ['Chart history','Mariah Carey’s “All I Want for Christmas Is You” first hit #1 on the Hot 100 in December 2019, 25 years after it came out.'],
+ ['Chart history','Brenda Lee was 13 when she recorded “Rockin’ Around the Christmas Tree.”'],
+ ['Out of this world','“Jingle Bells” was the first song played in space, by the Gemini 6 astronauts in 1965.'],
+ ['Rudolph','Rudolph the Red-Nosed Reindeer began in 1939 as a Montgomery Ward store booklet.'],
+ ['Songwriters','Johnny Marks wrote “Rudolph the Red-Nosed Reindeer,” “Rockin’ Around the Christmas Tree” and “A Holly Jolly Christmas.”'],
+ ['Hot summer','“The Christmas Song” (“Chestnuts roasting on an open fire…”) was written on a hot summer day in 1945.'],
+ ['Hot summer','“Let It Snow! Let It Snow! Let It Snow!” was written in Hollywood during a July heat wave in 1945.'],
+ ['Hot summer','Leroy Anderson started writing “Sleigh Ride” during a heat wave in 1946.'],
+ ['Chart history','Wham!’s “Last Christmas” finally reached #1 in the UK in January 2021, 36 years after it came out.'],
+ ['Silent Night','“Silent Night” was first performed on Christmas Eve 1818 in Oberndorf, Austria.'],
+ ['At the movies','“White Christmas” was introduced in the 1942 movie Holiday Inn.'],
+ ['At the movies','“Have Yourself a Merry Little Christmas” was first sung by Judy Garland in Meet Me in St. Louis (1944).'],
+ ['On TV','A Charlie Brown Christmas first aired in 1965, with music by the Vince Guaraldi Trio.'],
+ ['On TV','Burl Ives sang “A Holly Jolly Christmas” in the 1964 TV special Rudolph the Red-Nosed Reindeer.'],
+ ['Feliz Navidad','José Feliciano wrote “Feliz Navidad” in 1970.'],
+ ['Santa Baby','Eartha Kitt first recorded “Santa Baby” in 1953.'],
+ ['Jingle Bell Rock','Bobby Helms first released “Jingle Bell Rock” in 1957.'],
+ ['The Grinch','“You’re a Mean One, Mr. Grinch” was sung by Thurl Ravenscroft, the longtime voice of Tony the Tiger.']
+];
+const XM={active:false,pool:[],recent:[],matching:false,src:null,flyT:null};
+function xmasDays(){const n=new Date(),y=n.getMonth()===11&&n.getDate()>25?n.getFullYear()+1:n.getFullYear(),x=new Date(y,11,25),t=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((x-t)/864e5)}
+const xmasDayTxt=()=>{const d=xmasDays();return d===0?'Merry Christmas!':d===1?'1 day':`${d} days`};
+function xmasData(){
+ const d=xmasDays(),cd=d===0?['Merry Christmas!','It’s Christmas Day!']:['Countdown',`${d} day${d>1?'s':''} until Christmas.`];
+ return{s:[cd,...XTRIVIA],e:[]};
+}
+const xKey=s=>s.t+'|'+s.a;
+// Built-in list: look each song up on Spotify once, slowly, and remember it for good
+async function xmasMatch(){
+ if(XM.matching||REMOTE)return;XM.matching=true;
+ try{
+  const found=store.get('xmas_found',{});
+  for(const s of shuffle([...XSONGS])){
+   const k=xKey(s),f=found[k];
+   if(f&&(f.t||Date.now()-f.at<7*864e5)){if(f.t&&!XM.pool.some(x=>x.id===f.t.id))XM.pool.push(Object.assign({},f.t,{xs:k}));continue}
+   if(Date.now()<SPBLOCK.until)break;
+   let t=null;try{t=await provider.findSong(s.t,s.a)}catch(e){if(e.status===429)break}
+   found[k]={at:Date.now(),t:t?slimT(t):null};store.set('xmas_found',found);
+   if(t)XM.pool.push(Object.assign({},slimT(t),{xs:k}));
+   await sleep(700);
+  }
+ }finally{XM.matching=false}
+}
+async function xmasLoad(){
+ const src=S.xmasSrc||'top';
+ if(XM.src!==src){XM.src=src;XM.pool=[];XM.recent=[]}
+ if(src==='top'){xmasMatch();for(let i=0;i<40&&!XM.pool.length&&XM.matching;i++)await sleep(300);return}
+ if(XM.pool.length)return;
+ try{const it=src==='liked'?{id:'liked',type:'liked'}:{id:src,type:'playlist'};XM.pool=((await itemTracks(it))||[]).map(t=>Object.assign({},slimT(t)))}catch(e){toast("Couldn't load the Christmas playlist: "+e.message,'warn')}
+}
+async function xmasNext(){
+ await xmasLoad();
+ if(!XM.pool.length){toast("Couldn't find Christmas songs on Spotify right now",'warn');return null}
+ const avoid=new Set(XM.recent),pick=shuffle(XM.pool.filter(t=>!avoid.has(t.id)))[0]||XM.pool[Math.floor(Math.random()*XM.pool.length)];
+ XM.recent.push(pick.id);if(XM.recent.length>Math.min(15,XM.pool.length-1))XM.recent.shift();
+ const s=XSONGS.find(x=>xKey(x)===pick.xs);
+ return Object.assign({},pick,{cd:{chart:'xmas',pos:0,year:s&&s.y,title:s?s.t:pick.name}});
+}
+function xmasPlayed(t){gfSong({track:t,r:{artist:t.artist,title:t.name},cd:t.cd})}
+async function xmasSet(on){
+ if(on&&!S.xmas)return;
+ XM.active=!!on;store.set('xmas_on',XM.active);xmasRender();hueTrack();try{hostSync()}catch(e){}
+ if(XM.active){
+  xmasBells();toast('Christmas Mode on · '+xmasDayTxt().replace(/^(\d+) days?$/,'$1 days until Christmas'));
+  xmasMatch();xartLoad();xmasFlySoon(20e3);
+  const c=P.current;
+  if(!c||c.house||c.radio||c.cd||P.paused){
+   if(CD.active){CD.active=false;CD.grad=null;CD.list=[];CD.idx=0;renderCountdown()}
+   const t=await xmasNext();if(t&&XM.active){await startTrack(t,false,null,t.cd);xmasPlayed(t)}
+  }else toast('Christmas music starts after the current picks');
+ }else toast(P.current&&P.current.cd&&P.current.cd.chart==='xmas'?'Christmas Mode off. This song will finish.':'Christmas Mode off');
+}
+function xmasRender(){
+ const en=!!S.xmas,on=en&&XM.active,b=$('#xmasBtn');
+ document.documentElement.classList.toggle('xmas',on);
+ if(b){b.style.display=en?'':'none';b.classList.toggle('on',on);$('#xmasDays').textContent=en?xmasDayTxt():''}
+ snowSync();
+}
+function xmasPal(t){
+ const P5=[['#ff1a1a','#0fa84a','#ffd9a0'],['#ff1a1a','#ffffff'],['#0fa84a','#ffd23f','#ff1a1a'],['#c4001a','#ffd9a0'],['#0fa84a','#ffffff','#ff1a1a']];
+ const h=[...String(t&&t.id||'x')].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
+ return{cols:P5[h%P5.length].map(c=>({rgb:cssRgb(c),w:1}))};
+}
+function xmasBells(){
+ if(!S.sfx)return;
+ try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime;
+  for(let i=0;i<14;i++){const o=actx.createOscillator(),g=actx.createGain(),t=t0+i*.085+Math.random()*.03,f=[2093,2349,2637,3136][i%4]*(1+Math.random()*.01);
+   o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.035,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+.35);
+   o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.4)}}catch(e){}
+}
+// Snow: a light canvas of drifting flakes; sleeps while the tab is hidden
+const SNOW={cv:null,f:[],raf:0,last:0};
+function snowSync(){
+ const on=document.documentElement.classList.contains('xmas');
+ if(on&&!SNOW.raf){SNOW.cv=$('#snow');snowSize();SNOW.raf=requestAnimationFrame(snowFrame)}
+ if(!on&&SNOW.raf){cancelAnimationFrame(SNOW.raf);SNOW.raf=0;const x=SNOW.cv&&SNOW.cv.getContext('2d');if(x)x.clearRect(0,0,SNOW.cv.width,SNOW.cv.height)}
+}
+function snowSize(){
+ const cv=SNOW.cv;if(!cv)return;cv.width=innerWidth;cv.height=innerHeight;
+ const n=Math.max(25,Math.min(110,Math.round(innerWidth*innerHeight/24000)));
+ while(SNOW.f.length<n)SNOW.f.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:1+Math.random()*2.6,v:18+Math.random()*38,p:Math.random()*6.28,w:.4+Math.random()*.8});
+ SNOW.f.length=n;
+}
+addEventListener('resize',()=>{if(SNOW.raf)snowSize()});
+function snowFrame(t){
+ SNOW.raf=requestAnimationFrame(snowFrame);
+ if(document.hidden||t-SNOW.last<33)return;
+ const dt=Math.min(.1,(t-(SNOW.last||t))/1000);SNOW.last=t;
+ const cv=SNOW.cv,x=cv.getContext('2d'),W=cv.width,H=cv.height;x.clearRect(0,0,W,H);x.fillStyle='rgba(255,255,255,.85)';
+ for(const f of SNOW.f){f.y+=f.v*dt;f.x+=Math.sin(t/1000*f.w+f.p)*.35;if(f.y>H+5){f.y=-5;f.x=Math.random()*W}if(f.x>W+5)f.x=-5;else if(f.x<-5)f.x=W+5;
+  x.globalAlpha=.35+f.r/5;x.beginPath();x.arc(f.x,f.y,f.r,0,6.283);x.fill()}
+ x.globalAlpha=1;
+}
+// Santa's sleigh glides across the top every 10–15 minutes
+function xmasFlySoon(ms){clearTimeout(XM.flyT);XM.flyT=setTimeout(xmasFly,ms||(10+Math.random()*5)*60e3)}
+function xmasFly(){
+ if(!XM.active||REMOTE)return;
+ const s=$('#sleigh');s.classList.remove('fly');void s.offsetWidth;s.classList.add('fly');
+ setTimeout(()=>{if(XM.active)xmasBells()},5000);
+ xmasFlySoon();
+}
+// Winter paintings for the screensaver while Christmas Mode is on
+const XART={list:[],loading:null};
+function xartLoad(){
+ if(XART.list.length||XART.loading)return XART.loading;
+ XART.loading=(async()=>{
+  const c=store.get('art_xmas',null);
+  if(c&&c.list&&c.list.length>=8&&Date.now()-c.at<14*864e5){XART.list=c.list;return}
+  const seen=new Map();
+  for(const q of['winter snow landscape','snow village winter','winter']){
+   try{const params={q,query:{bool:{must:[{term:{is_public_domain:true}},{exists:{field:'image_id'}}]}},fields:['id','title','artist_title','artist_display','date_display','image_id','thumbnail'],limit:60};
+    const r=await fetch('https://api.artic.edu/api/v1/artworks/search?params='+encodeURIComponent(JSON.stringify(params)));if(!r.ok)continue;const j=await r.json();
+    (j.data||[]).forEach(a=>{if(!a.image_id||seen.has(a.id))return;const th=a.thumbnail||{};seen.set(a.id,{title:a.title||'Untitled',artist:a.artist_title||String(a.artist_display||'').split('\n')[0]||'Unknown artist',date:a.date_display||'',img:a.image_id,r:th.width&&th.height?+(th.width/th.height).toFixed(3):0})});
+   }catch(e){}
+   if(seen.size>=30)break;
+  }
+  if(seen.size>=8){XART.list=shuffle([...seen.values()]);store.set('art_xmas',{list:XART.list,at:Date.now()})}
+ })().finally(()=>{XART.loading=null});
+ return XART.loading;
+}
+// Christmas countdown: the biggest Christmas songs in Hot 100 Top 20 history (December–early January weeks)
+let XCHART=null;
+function xmasChart(){
+ if(XCHART||!CD.data)return XCHART||[];
+ const kw=/christmas|xmas|santa|jingle bell|sleigh|let it snow|navidad|holly jolly|rudolph|reindeer|mistletoe|silent night|drummer boy|underneath the tree|wonderful time of the year|winter wonderland|grinch|noel/i,bad=/jingle jangle|snowbird/i;
+ const M=new Map();
+ for(const[d,rows]of Object.entries(CD.data.weeks)){
+  if(!(d.slice(5,7)==='12'||(d.slice(5,7)==='01'&&d.slice(8)<='10')))continue;
+  for(const[pos,title,artist]of rows){
+   if(!kw.test(title)||bad.test(title))continue;
+   const k=afNorm(String(title).replace(/\s*\([^)]*\)/g,''))+'|'+afNorm(afParts(artist)[0]||artist);
+   let s=M.get(k);if(!s)M.set(k,s={title,artist,pts:0,weeks:0,peak:99,first:d,best:0});
+   s.pts+=21-pos;s.weeks++;if(pos<s.peak)s.peak=pos;if(d<s.first)s.first=d;
+  }
+ }
+ return XCHART=[...M.values()].sort((a,b)=>b.pts-a.pts||a.peak-b.peak).slice(0,25).map((s,i)=>Object.assign(s,{pos:i+1}));
+}
+
 /* ---------- Grad Year pop-culture facts ---------- */
 // grad-facts.json: per class year, s = [label, sentence] facts that hold for the whole senior year, e = ['YYYY-MM', sentence] events from Sep (year before) to Jun
 const GF={data:null,loading:null,y:null,usedE:new Set(),usedS:new Set(),songs:0,shown:null,timer:null};
@@ -3252,10 +3486,10 @@ async function gfLoad(){
 }
 function gfReset(y){GF.y=y;GF.usedE=new Set();GF.usedS=new Set();GF.songs=0;GF.shown=null}
 // Grad Year uses the senior-year window (Sep–Jun); Hot 100 Rewind and Country Gold use the calendar year
-function gfYear(c){if(!c||!GF.data)return null;const g=c.chart==='grad',k=(g?'g':'c')+c.year,d=g?GF.data.years&&GF.data.years[c.year]:GF.data.cal&&GF.data.cal[c.year];if(d&&GF.y!==k)gfReset(k);return d}
+function gfYear(c){if(c&&/^xmas/.test(c.chart)){if(GF.y!=='x')gfReset('x');return xmasData()}if(!c||!GF.data)return null;const g=c.chart==='grad',k=(g?'g':'c')+c.year,d=g?GF.data.years&&GF.data.years[c.year]:GF.data.cal&&GF.data.cal[c.year];if(d&&GF.y!==k)gfReset(k);return d}
 const gfMonth=(d,n)=>{const[y,m]=d.split('-').map(Number),t=y*12+m-1+n;return`${Math.floor(t/12)}-${String(t%12+1).padStart(2,'0')}`};
 function gfRange(c){if(c.chart==='grad')return[(c.first||'').slice(0,7),(c.last||'').slice(0,7)];const d=c.date||c.first;return d?[gfMonth(d,-1),gfMonth(d,1)]:['','']}
-const gfBadge=c=>`${c.chart==='grad'?'CLASS OF':c.chart==='country'?'COUNTRY':'HOT 100'}<b>'${String(c.year).slice(2)}</b>`;
+const gfBadge=c=>/^xmas/.test(c.chart)?'MERRY<b>XMAS</b>':`${c.chart==='grad'?'CLASS OF':c.chart==='country'?'COUNTRY':'HOT 100'}<b>'${String(c.year).slice(2)}</b>`;
 const gfWhen=m=>`${MON[+m.slice(5,7)-1]} '${m.slice(2,4)}`;
 // An event from while this song was on the chart, else any unused event, else a whole-year fact
 function gfPickEvent(d,from,to){
@@ -3399,7 +3633,7 @@ function gfSong(x){
  if(!d||S.gradFacts===false){tkStop();return}
  if(GF.shown===x.track.id){tkStart(c);return}
  GF.shown=x.track.id;GF.songs++;
- const id=x.track.id,ev=gfPickEvent(d,...gfRange(c));
+ const xs=/^xmas/.test(c.chart),id=x.track.id,ev=xs?(c.year?{when:x.track.name,text:`First released in ${c.year}.`}:null):gfPickEvent(d,...gfRange(c));
  const nx=CD.list[CD.idx];if(nx)afWiki(afLead(nx.r.artist||nx.track.artist)); // warm up the next artist
  Promise.race([afFacts(x),sleep(3000).then(()=>null)]).catch(()=>null).then(af=>{
   if(GF.shown!==id)return;
@@ -3409,7 +3643,7 @@ function gfSong(x){
 }
 function gfNP(){
  const c=P.current&&P.current.cd;
- if(!c||!CD.active)tkStop();
+ if(!c||(!CD.active&&!(c.chart==='xmas'&&XM.active)))tkStop();
 }
 // Every 4th song of the Senior Countdown, a "Class of 'YY flashback" card shows in the song's last seconds, as it hands over to the next one
 function gfTick(){
@@ -3421,7 +3655,7 @@ function gfTick(){
  const d=gfYear(c);if(!d)return;
  GF.flashFor=GF.shown;
  const facts=[gfPickEvent(d),gfPickStat(d),gfPickStat(d)].filter(Boolean);if(!facts.length)return;
- $('#gfHead').textContent=c.chart==='grad'?`Class of '${String(c.year).slice(2)} Flashback`:`${c.year} Flashback`;
+ $('#gfHead').textContent=/^xmas/.test(c.chart)?'Christmas Trivia':c.chart==='grad'?`Class of '${String(c.year).slice(2)} Flashback`:`${c.year} Flashback`;
  const L=$('#gfList');L.innerHTML='';for(const f of facts){const p=document.createElement('p');gfLine(p,f);L.append(p)}
  const card=$('#gfCard');$('#cdCard').classList.remove('show');card.classList.add('show');sfx('tick');
  clearTimeout(GF.timer);GF.timer=setTimeout(()=>card.classList.remove('show'),Math.min(12000,left+3000));
@@ -3431,7 +3665,10 @@ function cdCard(x){
  const c=x.cd;
  $('#cdNum').textContent='#'+c.pos;
  $('#cdTitle').textContent=x.track.name;$('#cdArtist').textContent=x.r.artist;
- if(c.chart==='grad'){
+ if(c.chart==='xmascd'){
+  $('#cdWhen').textContent=c.pos===1?'The biggest Christmas song on the Hot 100':`Christmas Countdown · #${c.pos}`;
+  $('#cdStats').textContent=`Peaked at #${c.peak} · ${c.weeks} holiday week${c.weeks>1?'s':''} in the Top 20`;
+ }else if(c.chart==='grad'){
   $('#cdWhen').textContent=c.pos===1?`The Class of ${c.year}'s #1 song of senior year`:`Class of ${c.year} · #${c.pos} of senior year`;
   $('#cdStats').textContent=[c.wk1?`#1 for ${c.wk1} week${c.wk1>1?'s':''}`:`Peaked at #${c.peak}`,`${c.weeks} week${c.weeks>1?'s':''} in the Top 20`].join(' · ');
  }else if(c.chart==='country'){
@@ -3577,7 +3814,7 @@ function deckInfo(){
  $('#dkLbl').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkBg').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkTitle').textContent=c?c.name:'Pick a song';$('#dkArtist').textContent=c?c.artist:'GriffTunes';
- $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING');
+ $('#dkState').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="xmas"?"CHRISTMAS MODE":c.cd.chart==="xmascd"?`CHRISTMAS #${c.cd.pos}`:c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'PLAYING');
  $('#dkTime').textContent=`${fmt(P.pos)} / ${fmt(P.dur)}`;
  $('#dkVol').value=S.volume;
 }
@@ -3615,10 +3852,11 @@ async function deck3d(){
 }
 function deck3Info(){
  const c=P.current;
- $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
+ $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="xmas"?"CHRISTMAS MODE":c.cd.chart==="xmascd"?`CHRISTMAS #${c.cd.pos}`:c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
- if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
+ if(D3&&XM.active){D3.setLabel(null,null);D3.setAccent('#c4001a','#0d8a40')}
+ else if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
 }
 // Up next: the queue as a stack of record sleeves, with the next record sliding out of the top one
 function dkNextRender(){
@@ -3713,6 +3951,7 @@ const TIPS={
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
  albumBack:'Back to the artist',
+ xmasBtn:()=>XM.active?'Turn off Christmas Mode':'Start Christmas Mode: Christmas music, lights and snow',
  npArt:'See the whole album and pick another song from it',
  albumAll:()=>isPlaylist(ALB.it)?`Add this playlist to the queue, in order (up to ${PLAYLIST_MAX} songs)`:'Add every song on this album to the queue, in order',
  lightsBtn:'Hue lights: pick a lighting mode',
@@ -3954,6 +4193,9 @@ setInterval(()=>{
  if(Date.now()-UPD.quietSince>60000)location.reload();
 },5000);
 $('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
+// Christmas Mode comes back on after a reload if it was on
+if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad();xmasFlySoon(60e3)}}
+setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
 // Weekly fresh start: reload at the chosen day and time once the jukebox is quiet (gives up 12 hours after the set time)
 if(!REMOTE&&!store.get('wk_refresh_at',0))store.set('wk_refresh_at',Date.now());
 const WK={quietSince:0};
