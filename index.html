@@ -2369,7 +2369,7 @@ function artLoad(){
 const artUrl=(a,w)=>`${ART.iiif}/${a.img}/full/${w},/0/default.jpg`;
 const loadImg=src=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src});
 async function artNext(){
- const AL=XM.active&&XAL.length>=8?XART.list:AL;
+ const AL=XM.active&&XART.list.length>=8?XART.list:ART.list;
  for(let n=0;n<6&&AL.length;n++){
   const sar=innerWidth/Math.max(1,innerHeight),fits=AL.filter(x=>x.r&&x.r>=sar*.8&&x.r<=sar*1.28);
   const pool=fits.length>=10?fits:AL;
