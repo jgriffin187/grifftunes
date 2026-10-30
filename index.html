@@ -1851,7 +1851,7 @@ async function startHouse(){
 async function startTrack(t,house=false,radio=null,cd=null){
  await speakersAuto();
  P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);P.pos=0;P.dur=t.duration||0;P.paused=false;
- renderNP();accentFrom(t);markNow();hueTrack();
+ renderNP();accentFrom(t);markNow();hueTrack();if(XM.active)xmasFlySoon();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
 }
 let advancing=false;
@@ -3381,13 +3381,13 @@ async function xmasSet(on){
  XM.active=!!on;store.set('xmas_on',XM.active);xmasRender();hueTrack();try{hostSync()}catch(e){}
  if(XM.active){
   xmasBells();toast('Christmas Mode on · '+xmasDayTxt().replace(/^(\d+) days?$/,'$1 days until Christmas'));
-  xmasMatch();xartLoad();xmasFlySoon(20e3);
+  xmasMatch();xartLoad();
   const c=P.current;
   if(!c||c.house||c.radio||c.cd||P.paused){
    if(CD.active){CD.active=false;CD.grad=null;CD.list=[];CD.idx=0;renderCountdown()}
    const t=await xmasNext();if(t&&XM.active){await startTrack(t,false,null,t.cd);xmasPlayed(t)}
-  }else toast('Christmas music starts after the current picks');
- }else toast(P.current&&P.current.cd&&P.current.cd.chart==='xmas'?'Christmas Mode off. This song will finish.':'Christmas Mode off');
+  }else{toast('Christmas music starts after the current picks');xmasFlySoon(20e3)}
+ }else{clearTimeout(XM.flyT);toast(P.current&&P.current.cd&&P.current.cd.chart==='xmas'?'Christmas Mode off. This song will finish.':'Christmas Mode off')}
 }
 function xmasRender(){
  const en=!!S.xmas,on=en&&XM.active,b=$('#xmasBtn');
@@ -3430,13 +3430,12 @@ function snowFrame(t){
   x.globalAlpha=.35+f.r/5;x.beginPath();x.arc(f.x,f.y,f.r,0,6.283);x.fill()}
  x.globalAlpha=1;
 }
-// Santa's sleigh glides across the top every 10–15 minutes
-function xmasFlySoon(ms){clearTimeout(XM.flyT);XM.flyT=setTimeout(xmasFly,ms||(10+Math.random()*5)*60e3)}
+// Santa's sleigh glides across the top once per song, somewhere in its first half
+function xmasFlySoon(ms){clearTimeout(XM.flyT);if(!XM.active||REMOTE)return;const d=P.dur||200000;XM.flyT=setTimeout(xmasFly,ms||Math.min(90e3,Math.max(15e3,d*(.15+Math.random()*.35))))}
 function xmasFly(){
  if(!XM.active||REMOTE)return;
  const s=$('#sleigh');s.classList.remove('fly');void s.offsetWidth;s.classList.add('fly');
  setTimeout(()=>{if(XM.active)xmasBells()},5000);
- xmasFlySoon();
 }
 // Winter paintings for the screensaver while Christmas Mode is on
 const XART={list:[],loading:null};
@@ -4194,7 +4193,7 @@ setInterval(()=>{
 },5000);
 $('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
 // Christmas Mode comes back on after a reload if it was on
-if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad();xmasFlySoon(60e3)}}
+if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad()}}
 setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
 // Weekly fresh start: reload at the chosen day and time once the jukebox is quiet (gives up 12 hours after the set time)
 if(!REMOTE&&!store.get('wk_refresh_at',0))store.set('wk_refresh_at',Date.now());
