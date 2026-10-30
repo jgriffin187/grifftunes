@@ -41,6 +41,8 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .badge::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 10px currentColor}
 .badge.spotify{color:#1ed760;border-color:rgba(30,215,96,.5)}
 .badge.warn{color:var(--gold);border-color:rgba(255,210,63,.5)}
+.badge.busy{color:#ff9f43;border-color:rgba(255,159,67,.6);background:rgba(255,159,67,.12);cursor:pointer}.badge.busy::before{animation:blink 1s steps(2) infinite}
+.badge.back{color:#1ed760;border-color:#1ed760;background:rgba(30,215,96,.18);box-shadow:0 0 18px rgba(30,215,96,.45)}
 .searchBtn{flex:1;max-width:640px;height:62px;border-radius:999px;display:flex;align-items:center;gap:14px;padding:0 26px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:var(--muted);font-size:20px;font-weight:500;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .15s,border-color .3s;margin-left:auto}
 .searchBtn:active{transform:scale(.98);border-color:var(--accent2)}
 .searchBtn svg{width:26px;height:26px;color:var(--accent2);flex:none}
@@ -1189,7 +1191,7 @@ addEventListener('storage',e=>{if(e.key==='jbx.sp_tokens')adoptSaved()});
 const SPBLOCK={until:0,strikes:0};
 const blockMsg=ms=>{const s=Math.ceil(ms/1000);return`Spotify asked GriffTunes to slow down. Ready again in ${s>90?Math.ceil(s/60)+' minutes':s+' seconds'}`};
 async function api(path,opts={},retry=true){
- if(Date.now()<SPBLOCK.until&&!(opts.method&&opts.method!=='GET')){const er=new Error(blockMsg(SPBLOCK.until-Date.now()));er.status=429;er.wait=Math.ceil((SPBLOCK.until-Date.now())/1000);throw er}
+ if(Date.now()<SPBLOCK.until&&!opts.probe&&!(opts.method&&opts.method!=='GET')){const er=new Error(blockMsg(SPBLOCK.until-Date.now()));er.status=429;er.wait=Math.ceil((SPBLOCK.until-Date.now())/1000);throw er}
  const r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:'Bearer '+await getToken()},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined});
  if(r.status===401&&retry&&tok){tok.exp=0;return api(path,opts,false)}
  if(r.status===429){
@@ -3946,7 +3948,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
 const TIPS={
  coinBtn:()=>S.freePlay?'Free play is on, no coins needed':`Insert a coin for ${S.coinCredits} credits`,
  credits:()=>S.freePlay?'Free play: every song is free':'Credits left. Queue 1 · Play next 2 · Play now 3',
- modeBadge:'Music source. Click for settings',
+ modeBadge:()=>SPST.busy?`Spotify asked GriffTunes to slow down. It checks again by itself at ${new Date(SPBLOCK.until).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}. Tap to check now`:'Music source. Click for settings',
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
  albumBack:'Back to the artist',
@@ -4191,7 +4193,25 @@ setInterval(()=>{
  if(!UPD.quietSince)UPD.quietSince=Date.now();
  if(Date.now()-UPD.quietSince>60000)location.reload();
 },5000);
-$('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
+$('#modeBadge').onclick=()=>{if(REMOTE)return;if(SPST.busy){spProbe(true);return}openSettings()};
+// Spotify status in the top-left badge: green when fine, orange with a countdown while Spotify has asked GriffTunes to slow down,
+// then one gentle check when the wait is over and a "Spotify is back" notice
+const SPST={busy:false,probing:false,manualAt:0};
+const fmtWait=ms=>{const t=Math.ceil(ms/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60),x=t%60;return h?`${h}:${String(m).padStart(2,'0')}:${String(x).padStart(2,'0')}`:`${m}:${String(x).padStart(2,'0')}`};
+async function spProbe(manual){
+ if(SPST.probing)return;
+ if(manual){if(Date.now()-SPST.manualAt<30e3){toast('Already checked a moment ago. GriffTunes keeps checking on its own.');return}SPST.manualAt=Date.now()}
+ SPST.probing=true;setBadge('busy','Checking Spotify…');
+ try{await api('/me',{probe:true},false);SPBLOCK.until=0;SPST.busy=false;setBadge('back','Spotify is back');sfx('add');toast('Spotify is back! GriffTunes is running normally again');setTimeout(()=>{if(!SPST.busy)setBadge('spotify','Spotify')},8000)}
+ catch(e){if(e.status!==429&&!SPBLOCK.until){SPST.busy=false;setBadge('spotify','Spotify')}else if(manual)toast(e.message,'warn')}
+ finally{SPST.probing=false}
+}
+setInterval(()=>{
+ if(REMOTE||provider!==SPOTIFY||SPST.probing)return;
+ const left=SPBLOCK.until-Date.now();
+ if(left>0){if(!SPST.busy){SPST.busy=true;toast("Spotify asked GriffTunes to slow down. Hang tight, it'll keep trying on its own",'warn')}setBadge('busy',`Spotify busy · ${fmtWait(left)}`);return}
+ if(SPST.busy)spProbe(false);
+},1000);
 // Christmas Mode comes back on after a reload if it was on
 if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad()}}
 setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
