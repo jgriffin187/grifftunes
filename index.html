@@ -550,7 +550,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .sBody{overflow-y:auto;padding:4px 30px 30px;user-select:text;-webkit-user-select:text}
 .field{margin:18px 0}
 .field>label,.field .lab{display:block;font-size:12px;letter-spacing:.22em;font-weight:800;color:var(--accent2);margin-bottom:8px;text-transform:uppercase}
-.field input[type=text],.field input[type=number]{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 16px;font:500 18px Outfit,sans-serif;outline:none}
+.field input[type=text],.field input[type=number],.field input[type=time]{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 16px;font:500 18px Outfit,sans-serif;outline:none}
 .field input:focus{border-color:var(--accent2)}
 .field.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .seg{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:6px;border-radius:999px}
@@ -927,7 +927,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00'};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // Radio now follows album art colors like every other song; station colors are opt-in
 if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
@@ -2147,11 +2147,15 @@ function openSettings(){
  <div class="field"><span class="lab">Wall display</span>
   ${tg('fAutoFs','Go full screen on first tap',S.autoFs)}
   ${tg('fWake','Keep the screen awake',S.wake)}
+  ${tg('fWeekly','Fresh start once a week',S.weekRefresh)}
+  <div class="field two" id="fWeeklyWhen" style="margin:8px 0 0"><div><label for="fRefDay">Day</label><select id="fRefDay">${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d,i)=>`<option value="${i}"${+S.refreshDay===i?' selected':''}>${d}</option>`).join('')}</select></div><div><label for="fRefTime">Time</label><input type="time" id="fRefTime" value="${esc(S.refreshTime||'04:00')}"></div></div>
+  <div class="note">Reloads GriffTunes to clear its memory, pick up updates and reconnect Spotify, phones and Hue. It waits until nothing is playing, for up to 12 hours after the set time. ChromeOS itself isn't restarted.</div>
   <div class="btnRow"><button class="btn" id="fsNow">Full screen now</button>${isInstalledApp()?'<span class="ok">● Running as installed app</span>':'<button class="btn primary" id="installApp">Install GriffTunes app</button>'}</div>
  </div>
  <div class="btnRow"><button class="btn primary" id="setSave">Save</button><button class="btn" id="resetCredits">Reset credits</button><button class="btn" id="clearQueue">Clear queue</button></div>`;
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
  $('#fsNow').onclick=()=>goFullscreen();
@@ -3925,6 +3929,25 @@ setInterval(()=>{
  if(Date.now()-UPD.quietSince>60000)location.reload();
 },5000);
 $('#modeBadge').onclick=()=>{if(!REMOTE)openSettings()};
+// Weekly fresh start: reload at the chosen day and time once the jukebox is quiet (gives up 12 hours after the set time)
+if(!REMOTE&&!store.get('wk_refresh_at',0))store.set('wk_refresh_at',Date.now());
+const WK={quietSince:0};
+function wkDue(){
+ const[h,m]=String(S.refreshTime||'04:00').split(':').map(Number),d=new Date();
+ d.setHours(h||0,m||0,0,0);d.setDate(d.getDate()-((d.getDay()-(+S.refreshDay||0)+7)%7));
+ if(d.getTime()>Date.now())d.setDate(d.getDate()-7);
+ return d.getTime();
+}
+setInterval(()=>{
+ if(REMOTE||!S.weekRefresh)return;
+ const due=wkDue(),last=store.get('wk_refresh_at',0);
+ if(last>=due)return;
+ if(Date.now()-due>12*3600e3){store.set('wk_refresh_at',Date.now());return}
+ const quiet=(!P.current||P.paused)&&!P.queue.length&&!$('.modal.open')&&!(typeof DECK!=='undefined'&&DECK.open&&!DECK.saver)&&!CD.active;
+ if(!quiet){WK.quietSince=0;return}
+ if(!WK.quietSince)WK.quietSince=Date.now();
+ if(Date.now()-WK.quietSince>60000){store.set('wk_refresh_at',Date.now());console.info('[GriffTunes] weekly fresh start');location.reload()}
+},15000);
 boot();
 })();
 </script>
