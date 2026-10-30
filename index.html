@@ -1126,9 +1126,12 @@ async function famToken(m){
  return m.tok.access;
 }
 async function famApi(m,path){
+ if(Date.now()<SPBLOCK.until){const er=new Error(blockMsg(SPBLOCK.until-Date.now()));er.status=429;throw er}
+ await spSlot(false);
  let access;try{access=await famToken(m)}catch(e){throw new Error(`${m.name}'s Spotify sign-in expired. Re-add them in Settings`)}
  const r=await fetch('https://api.spotify.com/v1'+path,{headers:{Authorization:'Bearer '+access}});
  if(r.status===401){m.tok.exp=0;saveFam();return famApi(m,path)}
+ if(r.status===429){const ms=spBlock(+r.headers.get('Retry-After')*1000||0,'busy',path);const er=new Error(blockMsg(ms));er.status=429;throw er}
  if(r.status===403)throw new Error('Spotify blocks personal apps from opening this one');
  if(!r.ok)throw new Error('HTTP '+r.status);
  return r.json();
@@ -1192,8 +1195,27 @@ addEventListener('storage',e=>{if(e.key==='jbx.sp_tokens')adoptSaved()});
 const SPBLOCK=Object.assign({until:0,strikes:0,why:''},store.get('sp_block',{}));
 const spBlock=(ms,why,path)=>{if(path)SPBLOCK.path=path;SPBLOCK.strikes=Math.min(5,SPBLOCK.strikes+1);SPBLOCK.until=Date.now()+(ms||Math.min(300e3,30e3*2**(SPBLOCK.strikes-1)));SPBLOCK.why=why||'busy';store.set('sp_block',{until:SPBLOCK.until,strikes:SPBLOCK.strikes,why:SPBLOCK.why,path:SPBLOCK.path});return SPBLOCK.until-Date.now()};
 const blockMsg=ms=>{const s=Math.ceil(ms/1000);return`Spotify asked GriffTunes to slow down. Ready again in ${s>90?Math.ceil(s/60)+' minutes':s+' seconds'}`};
+// Request budget: GriffTunes paces itself well under Spotify's limits, shared by every GriffTunes window on this computer.
+// At most 20 requests per 30 seconds and 500 per hour; anything over waits its turn. Play/pause/skip commands always go straight through.
+const SPQ={max30:20,maxHr:500,waiting:0,warnAt:0};
+function spLog(){let L=[];try{L=JSON.parse(localStorage.getItem('jbx.sp_rq')||'[]')}catch(e){}const now=Date.now();return L.filter(x=>now-x<3600e3)}
+function spNote(L){L.push(Date.now());try{localStorage.setItem('jbx.sp_rq',JSON.stringify(L.slice(-SPQ.maxHr-50)))}catch(e){}}
+async function spSlot(cmd){
+ if(cmd){spNote(spLog());return}
+ SPQ.waiting++;
+ try{
+  for(;;){
+   const L=spLog(),now=Date.now(),recent=L.filter(x=>now-x<30e3);
+   if(recent.length<SPQ.max30&&L.length<SPQ.maxHr){spNote(L);return}
+   const wait=recent.length>=SPQ.max30?30e3-(now-recent[0]):3600e3-(now-L[0]);
+   if(wait>15e3&&Date.now()-SPQ.warnAt>120e3){SPQ.warnAt=Date.now();toast('GriffTunes is pacing itself so Spotify stays happy. This may take a moment')}
+   await sleep(Math.max(250,Math.min(wait+60,5000)));
+  }
+ }finally{SPQ.waiting--}
+}
 async function api(path,opts={},retry=true){
  if(Date.now()<SPBLOCK.until&&!opts.probe&&!(opts.method&&opts.method!=='GET')){const er=new Error(blockMsg(SPBLOCK.until-Date.now()));er.status=429;er.wait=Math.ceil((SPBLOCK.until-Date.now())/1000);throw er}
+ await spSlot(!!(opts.method&&opts.method!=='GET'));
  const auth='Bearer '+await getToken();
  let r;
  try{r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:auth},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined})}
@@ -1580,10 +1602,10 @@ const SpotifyEngine={
  },
  useLocal(why){if(this.target){console.info('[GriffTunes] stopped controlling',this.targetName,why||'');if(why)toast(why,'warn')}this.target=null;this.targetName=null;this.stopPoll();renderDevChip()},
  useDevice(d){this.target=d.id;this.targetName=d.name;this.expect=null;this.startPoll();renderDevChip()},
- // Checks the speaker every 5s while a song plays, every 2s near the end of a song, every 10s while paused
+ // Checks the speaker every 30s mid-song (the position is tracked locally in between), every 3s in a song's last 15s, every 30s while paused
  startPoll(){this.stopPoll();this.pollT=setInterval(()=>{
   const st=this.st,left=st?st.duration-(st.position+(st.paused?0:performance.now()-this.stAt)):Infinity;
-  const gap=Date.now()<SPBLOCK.until?Infinity:P.paused?10000:left<15000||this.expect?2000:5000;
+  const gap=Date.now()<SPBLOCK.until?Infinity:this.expect?2000:P.paused?30000:left<15000?3000:30000;
   if(Date.now()-(this.lastPoll||0)>=gap)this.pollRemote()},1000);this.pollRemote()},
  stopPoll(){clearInterval(this.pollT);this.pollT=null},
  matchItem(it,id){return!!it&&(it.id===id||(it.linked_from&&it.linked_from.id===id))},
@@ -3960,7 +3982,7 @@ addEventListener('keydown',e=>{if(e.key==='Escape'&&DECK.open)closeDeck()});
 const TIPS={
  coinBtn:()=>S.freePlay?'Free play is on, no coins needed':`Insert a coin for ${S.coinCredits} credits`,
  credits:()=>S.freePlay?'Free play: every song is free':'Credits left. Queue 1 · Play next 2 · Play now 3',
- modeBadge:()=>SPST.busy?`Spotify asked GriffTunes to slow down. It checks again by itself at ${new Date(SPBLOCK.until).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}. Tap to check now`:'Music source. Click for settings',
+ modeBadge:()=>provider===SPOTIFY&&!SPST.busy?(()=>{const L=spLog(),n=Date.now();return`Spotify requests: ${L.filter(x=>n-x<30e3).length} of ${SPQ.max30} in the last 30 seconds, ${L.length} of ${SPQ.maxHr} in the last hour. Click for settings`})():SPST.busy?`Spotify asked GriffTunes to slow down. It checks again by itself at ${new Date(SPBLOCK.until).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}. Tap to check now`:'Music source. Click for settings',
  phoneBtn:'Show a QR code so guests can add songs from their phones',
  qrMini:'Show a QR code so guests can add songs from their phones',
  albumBack:'Back to the artist',
@@ -4223,6 +4245,7 @@ setInterval(()=>{
  const left=SPBLOCK.until-Date.now();
  if(left>0){if(!SPST.busy){SPST.busy=true;toast("Spotify asked GriffTunes to slow down. Hang tight, it'll keep trying on its own",'warn')}setBadge('busy',`${SPBLOCK.why==='silent'?'Spotify not answering':'Spotify busy'} · ${fmtWait(left)}`);return}
  if(SPST.busy)spProbe(false);
+ else{const b=$('#modeBadge'),pace=SPQ.waiting>0;if(pace&&!b.classList.contains('warn'))setBadge('warn','Spotify · pacing');else if(!pace&&b.classList.contains('warn')&&b.textContent==='Spotify · pacing')setBadge('spotify','Spotify')}
 },1000);
 // Christmas Mode comes back on after a reload if it was on
 if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad()}}
