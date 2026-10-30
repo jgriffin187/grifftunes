@@ -1188,20 +1188,32 @@ const keepTok=()=>{if(tok&&tok.exp-Date.now()<10*60e3)getToken().catch(()=>{})};
 setInterval(keepTok,4*60e3);addEventListener('online',keepTok);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')keepTok()});
 addEventListener('storage',e=>{if(e.key==='jbx.sp_tokens')adoptSaved()});
 // When Spotify says "too fast", GriffTunes stops asking for a while instead of digging the hole deeper
-const SPBLOCK={until:0,strikes:0};
+// (remembered across reloads, so a reload doesn't start hammering Spotify again)
+const SPBLOCK=Object.assign({until:0,strikes:0,why:''},store.get('sp_block',{}));
+const spBlock=(ms,why)=>{SPBLOCK.strikes=Math.min(5,SPBLOCK.strikes+1);SPBLOCK.until=Date.now()+(ms||Math.min(300e3,30e3*2**(SPBLOCK.strikes-1)));SPBLOCK.why=why||'busy';store.set('sp_block',{until:SPBLOCK.until,strikes:SPBLOCK.strikes,why:SPBLOCK.why});return SPBLOCK.until-Date.now()};
 const blockMsg=ms=>{const s=Math.ceil(ms/1000);return`Spotify asked GriffTunes to slow down. Ready again in ${s>90?Math.ceil(s/60)+' minutes':s+' seconds'}`};
 async function api(path,opts={},retry=true){
  if(Date.now()<SPBLOCK.until&&!opts.probe&&!(opts.method&&opts.method!=='GET')){const er=new Error(blockMsg(SPBLOCK.until-Date.now()));er.status=429;er.wait=Math.ceil((SPBLOCK.until-Date.now())/1000);throw er}
- const r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:'Bearer '+await getToken()},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined});
+ const auth='Bearer '+await getToken();
+ let r;
+ try{r=await fetch('https://api.spotify.com/v1'+path,{method:opts.method||'GET',headers:Object.assign({Authorization:auth},opts.body?{'Content-Type':'application/json'}:{}),body:opts.body?JSON.stringify(opts.body):undefined})}
+ catch(e){
+  // When Spotify blocks hard, its reply often arrives without the headers a browser needs, so it looks like a network failure.
+  // Two in a row while the internet is up counts as a block.
+  if(navigator.onLine===false){const er=new Error('No internet connection');er.status=0;throw er}
+  api.netFails=(api.netFails||0)+1;
+  if(api.netFails>=2){api.netFails=0;const ms=spBlock(0,'silent');const er=new Error(blockMsg(ms));er.status=429;er.wait=Math.ceil(ms/1000);throw er}
+  const er=new Error("Couldn't reach Spotify");er.status=0;throw er;
+ }
+ api.netFails=0;
  if(r.status===401&&retry&&tok){tok.exp=0;return api(path,opts,false)}
  if(r.status===429){
   const ra=+r.headers.get('Retry-After'),wait=ra||2;
   if(retry&&wait<=8){if(wait>=2&&Date.now()-(api.busyAt||0)>10e3){api.busyAt=Date.now();toast(`Spotify is busy, retrying in ${wait} second${wait>1?'s':''}…`)}await sleep(wait*1000+300);return api(path,opts,false)}
-  SPBLOCK.strikes=Math.min(5,SPBLOCK.strikes+1);
-  const pause=ra?ra*1000:Math.min(300e3,30e3*2**(SPBLOCK.strikes-1));SPBLOCK.until=Date.now()+pause;
+  const pause=spBlock(ra?ra*1000:0,'busy');
   const er=new Error(blockMsg(pause));er.status=429;er.wait=Math.ceil(pause/1000);throw er;
  }
- if(r.ok&&SPBLOCK.strikes&&Date.now()-SPBLOCK.until>120e3)SPBLOCK.strikes=0;
+ if(r.ok&&SPBLOCK.strikes&&Date.now()-SPBLOCK.until>120e3){SPBLOCK.strikes=0;store.set('sp_block',{until:0,strikes:0})}
  if(r.status===204||r.status===202)return null;
  const txt=await r.text();let j=null;try{j=txt?JSON.parse(txt):null}catch(e){}
  if(!r.ok){
@@ -4202,14 +4214,14 @@ async function spProbe(manual){
  if(SPST.probing)return;
  if(manual){if(Date.now()-SPST.manualAt<30e3){toast('Already checked a moment ago. GriffTunes keeps checking on its own.');return}SPST.manualAt=Date.now()}
  SPST.probing=true;setBadge('busy','Checking Spotify…');
- try{await api('/me',{probe:true},false);SPBLOCK.until=0;SPST.busy=false;setBadge('back','Spotify is back');sfx('add');toast('Spotify is back! GriffTunes is running normally again');setTimeout(()=>{if(!SPST.busy)setBadge('spotify','Spotify')},8000)}
- catch(e){if(e.status!==429&&!SPBLOCK.until){SPST.busy=false;setBadge('spotify','Spotify')}else if(manual)toast(e.message,'warn')}
+ try{await api('/me',{probe:true},false);SPBLOCK.until=0;store.set('sp_block',{until:0,strikes:SPBLOCK.strikes});SPST.busy=false;setBadge('back','Spotify is back');sfx('add');toast('Spotify is back! GriffTunes is running normally again');setTimeout(()=>{if(!SPST.busy)setBadge('spotify','Spotify')},8000)}
+ catch(e){if(e.status!==429)spBlock(0,'silent');if(manual)toast(blockMsg(Math.max(0,SPBLOCK.until-Date.now())),'warn')}
  finally{SPST.probing=false}
 }
 setInterval(()=>{
  if(REMOTE||provider!==SPOTIFY||SPST.probing)return;
  const left=SPBLOCK.until-Date.now();
- if(left>0){if(!SPST.busy){SPST.busy=true;toast("Spotify asked GriffTunes to slow down. Hang tight, it'll keep trying on its own",'warn')}setBadge('busy',`Spotify busy · ${fmtWait(left)}`);return}
+ if(left>0){if(!SPST.busy){SPST.busy=true;toast("Spotify asked GriffTunes to slow down. Hang tight, it'll keep trying on its own",'warn')}setBadge('busy',`${SPBLOCK.why==='silent'?'Spotify not answering':'Spotify busy'} · ${fmtWait(left)}`);return}
  if(SPST.busy)spProbe(false);
 },1000);
 // Christmas Mode comes back on after a reload if it was on
