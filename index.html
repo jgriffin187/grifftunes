@@ -1963,7 +1963,7 @@ async function advance(){
  try{
   const next=P.queue.shift();saveQueue();renderQueue();
   if(next){await startTrack(next);return}
-  if(CD.active){const e=cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
+  if(CD.active){const e=await cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
   if(XM.active){const t=await xmasNext();if(t){await startTrack(t,false,null,t.cd);xmasPlayed(t);return}}
   if(P.current&&P.current.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
   if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
@@ -3368,42 +3368,59 @@ $('#cdPanel').addEventListener('click',async e=>{
  const y=e.target.closest('[data-cdy]');if(y&&!y.disabled){CD.years=+y.dataset.cdy;sfx('tick');renderCountdown();return}
  if(e.target.closest('#cdGo')){if(CD.active)stopCountdown();else startCountdown()}
 });
+// Countdowns start right away: the first song to play is found first, the rest are looked up in the background
+// in play order (from the song library when possible), so nobody waits for all 20 lookups
+function cdItem(r,cd,t){return{track:t||null,state:t?'ok':'pending',p:null,r,cd}}
+function cdResolve(x){
+ if(x.state!=='pending')return Promise.resolve(x);
+ if(!x.p)x.p=libFind(x.r.title,x.r.artist).then(t=>{x.track=t||null;x.state=t?'ok':'miss';if(!t){CD.missing=(CD.missing||[]).concat(x.cd.pos)}return x},e=>{x.p=null;if(e.status===429){x.state='miss';x.later=true}throw e});
+ return x.p;
+}
+async function cdFill(list){
+ for(let i=0;i<list.length;i++){
+  if(!CD.active||CD.list!==list)return;
+  const nx=list.slice(CD.idx).find(y=>y.state==='pending')||list.find(y=>y.state==='pending');
+  if(!nx)break;
+  // background lookups leave room in Spotify's budget for whatever someone taps next
+  while(spLog().filter(t=>Date.now()-t<30e3).length>=11||SPQ.waiting){await sleep(1500);if(!CD.active||CD.list!==list)return}
+  try{await cdResolve(nx)}catch(e){if(e.status===429)break}
+  if(tabId==='countdown')renderCdRows();
+ }
+}
 async function startCountdown(fromPos){
  if(CD.matching)return;
- const v=cdView(CD.years),key=CD.chart+':'+v.year+':'+(v.date||''),rows=[...v.rows].sort((a,b)=>b.pos-a.pos);
+ const v=cdView(CD.years),rows=[...v.rows].sort((a,b)=>b.pos-a.pos);
  if(!rows.length)return;
+ if(provider===SPOTIFY)await libLoad();
+ const lib=r=>{if(provider!==SPOTIFY)return null;const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t||null};
+ const list=rows.map(r=>cdItem(r,r.cd,lib(r)));
+ const first=fromPos?list.find(x=>x.cd.pos===fromPos):list[0];
  CD.matching=true;renderCountdown();
- let done=0;const btn=()=>{GY.done=done;if(done%5===0)hostSync();const b=$('#cdGo');if(b)b.textContent=`Finding songs… ${done}/${rows.length}`};
  try{
-  const found=CD.cache[key]||{};
-  for(let i=0;i<rows.length;i+=4){
-   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await libFind(r.title,r.artist)}catch(err){if(err.status!==429)found[r.pos]=null}}done++;btn()}));
-  }
-  CD.cache[key]=found;
-  CD.list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r,cd:r.cd}));
-  CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);
-  if(!CD.list.length){toast("Couldn't find these songs on Spotify",'warn');return}
+  try{await cdResolve(first)}catch(e){toast(e.message,'warn');return}
   await gfLoad();GF.y=null;
-  CD.active=true;CD.grad=null;CD.idx=0;CD.view=v;CD.date=v.date;CD.year=v.year;
-  sfx('coin');toast((CD.chart==='xmas'?'Christmas Countdown':CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`)+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+  CD.active=true;CD.grad=null;CD.idx=0;CD.list=list;CD.missing=list.filter(x=>x.state==='miss').map(x=>x.cd.pos);CD.view=v;CD.date=v.date;CD.year=v.year;
+  sfx('coin');toast(CD.chart==='xmas'?'Christmas Countdown':CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`);
   if(fromPos)await cdJump(fromPos);
   else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
   else toast('The countdown starts after the current picks');
+  cdFill(list);
  }finally{CD.matching=false;renderCountdown()}
 }
 // Jump straight to a position: it plays now, and the countdown carries on from there toward #1
 async function cdJump(pos){
  const i=CD.list.findIndex(x=>x.cd.pos===pos);
- if(i<0){toast(`#${pos} isn't on Spotify, so it can't be played`,'warn');return}
+ if(i>=0)try{await cdResolve(CD.list[i])}catch(e){toast(e.message,'warn');return}
+ if(i<0||!CD.list[i].track){toast(`#${pos} isn't on Spotify, so it can't be played`,'warn');if(tabId==='countdown')renderCdRows();return}
  const x=CD.list[i];CD.idx=i+1;
  await startTrack(x.track,false,null,x.cd);cdCard(x);renderCdRows();
 }
 function stopCountdown(){CD.active=false;CD.grad=null;CD.list=[];CD.idx=0;renderCountdown();renderNP();toast('Countdown stopped. This song will finish.')}
-function cdNext(){
+async function cdNext(){
  if(!CD.active)return null;
- if(CD.idx<CD.list.length)return CD.list[CD.idx++];
- CD.active=false;const top=CD.list[CD.list.length-1];
- toast(top?(top.cd.chart==='xmascd'?`That's the Christmas Countdown! #1: ${top.track.name}`:top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
+ while(CD.idx<CD.list.length){const x=CD.list[CD.idx++];try{await cdResolve(x)}catch(e){}if(x.track)return x}
+ CD.active=false;const top=[...CD.list].reverse().find(x=>x.track)||CD.list[CD.list.length-1];
+ toast(top&&top.track?(top.cd.chart==='xmascd'?`That's the Christmas Countdown! #1: ${top.track.name}`:top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
  if(tabId==='countdown')renderCountdown();
  return null;
 }
@@ -3832,7 +3849,7 @@ function gfSong(x){
  if(GF.shown===x.track.id){tkStart(c);return}
  GF.shown=x.track.id;GF.songs++;
  const xs=/^xmas/.test(c.chart),id=x.track.id,ev=xs?(c.year?{when:x.track.name,text:`First released in ${c.year}.`}:null):gfPickEvent(d,...gfRange(c));
- const nx=CD.list[CD.idx];if(nx)afWiki(afLead(nx.r.artist||nx.track.artist)); // warm up the next artist
+ const nx=CD.list[CD.idx];if(nx)afWiki(afLead(nx.r.artist||(nx.track&&nx.track.artist)||'')); // warm up the next artist
  Promise.race([afFacts(x),sleep(3000).then(()=>null)]).catch(()=>null).then(af=>{
   if(GF.shown!==id)return;
   TK.next=[...(af||[]),...(ev?[ev]:[])];
@@ -4312,7 +4329,7 @@ function gyFill(y){
  const stat=r=>`${r.wk1?`#1 for ${r.wk1} wk${r.wk1>1?'s':''}`:`peaked #${r.peak}`} · ${r.weeks} wk${r.weeks>1?'s':''} in the Top 20`;
  $('#gyYearNum').textContent=y;$('#gyWhen').textContent=`Senior year · September ${y-1} – June ${y}`;
  const b=$('#gyGo');b.className='cdGo'+(active?' stop':'');b.disabled=GY.matching||!rows.length;
- b.textContent=GY.matching?`Finding songs… ${GY.done}/${rows.length}`:active?'Stop countdown':`Start countdown · #${rows.length} → #1`;
+ b.textContent=GY.matching?'Finding the first song…':active?'Stop countdown':`Start countdown · #${rows.length} → #1`;
  $('#gyList').innerHTML=rows.length?rows.map(r=>`<div class="cdRow" data-gpos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.artist)} · ${stat(r)}</span></span><span class="mv ${r.wk1?'up':'same'}">${r.wk1?'★ #1':'#'+r.peak}</span></div>`).join(''):'<div class="loading">No chart data for this year</div>';
  $('#gyList').scrollTop=0;GY.key=null;markGy();
 }
@@ -4333,28 +4350,25 @@ async function gyStart(fromPos){
  const rows=ybRows(y),key=ybKey(y),cache=store.get(key,{}),found={};
  if(provider===SPOTIFY)await libLoad();
  rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t;else if(provider===SPOTIFY){const e=LIB.map.get(libKey(r.title,r.artist));if(e&&e.t)found[r.pos]=e.t}});
- const todo=rows.filter(r=>!found[r.pos]);
- GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradList();
- let limited=null;
- try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await libFind(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;if(GY.done%5===0)hostSync();const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
- finally{GY.matching=false}
- if(limited){toast(limited.message,'warn');if(tabId==='gradyear')renderGradList();return}
- await gradBegin(y,rows,found,fromPos);
+ GY.matching=true;GY.done=0;if(tabId==='gradyear')renderGradList();
+ try{await gradBegin(y,rows,found,fromPos)}finally{GY.matching=false}
  if(tabId==='gradyear')renderGradList();
 }
 // Start a Senior Countdown for class year y from the songs found on Spotify
 async function gradBegin(y,allRows,found,fromPos){
  const rows=[...allRows].sort((a,b)=>b.pos-a.pos);
- const list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r:{artist:r.artist},cd:{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last}}));
- if(!list.length){toast("Couldn't find these songs on Spotify. Try again in a few minutes",'warn');return false}
+ const list=rows.map(r=>cdItem({artist:r.artist,title:r.title},{chart:'grad',pos:r.pos,year:y,peak:r.peak,wk1:r.wk1,weeks:r.weeks,first:r.first,last:r.last},found[r.pos]));
+ const first=fromPos?list.find(x=>x.cd.pos===fromPos):list[0];
+ try{await cdResolve(first)}catch(e){toast(e.message,'warn');return false}
  await gfLoad();GF.y=null;
- CD.active=true;CD.grad=y;CD.list=list;CD.idx=0;CD.missing=rows.filter(r=>!found[r.pos]).map(r=>r.pos);CD.year=y;CD.date=null;
+ CD.active=true;CD.grad=y;CD.list=list;CD.idx=0;CD.missing=list.filter(x=>x.state==='miss').map(x=>x.cd.pos);CD.year=y;CD.date=null;
  CD.view={year:y,date:null,heading:`Class of ${y} · senior year Top 40`,rows:allRows.map(r=>({pos:r.pos,title:r.title,artist:r.artist,sub:`${r.artist} · ${ybStats(r)}`,badge:r.wk1?['up',r.wk1+' WK #1']:['same','#'+r.peak]}))};
  store.set('yb_recent',[y].concat(store.get('yb_recent',[]).filter(x=>x!==y)).slice(0,6));
- sfx('coin');toast(`Class of ${y} · Senior Countdown`+(CD.missing.length?` · ${CD.missing.length} not on Spotify`:''));
+ sfx('coin');toast(`Class of ${y} · Senior Countdown`);
  if(fromPos)await cdJump(fromPos);
  else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
  else toast('The countdown starts after the songs already in line');
+ cdFill(list);
  return true;
 }
 $('#ybPanel').addEventListener('click',e=>{
