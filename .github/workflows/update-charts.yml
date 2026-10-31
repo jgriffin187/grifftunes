@@ -1,0 +1,23 @@
+name: Update Hot 100 charts
+# Every Wednesday (Billboard publishes Tuesdays), add the newest weekly Top 20 to hot100-top20.json.
+on:
+  schedule:
+    - cron: '17 15 * * 3'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add new charts
+        run: python3 scripts/update_charts.py
+      - name: Save to GitHub
+        run: |
+          if git diff --quiet; then echo "Nothing new"; exit 0; fi
+          git config user.name "GriffTunes chart update"
+          git config user.email "actions@users.noreply.github.com"
+          git add hot100-top20.json
+          git commit -m "Weekly Hot 100 chart update"
+          git push

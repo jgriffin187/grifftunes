@@ -3287,7 +3287,7 @@ async function huePair(ip){
 
 /* ---------- Countdown: Hot 100 Rewind (this week) + Country #1 hits (year) ---------- */
 const CD={data:null,cdata:null,loading:null,years:20,chart:'hot100',active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{},missing:[]};
-const CD_YEARS=[5,10,15,20,25,30,35,40];
+const CD_YEARS=[0,1,5,10,15,20,25,30,35,40]; // 0 = last week's chart (the newest in the archive)
 const fetchJSON=f=>fetch(f).then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()});
 async function cdData(){
  if(CD.chart==='country'){if(!CD.cdata)CD.cdata=await fetchJSON('country-top20.json');return CD.cdata}
@@ -3296,6 +3296,7 @@ async function cdData(){
  return CD.data;
 }
 function cdWeek(years){
+ if(!years){const lim=new Date(Date.now()+7*864e5).toISOString().slice(0,10);return Object.keys(CD.data.weeks).filter(x=>x<=lim).sort().pop()}
  const d=new Date();d.setFullYear(d.getFullYear()-years);const t=d.getTime();
  let best=null,bd=Infinity;for(const x of Object.keys(CD.data.weeks)){const diff=Math.abs(new Date(x+'T12:00:00').getTime()-t);if(diff<bd){bd=diff;best=x}}
  return best;
@@ -3337,7 +3338,7 @@ function renderCountdown(){
  const hasYear=n=>!cty||!!(CD.cdata.years[String(yr-n)]||[]).length;
  panel.innerHTML=`<div class="cdHead"><div><h2>${CD.chart==='xmas'?'Christmas Countdown':cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${CD.chart==='xmas'?'The biggest Christmas songs ever on the Billboard Hot 100':cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
   <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button>${S.xmas?`<button data-cdc="xmas" class="${CD.chart==='xmas'?'on':''}"${CD.active?' disabled':''}>Christmas</button>`:''}</div></div>
-  <div class="cdYears"${CD.chart==='xmas'?' style="display:none"':''}>${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}><b>${yr-n}</b><small>${n} yrs ago</small></button>`).join('')}</div>
+  <div class="cdYears"${CD.chart==='xmas'?' style="display:none"':''}>${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}>${n?`<b>${yr-n}</b><small>${n===1?'1 yr ago':n+' yrs ago'}</small>`:`<b>${!cty&&CD.data?fmtMon(cdWeek(0)):'Latest'}</b><small>Last week</small>`}</button>`).join('')}</div>
   <div class="cdBar"><span class="cdWeek">${esc(v.heading)}</span>
   <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${CD.chart==='xmas'?v.rows.length:Math.min(20,v.rows.length)} → #1`}</button></div>
   <div class="cdList" id="cdList">${v.rows.length?v.rows.map(r=>`<div class="cdRow" data-pos="${r.pos}"><span class="n">${r.pos}</span><span class="m"><b>${esc(r.title)}</b><span>${esc(r.sub)}</span></span><span class="mv ${r.badge[0]}">${r.badge[1]}</span></div>`).join(''):'<div class="loading">No chart for this year yet</div>'}</div>`;
@@ -4193,7 +4194,7 @@ const TIP_ATTR={
  mode:el=>el.dataset.mode==='spotify'?'Play music from your Spotify account':'Try GriffTunes with sample music',
  dksp:el=>el.dataset.dksp==='45'?'45 RPM':'33⅓ RPM',
  cdc:el=>el.dataset.cdc==='country'?'Country #1 hits from a past year':'Billboard Hot 100 top 20 from this week in a past year',
- cdy:el=>`This week, ${el.dataset.cdy} years ago`,
+ cdy:el=>+el.dataset.cdy===0?'Last week: the newest Hot 100 chart':+el.dataset.cdy===1?'This week, 1 year ago':`This week, ${el.dataset.cdy} years ago`,
  dev:()=>'Play on this speaker',
  famdel:()=>'Remove this family member',
  key:el=>({BS:'Backspace',CLR:'Clear',GO:'Search',' ':'Space'})[el.dataset.key],
