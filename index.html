@@ -958,7 +958,12 @@ const fmt=ms=>{ms=Math.max(0,ms||0);const s=Math.floor(ms/1000);return Math.floo
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const store={
  get(k,d){try{const v=localStorage.getItem('jbx.'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},
- set(k,v){try{localStorage.setItem('jbx.'+k,JSON.stringify(v))}catch(e){}},
+ set(k,v){const val=JSON.stringify(v);try{localStorage.setItem('jbx.'+k,val);return true}catch(e){}
+  // storage full: drop the caches GriffTunes can rebuild (oldest-looking first) and try again, so settings always save
+  for(const c of['gt_radio_art','gt_lists','gt_artist_wiki','art_xmas','art2','greatest.v1','sp_rq'].concat(Object.keys(localStorage).filter(x=>/^jbx\.yb_(sp|demo)_/.test(x)).map(x=>x.slice(4)))){
+   if(c===k)continue;try{localStorage.removeItem('jbx.'+c);localStorage.setItem('jbx.'+k,val);console.warn('[GriffTunes] storage was full; cleared',c);return true}catch(e){}
+  }
+  if(k==='settings'&&typeof toast==='function')toast("Couldn't save settings: this browser's storage is full",'warn');return false},
  del(k){try{localStorage.removeItem('jbx.'+k)}catch(e){}}
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
@@ -2257,6 +2262,7 @@ function openSettings(){
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
  const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
  tabItems('playlists').then(L=>{const sel=$('#fXmasSrc');if(!sel)return;(L||[]).filter(x=>x.type==='playlist'||x.type==='liked').forEach(x=>{if(x.id===S.xmasSrc)return;const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)})}).catch(()=>{});
+ $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
  $('#previewSaver').onclick=()=>{collect();saveS();closeModal($('#settingsModal'));setTimeout(()=>{lastInput=Date.now();showAttract()},350)};
