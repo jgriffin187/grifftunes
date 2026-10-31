@@ -1030,7 +1030,7 @@ const store={
 };
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00',xmas:false,xmasSrc:'top'};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00',xmas:false,xmasSrc:'top',libNight:true};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // Radio now follows album art colors like every other song; station colors are opt-in
 if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
@@ -2312,6 +2312,11 @@ function openSettings(){
   ${tg('fXmas','Show the Christmas tree button',S.xmas)}
   <div class="field" style="margin:8px 0 0"><label for="fXmasSrc">Christmas music</label><select id="fXmasSrc"><option value="top">GriffTunes Christmas Top 40</option>${S.xmasSrc&&S.xmasSrc!=='top'?`<option value="${esc(S.xmasSrc)}" selected>${esc(S.xmasSrcName||'Your playlist')}</option>`:''}</select></div>
   <div class="note">Tap the tree in the top bar to start Christmas music, Christmas light colors, snow and a few surprises. Songs people pay for still play first. To use your own list, make a Christmas playlist in your Spotify account and pick it here.</div></div>
+ <div class="field"><span class="lab">Song library</span>
+  <div class="note" id="libStat" style="margin-top:0">Loading…</div>
+  ${tg('fLibNight','Find chart songs overnight (1–6 AM, only when nothing is playing)',S.libNight)}
+  <div class="btnRow"><button class="btn" id="libNow">${LIB.manual?'Stop finding songs':'Find songs now while idle'}</button><button class="btn" id="libDl">Download library file</button></div>
+  <div class="note">Grad Year, Hot 100 Rewind and Countdown songs never change, so GriffTunes looks each one up on Spotify only once and keeps it. Once the library is filled in, those lists start instantly. Send me the downloaded file and I'll add it to GriffTunes on GitHub, so any jukebox starts with every song ready.</div></div>
  <div class="field"><span class="lab">Wall display</span>
   ${tg('fAutoFs','Go full screen on first tap',S.autoFs)}
   ${tg('fWake','Keep the screen awake',S.wake)}
@@ -2324,6 +2329,10 @@ function openSettings(){
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
  const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci)S.clientId=ci.value.trim();S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
  tabItems('playlists').then(L=>{const sel=$('#fXmasSrc');if(!sel)return;(L||[]).filter(x=>x.type==='playlist'||x.type==='liked').forEach(x=>{if(x.id===S.xmasSrc)return;const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)})}).catch(()=>{});
+(provider===SPOTIFY?libLoad().then(()=>libCandidates()):Promise.resolve()).then(()=>{const el=$('#libStat');if(el)el.textContent=libText()}).catch(()=>{const el=$('#libStat');if(el)el.textContent=libText()});
+ $('#fLibNight').onchange=e=>{S.libNight=e.target.checked;saveS()};
+ $('#libNow').onclick=()=>{if(provider!==SPOTIFY){toast('Connect Spotify first');return}LIB.manual=!LIB.manual;$('#libNow').textContent=LIB.manual?'Stop finding songs':'Find songs now while idle';toast(LIB.manual?'Finding songs whenever nothing is playing. It goes slowly to keep Spotify happy':'Stopped finding songs')};
+ $('#libDl').onclick=()=>{libDownload();toast('Song library downloaded')};
  $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -3367,7 +3376,7 @@ async function startCountdown(fromPos){
  try{
   const found=CD.cache[key]||{};
   for(let i=0;i<rows.length;i+=4){
-   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await provider.findSong(r.title,r.artist)}catch(err){if(err.status!==429)found[r.pos]=null}}done++;btn()}));
+   await Promise.all(rows.slice(i,i+4).map(async r=>{if(!(r.pos in found)){try{found[r.pos]=await libFind(r.title,r.artist)}catch(err){if(err.status!==429)found[r.pos]=null}}done++;btn()}));
   }
   CD.cache[key]=found;
   CD.list=rows.filter(r=>found[r.pos]).map(r=>({track:found[r.pos],r,cd:r.cd}));
@@ -3397,6 +3406,73 @@ function cdNext(){
  if(tabId==='countdown')renderCountdown();
  return null;
 }
+/* ---------- Song library: every chart song GriffTunes has found on Spotify, kept for good ----------
+   Chart history never changes, so each song is looked up once. Saved in this browser's database (IndexedDB),
+   plus an optional song-library.json in the GitHub repo that any jukebox can start from. */
+const LIB={map:new Map(),ready:null,db:null,cand:null,idx:0,manual:false,busy:false,found:0,miss:0};
+const libKey=(title,artist)=>songKey(title)+'|'+String(artist||'').toLowerCase().trim();
+function libDB(){
+ if(LIB.db)return LIB.db;
+ LIB.db=new Promise((res,rej)=>{try{const r=indexedDB.open('grifftunes',1);r.onupgradeneeded=()=>r.result.createObjectStore('songs');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}catch(e){rej(e)}});
+ return LIB.db;
+}
+async function libPut(k,v){try{const db=await libDB();db.transaction('songs','readwrite').objectStore('songs').put(v,k)}catch(e){}}
+function libLoad(){
+ if(LIB.ready)return LIB.ready;
+ LIB.ready=(async()=>{
+  try{const db=await libDB();await new Promise(res=>{const tx=db.transaction('songs'),st=tx.objectStore('songs'),rq=st.openCursor();rq.onsuccess=()=>{const c=rq.result;if(c){LIB.map.set(c.key,c.value);c.continue()}else res()};rq.onerror=()=>res()})}catch(e){}
+  // songs found before the library existed (Grad Year caches) move in
+  try{for(const k of Object.keys(localStorage)){const m=k.match(/^jbx\.yb_sp_\d+$/);if(!m)continue;const c=store.get(k.slice(4),{});for(const[rk,t]of Object.entries(c)){const i=rk.lastIndexOf('|'),key=libKey(rk.slice(0,i),rk.slice(i+1));if(t&&!LIB.map.has(key)){const v={t,at:Date.now()};LIB.map.set(key,v);libPut(key,v)}}}}catch(e){}
+  // the shared library file in the repo, if there is one
+  try{const r=await fetch('song-library.json',{cache:'no-cache'});if(r.ok){const j=await r.json();for(const[k,a]of Object.entries(j.songs||{})){if(LIB.map.has(k))continue;LIB.map.set(k,{t:a?{id:a[0],uri:'spotify:track:'+a[0],name:a[1],artist:a[2],album:a[3],img:a[4],duration:a[5]}:null,at:j.at||0,shared:true})}}}catch(e){}
+ })();
+ return LIB.ready;
+}
+// Find a chart song: from the library when possible, otherwise ask Spotify once and remember the answer (misses are retried after 30 days)
+async function libFind(title,artist){
+ if(provider!==SPOTIFY)return provider.findSong(title,artist);
+ await libLoad();
+ const k=libKey(title,artist),e=LIB.map.get(k);
+ if(e&&(e.t||Date.now()-e.at<30*864e5))return e.t;
+ const t=await provider.findSong(title,artist);
+ const v={t:t?slimT(t):null,at:Date.now()};LIB.map.set(k,v);libPut(k,v);
+ return v.t;
+}
+function libStats(){let f=0,m=0;for(const v of LIB.map.values())v.t?f++:m++;return{found:f,missing:m}}
+// Every Top 20 song ever, Grad Year songs first (they're asked for most)
+async function libCandidates(){
+ if(LIB.cand)return LIB.cand;
+ await ybData();
+ const seen=new Set(),out=[],add=(t,a)=>{const k=libKey(t,a);if(!seen.has(k)){seen.add(k);out.push([t,a])}};
+ const[lo,hi]=ybRange();for(let y=hi;y>=lo;y--)ybRows(y).forEach(r=>add(r.title,r.artist));
+ for(const rows of Object.values(CD.data.weeks))for(const[,t,a]of rows)add(t,a);
+ return LIB.cand=out;
+}
+function libDownload(){
+ const songs={};for(const[k,v]of LIB.map)songs[k]=v.t?[v.t.id,v.t.name,v.t.artist,v.t.album||'',v.t.img||'',v.t.duration||0]:null;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({v:1,at:Date.now(),songs})],{type:'application/json'}));a.download='song-library.json';a.click();
+}
+// Background filling: overnight (1–6 AM) when the setting is on, or right away after "Fill now"; only while nothing is playing,
+// one song at a time and never while Spotify has asked GriffTunes to wait
+setInterval(async()=>{
+ if(REMOTE||provider!==SPOTIFY||LIB.busy)return;
+ const h=new Date().getHours(),night=S.libNight&&h>=1&&h<6;
+ if(!night&&!LIB.manual)return;
+ const quiet=(!P.current||P.paused)&&!P.queue.length&&!CD.active&&!XM.active;
+ if(!quiet||Date.now()<SPBLOCK.until||SPQ.waiting)return;
+ if(spLog().filter(x=>Date.now()-x<30e3).length>=8)return;
+ LIB.busy=true;
+ try{
+  const C=await libCandidates();
+  while(LIB.idx<C.length){const[t,a]=C[LIB.idx];const e=LIB.map.get(libKey(t,a));if(e&&(e.t||Date.now()-e.at<30*864e5)){LIB.idx++;continue}break}
+  if(LIB.idx>=C.length){if(LIB.manual){LIB.manual=false;toast('Song library is complete')}return}
+  const[t,a]=C[LIB.idx++];
+  try{await libFind(t,a)}catch(e){LIB.idx--}
+  const el=$('#libStat');if(el)el.textContent=libText();
+ }finally{LIB.busy=false}
+},4000);
+function libText(){const s=libStats(),total=LIB.cand?LIB.cand.length:8600;return`${s.found.toLocaleString()} songs saved${s.missing?` · ${s.missing} not on Spotify`:''} · about ${Math.max(0,total-s.found-s.missing).toLocaleString()} left to find`}
+
 /* ---------- Christmas fireplace screensaver (replaces the paintings while Christmas Mode is on) ---------- */
 // Josh's own fireplace footage: a 59 s loop whose last second cross-fades into the first, so it never jumps.
 const FIRE={vid:null};
@@ -4254,11 +4330,12 @@ async function gyStart(fromPos){
  if(CD.active&&CD.grad===y){if(fromPos){await cdJump(fromPos);return}stopCountdown();GY.key=null;markGy();return}
  if(GY.matching)return;
  const rows=ybRows(y),key=ybKey(y),cache=store.get(key,{}),found={};
- rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t});
+ if(provider===SPOTIFY)await libLoad();
+ rows.forEach(r=>{const t=cache[ybRowKey(r)];if(t)found[r.pos]=t;else if(provider===SPOTIFY){const e=LIB.map.get(libKey(r.title,r.artist));if(e&&e.t)found[r.pos]=e.t}});
  const todo=rows.filter(r=>!found[r.pos]);
  GY.matching=true;GY.done=rows.length-todo.length;if(tabId==='gradyear')renderGradList();
  let limited=null;
- try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await provider.findSong(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;if(GY.done%5===0)hostSync();const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
+ try{await pmap(todo,2,async r=>{if(limited)return;let t=null;try{t=await libFind(r.title,r.artist)}catch(e){if(e.status===429)limited=e}if(t){t=slimT(t);found[r.pos]=t;const c=store.get(key,{});c[ybRowKey(r)]=t;store.set(key,c)}GY.done++;if(GY.done%5===0)hostSync();const b=$('#gyGo');if(b)b.textContent=`Finding songs… ${GY.done}/${rows.length}`})}
  finally{GY.matching=false}
  if(limited){toast(limited.message,'warn');if(tabId==='gradyear')renderGradList();return}
  await gradBegin(y,rows,found,fromPos);
