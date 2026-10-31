@@ -298,8 +298,20 @@ html.bgPause #bg *{animation-play-state:paused!important}
 @keyframes treeGlow{50%{filter:drop-shadow(0 0 12px rgba(255,230,140,.95))}}
 #snow{position:fixed;inset:0;z-index:92;pointer-events:none;display:none}
 html.xmas #snow{display:block}
-#sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(440px,60vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 8px rgba(255,220,150,.55))}
+#sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(600px,70vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 6px rgba(255,230,170,.45)) drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sleigh svg{width:100%;height:auto;display:block}
+#sleigh .deer{animation:deerBob .9s ease-in-out infinite}#sleigh .d2{animation-delay:-.22s}#sleigh .d3{animation-delay:-.45s}#sleigh .d4{animation-delay:-.67s}
+#sleigh .lead{animation:deerBob .9s ease-in-out infinite}
+@keyframes deerBob{50%{transform:translateY(-4px)}}
+#sleigh .lgF,#sleigh .lgB{transform-box:fill-box;transform-origin:50% 0;animation:gallop .45s ease-in-out infinite alternate}
+#sleigh .lgB{animation-direction:alternate-reverse}
+@keyframes gallop{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
+#sleigh .glow{animation:lanternGlow 1.2s ease-in-out infinite alternate}
+@keyframes lanternGlow{from{opacity:.55}to{opacity:1}}
+#sleigh .sleighBody{animation:deerBob 1.4s ease-in-out infinite}
+#sleigh .trail circle{animation:sparkle 1s ease-in-out infinite alternate}#sleigh .trail circle:nth-child(2n){animation-delay:-.5s}
+@keyframes sparkle{from{opacity:.2}to{opacity:1}}
+
 #sleigh.fly{animation:sleighFly 16s linear forwards}
 @keyframes sleighFly{0%{opacity:1;transform:translate(110vw,4vh)}25%{transform:translate(70vw,-1vh)}50%{transform:translate(35vw,3vh)}75%{transform:translate(5vw,-2vh)}99%{opacity:1}100%{opacity:0;transform:translate(-60vw,2vh)}}
 #xlights{position:fixed;inset:0;z-index:94;pointer-events:none;display:none}
@@ -894,13 +906,56 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 
 <canvas id="snow" aria-hidden="true"></canvas>
-<div id="sleigh" aria-hidden="true"><svg viewBox="0 0 440 90"><g fill="#ffe9c4" stroke="#ffe9c4" stroke-linecap="round">
-<path d="M30 34 L300 50" fill="none" stroke-width="1.2" opacity=".8"/>
-<g transform="translate(20,26)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(82,30)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(144,26)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g><g transform="translate(206,30)"><ellipse cx="22" cy="20" rx="17" ry="7.5" stroke="none"/><path d="M9 17 L3 6" stroke-width="5" fill="none"/><ellipse cx="0" cy="5" rx="6" ry="3.6" stroke="none"/><path d="M3 2 L6 -7 L3 -12 M6 -7 L11 -10 M-1 2 L0 -6 L-4 -10" stroke-width="1.6" fill="none"/><path d="M12 26 L4 36 M16 26 L10 38 M30 26 L38 34 M34 25 L44 30" stroke-width="2.4" fill="none"/></g>
-<path d="M296 44 h66 q14 0 15 -18 l7 0 q0 32 -26 32 h-52 q-12 0 -14 -14 z" stroke="none"/>
-<path d="M282 68 h98 q12 0 14 -9" fill="none" stroke-width="3"/><path d="M300 58 v10 M360 58 v10" stroke-width="2.5"/>
-<circle cx="330" cy="18" r="6.5" stroke="none"/><ellipse cx="331" cy="33" rx="11" ry="10" stroke="none"/><path d="M324 14 L341 6 L336 17 z" stroke="none"/><circle cx="342" cy="6" r="2.4" stroke="none"/><circle cx="352" cy="30" r="11" stroke="none"/>
-</g></svg></div>
+<div id="sleigh" aria-hidden="true"><svg viewBox="0 0 600 150"><defs>
+<linearGradient id="rdFur" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a6436"/><stop offset=".6" stop-color="#7a4b26"/><stop offset="1" stop-color="#5e3a1e"/></linearGradient>
+<radialGradient id="gold" cx=".35" cy=".35" r=".7"><stop offset="0" stop-color="#fff6c2"/><stop offset=".5" stop-color="#ffd23f"/><stop offset="1" stop-color="#b8860b"/></radialGradient>
+<linearGradient id="slRed" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3b4a"/><stop offset=".55" stop-color="#d4142a"/><stop offset="1" stop-color="#7d0010"/></linearGradient>
+<linearGradient id="suit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff3344"/><stop offset="1" stop-color="#a8001a"/></linearGradient>
+<radialGradient id="lantern" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3b0" stop-opacity=".95"/><stop offset=".35" stop-color="#ffd23f" stop-opacity=".55"/><stop offset="1" stop-color="#ffb300" stop-opacity="0"/></radialGradient>
+<symbol id="rdr" viewBox="-16 -22 96 70" overflow="visible">
+ <g class="lgB"><path d="M58 34 L63 44 L70 50" stroke="#5a3519" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M54 35 L56 45 L62 52" stroke="#4a2c14" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+ <g class="lgF"><path d="M26 34 L20 44 L14 49" stroke="#5a3519" stroke-width="4.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 35 L27 46 L22 52" stroke="#4a2c14" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+ <path d="M66 22 C72 18 76 19 75 23 C73 26 69 27 66 26 Z" fill="#f3ead8"/>
+ <path d="M18 26 C21 15 45 12 59 16 C68 19 72 26 69 33 C66 39 55 41 43 41 C31 41 21 38 18 31 Z" fill="url(#rdFur)"/>
+ <path d="M26 36 C36 40 52 40 62 35 C58 39 48 41 40 41 C33 41 28 39 26 36 Z" fill="#c9a47a" opacity=".7"/>
+ <path d="M23 24 C17 17 13 10 12 5 L21 3 C22 10 26 16 31 21 Z" fill="#7a4b26"/>
+ <path d="M14 7 C16 9 20 10 23 9" stroke="#f3ead8" stroke-width="3" fill="none" stroke-linecap="round" opacity=".8"/>
+ <path d="M4 1 C8 -3 18 -2 21 2 C23 5 20 8 15 8 L6 9 C1 9 -1 6 1 3 Z" fill="#7a4b26"/>
+ <path d="M1 3 C0 5 1 8 4 8 L7 8 C5 6 4 4 4 2 Z" fill="#5a3519"/>
+ <circle cx="1.6" cy="5" r="1.7" fill="#2a1a10"/><circle cx="12.5" cy="2.2" r="1.3" fill="#1a0f08"/><circle cx="12.9" cy="1.8" r=".4" fill="#fff"/>
+ <path d="M17 -1 L24 -6 L21 1 Z" fill="#6a4020"/>
+ <path d="M15 -1 C13 -8 9 -12 4 -16 M11 -8 L6 -8 M8 -12 L5 -16 M16 -1 C18 -9 22 -14 28 -18 M20 -9 L25 -7 M23 -14 L27 -13 M26 -16 L29 -20" stroke="#d8b483" stroke-width="2" fill="none" stroke-linecap="round"/>
+ <path d="M27 22 C35 29 51 30 61 23" stroke="#c4001a" stroke-width="3.4" fill="none"/>
+ <path d="M24 19 C22 24 22 29 25 33" stroke="#c4001a" stroke-width="3" fill="none"/>
+ <circle cx="36" cy="27.5" r="2.2" fill="url(#gold)"/><circle cx="44" cy="28.8" r="2.2" fill="url(#gold)"/><circle cx="52" cy="27.8" r="2.2" fill="url(#gold)"/>
+</symbol>
+</defs>
+<g class="trail" fill="#ffe9a8"><circle cx="560" cy="96" r="2"/><circle cx="578" cy="88" r="1.5"/><circle cx="592" cy="100" r="1.2"/><circle cx="570" cy="108" r="1"/><circle cx="586" cy="80" r="1"/></g>
+<path d="M60 64 C140 70 250 76 420 92" stroke="#ffd23f" stroke-width="1.2" fill="none" opacity=".85"/>
+<path d="M140 70 C220 76 300 82 420 96" stroke="#ffd23f" stroke-width="1" fill="none" opacity=".6"/>
+<g class="deer d1"><use href="#rdr" x="20" y="38" width="96" height="70"/></g>
+<g class="deer d2"><use href="#rdr" x="104" y="46" width="96" height="70"/></g>
+<g class="deer d3"><use href="#rdr" x="188" y="40" width="96" height="70"/></g>
+<g class="deer d4"><use href="#rdr" x="272" y="50" width="96" height="70"/></g>
+<g class="lead"><path d="M40 45 C36 47 33 49 31 52" stroke="#d8b483" stroke-width="1.2" fill="none"/><circle class="glow" cx="30" cy="57" r="17" fill="url(#lantern)"/><rect x="26.5" y="52" width="7" height="9" rx="1.5" fill="#ffd23f" stroke="#8a5a14" stroke-width="1"/><rect x="28" y="54" width="4" height="5" rx="1" fill="#fff6c2"/></g>
+<g class="sleighBody">
+ <path d="M412 124 C420 132 520 132 548 124 C560 120 566 112 560 106" stroke="#d9d9de" stroke-width="4" fill="none" stroke-linecap="round"/>
+ <path d="M440 112 L436 126 M520 112 L524 126" stroke="#b8b8c0" stroke-width="3.5" stroke-linecap="round"/>
+ <path d="M500 46 C520 40 548 44 552 58 C556 70 548 82 540 84 L520 84 Z" fill="#7a4b2a"/>
+ <rect x="512" y="34" width="18" height="16" rx="2" fill="#1fa84f"/><path d="M521 34 V50 M512 42 H530" stroke="#e8102a" stroke-width="3"/>
+ <rect x="530" y="40" width="14" height="12" rx="2" fill="#3b82f6"/><path d="M537 40 V52" stroke="#ffd23f" stroke-width="2.5"/>
+ <circle cx="474" cy="40" r="11" fill="#f2c6a0"/>
+ <path d="M462 42 C462 58 486 58 486 42 C482 50 466 50 462 42 Z" fill="#fff"/>
+ <path d="M465 36 C468 22 486 20 492 30 L502 22 C506 26 500 34 494 34 Z" fill="url(#suit)"/><path d="M462 37 C470 32 480 32 488 37" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"/><circle cx="503" cy="21" r="4.2" fill="#fff"/>
+ <circle cx="470" cy="39" r="1.3" fill="#2a1a10"/><circle cx="465.5" cy="43" r="2.2" fill="#e88a7a"/>
+ <path d="M458 56 C456 74 466 86 490 86 C506 86 510 72 506 58 C500 50 466 48 458 56 Z" fill="url(#suit)"/>
+ <path d="M460 72 L506 72" stroke="#1a1a1a" stroke-width="5"/><rect x="478" y="68" width="9" height="8" rx="1" fill="none" stroke="#ffd23f" stroke-width="2"/>
+ <path d="M462 60 C452 64 444 70 436 72" stroke="url(#suit)" stroke-width="8" stroke-linecap="round" fill="none"/><circle cx="434" cy="72" r="4.5" fill="#1a1a1a"/>
+ <path d="M420 92 C414 70 424 60 440 66 L444 82 L548 82 C560 82 566 96 560 108 C556 116 548 118 536 118 L446 118 C430 118 422 108 420 92 Z" fill="url(#slRed)"/>
+ <path d="M420 92 C414 70 424 60 440 66" stroke="#ffd23f" stroke-width="3" fill="none"/><path d="M446 116 L536 116 C548 116 556 112 558 104" stroke="#ffd23f" stroke-width="2.5" fill="none"/>
+ <path d="M452 98 C470 92 500 92 530 98" stroke="#ffd23f" stroke-width="1.6" fill="none" opacity=".8"/><circle cx="432" cy="72" r="3.4" fill="url(#gold)"/>
+</g>
+</svg></div>
 <div id="xlights" aria-hidden="true"><i class="xl xt"></i><i class="xl xr"></i><i class="xl xb"></i><i class="xl xlf"></i></div>
 <div id="cdCard"><div class="cdNum" id="cdNum"></div><div class="cdTxt"><small id="cdWhen"></small><b id="cdTitle"></b><span id="cdArtist"></span><em id="cdStats"></em></div></div>
 <div id="gfCard" aria-live="polite"><div class="gfHead" id="gfHead"></div><div id="gfList"></div></div>
