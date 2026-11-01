@@ -4,6 +4,7 @@ Newest first. Version numbers also show in GriffTunes under **Settings → About
 
 ## 1.0.1 — November 1, 2026
 
+- **Reload while a song plays on the speaker:** GriffTunes now picks the song back up (Now Playing, time, lights, volume) and carries on to the next song, instead of showing an empty Now Playing. Up Next was already kept.
 - **Volume sliders** in the screensaver mini player and on the full-screen turntable's control bar (they stay in sync with the main volume, the WiiM and phones).
 - **Speaker picker during a Spotify wait:** tapping the speaker button now asks Spotify directly instead of showing "slow down". If Spotify answers, the wait clears right away and the badge shows "Spotify is back".
 - Spotify back-off resets after 6 quiet hours, so yesterday's slow-downs don't make today's waits longer.
