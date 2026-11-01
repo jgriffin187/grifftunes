@@ -5,6 +5,7 @@ Newest first. Version numbers also show in GriffTunes under **Settings → About
 ## 1.1 — November 1, 2026
 
 - **Couch remote:** Settings → *Couch remote for your phone* shows a private QR code. The phone that scans it (and saves it to the home screen as "Couch Remote") gets owner controls: free songs, play/pause, skip, volume (even when guest volume is off), the speaker picker and removing songs from Up Next. *New code* revokes it. Ordinary guest phones are unchanged.
+- **Couch remote screen switches:** turn the full-screen turntable on/off on the touchscreen, and turn lyrics on/off for the turntable and screensaver. The buttons light up to match what the touchscreen is showing.
 - Phone links saved to the home screen now reopen the phone remote instead of the jukebox screen.
 
 ## 1.0.1 — November 1, 2026
