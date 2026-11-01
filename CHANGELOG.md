@@ -6,6 +6,8 @@ Newest first. Version numbers also show in GriffTunes under **Settings → About
 
 - **Speaker picker during a Spotify wait:** tapping the speaker button now asks Spotify directly instead of showing "slow down". If Spotify answers, the wait clears right away and the badge shows "Spotify is back".
 - Spotify back-off resets after 6 quiet hours, so yesterday's slow-downs don't make today's waits longer.
+- **Spotify's search quota** (new from Spotify in July 2026, shared by every app on the developer account): when Spotify says `QUOTA_EXCEEDED`, GriffTunes now pauses only searches (badge: "Spotify · search paused", re-checks every 2 hours). Playback, the speaker picker and songs already in the library keep working.
+- **Song library file:** `song-library.json` now ships with 7,149 of the 8,590 Top 20 chart songs, matched from a public Billboard Hot 100 dataset with Spotify track IDs (TidyTuesday, Sept 2021) — no Spotify searches used. Album art fills in from Spotify's public embed info the first time a song is used.
 - Overnight song-library builder is much gentler (one lookup every 20 seconds, stays far under the request budget) and stops for the night after any slow-down.
 
 ## 1.0 — October 31, 2026
