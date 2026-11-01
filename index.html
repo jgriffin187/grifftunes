@@ -5,11 +5,25 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07040f">
 <title>GriffTunes</title>
-<link rel="manifest" href="manifest.webmanifest">
 <script>
-// A phone remote saved to the home screen must reopen its own link (with the room and owner codes), not the jukebox itself
-if(/[?&]remote=/.test(location.search)){document.querySelector('link[rel=manifest]').remove();
- for(const[n,c]of[['apple-mobile-web-app-capable','yes'],['mobile-web-app-capable','yes'],['apple-mobile-web-app-status-bar-style','black-translucent'],['apple-mobile-web-app-title',/[?&]owner=/.test(location.search)?'Couch Remote':'GriffTunes']]){const m=document.createElement('meta');m.name=n;m.content=c;document.head.appendChild(m)}}
+// Phones saved to the home screen must reopen their own remote link (room + couch-remote codes), never the jukebox screen.
+// iPhone uses a page's manifest start_url ("./") for home-screen icons, so remote pages get no manifest at all,
+// and an iPhone icon that still opens plain "./" is sent back to the remote link it was saved from.
+(()=>{
+ const q=location.search,remote=/[?&]remote=/.test(q),dir=location.pathname.replace(/[^/]*$/,'');
+ if(remote){
+  try{document.cookie='gt_remote='+encodeURIComponent(q)+';max-age=31536000;path='+dir+';SameSite=Lax'}catch(e){}
+  try{localStorage.setItem('jbx.remote_link',q)}catch(e){}
+  for(const[n,c]of[['apple-mobile-web-app-capable','yes'],['mobile-web-app-capable','yes'],['apple-mobile-web-app-status-bar-style','black-translucent'],['apple-mobile-web-app-title',/[?&]owner=/.test(q)?'Couch Remote':'GriffTunes']]){const m=document.createElement('meta');m.name=n;m.content=c;document.head.appendChild(m)}
+  return;
+ }
+ if(navigator.standalone===true){
+  let saved='';try{const m=document.cookie.match(/(?:^|; )gt_remote=([^;]+)/);saved=m?decodeURIComponent(m[1]):''}catch(e){}
+  try{saved=saved||localStorage.getItem('jbx.remote_link')||''}catch(e){}
+  if(/^\?remote=/.test(saved)){location.replace(dir+saved);return}
+ }
+ const l=document.createElement('link');l.rel='manifest';l.href='manifest.webmanifest';document.head.appendChild(l);
+})();
 </script>
 <link rel="icon" href="icon-192.png?v=3">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
