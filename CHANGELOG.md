@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.0.1 — November 1, 2026
+
+- **Speaker picker during a Spotify wait:** tapping the speaker button now asks Spotify directly instead of showing "slow down". If Spotify answers, the wait clears right away and the badge shows "Spotify is back".
+- Spotify back-off resets after 6 quiet hours, so yesterday's slow-downs don't make today's waits longer.
+- Overnight song-library builder is much gentler (one lookup every 20 seconds, stays far under the request budget) and stops for the night after any slow-down.
+
 ## 1.0 — October 31, 2026
 
 First official release. Highlights:
