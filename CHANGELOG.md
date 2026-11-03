@@ -7,6 +7,7 @@ Newest first. Version numbers also show in GriffTunes under **Settings → About
 - **Couch remote:** Settings → *Couch remote for your phone* shows a private QR code. The phone that scans it (and saves it to the home screen as "Couch Remote") gets owner controls: free songs, play/pause, skip, volume (even when guest volume is off), the speaker picker and removing songs from Up Next. *New code* revokes it. Ordinary guest phones are unchanged.
 - **Couch remote screen switches:** turn the full-screen turntable on/off on the touchscreen, and turn lyrics on/off for the turntable and screensaver. The buttons light up to match what the touchscreen is showing.
 - **Couch remote power switches:** Speakers (the Hue smart plugs) and Lights (the Hue lights; the speaker plugs are never touched) on/off, showing their current state.
+- **Couch remote: queue a whole album** from any album (not just Greatest Albums), free.
 - **iPhone fix:** album covers in the cover carousel no longer show up black or missing in Safari (the covers skip the mirror reflection and dimming filter there, and far-off covers are left out).
 - Phone links saved to the home screen now reopen the phone remote instead of the jukebox screen. Remote pages no longer offer the jukebox's app manifest (iPhone used its start page for the icon), and an iPhone icon that still opens the plain jukebox page is sent back to the remote link it was saved from.
 
