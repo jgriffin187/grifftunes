@@ -96,6 +96,14 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .fItem{position:absolute;left:50%;top:44%;width:var(--fs,280px);height:var(--fs,280px);transition:transform .65s cubic-bezier(.2,.8,.2,1),opacity .4s,filter .5s;cursor:pointer;-webkit-box-reflect:below 6px linear-gradient(transparent 64%,rgba(255,255,255,.26));filter:brightness(.55) saturate(.85)}
 .fItem img{width:100%;height:100%;object-fit:cover;border-radius:16px;box-shadow:0 30px 60px rgba(0,0,0,.6);pointer-events:none}
 .fItem.round img{border-radius:50%}
+/* iPhone/iPad Safari: reflections and filters on 3D-turned covers can render black or vanish (and dozens of composited
+   covers run out of graphics memory), so there the covers skip both and are dimmed with a plain overlay instead */
+@supports (-webkit-touch-callout:none){
+ .fItem{-webkit-box-reflect:none;filter:none;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+ .fItem::after{content:'';position:absolute;inset:0;border-radius:16px;background:#000;opacity:.45;transition:opacity .5s;pointer-events:none}
+ .fItem.round::after{border-radius:50%}
+ .fItem.center::after{opacity:0}
+}
 .fItem.center{filter:none}
 .fItem.center img{box-shadow:0 0 0 2px rgba(255,255,255,.28),0 0 60px color-mix(in srgb,var(--accent) 60%,transparent),0 30px 60px rgba(0,0,0,.6)}
 .flowCaption{position:absolute;left:70px;right:70px;bottom:2px;text-align:center;pointer-events:none;z-index:120}
@@ -2214,6 +2222,7 @@ async function loadTab(id){
  }
 }
 let flow=[],fi=0,lastFlowTouch=0;
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 function renderFlow(items,start){
  flow=items;fi=items.length?(start!=null?Math.min(items.length-1,start):Math.min(items.length-1,Math.floor(Math.min(items.length,7)/2))):0;
  $('#flowStage').innerHTML=items.map((it,i)=>`<div class="fItem${it.type==='artist'?' round':''}" data-fi="${i}"><img src="${esc(it.img)}" alt="" draggable="false"></div>`).join('');
@@ -2226,7 +2235,7 @@ function layoutFlow(){
   const d=+el.dataset.fi-fi,ad=Math.abs(d),sg=Math.sign(d);
   const tx=d===0?0:sg*(size*.68+(ad-1)*size*.3),tz=d===0?50:-size*.5-ad*24,ry=d===0?0:-sg*50;
   el.style.transform=`translate(-50%,-50%) translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg)`;
-  el.style.zIndex=50-ad;el.style.opacity=ad>4?0:1;el.style.pointerEvents=ad>4?'none':'';el.style.visibility=ad>6?'hidden':'';
+  el.style.zIndex=50-ad;el.style.opacity=ad>4?0:1;el.style.pointerEvents=ad>4?'none':'';el.style.visibility=ad>6?'hidden':'';el.style.display=IOS&&ad>6?'none':'';
   el.classList.toggle('center',d===0);
  });
  const it=flow[fi];$('#flowCaption').innerHTML=it?`<h3>${esc(it.name)}</h3><p>${esc(it.sub||'')}</p>`:'';
