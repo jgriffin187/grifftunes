@@ -1682,7 +1682,7 @@ const SpotifyEngine={
   };
   const sc=document.createElement('script');sc.src='https://sdk.scdn.co/spotify-player.js';sc.onerror=()=>{clearTimeout(to);rej(new Error('could not load the Spotify player'))};document.head.appendChild(sc);
  })},
- async play(t){this.expect=t.id;this.expectUntil=Date.now()+8000;this.endedFor=null;this.pendingEnd=false;this.nearEnd=false;this.st=null;
+ async play(t){this.playAt=Date.now();this.expect=t.id;this.expectUntil=Date.now()+8000;this.endedFor=null;this.pendingEnd=false;this.nearEnd=false;this.st=null;
   try{await api(`/me/player/play?device_id=${this.dev()}`,{method:'PUT',body:{uris:[t.uri]}})}
   catch(e){
    if(!this.target)throw e;
@@ -1776,14 +1776,27 @@ const SpotifyEngine={
    if(!j||!j.device){if(!this.expect&&this.nearEnd&&this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
    if(j.device.id!==this.target){
     if(j.device.id===this.deviceId){this.useLocal('Spotify moved the music back to the GriffTunes player');return}
-    this.target=j.device.id;this.targetName=j.device.name;renderDevChip();
+    // the same speaker can come back with a new id; any other device means someone started Spotify somewhere else (a phone, the car)
+    if(j.device.name&&j.device.name===this.targetName){this.target=j.device.id;renderDevChip()}
+    else{if(j.is_playing&&Date.now()-(this.playAt||0)>30e3)this.stepAside(j.device.name);return}
    }
    const item=j.item;
    if(this.expect){if(this.matchItem(item,this.expect))this.expect=null;else if(Date.now()<this.expectUntil)return;else this.expect=null}
    const atEdge=!j.is_playing&&(j.progress_ms<1500||(item&&j.progress_ms>=item.duration_ms-2500));
+   // a different song mid-way through ours: someone picked it in the Spotify app, so step aside instead of "moving on" and taking the speaker back
+   if(item&&!this.matchItem(item,id)&&!this.nearEnd){if(j.is_playing&&Date.now()-(this.playAt||0)>30e3)this.stepAside(j.device.name);return}
    if((item&&!this.matchItem(item,id))||(atEdge&&this.nearEnd)){if(this.endedFor!==id){this.endedFor=id;this.pendingEnd=true}return}
    this.st={paused:!j.is_playing,position:j.progress_ms||0,duration:(item&&item.duration_ms)||P.dur};this.stAt=performance.now();
   }catch(e){}finally{this.polling=false}
+ },
+ // Someone else is using this Spotify account now: let go of the song without advancing, so GriffTunes never pulls their music back to the basement
+ stepAside(where){
+  if(!P.current)return;
+  console.info('[GriffTunes] Spotify is playing on',where,'- stepping aside');
+  this.st=null;this.pendingEnd=false;this.nearEnd=false;this.endedFor=P.current.id;
+  P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();store.del('np_now');
+  toast(`Spotify started playing on ${spkLabel(where)}, so GriffTunes stepped aside. Up Next is saved. Tap Play to start again`,'warn');
+  try{hostSync()}catch(e){}
  },
  match(tr,id){return!!tr&&(tr.id===id||(tr.linked_from&&tr.linked_from.id===id))},
  onState(s){
@@ -1791,6 +1804,7 @@ const SpotifyEngine={
   const id=P.current.id,tw=s.track_window||{},cur=tw.current_track;
   if(this.expect){if(this.match(cur,this.expect))this.expect=null;else if(Date.now()<this.expectUntil)return;else this.expect=null}
   const prevHas=(tw.previous_tracks||[]).some(x=>this.match(x,id));
+  if(cur&&!this.match(cur,id)&&!this.nearEnd&&!prevHas&&!s.paused){this.stepAside(S.name);return}
   const finished=(s.paused&&s.position===0&&(prevHas||this.nearEnd))||(cur&&!this.match(cur,id));
   if(finished&&this.endedFor!==id){this.endedFor=id;this.pendingEnd=true;return}
   this.st=s;this.stAt=performance.now();
