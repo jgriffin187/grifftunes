@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.2 — November 4, 2026
+
+- **Artists tab shows the artists you follow:** your 30 most-played artists, plus every artist you follow on Spotify. Chips across the top switch between Most Played, Pop, Country, Hip Hop, Other and All. Followed artists are A to Z within each genre, and an artist in Most Played isn't repeated below. The tab is now called "Artists".
+- **New follows show up on their own:** the follow list is checked when GriffTunes starts and about once a day after that (one Spotify request per 50 artists).
+- **Genres:** Spotify no longer sends genres to personal apps, so `artist-genres.json` maps artists to the chips (Spotify genre tags from the TidyTuesday Billboard dataset, plus hand-picked artist IDs). Anything unknown goes under Other; open the artist and change **Genre** at the top of their page to move them. Your choices are remembered.
+- **One-time sign-in:** reading follows needs a new Spotify permission. Until you sign in again, the Artists tab shows a "+ Add the artists you follow" chip that starts the sign-in.
+- **Phones** get the same chips. The **My Artists** radio station now plays from followed artists too.
+
 ## 1.1 — November 1, 2026
 
 - **Couch remote:** Settings → *Couch remote for your phone* shows a private QR code. The phone that scans it (and saves it to the home screen as "Couch Remote") gets owner controls: free songs, play/pause, skip, volume (even when guest volume is off), the speaker picker and removing songs from Up Next. *New code* revokes it. Ordinary guest phones are unchanged.
