@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.2.1 — November 4, 2026
+
+- **Rock** genre chip on the Artists tab (between Hip Hop and Other), and Rock in each artist's Genre picker. About 1,400 rock artists from the genre file (Guns N' Roses, Creed, Mötley Crüe, Kid Rock, O.A.R. and so on) move out of Other automatically.
+
 ## 1.2 — November 4, 2026
 
 - **Artists tab shows the artists you follow:** your 30 most-played artists, plus every artist you follow on Spotify. Chips across the top switch between Most Played, Pop, Country, Hip Hop, Other and All. Followed artists are A to Z within each genre, and an artist in Most Played isn't repeated below. The tab is now called "Artists".
