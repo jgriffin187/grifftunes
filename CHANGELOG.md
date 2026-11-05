@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.2.2 — November 4, 2026
+
+- **↻ Sync** chip at the end of the Artists tab's chips (on the jukebox) re-reads your Spotify follow list right away instead of waiting for the daily check, then shows how many new artists it found.
+
 ## 1.2.1 — November 4, 2026
 
 - **Rock** genre chip on the Artists tab (between Hip Hop and Other), and Rock in each artist's Genre picker. About 1,400 rock artists from the genre file (Guns N' Roses, Creed, Mötley Crüe, Kid Rock, O.A.R. and so on) move out of Other automatically.
