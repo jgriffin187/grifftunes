@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.3 — November 5, 2026
+
+- **Settings in tabs:** Spotify, Jukebox, Phones, Lights, Screen and Extras down the left side (across the top on narrow screens), so nothing needs a long scroll on the touchscreen. Related settings sit side by side in two columns, and the Spotify setup and family how-to notes fold away.
+- **Save is always visible** in a bar at the bottom and saves every tab at once; "Unsaved changes" shows when something's been changed. Settings reopens on the tab you used last.
+- The Lights panel's settings link now opens the Lights tab.
+
 ## 1.2.2 — November 4, 2026
 
 - **↻ Sync** chip at the end of the Artists tab's chips (on the jukebox) re-reads your Spotify follow list right away instead of waiting for the daily check, then shows how many new artists it found.
