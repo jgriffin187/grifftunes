@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.4 — November 6, 2026
+
+- **Move to a new jukebox** (Settings → Extras): **Save setup file** downloads `grifftunes-setup-DATE.json` with the Spotify Client ID, Hue pairing and speaker plugs, family members, genre picks, credits, Up Next, the room and the Couch Remote code. **Load setup file** (tap twice to confirm) on the new computer restores them and reloads. No camera needed. Your own Spotify sign-in is left out on purpose; sign in once on the new box.
+- About GriffTunes has a "Moving to a new jukebox" section.
+
 ## 1.3.1 — November 6, 2026
 
 - **Song library settings trimmed:** just the count and the overnight switch (now "Find new chart songs overnight"). "Find songs now," "Download library file" and the explanation fold under **More**.
