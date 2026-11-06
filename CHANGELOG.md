@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.3.1 — November 6, 2026
+
+- **Song library settings trimmed:** just the count and the overnight switch (now "Find new chart songs overnight"). "Find songs now," "Download library file" and the explanation fold under **More**.
+
 ## Song library update — November 6, 2026
 
 - `song-library.json` now has every Hot 100 Top 20 and country chart song: 8,590 entries, 8,427 matched to Spotify (165 aren't on Spotify). This is the complete library from the jukebox's overnight builder, merged with the earlier dataset file, so new jukeboxes start with nothing left to look up.
