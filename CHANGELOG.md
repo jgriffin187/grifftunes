@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## Song library update — November 6, 2026
+
+- `song-library.json` now has every Hot 100 Top 20 and country chart song: 8,590 entries, 8,427 matched to Spotify (165 aren't on Spotify). This is the complete library from the jukebox's overnight builder, merged with the earlier dataset file, so new jukeboxes start with nothing left to look up.
+
 ## 1.3 — November 5, 2026
 
 - **Settings in tabs:** Spotify, Jukebox, Phones, Lights, Screen and Extras down the left side (across the top on narrow screens), so nothing needs a long scroll on the touchscreen. Related settings sit side by side in two columns, and the Spotify setup and family how-to notes fold away.
