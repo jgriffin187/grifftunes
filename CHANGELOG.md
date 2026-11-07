@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.5 — November 6, 2026
+
+- **🎲 Shuffle** button next to the section title on Featured, Albums, Playlists and Artists. The cover flow spins for about 4 seconds (ping-ponging through short lists), ticking and slowing like a prize wheel while the Hue lights chase colors; the winner flips forward with confetti and a fanfare.
+- **What plays:** an artist's Greatest Hits (top 10), an album in order, or 10 shuffled songs from a playlist. The first song plays now; the rest go after any songs already in Up Next. On Artists it picks within the selected genre chip. It avoids recent picks.
+- If Spotify search is paused, an artist spin falls back to that artist's songs in the chart-song library.
+- Tap the covers mid-spin to skip to the result. Free; touchscreen and Couch Remote only (the remote's button spins the big screen on the tab and chip the phone is showing).
+
 ## 1.4 — November 6, 2026
 
 - **Move to a new jukebox** (Settings → Extras): **Save setup file** downloads `grifftunes-setup-DATE.json` with the Spotify Client ID, Hue pairing and speaker plugs, family members, genre picks, credits, Up Next, the room and the Couch Remote code. **Load setup file** (tap twice to confirm) on the new computer restores them and reloads. No camera needed. Your own Spotify sign-in is left out on purpose; sign in once on the new box.
