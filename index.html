@@ -769,6 +769,8 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 
 .qClear{margin-left:auto;height:34px;padding:0 14px;border-radius:99px;font:700 13px Outfit,sans-serif;letter-spacing:.02em;color:var(--muted);background:rgba(255,255,255,.06);border:1px solid var(--stroke)}
 .qClear.armed{color:#fff;background:#d6304f;border-color:#d6304f}
+.qClear,.qrMini{white-space:nowrap;flex:none}
+.qHead span#qCount{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .qClear+.qrMini{margin-left:8px}
 .qrMini{margin-left:auto;display:flex;align-items:center;gap:6px;height:34px;padding:0 14px;border-radius:99px;font-family:Outfit;font-size:13px;font-weight:700;letter-spacing:.02em;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 0 16px color-mix(in srgb,var(--accent) 45%,transparent)}
 .qrMini svg{width:16px;height:16px}
@@ -2907,7 +2909,7 @@ document.addEventListener('click',e=>{
  const qx=e.target.closest('[data-qx]');if(qx){const i=+qx.dataset.qx;if(REMOTE){const t=P.queue[i];if(RM.owner&&t){P.queue.splice(i,1);renderQueue();remoteCmd({t:'qdel',i,tid:t.id})}return}P.queue.splice(i,1);saveQueue();renderQueue();return}
  const tb=e.target.closest('[data-tab]');if(tb){sfx('tick');loadTab(tb.dataset.tab);return}
  if(e.target.closest('#qClear')){const b=$('#qClear');
-  if(!b.classList.contains('armed')){sfx('tick');b.classList.add('armed');b.textContent=`Clear all ${P.queue.length}?`;clearTimeout(b._t);b._t=setTimeout(()=>{b.classList.remove('armed');b.textContent='Clear'},4000);return}
+  if(!b.classList.contains('armed')){sfx('tick');b.classList.add('armed');b.textContent=`Clear ${P.queue.length}?`;clearTimeout(b._t);b._t=setTimeout(()=>{b.classList.remove('armed');b.textContent='Clear'},4000);return}
   clearTimeout(b._t);b.classList.remove('armed');b.textContent='Clear';
   if(REMOTE){if(RM.owner){P.queue=[];renderQueue();remoteCmd({t:'qclear'});toast('Up Next cleared')}return}
   P.queue=[];saveQueue();renderQueue();sfx('err');toast('Up Next cleared');return}
