@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.5.4 — November 6, 2026
+
+- **Clear Up Next:** a **Clear** button next to the Up Next count (shown when 2 or more songs are waiting). First tap turns it red and asks "Clear all N?"; a second tap within 4 seconds empties the line. On the touchscreen and the Couch Remote (new `qclear` command), not guests' phones. Settings → Jukebox → Clear queue still works too.
+
 ## 1.5.3 — November 6, 2026
 
 - **iPhone carousel covers:** some covers in the phone's cover flow drew only a strip at the top and stayed black (seen in New Releases). iPhone Safari paints 3D-turned images as GPU tiles and runs short of graphics memory with 640px art. On iPhone/iPad the carousel now loads Spotify's 300px version of each cover (album and artist art) and the center cover's large glow shadow is replaced with a smaller one. The touchscreen is unchanged.
