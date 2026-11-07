@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.5.2 — November 6, 2026
+
+- **New Releases is weekly:** Spotify releases new music on Fridays, so the saved list now lasts until the next Friday 5 AM (local time) instead of 12 hours. The jukebox checks every 15 minutes; once the week turns over it rebuilds the list the first time nothing is playing (or by noon either way). The old list keeps showing instantly until the new one is ready.
+
 ## 1.5.1 — November 6, 2026
 
 - **New Releases on phones:** building the tab took about 25 Spotify searches, more than the 20-per-30-seconds budget, so the first load could take over 30 seconds and phones gave up after 20 ("Couldn't load this section"). Now:
