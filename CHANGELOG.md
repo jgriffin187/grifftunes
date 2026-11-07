@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.6.3 — November 6, 2026
+
+- **Christmas look on the Christmas tab:** opening the 🎄 Christmas tab turns on everything Christmas Mode shows, without changing the music: falling snow, the string lights around the border, Santa's sleigh flying across (first pass about 6 seconds in when a song is playing, then once per song), Christmas red, green and gold on the Hue lights (even with nothing playing), sleigh-bell coins and the fireplace screensaver. Leaving the tab puts the regular look and album colors back, unless Christmas Mode itself is on. Phones show the snow and lights while the jukebox is on the tab.
+
 ## 1.6.2 — November 6, 2026
 
 - **Radio dial hides during picks:** switching from the radio to an album left the FM dial and ON AIR sign showing over the album song. The dial now shows only while a radio song is playing (or nothing is). During a picked song the radio button stays lit, which means the station comes back once the picks are done. Tapping the radio button then brings the dial back so you can switch stations right away; a second tap turns the radio off.
