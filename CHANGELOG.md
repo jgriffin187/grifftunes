@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.6.1 — November 6, 2026
+
+- **Radio variety:** the Alternative station played Coldplay 5 songs out of 6. Artist stations (Alternative, Rock, Country and the other hand-picked ones) took every remembered song from up to 5 artists, and right after a fresh start only 1 or 2 artists might be remembered, so one artist with 10 songs could fill the line. Now:
+  - Each refill takes at most 3 random songs per artist, from up to 14 artists.
+  - While fewer than 5 artists are remembered for a station, a refill looks up 4 new artists instead of 2.
+  - The line is dealt out artist by artist, and the next song skips any artist from the last 4 radio songs when another choice is waiting.
+
 ## 1.6 — November 6, 2026
 
 - **🎄 Christmas tab:** shown to the right of Grad Year while **Show the Christmas tree button** is on (Settings → Extras); it appears and disappears on the touchscreen and phones as soon as the switch changes.
