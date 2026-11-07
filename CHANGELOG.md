@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.5.1 — November 6, 2026
+
+- **New Releases on phones:** building the tab took about 25 Spotify searches, more than the 20-per-30-seconds budget, so the first load could take over 30 seconds and phones gave up after 20 ("Couldn't load this section"). Now:
+  - Each build checks 8 of your top artists (a different 8 each day) instead of 20, about 13 searches in all; earlier "For you" finds that are still new are kept.
+  - The result is saved on the jukebox for 12 hours and survives reloads; after that the saved copy shows instantly while a fresh one builds in the background.
+  - Phone browse requests go through the jukebox's tab cache, and phones wait up to 60 seconds for a section instead of 20.
+
 ## 1.5 — November 6, 2026
 
 - **🎲 Shuffle** button next to the section title on Featured, Albums, Playlists and Artists. The cover flow spins for about 4 seconds (ping-ponging through short lists), ticking and slowing like a prize wheel while the Hue lights chase colors; the winner flips forward with confetti and a fanfare.
