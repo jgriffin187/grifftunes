@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.5.3 — November 6, 2026
+
+- **iPhone carousel covers:** some covers in the phone's cover flow drew only a strip at the top and stayed black (seen in New Releases). iPhone Safari paints 3D-turned images as GPU tiles and runs short of graphics memory with 640px art. On iPhone/iPad the carousel now loads Spotify's 300px version of each cover (album and artist art) and the center cover's large glow shadow is replaced with a smaller one. The touchscreen is unchanged.
+
 ## 1.5.2 — November 6, 2026
 
 - **New Releases is weekly:** Spotify releases new music on Fridays, so the saved list now lasts until the next Friday 5 AM (local time) instead of 12 hours. The jukebox checks every 15 minutes; once the week turns over it rebuilds the list the first time nothing is playing (or by noon either way). The old list keeps showing instantly until the new one is ready.
