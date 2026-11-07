@@ -2,6 +2,15 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.6 — November 6, 2026
+
+- **🎄 Christmas tab:** shown to the right of Grad Year while **Show the Christmas tree button** is on (Settings → Extras); it appears and disappears on the touchscreen and phones as soon as the switch changes.
+  - 50 Christmas albums in `christmas-albums.json`, matched to Spotify ahead of time (ID, title, artist, year, cover) so the tab costs no searches: 14 Classics, 14 Pop, 9 Country, 7 Christian, 6 Kids & Movies.
+  - Genre chips: All, Classics, Pop, Country, Christian, Kids & Movies, and **Your Christmas** (your playlists and family playlists whose names include Christmas, Xmas, holiday, Noel or Navidad).
+  - The first card, **Christmas Top 40**, opens the Christmas countdown.
+  - Albums open like Greatest Albums: songs one at a time or **Queue the whole album**.
+  - **Snowy Shuffle:** the Shuffle button on this tab ticks with sleigh bells, chases red and green on the Hue lights and lands with bells and snowflakes. It stays inside the chip you're on, and works from the Couch Remote.
+
 ## 1.5.4 — November 6, 2026
 
 - **Clear Up Next:** a **Clear** button next to the Up Next count (shown when 2 or more songs are waiting). First tap turns it red and asks "Clear all N?"; a second tap within 4 seconds empties the line. On the touchscreen and the Couch Remote (new `qclear` command), not guests' phones. Settings → Jukebox → Clear queue still works too.
