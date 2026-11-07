@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.8 — November 6, 2026
+
+- **Keep going from the album or playlist:** when a picked song ends and Up Next is empty, GriffTunes plays the next song from where that song was picked, in order, instead of the house mix.
+  - Works for albums, playlists (including Liked Songs and family playlists), Greatest Albums, the Christmas tab and an artist's Greatest Hits list. A song picked from search continues with the rest of its album.
+  - It follows the most recently picked song, including picks from phones and the Couch Remote.
+  - Order when Up Next empties: a running countdown, Christmas Mode, then the album or playlist, then the radio, then the house mix. When the album or playlist runs out, the radio or house mix takes over.
+  - These songs are free and show a **FROM · album name** tag in Now Playing.
+  - Whole albums or playlists queued with the "Queue the whole…" button, and Shuffle picks, don't continue past what was queued.
+  - Starting the house mix, a radio song or a countdown ends it.
+
 ## 1.7.1 — November 6, 2026
 
 - **Christmas lights without white:** during Christmas Mode and on the 🎄 Christmas tab, color bulbs use only red and green (bright red, deep red, green, pine green), split about evenly, at 70% of the normal brightness setting. White-only and dimmable bulbs go to a very warm candle glow at 20%. The old palette mixed in warm white, pure white and gold.
