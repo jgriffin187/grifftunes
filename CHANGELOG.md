@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.8.1 — November 7, 2026
+
+- **DJ voice test** (Settings → Extras): checks whether a virtual DJ could speak through the WiiM over Bluetooth from the Chromebox. Part 1 speaks over the music without pausing; Part 2 pauses Spotify, speaks, then starts Spotify on the WiiM again and times how long it takes. Uses the built-in ChromeOS voice; this only tests the audio path. If it doesn't work cleanly, the DJ idea is dropped.
+
 ## 1.8 — November 6, 2026
 
 - **Keep going from the album or playlist:** when a picked song ends and Up Next is empty, GriffTunes plays the next song from where that song was picked, in order, instead of the house mix.
