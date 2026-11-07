@@ -2,6 +2,15 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.7 — November 6, 2026
+
+- **223 Christmas albums** on the 🎄 Christmas tab, up from 50 (`christmas-albums.json` v2), all matched to Spotify ahead of time: Classics 32, Pop 51, Country 42, R&B & Soul 21, Christian 33, Instrumental 24, Kids & Movies 20.
+  - Includes Vince Gill (3), Neil Diamond (3), Josh Groban (Noël Deluxe, his only Christmas album on Spotify), Mannheim Steamroller (3) and Trans-Siberian Orchestra (3).
+  - Up to 3 albums per artist; when Spotify has a Deluxe or Expanded edition, that one is used.
+  - Not on Spotify, so left out: Garth Brooks's Christmas albums, Tim McGraw & Faith Hill's *Christmas Together*, Carpenters' *An Old-Fashioned Christmas*, Clint Black, and a few others.
+- **New chips:** **R&B & Soul** (Motown, Temptations, Stevie Wonder, Boyz II Men, Luther, Whitney…) and **Instrumental** (Mannheim, TSO, Charlie Brown, Kenny G, George Winston, Piano Guys…). Mannheim, TSO, Charlie Brown and the Jackson 5 moved into them.
+- **Shuffled each visit:** the albums come up in a new random order every time the tab opens; the Christmas Top 40 card and your own Christmas playlists stay first.
+
 ## 1.6.3 — November 6, 2026
 
 - **Christmas look on the Christmas tab:** opening the 🎄 Christmas tab turns on everything Christmas Mode shows, without changing the music: falling snow, the string lights around the border, Santa's sleigh flying across (first pass about 6 seconds in when a song is playing, then once per song), Christmas red, green and gold on the Hue lights (even with nothing playing), sleigh-bell coins and the fireplace screensaver. Leaving the tab puts the regular look and album colors back, unless Christmas Mode itself is on. Phones show the snow and lights while the jukebox is on the tab.
