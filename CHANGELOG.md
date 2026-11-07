@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.7.1 — November 6, 2026
+
+- **Christmas lights without white:** during Christmas Mode and on the 🎄 Christmas tab, color bulbs use only red and green (bright red, deep red, green, pine green), split about evenly, at 70% of the normal brightness setting. White-only and dimmable bulbs go to a very warm candle glow at 20%. The old palette mixed in warm white, pure white and gold.
+- **Slow drift:** every 30 seconds one color bulb fades over 10 seconds to another red or green (keeping reds and greens balanced). A new song or opening the tab fades the whole room to a new arrangement over 5 seconds. The drift stops when the Christmas look ends or the lights mode isn't Album colors.
+
 ## 1.7 — November 6, 2026
 
 - **223 Christmas albums** on the 🎄 Christmas tab, up from 50 (`christmas-albums.json` v2), all matched to Spotify ahead of time: Classics 32, Pop 51, Country 42, R&B & Soul 21, Christian 33, Instrumental 24, Kids & Movies 20.
