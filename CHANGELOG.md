@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.6.2 — November 6, 2026
+
+- **Radio dial hides during picks:** switching from the radio to an album left the FM dial and ON AIR sign showing over the album song. The dial now shows only while a radio song is playing (or nothing is). During a picked song the radio button stays lit, which means the station comes back once the picks are done. Tapping the radio button then brings the dial back so you can switch stations right away; a second tap turns the radio off.
+- **Speaker chip:** a speaker Spotify reports with a code instead of a name (the WiiM did this) now shows as "Speaker" instead of the 32-character code.
+
 ## 1.6.1 — November 6, 2026
 
 - **Radio variety:** the Alternative station played Coldplay 5 songs out of 6. Artist stations (Alternative, Rock, Country and the other hand-picked ones) took every remembered song from up to 5 artists, and right after a fresh start only 1 or 2 artists might be remembered, so one artist with 10 songs could fill the line. Now:
