@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.10.1 — November 7, 2026
+
+- **About brought up to date:** DJ Griff (how he sounds on the WiiM vs. this jukebox, setup, voices, failures, troubleshooting, data sources, developer notes), whole-playlist queuing for 5 credits, tab names (My Albums / My Playlists; Featured is demo-only), Shuffle handing off to the radio or house mix, the FROM · tag, "Speaker" for the unnamed WiiM, Couch Remote's Clear and Shuffle, Settings → Extras, the setup file carrying DJ Griff's keys, cache ages, file size, the full list of phone messages, and the missing 1.9.x entries in the version history.
+- **Fix:** the Christmas tab's countdown card said "Christmas Top 40", but it starts the 25-song Christmas Countdown. It now says Christmas Countdown, and its art shows 25.
+
 ## 1.10 — November 7, 2026
 
 - **DJ Griff follows the music.** No more "plays through" setting; at each break GriffTunes checks where Spotify is playing:
