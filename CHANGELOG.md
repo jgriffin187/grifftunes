@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14.6 — November 8, 2026
+
+- **Memorial: a truer Fitzgerald.** The side-view ship is redrawn in feet from her 1971 and Corps of Engineers photos: red hull with a raised stern and raised forecastle and a raked bow; the white forecastle band with portholes and "EDMUND FITZGERALD" in black; a low, rounded forward house under the pilothouse with its wide window band, roof overhang and radar mast; 21 hatch coamings; a low two-level white after house with portholes; the black-yellow-black Columbia stack and after mast. Less vertical exaggeration (ship now 86% of the strip's width, 150 px tall strip) so the superstructures read as low blocks instead of towers. Drawn at the screen's pixel density so it stays sharp.
+
 ## 1.14.5 — November 8, 2026
 
 - **Memorial: the wreck itself.** The "Found" card now shows an underwater video still of "EDMUND FITZGERALD" on the pilothouse (supplied by Josh; photographer unknown, so credited that way), stored in the repo at `photos/efz-wreck-name.jpg` (1280 px) and kept on the jukebox by the service worker (`/photos/` added to its keep list). It replaces the CURV III photo. Photo credits now name where each photo comes from (Wikimedia Commons or stored with GriffTunes).
