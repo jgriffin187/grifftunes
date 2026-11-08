@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.13.1 — November 8, 2026
+
+- **Memorial: saved on the jukebox.** Leaflet 1.9.4 now ships with GriffTunes (`vendor/leaflet/`, BSD-2 license included) instead of loading from cdnjs. The service worker keeps `vendor/*` and `efz-bell.mp3` in a cache-first asset cache, and serves Google Fonts and the song's cover from the jukebox while refreshing them in the background. A minute after startup GriffTunes preloads the map code, the bell (held in memory, so the bell starts instantly when it plays on the jukebox) and the cover. Map tiles still come from Esri over the internet (not pre-downloaded, to stay within Esri's terms).
+- **Memorial: lighter on the Chromebox.** The map is dimmed with a tinted layer instead of a CSS filter on the tiles; Leaflet's zoom, fade and marker animations are off and the map slides to each part of the lake in 1.6 s instead of a 3.2 s fly. Sleet is drawn at half resolution and about 30 fps, and stops completely when there's no storm or the bell is ringing. The play button only redraws when it changes.
+
 ## 1.13 — November 8, 2026
 
 - **🔔 Edmund Fitzgerald memorial** (jukebox only): a ship's-bell button ("Fitz") next to the Christmas tree. Tapping it plays Gordon Lightfoot's "The Wreck of the Edmund Fitzgerald" right away (a paid song that was playing goes back to the front of Up Next) and opens a full-screen memorial with just a mini player for controls.
