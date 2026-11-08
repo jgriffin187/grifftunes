@@ -2,6 +2,18 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9 — November 7, 2026
+
+- **🎙 DJ Griff:** a radio-style host. Every 3–5 songs, when a song ends on its own, the music stays paused while DJ Griff introduces the next song (title, artist, why it's playing: requested, radio station, countdown position, Christmas Mode, continuing an album) and sometimes one fun fact, then the next song starts.
+  - Lines are written by Gemini (`gemini-2.5-flash`, falling back to `gemini-flash-latest`) from facts GriffTunes already has: a Wikipedia line about the artist and the song's Hot 100 Top 20 run. The prompt forbids inventing facts.
+  - Spoken by Google Cloud Text-to-Speech (Chirp 3 HD voices, five to choose from; falls back to Neural2).
+  - The audio plays from the Chromebox, which reaches the WiiM over Bluetooth. The WiiM switches to Bluetooth for the clip and back to Spotify when the next song starts (about 2 seconds in testing). It can't talk over music.
+  - The next intro is prepared about 8 seconds into the song before it (for paid picks, continuing albums/playlists and radio); countdowns, Christmas Mode and the house mix make theirs at the break.
+  - Settings → Extras → DJ Griff: on/off, Google Cloud API key (kept only on the jukebox and in the setup file), voice, and a Preview button.
+  - While DJ Griff is on, all of GriffTunes' own sounds (coins, ticks, scratches, radio static, bells) are silent, since any Chromebox sound would pull the WiiM onto Bluetooth.
+  - Any failure skips the break; after two failures in a row a warning toast says why. Skip during a break ends it; a song started by someone during a break wins.
+- Removed the DJ voice test from 1.8.1.
+
 ## 1.8.1 — November 7, 2026
 
 - **DJ voice test** (Settings → Extras): checks whether a virtual DJ could speak through the WiiM over Bluetooth from the Chromebox. Part 1 speaks over the music without pausing; Part 2 pauses Spotify, speaks, then starts Spotify on the WiiM again and times how long it takes. Uses the built-in ChromeOS voice; this only tests the audio path. If it doesn't work cleanly, the DJ idea is dropped.
