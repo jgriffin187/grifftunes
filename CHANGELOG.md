@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14 — November 8, 2026
+
+- **📻 Alpine car radio (test radio style):** Settings → Extras → **Radio style** → "Alpine car radio (test)". The tuning dial stays the default; phones keep the dial either way.
+  - The radio button opens a full-width faceplate modeled on Josh's 1990s Alpine 7280 (traced Alpine wordmark, SCC HEAD cassette door, treble/bass sliders, green-backlit buttons) instead of turning the radio on and off. The Now Playing card shows a small green LCD in place of the dial; tapping it opens the faceplate.
+  - **Presets 1–6** tune directly (turning the radio on if needed); **BAND** cycles FM1/FM2/FM3 so all 18 stations have a button; **DN/UP** and **SEEK/TUNE** step through the stations by frequency with a seek animation on the LCD; **▶▶** skips; **⏏**, Close or tapping outside closes it; it auto-closes after 30 s without a touch.
+  - **Knob:** drag (around or up/down) for volume, with the green ring showing the level and VOL on the LCD; a tap turns the radio off.
+  - **LCD:** DSEG7 Classic (frequency) and DSEG14 Classic (band and 12-character name line) with unlit "ghost" segments; RDS-style scrolling of the song and artist every few seconds; SEEK/ST/DX/MONO/LOUD indicators. Fonts bundled in `vendor/dseg/` (SIL OFL) and kept on the jukebox by the service worker.
+
 ## 1.13.1 — November 8, 2026
 
 - **Memorial: saved on the jukebox.** Leaflet 1.9.4 now ships with GriffTunes (`vendor/leaflet/`, BSD-2 license included) instead of loading from cdnjs. The service worker keeps `vendor/*` and `efz-bell.mp3` in a cache-first asset cache, and serves Google Fonts and the song's cover from the jukebox while refreshing them in the background. A minute after startup GriffTunes preloads the map code, the bell (held in memory, so the bell starts instantly when it plays on the jukebox) and the cover. Map tiles still come from Esri over the internet (not pre-downloaded, to stay within Esri's terms).
