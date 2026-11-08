@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.1 — November 7, 2026
+
+- DJ Griff Preview: when the Google key's API restrictions block Gemini or Text-to-Speech, the message now says which service to tick on the key instead of "Gemini gave no line".
+
 ## 1.9 — November 7, 2026
 
 - **🎙 DJ Griff:** a radio-style host. Every 3–5 songs, when a song ends on its own, the music stays paused while DJ Griff introduces the next song (title, artist, why it's playing: requested, radio station, countdown position, Christmas Mode, continuing an album) and sometimes one fun fact, then the next song starts.
