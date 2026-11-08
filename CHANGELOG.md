@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.3 — November 7, 2026
+
+- **DJ Griff over Wi-Fi (test):** a new "DJ Griff plays through" choice. "The WiiM over Wi-Fi" uploads each clip to a Firebase Storage bucket (as `dj-….mp3`, so the link needs no escaping) and tells the WiiM to play that link through its local HTTP API (`setPlayerCmd:play:<url>`), then GriffTunes restarts Spotify on the WiiM. No Bluetooth, so nothing drops out. Settings → Extras → DJ Griff has the WiiM address, the bucket, a **Trust the WiiM** button (Chrome has to accept the WiiM's self-signed certificate once) and a **Test on the WiiM** button that runs the whole path and times it. In Wi-Fi mode the jukebox's own sounds stay on.
+
 ## 1.9.2 — November 7, 2026
 
 - DJ Griff takes two keys: a Google Cloud key for Text-to-Speech (the voice) and a Google AI Studio key for Gemini (the writing). Google Cloud keys now need a service account to use Gemini, while AI Studio keys work directly. If the writing key is empty, the voice key is used for both.
