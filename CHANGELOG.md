@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.7 — November 7, 2026
+
+- DJ Griff on the WiiM: the next song waited only 1.6 seconds past the clip's length, but the WiiM takes a moment to fetch the clip before it starts, so the last words got cut off. The wait is now the clip's length plus 3.5 seconds.
+
 ## 1.9.6 — November 7, 2026
 
 - DJ Griff talks to the WiiM over plain http when the WiiM allows it, and only uses https (with its self-signed certificate) as a fallback. Loading anything with a certificate error makes Chrome label the whole page "Not secure".
