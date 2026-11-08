@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.11 — November 7, 2026
+
+- **Bigger fun-fact ticker:** on the jukebox, the ticker moves out of Now Playing to a bar along the bottom of the main screen, under the album row (and under the countdown list), running from the left edge to the Up Next panel. It's 64 px tall with 28 px text (was 42 px / 16 px), bigger labels and badge, and scrolls at 74 px/s (was 62), slower relative to the larger text.
+- The turntable and screensaver mini player tickers are about 1.5× bigger.
+- Phones and the Couch Remote keep the ticker in Now Playing, unchanged.
+
 ## 1.10.1 — November 7, 2026
 
 - **About brought up to date:** DJ Griff (how he sounds on the WiiM vs. this jukebox, setup, voices, failures, troubleshooting, data sources, developer notes), whole-playlist queuing for 5 credits, tab names (My Albums / My Playlists; Featured is demo-only), Shuffle handing off to the radio or house mix, the FROM · tag, "Speaker" for the unnamed WiiM, Couch Remote's Clear and Shuffle, Settings → Extras, the setup file carrying DJ Griff's keys, cache ages, file size, the full list of phone messages, and the missing 1.9.x entries in the version history.
