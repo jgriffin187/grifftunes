@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.11.1 — November 8, 2026
+
+- **Lights on with the music:** when the first song starts after the jukebox loads or after 10+ quiet minutes, and every Hue light in the room is off, GriffTunes turns the room's lights on (the speaker plugs aren't touched by this; they have their own setting). If any light is on, nothing changes. Skipped in Hands off. New switch in Settings → Philips Hue: "Turn the lights on when music starts (if they're all off)", on by default.
+
 ## 1.11 — November 7, 2026
 
 - **Bigger fun-fact ticker:** on the jukebox, the ticker moves out of Now Playing to a bar along the bottom of the main screen, under the album row (and under the countdown list), running from the left edge to the Up Next panel. It's 64 px tall with 28 px text (was 42 px / 16 px), bigger labels and badge, and scrolls at 74 px/s (was 62), slower relative to the larger text.
