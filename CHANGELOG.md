@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.12 — November 8, 2026
+
+- **❄ Frosty screen** (Christmas Mode or the 🎄 Christmas tab, jukebox only): after a minute without touches, frost creeps in from the edges (procedural ice texture with feathery crystals, ragged front), reaching full frost after about 8 minutes: heavy at the edges, a see-through haze in the middle. Any touch pauses the growth.
+  - **Finger wipes:** dragging clears a streak (radius about 7% of the screen height) that frosts back over in about a minute. Taps and swipes still work normally underneath.
+  - **🔥 Heater:** a glowing button in the bottom-right corner once frost builds up. Tapping it sends an orange glow up from the bottom that melts the ice in about 8 seconds, with drips running down the screen. It also comes on automatically 2 minutes after the screen is fully frosted.
+  - Frosts over the screensaver too (the fireplace looks like it's behind a frosty window). Fades away when the Christmas look ends.
+  - Drawn into a 480×270 canvas scaled to full screen, redrawn only while it changes. Settings → Extras → **Frosty screen** switch, on by default.
+
 ## 1.11.1 — November 8, 2026
 
 - **Lights on with the music:** when the first song starts after the jukebox loads or after 10+ quiet minutes, and every Hue light in the room is off, GriffTunes turns the room's lights on (the speaker plugs aren't touched by this; they have their own setting). If any light is on, nothing changes. Skipped in Hands off. New switch in Settings → Philips Hue: "Turn the lights on when music starts (if they're all off)", on by default.
