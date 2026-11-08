@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14.4 — November 8, 2026
+
+- **Memorial: the seas beside the ship.** The wind/wave boxes and looping wave became one strip: a header with wind (and a compass arrow showing which way it blows, NE then NW) and waves, over a canvas side view of the Fitzgerald (red hull, white sheer stripe, 21 hatch coamings, after cabins and stack, forward house and pilothouse) in a moving sea.
+  - Heights to scale with each other (about 2.75 px per foot): her loaded freeboard of 11 ft 6 in (NTSB report, winter load line from 1973) is marked with a dashed line on a 0/10/20/30 ft scale; length is squeezed to fit. Storm waves are drawn steep, with crests standing higher above the calm line than troughs fall below it, so 18–25 ft seas roll over her deck.
+  - Wave height and wind ease from card to card using the record's numbers (2 → 10 ft by 1 AM, 14 ft at 2:45 PM, 18–25 ft by 5:20 PM, 25+ at 7 PM) with eased values in between; wind streaks blow against her early (NE) and from behind later (NW). At 7 PM every seventh crest comes in 45% bigger for the "two giant waves". She pitches and heaves a little, rides up to 3 ft lower after the 3:30 PM damage report (illustrative), and at 7:15 slides under and fades out. A note under the strip changes with the story ("Her deck: 11½ ft…", "Waves now taller than her deck", "Listing and riding lower · both pumps running", "Gone. No distress call was ever sent.").
+  - ~30 fps, only while the story is on screen (stops while exploring or while the bell rings).
+
 ## 1.14.3 — November 8, 2026
 
 - **Memorial photos, all from the wreck itself.** Replaced the two modern storm scenes (Two Harbors 2017, Pictured Rocks 2017): "Gale warnings" now shows NOAA's surface weather map of November 10, 1975, and "Two giant waves" shows the NTSB chart of both ships' probable tracks. "Found" now shows CURV III, the Navy robot that found and photographed the wreck in May 1976 (no free-licensed underwater photos of the wreck exist; the 1976 and later footage is copyrighted). "Twenty-nine times" shows the Fitzgerald's own bell (Duchene9, CC BY-SA 3.0), which also sits dimly behind the swinging bell while it rings. Explore tabs: the ship tab shows taconite from the wreck, the storm tab the 1975 weather map, "Why did she sink?" the NTSB wreck sketch, and the bell tab adds Mariners' Church.
