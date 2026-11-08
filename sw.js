@@ -4,8 +4,8 @@ const CACHE = 'grifftunes-shell-v3';
 // (If one of these files is ever replaced, give it a new name or bump ASSETS.)
 const ASSETS = 'grifftunes-assets-v1';
 const KEEP = [/\/vendor\//, /\/efz-bell\.mp3$/];
-// Fonts and the memorial's album cover: served from the copy on the jukebox, refreshed in the background.
-const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
+// Fonts, the memorial's album cover and its photos (Wikimedia Commons): served from the copy on the jukebox, refreshed in the background.
+const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(
   caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('grifftunes-assets-') && k !== ASSETS).map(k => caches.delete(k))))

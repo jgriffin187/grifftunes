@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14.2 — November 8, 2026
+
+- **Memorial photos.** Each of the 16 story cards now has a photo filling the space under the wind/wave panel (slow zoom, caption, photographer and license), and the explore tabs have one at the top. 20 images from Wikimedia Commons, all public domain, CC0 or CC BY / BY-SA: the Fitzgerald in 1971 (Greenmars), under way and from above the bow (USACE, U.S. Coast Guard), in the MacArthur Lock (USACE); the Arthur M. Anderson arriving in Duluth in November 1975 (Gary Todd collection); NWS Marquette's modeled winds and waves at 7 PM Nov 10; Whitefish Point Light (USCG); a recovered lifeboat (1977); the NTSB wreck sketch; the wreck-site map; Mariners' Church; the bell at the Shipwreck Museum; the Whitefish Point memorial; taconite from the wreck; Gordon Lightfoot (1974 Reprise ad); and present-day storm scenes from Two Harbors and Pictured Rocks (captioned with their years). Credits are also listed on the Sources tab.
+- Photos load from Wikimedia's servers, are preloaded with the rest of the memorial, and the service worker keeps copies on the jukebox. A photo that can't load just hides.
+
 ## 1.14.1 — November 8, 2026
 
 - **Couch remote: Reload jukebox.** A full-width button under Speakers and Lights on the couch remote (owner link only). First tap arms it ("TAP AGAIN", amber); a second tap within 4 seconds sends `reload` (an owner-only command) and the jukebox shows a toast and reloads 1.5 s later. Music on a Spotify Connect speaker keeps playing and is picked back up after the reload; Up Next is saved; the remote's normal retry reconnects it.
