@@ -681,7 +681,7 @@ input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radiu
 .sBody{overflow-y:auto;padding:4px 30px 30px;user-select:text;-webkit-user-select:text}
 .field{margin:18px 0}
 .field>label,.field .lab{display:block;font-size:12px;letter-spacing:.22em;font-weight:800;color:var(--accent2);margin-bottom:8px;text-transform:uppercase}
-.field input[type=text],.field input[type=number],.field input[type=time]{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 16px;font:500 18px Outfit,sans-serif;outline:none}
+.field input[type=text],.field input[type=password],.field input[type=number],.field input[type=time]{width:100%;height:54px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:#fff;padding:0 16px;font:500 18px Outfit,sans-serif;outline:none}
 .field input:focus{border-color:var(--accent2)}
 .field.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .seg{display:flex;gap:6px;background:rgba(255,255,255,.06);padding:6px;border-radius:999px}
@@ -903,6 +903,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 .gyYear b{font-family:Bungee;font-weight:400;font-size:46px;line-height:1.05;color:#fff;text-shadow:0 0 6px #fff,0 0 18px var(--accent)}
 #gyRange{flex:1;min-width:160px;max-width:360px}
 #gyList .mv{width:58px}
+#djStat:empty{display:none}
 </style>
 </head>
 <body>
@@ -1974,7 +1975,7 @@ function sfx(type){
  if(!S.sfx)return;
  if(type==='coin'&&xmLook()){xmasBells();return}
  try{
-  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  actx=mkActx();
   const t0=actx.currentTime;
   const cfg={coin:[[988,.09],[1319,.22]],add:[[660,.07],[880,.07],[1175,.16]],err:[[220,.12],[165,.2]],tick:[[1500,.025]]}[type]||[[1000,.05]];
   let t=t0;
@@ -2007,7 +2008,7 @@ function djScratch(){
  const v=$('.vinyl');if(v){v.classList.remove('scratch');void v.offsetWidth;v.classList.add('scratch');setTimeout(()=>v.classList.remove('scratch'),650)}
  if(!S.sfx)return;
  try{
-  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  actx=mkActx();
   if(actx.state==='suspended')actx.resume();
   if(!noiseBuf){const len=actx.sampleRate;noiseBuf=actx.createBuffer(1,len,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}
   const out=actx.createGain();out.gain.value=.32;
@@ -2022,7 +2023,7 @@ function djScratch(){
 // fast the record is being pushed, so a back-and-forth drag gives the classic wicka-wicka.
 const SCR={v:null,acc:0,at:0,tick:null};
 function scrAudio(){
- actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+ actx=mkActx();
  if(actx.state==='suspended')actx.resume();
  if(!noiseBuf){const len=actx.sampleRate;noiseBuf=actx.createBuffer(1,len,actx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1}
 }
@@ -2196,9 +2197,10 @@ async function startHouse(){
  }finally{b.classList.remove('busy')}
 }
 async function startTrack(t,house=false,radio=null,cd=null){
+ START_SEQ++;if(DJ.audio){try{DJ.audio.pause()}catch(e){}}
  await speakersAuto();
  P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);ctxSet(t,house||radio||cd);P.pos=0;P.dur=t.duration||0;P.paused=false;
- if(!REMOTE)store.set('np_now',{t:slimT(P.current),at:Date.now()});
+ if(!REMOTE){store.set('np_now',{t:slimT(P.current),at:Date.now()});djPlan()}
  renderNP();accentFrom(t);markNow();hueTrack();if(xmLook())xmasFlySoon();
  try{await engine.play(t)}catch(e){console.error(e);toast('Playback error: '+e.message,'warn')}
 }
@@ -2236,49 +2238,148 @@ async function ctxNext(){
  }catch(e){console.warn('Keep going',e)}
  P.ctx=null;return null;
 }
-// DJ voice test: can speech from the Chromebox reach the WiiM over Bluetooth, and does Spotify come back cleanly afterward?
-const djSay=(text)=>new Promise(res=>{
- try{const u=new SpeechSynthesisUtterance(text);const v=speechSynthesis.getVoices().find(v=>/en-US/i.test(v.lang)&&/Google/i.test(v.name))||speechSynthesis.getVoices().find(v=>/^en/i.test(v.lang));if(v)u.voice=v;u.rate=1.02;
-  let done=false;const fin=()=>{if(!done){done=true;res()}};u.onend=fin;u.onerror=fin;setTimeout(fin,15000);speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){res()}
-});
-async function djTest(){
- const log=$('#djLog'),b=$('#djTestBtn'),t0=Date.now(),L=m=>{log.textContent+=`${((Date.now()-t0)/1000).toFixed(1)}s  ${m}\n`};
- const who=async()=>{try{const j=await api('/me/player');return j&&j.device?{playing:!!j.is_playing,dev:j.device.name||'?',id:j.device.id,song:j.item&&j.item.name}:{playing:false,dev:'none'}}catch(e){return{err:e.message}}};
- const show=w=>w.err?`Spotify check failed: ${w.err}`:`Spotify says: ${w.playing?'PLAYING':'not playing'} on "${unnamedDev(w.dev)?'Speaker':w.dev}"${w.song?' · '+w.song:''}`;
- log.textContent='';b.disabled=true;
+/* ---------- DJ Griff: a radio-style host between songs ----------
+   Every 3–5 songs, when a song ends on its own, the music stays paused while DJ Griff introduces the next one. The line is
+   written by Gemini from facts GriffTunes already has (song, artist, chart run, a Wikipedia line) and spoken by Google Cloud
+   Text-to-Speech. The voice plays from the Chromebox, which reaches the WiiM over Bluetooth, so it can't talk over music
+   (the WiiM plays one source at a time). The clip is made while the song before it plays. Any failure just skips the break. */
+const DJ_VOICES=[['en-US-Chirp3-HD-Puck','Griff · upbeat'],['en-US-Chirp3-HD-Charon','Deep & smooth'],['en-US-Chirp3-HD-Fenrir','Big energy'],['en-US-Chirp3-HD-Aoede','Bright (female)'],['en-US-Chirp3-HD-Kore','Warm (female)']];
+const DJ={left:2,prep:null,audio:null,fails:0,warned:false,lines:[]};
+let START_SEQ=0;
+const djKey=()=>String(store.get('dj_key','')||'').trim();
+const djOn=()=>!!S.dj&&!REMOTE&&!!djKey()&&provider===SPOTIFY;
+function djReset(){DJ.left=1+Math.floor(Math.random()*2);DJ.prep=null;DJ.fails=0;DJ.warned=false}
+// while DJ Griff is on, the jukebox's own beeps stay silent: any sound from the Chromebox makes the WiiM switch to Bluetooth
+function mkActx(){if(S.dj&&!REMOTE)throw new Error('quiet while DJ Griff is on');actx=actx||new (window.AudioContext||window.webkitAudioContext)();return actx}
+async function djFacts(t){
+ const out=[];
+ try{const w=await Promise.race([afWiki(afLead(t.artist||'')),sleep(2500).then(()=>null)]);if(w&&w.lines&&w.lines[0])out.push(`About ${w.title}: ${w.lines[0]}`);if(w&&w.lines&&w.lines[1])out.push(w.lines[1])}catch(e){}
+ try{const idx=afIndex();if(idx){const songs=idx.get(afNorm(afLead(t.artist||'')));const x=songs&&songs.get(songKey(t.name));if(x)out.push(`This song first reached the Billboard Hot 100 Top 20 in ${x.first.slice(0,4)}${x.ones?' and hit No. 1':''}.`);if(songs&&songs.size>1)out.push(`The artist has ${songs.size} Hot 100 Top 20 hits.`)}}catch(e){}
+ return out;
+}
+function djWhy(t,how){
+ if(t.cd){const c=t.cd;if(c.chart==='xmas'||c.chart==='xmascd')return`It's Christmas Mode: a Christmas song${c.pos?`, No. ${c.pos} in the Christmas countdown`:''}. Make it festive.`;
+  if(c.chart==='grad')return`It's the Class of ${c.year} countdown: No. ${c.pos} of that school year's biggest songs.`;
+  return`It's a chart countdown: No. ${c.pos||'?'}${c.date?` on the Hot 100 for the week of ${c.date}`:''}${c.year&&!c.date?` (${c.year})`:''}.`}
+ if(how==='queue')return'Someone requested this song on the jukebox.';
+ if(how==='ctx'||t.cont)return`It continues from the album or playlist "${t.cont||(P.ctx&&P.ctx.it&&P.ctx.it.name)||''}".`;
+ if(how==='radio'||t.radio)return`It's on the ${t.radio||stationById(S.station).name} radio station.`;
+ return'It is from the house mix.';
+}
+async function djGemini(prompt){
+ const key=djKey(),sys=`You are DJ Griff, the upbeat, friendly host of GriffTunes, the Griffin family's basement jukebox. You speak between songs like a classic-hits FM radio DJ.
+Write what DJ Griff says right before the next song starts. Rules:
+- One or two short sentences, 35 words at most. It will be read aloud, so write it the way a DJ talks.
+- Say the song title and artist naturally. Vary how you start; don't always say "up next".
+- You may use ONE fun fact, but only from the facts given. Never invent chart positions, dates, awards or trivia. If no facts are given, keep it simple.
+- No emojis, hashtags, quotation marks, stage directions or sound effects. Don't mention being an AI.`;
+ const body=think=>({systemInstruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:Object.assign({temperature:1.05,maxOutputTokens:600},think?{thinkingConfig:{thinkingBudget:0}}:{})});
+ let last='';
+ for(const [m,think] of [['gemini-2.5-flash',true],['gemini-flash-latest',false]]){
+  const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body(think))});
+  const j=await r.json().catch(()=>({}));const msg=(j.error&&j.error.message)||String(r.status);
+  if(!r.ok){if(/API key|PERMISSION|billing|disabled|quota/i.test(msg))throw new Error('Gemini: '+msg);last=msg;continue}
+  const txt=((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).filter(p=>p.text&&!p.thought).map(p=>p.text).join(' ').replace(/[*_#"“”]/g,'').replace(/\s+/g,' ').trim();
+  if(txt)return txt;
+ }
+ throw new Error('Gemini gave no line'+(last?' · '+last:''));
+}
+async function djSpeech(text){
+ const key=djKey();let last='';
+ for(const name of [S.djVoice||DJ_VOICES[0][0],'en-US-Neural2-J']){
+  const r=await fetch(`https://texttospeech.googleapis.com/v1/text:synthesize?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({input:{text},voice:{languageCode:'en-US',name},audioConfig:{audioEncoding:'MP3'}})});
+  const j=await r.json().catch(()=>({}));
+  if(r.ok&&j.audioContent){const bin=atob(j.audioContent),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return URL.createObjectURL(new Blob([u],{type:'audio/mpeg'}))}
+  last=(j.error&&j.error.message)||String(r.status);
+  if(/API key|PERMISSION|billing|disabled|has not been used/i.test(last))throw new Error('Text-to-Speech: '+last);
+ }
+ throw new Error('Text-to-Speech: '+last);
+}
+async function djMake(t,how,prev){
+ const facts=await djFacts(t);
+ const lines=[`Next song: "${t.name}" by ${t.artist}${t.album?` (from the album ${t.album})`:''}.`,djWhy(t,how)];
+ if(prev&&prev.name&&prev.id!==t.id)lines.push(`The song that just finished: "${prev.name}" by ${prev.artist}.`);
+ if(facts.length)lines.push('Facts you may use (pick at most one):\n- '+facts.join('\n- '));else lines.push('No facts available.');
+ if(DJ.lines.length)lines.push('Avoid repeating these recent lines: '+DJ.lines.slice(-3).join(' | '));
+ const text=await djGemini(lines.join('\n'));
+ const url=await djSpeech(text);
+ return{id:t.id,text,url};
+}
+// best guess at the song that plays next, so its intro can be made ahead of time
+async function djPeek(){
+ if(P.queue[0])return{t:P.queue[0],how:'queue'};
+ if(CD.active||XM.active)return null;
+ const cx=P.ctx;
+ if(cx){try{const list=(await itemTracks(cx.it))||[];let i=list.findIndex(x=>x&&x.id===cx.tid);if(i<0)i=typeof cx.i==='number'?cx.i:-1;const n=list.slice(i+1).find(x=>x&&x.uri&&x.id!==cx.tid);if(n)return{t:Object.assign({},n,{cont:cx.it.name}),how:'ctx'}}catch(e){}return null}
+ if(S.radio&&RADIO.buf.length){let i=RADIO.buf.findIndex(x=>!RADIO.arts.includes(radioArt(x)));if(i<0)i=0;return{t:Object.assign({},RADIO.buf[i],{radio:stationById(S.station).name}),how:'radio'}}
+ return null;
+}
+function djPlan(){
+ if(!djOn()||DJ.left>1)return;
+ const cur=P.current,seq=START_SEQ;
+ setTimeout(async()=>{
+  if(START_SEQ!==seq||!djOn())return;
+  const pk=await djPeek();if(!pk||START_SEQ!==seq)return;
+  const p=djMake(pk.t,pk.how,cur);p.catch(()=>{});DJ.prep={id:pk.t.id,p};
+ },8000);
+}
+function djFail(e){
+ DJ.fails++;console.warn('DJ Griff',e);
+ if(DJ.fails>=2&&!DJ.warned){DJ.warned=true;toast(`🎙 DJ Griff couldn't get on the air · ${String(e&&e.message||e).slice(0,90)}`,'warn')}
+}
+function djPlay(url){
+ return new Promise(res=>{
+  const a=new Audio(url);DJ.audio=a;let done=false;
+  const fin=()=>{if(done)return;done=true;if(DJ.audio===a)DJ.audio=null;clearTimeout(to);res()};
+  const to=setTimeout(fin,30000);a.onended=fin;a.onerror=fin;a.onpause=fin;
+  a.play().catch(fin);
+ });
+}
+// called between songs that ended on their own; returns once the break is over (or skipped)
+async function djBreak(t,how){
+ if(!djOn())return;
+ if(--DJ.left>0)return;
+ DJ.left=3+Math.floor(Math.random()*3);
+ let clip=null;
  try{
-  if(provider!==SPOTIFY||!engine.target){L('Play a song on the WiiM from GriffTunes first (Spotify mode, speaker = WiiM).');return}
-  const dev=engine.target;L(show(await who()));
-  L('PART 1: speaking over the music (music not paused)…');
-  await djSay('Part one. This is the GriffTunes DJ, talking over the music.');
-  L('Part 1 voice finished. Waiting 5 seconds…');await sleep(5000);
-  L(show(await who()));
-  L('PART 2: pausing the music…');
-  try{await api(`/me/player/pause?device_id=${dev}`,{method:'PUT'})}catch(e){L('Pause failed: '+e.message)}
-  await sleep(1200);
-  await djSay('Part two. Hi, this is the GriffTunes DJ. If you can hear me through the big speakers, the Bluetooth link works. Here comes the music.');
-  L('Part 2 voice finished. Starting the music on the WiiM…');
-  const t1=Date.now();
-  try{await api(`/me/player/play?device_id=${dev}`,{method:'PUT'})}catch(e){L('Play failed ('+e.message+'), trying a speaker transfer…');try{await api('/me/player',{method:'PUT',body:{device_ids:[dev],play:true}})}catch(e2){L('Transfer failed too: '+e2.message)}}
-  let ok=false;
-  for(let i=0;i<8&&!ok;i++){await sleep(1500);const w=await who();if(w.playing&&w.id===dev){ok=true;L(`Music back on the WiiM after ${((Date.now()-t1)/1000).toFixed(1)}s (Spotify's view)`)}else if(i===7)L(show(w))}
-  if(!ok)L('Spotify did not report the WiiM playing again within 12 seconds.');
-  L('DONE. Tell Claude: did you hear Part 1 and Part 2 through the big speakers? Did the music keep playing during Part 1? Did it come back after Part 2 on its own, and how long was the gap?');
- }catch(e){L('Test stopped: '+e.message)}
- finally{b.disabled=false}
+  if(DJ.prep&&DJ.prep.id===t.id)clip=await Promise.race([DJ.prep.p,sleep(6000).then(()=>null)]);
+  if(!clip)clip=await Promise.race([djMake(t,how,P.current),sleep(9000).then(()=>{throw new Error('took too long')})]);
+ }catch(e){djFail(e);DJ.prep=null;return}
+ DJ.prep=null;if(!clip)return;
+ DJ.fails=0;DJ.lines.push(clip.text);DJ.lines=DJ.lines.slice(-6);
+ toast(`🎙 DJ Griff · ${clip.text}`,t.img);
+ await djPlay(clip.url);
+ setTimeout(()=>URL.revokeObjectURL(clip.url),5000);
+}
+async function djPreview(){
+ const st=$('#djStat'),key=$('#fDjKey').value.trim();if(key!==djKey()){store.set('dj_key',key);DJ.prep=null}
+ if(!key){st.textContent='Paste the Google Cloud key first.';return}
+ const v=$('#fDjVoice').value;if(v!==S.djVoice){S.djVoice=v;saveS()}
+ st.textContent='Writing and recording a sample…';
+ const t=P.queue[0]||P.current||{id:'x',name:'Take On Me',artist:'a-ha',album:'Hunting High and Low'};
+ try{const c=await djMake(t,P.queue[0]?'queue':'house',null);st.textContent='🎙 '+c.text;await djPlay(c.url);URL.revokeObjectURL(c.url)}
+ catch(e){st.textContent='Problem: '+e.message}
 }
 let advancing=false;
-async function advance(){
- if(advancing)return;advancing=true;
+async function advance(ended=false){
+ // a skip during a DJ Griff break just ends the break
+ if(advancing){if(DJ.audio){try{DJ.audio.pause()}catch(e){}}return}
+ advancing=true;
+ // DJ Griff may talk before the next song when the last one ended on its own; if anything else starts a song meanwhile, that wins
+ const go=async(t,how,house=false,radio=null,cd=null)=>{
+  if(ended===true&&djOn()){const seq=START_SEQ;await djBreak(Object.assign({},t,{cd:cd||t.cd,radio:radio||t.radio}),how);
+   if(START_SEQ!==seq){if(how==='queue'){P.queue.unshift(t);saveQueue();renderQueue()}return false}}
+  await startTrack(t,house,radio,cd);return true;
+ };
  try{
   const next=P.queue.shift();saveQueue();renderQueue();
-  if(next){await startTrack(next);return}
-  if(CD.active){const e=await cdNext();if(e){await startTrack(e.track,false,null,e.cd);cdCard(e);renderCdRows();return}}
-  if(XM.active){const t=await xmasNext();if(t){await startTrack(t,false,null,t.cd);xmasPlayed(t);return}}
-  if(P.ctx){const t=await ctxNext();if(t){await startTrack(t);return}}
-  if(P.current&&P.current.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
-  if(S.radio){const t=await radioNext();if(t){await startTrack(t,false,stationById(S.station).name);return}}
-  if(S.house){const t=await houseNext();if(t){await startTrack(t,true);return}}
+  if(next){await go(next,'queue');return}
+  if(CD.active){const e=await cdNext();if(e){if(await go(e.track,'cd',false,null,e.cd)){cdCard(e);renderCdRows()}return}}
+  if(XM.active){const t=await xmasNext();if(t){if(await go(t,'xmas',false,null,t.cd))xmasPlayed(t);return}}
+  if(P.ctx){const t=await ctxNext();if(t){await go(t,'ctx');return}}
+  if(P.current&&P.current.house){const t=await houseNext();if(t){await go(t,'house',true);return}}
+  if(S.radio){const t=await radioNext();if(t){await go(t,'radio',false,stationById(S.station).name);return}}
+  if(S.house){const t=await houseNext();if(t){await go(t,'house',true);return}}
   engine.stop();P.current=null;P.paused=true;P.pos=0;P.dur=0;renderNP();store.del('np_now');
  }finally{advancing=false}
 }
@@ -2345,7 +2446,7 @@ function markNow(){const id=P.current&&P.current.id;$$('.tRow').forEach(r=>{cons
 setInterval(()=>{
  if(!P.current)return;
  const s=engine.poll();if(!s)return;
- if(s.ended){advance();return}
+ if(s.ended){advance(true);return}
  P.pos=s.pos;if(s.dur)P.dur=s.dur;
  if(P.paused!==s.paused){P.paused=s.paused;renderPlayState()}
  renderProgress();
@@ -2476,7 +2577,7 @@ function shufPath(from,to,n){
 // a tiny sleigh-bell jingle per cover on the Christmas tab
 function jingleTick(k){
  if(!S.sfx)return;
- try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t=actx.currentTime;
+ try{actx=mkActx();const t=actx.currentTime;
   [2637,3520].forEach((f,i)=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f*(k%2?1:1.06);g.gain.setValueAtTime(.0001,t+i*.02);g.gain.exponentialRampToValueAtTime(.035,t+i*.02+.005);g.gain.exponentialRampToValueAtTime(.0001,t+i*.02+.09);o.connect(g).connect(actx.destination);o.start(t+i*.02);o.stop(t+i*.02+.1)})}catch(e){}
 }
 function shufConfetti(snow){
@@ -2488,7 +2589,7 @@ function shufConfetti(snow){
 }
 function shufFanfare(){
  if(!S.sfx)return;
- try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();let t=actx.currentTime;
+ try{actx=mkActx();let t=actx.currentTime;
   [[523,.1],[659,.1],[784,.1],[1047,.32]].forEach(([f,d])=>{const o=actx.createOscillator(),g=actx.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.09,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d+.12);o.connect(g).connect(actx.destination);o.start(t);o.stop(t+d+.15);t+=d*.9})}catch(e){}
 }
 async function shuffleSpin(){
@@ -2796,10 +2897,16 @@ function openSettings(){
  <div class="field"><span class="lab">Move to a new jukebox</span>
   <div class="btnRow"><button class="btn" id="setupSave">Save setup file</button><button class="btn" id="setupLoad">Load setup file</button><input type="file" id="setupFile" accept=".json,application/json" hidden></div>
   <div class="note">Brings Spotify, Hue, family members, genre picks, Up Next and the Couch Remote to another computer. Save here, put the file in Google Drive, load it on the new jukebox, then sign in to Spotify once. It holds private keys: delete it after the move, and turn the old jukebox off.</div></div>
- <div class="field"><span class="lab">DJ voice test (Bluetooth)</span>
-  <div class="note" style="margin-top:0">Checks whether a DJ voice from this Chromebox can come through the WiiM over Bluetooth. First pair the Chromebox with the WiiM (ChromeOS: Quick Settings → Bluetooth), and play a song on the WiiM from GriffTunes. Then tap the button and listen. It takes about 30 seconds: <b>Part 1</b> speaks over the music without pausing it; <b>Part 2</b> pauses the music, speaks, then starts the music again.</div>
-  <div class="btnRow"><button class="btn" id="djTestBtn">Run DJ test</button></div>
-  <div class="note" id="djLog" style="white-space:pre-line;font-family:monospace;font-size:12px"></div></div>
+ <div class="field"><span class="lab">🎙 DJ Griff</span>
+  ${tg('fDj','DJ Griff talks between songs (every 3–5 songs)',S.dj)}
+  <div class="note" style="margin-top:0">DJ Griff introduces the next song, sometimes with a fun fact, through the WiiM over Bluetooth. Keep this Chromebox paired with the WiiM (Quick Settings → Bluetooth). While DJ Griff is on, the jukebox's own coin and button sounds are off so they never interrupt the music.</div>
+  <span class="lab" style="margin-top:12px">Google Cloud API key</span>
+  <input id="fDjKey" type="password" autocomplete="off" spellcheck="false" placeholder="AIza…" value="${esc(store.get('dj_key','')||'')}">
+  <span class="lab" style="margin-top:12px">Voice</span>
+  <select id="fDjVoice">${DJ_VOICES.map(([v,n])=>`<option value="${v}" ${v===(S.djVoice||DJ_VOICES[0][0])?'selected':''}>${n}</option>`).join('')}</select>
+  <div class="btnRow"><button class="btn" id="djPrev">▶ Preview DJ Griff</button></div>
+  <div class="note" id="djStat" style="min-height:0"></div>
+  <div class="note">The key stays on this jukebox only (and in the setup file). Its Google Cloud project needs the Generative Language API (Gemini) and the Cloud Text-to-Speech API turned on.</div></div>
  </div>
  </div></div>
  <div class="setBar"><span class="setDirty" id="setDirty"></span><button class="btn primary" id="setSave">Save</button></div>`;
@@ -2815,7 +2922,10 @@ function openSettings(){
  $('#libNow').onclick=()=>{if(provider!==SPOTIFY){toast('Connect Spotify first');return}LIB.manual=!LIB.manual;$('#libNow').textContent=LIB.manual?'Stop finding songs':'Find songs now while idle';toast(LIB.manual?'Finding songs whenever nothing is playing. It goes slowly to keep Spotify happy':'Stopped finding songs')};
  $('#libDl').onclick=()=>{libDownload();toast('Song library downloaded')};
  $('#setupSave').onclick=()=>setupSave();
- $('#djTestBtn').onclick=()=>djTest();
+ $('#fDj').onchange=e=>{S.dj=e.target.checked;saveS();djReset();$('#djStat').textContent=S.dj?(djKey()?'DJ Griff is on. First break in a song or two.':'Add the Google Cloud key below, then tap Preview.'):'DJ Griff is off.'};
+ $('#fDjKey').onchange=e=>{store.set('dj_key',e.target.value.trim());DJ.prep=null};
+ $('#fDjVoice').onchange=e=>{S.djVoice=e.target.value;saveS();DJ.prep=null};
+ $('#djPrev').onclick=()=>djPreview();
  $('#setupLoad').onclick=e=>{const b=e.currentTarget;if(!b.dataset.arm){b.dataset.arm='1';b.textContent="Tap again: replace this jukebox's setup";setTimeout(()=>{if(b.isConnected){delete b.dataset.arm;b.textContent='Load setup file'}},5000);return}delete b.dataset.arm;b.textContent='Load setup file';$('#setupFile').value='';$('#setupFile').click()};
  $('#setupFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)setupLoad(f)};
  $('#ownerQR').onclick=()=>{if(!S.phones){toast('Turn on phone requests first (and Save)','warn');return}closeModal($('#settingsModal'));openQR(true)};
@@ -3459,7 +3569,7 @@ async function radioNext(){
 function staticNoise(){
  if(!S.sfx)return;
  try{
-  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  actx=mkActx();
   const len=Math.floor(actx.sampleRate*.5),buf=actx.createBuffer(1,len,actx.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<len;i++){const env=Math.sin(Math.PI*i/len);d[i]=(Math.random()*2-1)*env*(.6+.4*Math.sin(i/90))}
   const src=actx.createBufferSource(),f=actx.createBiquadFilter(),g=actx.createGain();
@@ -4067,7 +4177,7 @@ async function libCandidates(){
 }
 /* ---------- Move to a new jukebox: setup file ---------- */
 // Your own Spotify sign-in is left out on purpose (it's one tap to redo, and two boxes sharing it would fight over refreshes).
-const SETUP_KEYS=['settings','family','art_grp','owner_key','room','credits','peerServer','xmas_on','set_tab','queue_spotify','queue_demo'];
+const SETUP_KEYS=['dj_key','settings','family','art_grp','owner_key','room','credits','peerServer','xmas_on','set_tab','queue_spotify','queue_demo'];
 function setupSave(){
  const data={};for(const k of SETUP_KEYS){const v=localStorage.getItem('jbx.'+k);if(v!=null)data[k]=v}
  const d=new Date(),ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -4275,7 +4385,7 @@ function xmasPal(t){
 }
 function xmasBells(){
  if(!S.sfx)return;
- try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();const t0=actx.currentTime;
+ try{actx=mkActx();const t0=actx.currentTime;
   for(let i=0;i<14;i++){const o=actx.createOscillator(),g=actx.createGain(),t=t0+i*.085+Math.random()*.03,f=[2093,2349,2637,3136][i%4]*(1+Math.random()*.01);
    o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.035,t+.005);g.gain.exponentialRampToValueAtTime(.0001,t+.35);
    o.connect(g).connect(actx.destination);o.start(t);o.stop(t+.4)}}catch(e){}
