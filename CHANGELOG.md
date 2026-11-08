@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.10 — November 7, 2026
+
+- **DJ Griff follows the music.** No more "plays through" setting; at each break GriffTunes checks where Spotify is playing:
+  - **The WiiM** (the speaker used in the WiiM test, any speaker named WiiM or reported with a code instead of a name, or the speaker set for the smart plugs): the WiiM plays the clip over Wi-Fi in a short pause, as before.
+  - **This jukebox** (the Chromebox itself, for example with a Bluetooth speaker connected): the next song starts at about a fifth of the volume, DJ Griff talks over its intro from the Chromebox, then the volume glides back up over about 1.3 seconds.
+  - **Any other Spotify speaker:** no break.
+- The Bluetooth-to-the-WiiM mode is gone, so the jukebox's own coin and button sounds are never muted for DJ Griff anymore.
+
 ## 1.9.7 — November 7, 2026
 
 - DJ Griff on the WiiM: the next song waited only 1.6 seconds past the clip's length, but the WiiM takes a moment to fetch the clip before it starts, so the last words got cut off. The wait is now the clip's length plus 3.5 seconds.
