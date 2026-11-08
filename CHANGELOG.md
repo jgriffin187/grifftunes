@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.6 — November 7, 2026
+
+- DJ Griff talks to the WiiM over plain http when the WiiM allows it, and only uses https (with its self-signed certificate) as a fallback. Loading anything with a certificate error makes Chrome label the whole page "Not secure".
+
 ## 1.9.5 — November 7, 2026
 
 - Fix: after a DJ Griff break on the WiiM, the next song could land on the jukebox itself ("GriffTunes") instead of the WiiM. Playing a clip by link takes the WiiM off Spotify for a few seconds, and GriffTunes gave up after one retry. Now, after each clip, GriffTunes waits up to 15 seconds for Spotify to list the WiiM again and wakes it before starting the next song, and for a minute after a clip it retries the WiiM for up to ~15 seconds before ever falling back to the jukebox.
