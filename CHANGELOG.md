@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.2 — November 7, 2026
+
+- DJ Griff takes two keys: a Google Cloud key for Text-to-Speech (the voice) and a Google AI Studio key for Gemini (the writing). Google Cloud keys now need a service account to use Gemini, while AI Studio keys work directly. If the writing key is empty, the voice key is used for both.
+
 ## 1.9.1 — November 7, 2026
 
 - DJ Griff Preview: when the Google key's API restrictions block Gemini or Text-to-Speech, the message now says which service to tick on the key instead of "Gemini gave no line".
