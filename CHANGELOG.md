@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.12.1 — November 8, 2026
+
+- **Volume sliders are knob-only:** on the touchscreen volume slider, the turntable's sliders, the screensaver mini player and the phone's slider, a touch has to start on (or right next to) the knob to change the volume. A tap or a swipe that starts elsewhere on the bar, like wiping frost off the screen, is ignored instead of jumping the volume. Swipes that start off the slider never affected it.
+
 ## 1.12 — November 8, 2026
 
 - **❄ Frosty screen** (Christmas Mode or the 🎄 Christmas tab, jukebox only): after a minute without touches, frost creeps in from the edges (procedural ice texture with feathery crystals, ragged front), reaching full frost after about 8 minutes: heavy at the edges, a see-through haze in the middle. Any touch pauses the growth.
