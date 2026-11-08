@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14.5 — November 8, 2026
+
+- **Memorial: the wreck itself.** The "Found" card now shows an underwater video still of "EDMUND FITZGERALD" on the pilothouse (supplied by Josh; photographer unknown, so credited that way), stored in the repo at `photos/efz-wreck-name.jpg` (1280 px) and kept on the jukebox by the service worker (`/photos/` added to its keep list). It replaces the CURV III photo. Photo credits now name where each photo comes from (Wikimedia Commons or stored with GriffTunes).
+
 ## 1.14.4 — November 8, 2026
 
 - **Memorial: the seas beside the ship.** The wind/wave boxes and looping wave became one strip: a header with wind (and a compass arrow showing which way it blows, NE then NW) and waves, over a canvas side view of the Fitzgerald (red hull, white sheer stripe, 21 hatch coamings, after cabins and stack, forward house and pilothouse) in a moving sea.

@@ -3,7 +3,7 @@ const CACHE = 'grifftunes-shell-v3';
 // Files that never change once published, kept on the jukebox so they load instantly and work offline.
 // (If one of these files is ever replaced, give it a new name or bump ASSETS.)
 const ASSETS = 'grifftunes-assets-v1';
-const KEEP = [/\/vendor\//, /\/efz-bell\.mp3$/];
+const KEEP = [/\/vendor\//, /\/photos\//, /\/efz-bell\.mp3$/];
 // Fonts, the memorial's album cover and its photos (Wikimedia Commons): served from the copy on the jukebox, refreshed in the background.
 const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
 self.addEventListener('install', () => self.skipWaiting());
