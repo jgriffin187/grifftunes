@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.9.4 — November 7, 2026
+
+- DJ Griff over Wi-Fi confirmed working on the real WiiM (Firebase bucket `grifftunes-dj.firebasestorage.app`, clips deleted after 1 day by a lifecycle rule). About updated: Wi-Fi is the recommended setup; Bluetooth stays as an option.
+
 ## 1.9.3 — November 7, 2026
 
 - **DJ Griff over Wi-Fi (test):** a new "DJ Griff plays through" choice. "The WiiM over Wi-Fi" uploads each clip to a Firebase Storage bucket (as `dj-….mp3`, so the link needs no escaping) and tells the WiiM to play that link through its local HTTP API (`setPlayerCmd:play:<url>`), then GriffTunes restarts Spotify on the WiiM. No Bluetooth, so nothing drops out. Settings → Extras → DJ Griff has the WiiM address, the bucket, a **Trust the WiiM** button (Chrome has to accept the WiiM's self-signed certificate once) and a **Test on the WiiM** button that runs the whole path and times it. In Wi-Fi mode the jukebox's own sounds stay on.
