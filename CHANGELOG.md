@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.14.1 — November 8, 2026
+
+- **Couch remote: Reload jukebox.** A full-width button under Speakers and Lights on the couch remote (owner link only). First tap arms it ("TAP AGAIN", amber); a second tap within 4 seconds sends `reload` (an owner-only command) and the jukebox shows a toast and reloads 1.5 s later. Music on a Spotify Connect speaker keeps playing and is picked back up after the reload; Up Next is saved; the remote's normal retry reconnects it.
+
 ## 1.14 — November 8, 2026
 
 - **📻 Alpine car radio (test radio style):** Settings → Extras → **Radio style** → "Alpine car radio (test)". The tuning dial stays the default; phones keep the dial either way.
