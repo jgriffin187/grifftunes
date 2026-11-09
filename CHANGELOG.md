@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.1 — November 8, 2026
+
+- **Lights off when it's quiet.** New Settings → Philips Hue switch "Turn the lights off after the music has been quiet a while" (on by default) with its own minutes (default 30, 5–600). Once nothing has played for that long, GriffTunes checks the bridge and, if any of the room's lights are on, fades the room group off over 5 s (the speaker plugs are separate) and shows a toast. It happens once per quiet stretch, never before the first song since startup, not while the lights are on Hands off or while the Edmund Fitzgerald memorial is open. The next song's existing "lights on with the music" turns them back on.
+
 ## 1.15 — November 8, 2026
 
 - **The Alpine car radio is the jukebox's radio.** Removed the Settings → Extras → Radio style choice; on the jukebox the 📻 button always opens the Alpine faceplate and Now Playing always shows the small green LCD instead of the tuning dial. The old `S.radioUi` setting is ignored. Phones (guest and couch remote) keep the tuning dial, since the faceplate doesn't fit a phone screen.
