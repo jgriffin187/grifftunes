@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.2 — November 8, 2026
+
+- **Lights switch instead of automatic lights-off.** Removed 1.15.1's automatic lights-off and its settings. The Lights window (the jukebox's lights button) now has a **Lights** row above **Speakers**, in the same style: it shows whether the room's lights are on and a **Turn off / Turn on** button. Off fades the room group off; on turns it on and reapplies the current light mode. The light mode itself isn't changed, so "lights on with the music" still works after a quiet stretch.
+
 ## 1.15.1 — November 8, 2026
 
 - **Lights off when it's quiet.** New Settings → Philips Hue switch "Turn the lights off after the music has been quiet a while" (on by default) with its own minutes (default 30, 5–600). Once nothing has played for that long, GriffTunes checks the bridge and, if any of the room's lights are on, fades the room group off over 5 s (the speaker plugs are separate) and shows a toast. It happens once per quiet stretch, never before the first song since startup, not while the lights are on Hands off or while the Edmund Fitzgerald memorial is open. The next song's existing "lights on with the music" turns them back on.
