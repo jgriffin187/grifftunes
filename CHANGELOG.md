@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.3 — November 8, 2026
+
+- **DJ Griff voices:** the Voice menu now lists all 30 Google Chirp 3 HD voices (16 male, 14 female) in American, British and Australian English (90 choices), grouped, with the five original picks under Favorites. The voice's locale is sent as the request's languageCode; Neural2-J stays the fallback.
+- **Pause before he talks:** each clip now starts with real silence (Settings → Extras → DJ Griff → "Pause before he talks": none to 3 s, default 1.5 s) so the WiiM/Evolves don't swallow his first word. The silence is added directly to the MP3 (silent Layer III frames copied from the clip's own frame header, any Xing/Info header frame dropped), and the clip's length is counted from its frames, so the WiiM wait and the next song's start stay exact. Checked with 24 kHz and 44.1 kHz test files: 1.54–1.58 s of silence decoded, durations correct in Chrome.
+
 ## 1.15.2 — November 8, 2026
 
 - **Lights switch instead of automatic lights-off.** Removed 1.15.1's automatic lights-off and its settings. The Lights window (the jukebox's lights button) now has a **Lights** row above **Speakers**, in the same style: it shows whether the room's lights are on and a **Turn off / Turn on** button. Off fades the room group off; on turns it on and reapplies the current light mode. The light mode itself isn't changed, so "lights on with the music" still works after a quiet stretch.
