@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.4 — November 8, 2026
+
+- The Fitz (Edmund Fitzgerald) button's label now uses the top bar's Bungee lettering, like the Christmas countdown next to it, instead of the memorial's old-style serif.
+
 ## 1.15.3 — November 8, 2026
 
 - **DJ Griff voices:** the Voice menu now lists all 30 Google Chirp 3 HD voices (16 male, 14 female) in American, British and Australian English (90 choices), grouped, with the five original picks under Favorites. The voice's locale is sent as the request's languageCode; Neural2-J stays the fallback.
