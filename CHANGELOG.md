@@ -2,6 +2,15 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.5 — November 9, 2026
+
+Tune-up from a full code review (items 3, 5, 7 and 8 of the review list).
+
+- **Less drawing behind things:** the Now Playing visualizer stops redrawing, and the background animation pauses, while an album/search/settings window, the Alpine faceplate or the Edmund Fitzgerald memorial covers them (before, the bars kept animating under the windows' blur).
+- **Redraw only on change:** the progress bar and times are written only when their text or width changes (was 5 writes a second, even paused); the Alpine LCD segments are rebuilt only when their characters change, and the mini LCD rests while covered; the cover flow no longer auto-advances while it's hidden (Countdown and Grad Year tabs, windows, full-screen views).
+- **Lighter update check:** every 10 minutes GriffTunes now asks GitHub Pages only for the page's ETag (a HEAD request) instead of downloading and hashing all ~600 KB; it falls back to the old way if no ETag or Last-Modified comes back.
+- **Reloads wait:** auto-update and the weekly fresh start no longer reload while the memorial (including the bell), the lyrics screen or the Alpine faceplate is open.
+
 ## 1.15.4 — November 8, 2026
 
 - The Fitz (Edmund Fitzgerald) button's label now uses the top bar's Bungee lettering, like the Christmas countdown next to it, instead of the memorial's old-style serif.
