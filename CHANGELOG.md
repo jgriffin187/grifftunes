@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.6 — November 9, 2026
+
+More from the code review (items 4, 6 and 9).
+
+- **Facts ticker:** the countdown ticker no longer measures the page on every frame. Widths are read about once a second and when a fact joins or leaves; the screensaver and turntable copies are rebuilt only when the facts change. Also fixes a small hop on the big-screen ticker each time a fact scrolled off (the gap between facts was assumed to be 36 px; it is now measured).
+- **Charts and song library kept on the jukebox:** the service worker saves `hot100-top20.json`, `country-top20.json`, `grad-facts.json` and `song-library.json`. A copy under 6 hours old is used straight away; older than that, the network is asked first and the saved copy is the fallback, so a new weekly chart still shows up the same day. The chart archive and song library also load on their own 45 seconds after start-up, so the first tap on Countdown or Grad Year doesn't wait.
+- **DJ Griff clean-up:** 20 seconds after the WiiM finishes a clip, GriffTunes deletes it from the Firebase bucket (this needs the bucket's rules to allow deletes; if they don't, nothing changes). Clips made ahead of time but never used are released from memory.
+
 ## 1.15.5 — November 9, 2026
 
 Tune-up from a full code review (items 3, 5, 7 and 8 of the review list).

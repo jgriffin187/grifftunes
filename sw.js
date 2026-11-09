@@ -5,6 +5,9 @@ const CACHE = 'grifftunes-shell-v3';
 const ASSETS = 'grifftunes-assets-v1';
 const KEEP = [/\/vendor\//, /\/photos\//, /\/efz-bell\.mp3$/];
 // Fonts, the memorial's album cover and its photos (Wikimedia Commons): served from the copy on the jukebox, refreshed in the background.
+// Chart archive, song library and facts: big files that change at most weekly. Served from the jukebox while the copy
+// is under 6 hours old; after that the network is asked first, and the saved copy is the fallback when it can't be reached.
+const DATA = /\/(hot100-top20|country-top20|grad-facts|song-library)\.json$/, DATA_FRESH = 6 * 3600e3;
 const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(
@@ -29,6 +32,21 @@ self.addEventListener('fetch', e => {
       const r = await fetch(req);
       if (r.ok) c.put(req, r.clone());
       return r;
+    }));
+    return;
+  }
+  if (url.startsWith(self.location.origin) && DATA.test(url.split('?')[0])) {
+    e.respondWith(caches.open(ASSETS).then(async c => {
+      const key = url.split('?')[0], hit = await c.match(key);
+      if (hit && Date.now() - (+hit.headers.get('x-gt-at') || 0) < DATA_FRESH) return hit;
+      try {
+        const r = await fetch(req);
+        if (r.ok) {
+          const body = await r.clone().blob();
+          await c.put(key, new Response(body, { headers: { 'content-type': r.headers.get('content-type') || 'application/json', 'x-gt-at': String(Date.now()) } }));
+        }
+        return r.ok || !hit ? r : hit;
+      } catch (err) { if (hit) return hit; throw err; }
     }));
     return;
   }
