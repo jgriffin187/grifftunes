@@ -2,6 +2,15 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.15.7 — November 9, 2026
+
+Fix: the memorial's lights (reported: no storm blue, no flashes with the bell).
+
+- **Lights off when the memorial opens:** the blue was only ever sent to lights that were already on, so with the room dark nothing happened, and the bell flashes had nothing to flash. The memorial now switches the room on in storm blue, and switches it back off when it closes (unless the music turned the lights on in the meantime).
+- **Blue sent too early:** when the song start turned the lights on ("first song after a quiet stretch"), that happened after the blue command, so the lights came up in their old colors. The blue is sent again once the song is going.
+- **Blue could be replaced:** anything that re-applied the normal light mode while the memorial was open (leaving the screensaver, a coin flash, the Lights window) put album colors back. `hueApply()` now keeps the blue while the memorial is open.
+- **Hue requests time out after 8 seconds** (they could wait forever, blocking every command queued behind them), and a room-wide command that the bridge rejects because GriffTunes' light group is gone re-creates the group and resends once.
+
 ## 1.15.6 — November 9, 2026
 
 More from the code review (items 4, 6 and 9).
