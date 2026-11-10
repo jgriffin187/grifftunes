@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16 — November 10, 2026
+
+- **Finer volume on the jukebox:** − and + buttons at the ends of the Now Playing volume slider. A tap moves the volume 2 points; holding steps repeatedly. The slider still drags for big moves.
+- **Volume number:** the current volume (0–100) shows over the knob while it is being changed on the touchscreen, then fades.
+- Phones and the couch remote are unchanged.
+
 ## 1.15.7 — November 9, 2026
 
 Fix: the memorial's lights (reported: no storm blue, no flashes with the bell).
