@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.5 — November 11, 2026
+
+- **Unplayable songs dimmed:** album, playlist and Liked Songs lists now ask Spotify for playability (`market=from_token`). Songs Spotify marks `is_playable:false`, and songs Spotify refused when the jukebox tried to start them (remembered on the jukebox, last 500), show dimmed with "Not available on Spotify" and no Queue / Play next / Play now buttons.
+- Those songs are left out of "Queue the whole album/playlist" (the button's count is playable songs only), the house mix, and keep-going playback through an album or playlist. Tapping one from anywhere else gets "Spotify can't play …" instead of a charge.
+- A refused song that later plays fine is taken off the list. Cached lists repaint when a song's playability changes.
+
 ## 1.16.4 — November 10, 2026
 
 Fix: music jumping from the WiiM to the (silent) jukebox when a song was picked.
