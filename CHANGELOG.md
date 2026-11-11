@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.1 — November 10, 2026
+
+- **Queue the whole album everywhere on the jukebox:** the button now shows on every album opened on the touchscreen (search results, artist pages, tabs), at the usual album price. Before, it only showed on Greatest Albums, Christmas albums, playlists and the couch remote. Guests' phones are unchanged.
+
 ## 1.16 — November 10, 2026
 
 - **Finer volume on the jukebox:** − and + buttons at the ends of the Now Playing volume slider. A tap moves the volume 2 points; holding steps repeatedly. The slider still drags for big moves.
