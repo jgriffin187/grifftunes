@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.4 — November 10, 2026
+
+Fix: music jumping from the WiiM to the (silent) jukebox when a song was picked.
+
+- When Spotify refused a song with "Restriction violated" (a track it can't play: pulled from the catalog or not licensed here), GriffTunes treated every failed start as "the speaker has gone missing": it retried, gave up on the WiiM, switched to the jukebox's own player, failed there too ("Playback error: Player command failed: Restriction violated"), and then stayed on the jukebox for every song after that.
+- Now, if the speaker is still listed by Spotify and the refusal is a restriction, GriffTunes tries once more, then treats it as an unplayable song: it stays on the speaker, shows "Spotify can't play … right now. Skipping it", clears Now Playing and moves on to the next song. After three refusals in a row it stops instead of skipping forever.
+- Credits spent on a refused song are not refunded yet.
+
 ## 1.16.3 — November 10, 2026
 
 - Settings → Extras → DJ Griff has a **Check the connection** button: it tries the WiiM over plain http and https (and two alternate ports) and shows which answer, how fast, and the Chrome version and window mode. For tracking down the "Not secure" label on the new Chromebox.
