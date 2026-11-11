@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.2 — November 10, 2026
+
+- **Full screen in the installed app:** "Go full screen on first tap" was skipped whenever GriffTunes ran as an installed app, on the assumption that the app window was already full screen. ChromeOS can open the app as an ordinary window with a title bar, so the check now looks at whether the display is actually full screen.
+
 ## 1.16.1 — November 10, 2026
 
 - **Queue the whole album everywhere on the jukebox:** the button now shows on every album opened on the touchscreen (search results, artist pages, tabs), at the usual album price. Before, it only showed on Greatest Albums, Christmas albums, playlists and the couch remote. Guests' phones are unchanged.
