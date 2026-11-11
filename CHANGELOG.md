@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.3 — November 10, 2026
+
+- Settings → Extras → DJ Griff has a **Check the connection** button: it tries the WiiM over plain http and https (and two alternate ports) and shows which answer, how fast, and the Chrome version and window mode. For tracking down the "Not secure" label on the new Chromebox.
+
 ## 1.16.2 — November 10, 2026
 
 - **Full screen in the installed app:** "Go full screen on first tap" was skipped whenever GriffTunes ran as an installed app, on the assumption that the app window was already full screen. ChromeOS can open the app as an ordinary window with a title bar, so the check now looks at whether the display is actually full screen.
