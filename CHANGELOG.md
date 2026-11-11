@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.6 — November 11, 2026
+
+- **Album covers in Countdown and Grad Year:** each row shows the song's cover next to its number. Covers come from the song library; the ~6,500 library songs without one get it from Spotify's public embed info (oEmbed, no sign-in, not counted against the Spotify request budget) when the row scrolls near the screen, three at a time, and the cover is then kept in the library on the jukebox. Songs not on Spotify show an empty tile.
+
 ## 1.16.5 — November 11, 2026
 
 - **Unplayable songs dimmed:** album, playlist and Liked Songs lists now ask Spotify for playability (`market=from_token`). Songs Spotify marks `is_playable:false`, and songs Spotify refused when the jukebox tried to start them (remembered on the jukebox, last 500), show dimmed with "Not available on Spotify" and no Queue / Play next / Play now buttons.
