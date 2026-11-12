@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.8 — November 12, 2026
+
+- **Country Gold, every year:** `country-top20.json` now covers 1958–2026 (69 years; it had 1986, 1991 … 2021 only). Built the same way from Wikipedia's yearly lists of Billboard country #1s (Hot C&W Sides / Hot Country Singles / Hot Country Singles & Tracks / Hot Country Songs, topped up with Country Airplay #1s from late 2012 on). Double A-sides keep the A-side title. The eight existing years are unchanged. Years before 1967 had fewer than 20 different #1s, so they count down from fewer. 2026 runs through the Nov 14 chart; it is not refreshed automatically.
+
 ## 1.16.7 — November 12, 2026
 
 - **Countdown opens on last week's chart** instead of 20 years ago (jukebox and phones). Country, which may have no chart for the current year, falls back to the newest year that has one.
