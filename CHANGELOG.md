@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.7 — November 12, 2026
+
+- **Countdown opens on last week's chart** instead of 20 years ago (jukebox and phones). Country, which may have no chart for the current year, falls back to the newest year that has one.
+
 ## 1.16.6 — November 11, 2026
 
 - **Album covers in Countdown and Grad Year:** each row shows the song's cover next to its number. Covers come from the song library; the ~6,500 library songs without one get it from Spotify's public embed info (oEmbed, no sign-in, not counted against the Spotify request budget) when the row scrolls near the screen, three at a time, and the cover is then kept in the library on the jukebox. Songs not on Spotify show an empty tile.
