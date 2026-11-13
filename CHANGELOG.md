@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.11 — November 12, 2026
+
+- **Dixie Chicks → The Chicks, Lady Antebellum → Lady A:** `song-library.json` now has Spotify matches (original album versions, with covers) for the 6 Dixie Chicks and 6 Lady Antebellum Country Gold #1s that weren't in the library ("Wide Open Spaces", "There's Your Trouble", "You Were Mine", "Cowboy Take Me Away", "Without You", "Travelin' Soldier"; "I Run to You", "American Honey", "Our Kind of Love", "We Owned the Night", "Downtown", "What If I Never Get Over You"). Their Hot 100 songs were already matched.
+- Song lookups also treat Dixie Chicks = The Chicks, Lady Antebellum = Lady A and Snoop Doggy Dogg = Snoop Dogg.
+
 ## 1.16.10 — November 12, 2026
 
 - **Puff Daddy → Diddy:** Billboard credits him as Puff Daddy / P. Diddy; Spotify lists the same recordings under Diddy, so the artist check rejected them. `song-library.json` now has Spotify matches for "Can't Nobody Hold Me Down", "Been Around the World", "Victory" and "Satisfy You" (all *No Way Out* / *Forever* originals), and "I Need a Girl (Part Two)" now points to Part Two instead of Part One. "Come With Me" (with Jimmy Page) isn't on Spotify. 13 other Puff Daddy / P. Diddy songs were already matched.
