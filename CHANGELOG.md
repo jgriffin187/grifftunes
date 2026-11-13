@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.10 — November 12, 2026
+
+- **Puff Daddy → Diddy:** Billboard credits him as Puff Daddy / P. Diddy; Spotify lists the same recordings under Diddy, so the artist check rejected them. `song-library.json` now has Spotify matches for "Can't Nobody Hold Me Down", "Been Around the World", "Victory" and "Satisfy You" (all *No Way Out* / *Forever* originals), and "I Need a Girl (Part Two)" now points to Part Two instead of Part One. "Come With Me" (with Jimmy Page) isn't on Spotify. 13 other Puff Daddy / P. Diddy songs were already matched.
+- Song lookups treat Puff Daddy, P. Diddy, Puffy and Sean Combs as Diddy.
+- The library file can now correct a jukebox's own saved "not on Spotify" (and songs listed under `fixed` replace a saved match), so these show up without clearing anything.
+
 ## 1.16.9 — November 12, 2026
 
 - **Country Gold in the overnight song finder:** the library's list of songs to find now includes every Country Gold #1 (newest years first), after the Hot 100 songs. About 1,100 of them were never on the Hot 100, so they had no Spotify match or cover until a countdown played them. Same pace as before: 1–6 AM, only when nothing is playing, one lookup every 20 seconds, stops for the night after any Spotify slow-down. Found songs come with their album cover.
