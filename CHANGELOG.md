@@ -2,6 +2,19 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.1 — November 12, 2026
+
+**Settings reorganized** (Extras was a catch-all)
+
+- **Music:** music source, Spotify setup, family members' playlists, song library.
+- **Jukebox:** jukebox name, rules, credits per coin, Right now, guests' phones and the couch remote (Phones tab merged in).
+- **DJ Griff:** its own tab. On/off, personality, voice, pause and Preview up front; the keys, WiiM address, Firebase bucket and Trust/Check/Test buttons sit in a folded **Setup** section that opens by itself when a key is missing, a break has failed, or a preview hits a problem.
+- **Lights:** unchanged.
+- **Screen:** screensaver, full screen and app install.
+- **Fun:** Christmas Mode and frost; the Edmund Fitzgerald memorial switch now has its own section instead of hiding under Christmas Mode.
+- **System:** keep the screen awake, weekly fresh start, move to a new jukebox, version and About.
+- A remembered old tab (Spotify, Phones, Extras) opens its new home.
+
 ## 1.17 — November 12, 2026
 
 **DJ Griff personality**
