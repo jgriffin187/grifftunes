@@ -2,6 +2,17 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17 — November 12, 2026
+
+**DJ Griff personality**
+
+- **Personality setting** (Settings → DJ Griff): Friendly (the old upbeat FM host), **Witty** (new default: dry humor, family-safe), Full sarcasm (roasts, clean) and Explicit (swearing and crude adult humor). Every level keeps hard limits: no slurs, no jokes about race, religion, sexuality, gender, disability or bodies, nothing sexual about real people.
+- **Targets:** the song and artist, whoever picked it, himself (a DJ living in a Chromebox) and the room's listening habits.
+- **More context per break:** day and time, holidays (New Year's, Valentine's, St. Patrick's, July 4, Halloween, Thanksgiving, Christmas Eve/Day, New Year's Eve), Christmas Mode, the last five songs played in the past three hours, and the family member's name when a song plays from their playlist. Touchscreen requests stay anonymous ("whoever picked this"). Grad Year breaks celebrate the class first.
+- **Length:** up to 45 words (was 35), with the title and artist near the end. Half of the breaks are told to keep the joke short so it doesn't get old.
+- **Explicit:** Gemini's harassment, sexual and dangerous-content filters are relaxed to block only high-severity; hate-speech filtering stays strict. A line Google still refuses is rewritten at Full sarcasm for that break.
+- Facts (chart positions, dates, awards) still come only from GriffTunes' own facts at every level.
+
 ## 1.16.11 — November 12, 2026
 
 - **Dixie Chicks → The Chicks, Lady Antebellum → Lady A:** `song-library.json` now has Spotify matches (original album versions, with covers) for the 6 Dixie Chicks and 6 Lady Antebellum Country Gold #1s that weren't in the library ("Wide Open Spaces", "There's Your Trouble", "You Were Mine", "Cowboy Take Me Away", "Without You", "Travelin' Soldier"; "I Run to You", "American Honey", "Our Kind of Love", "We Owned the Night", "Downtown", "What If I Never Get Over You"). Their Hot 100 songs were already matched.
