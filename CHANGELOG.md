@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.3 — November 13, 2026
+
+- **Countdown lists show all 20 songs** without scrolling: rows size themselves so 10 fit in each column (slimmer padding, 44 px covers). Longer lists, like the Christmas Countdown's 25, still scroll.
+
 ## 1.17.2 — November 13, 2026
 
 **Country Gold song lookups**
