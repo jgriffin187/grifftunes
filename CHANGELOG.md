@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.16.9 — November 12, 2026
+
+- **Country Gold in the overnight song finder:** the library's list of songs to find now includes every Country Gold #1 (newest years first), after the Hot 100 songs. About 1,100 of them were never on the Hot 100, so they had no Spotify match or cover until a countdown played them. Same pace as before: 1–6 AM, only when nothing is playing, one lookup every 20 seconds, stops for the night after any Spotify slow-down. Found songs come with their album cover.
+- **Settings → Song library** has a second line for Country Gold: songs found out of the total, not on Spotify, left to find (with a rough number of nights), and how many have covers.
+
 ## 1.16.8 — November 12, 2026
 
 - **Country Gold, every year:** `country-top20.json` now covers 1958–2026 (69 years; it had 1986, 1991 … 2021 only). Built the same way from Wikipedia's yearly lists of Billboard country #1s (Hot C&W Sides / Hot Country Singles / Hot Country Singles & Tracks / Hot Country Songs, topped up with Country Airplay #1s from late 2012 on). Double A-sides keep the A-side title. The eight existing years are unchanged. Years before 1967 had fewer than 20 different #1s, so they count down from fewer. 2026 runs through the Nov 14 chart; it is not refreshed automatically.
