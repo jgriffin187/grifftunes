@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.2 — November 13, 2026
+
+**Country Gold song lookups**
+
+- **Why overnight finding stalled:** any Spotify slow-down earlier in the day left a "strike" that only clears after a successful Spotify call. Overnight, with nothing playing, the finder was the only thing that would make that call, and it refused to start while the strike was there, so it sat idle all night. Now only a slow-down in the last hour stops the night's work.
+- **Settings → Music → Song library** shows what the last run did ("Last run: 412 looked up", plus why it stopped, if it did).
+- **Country Gold songs added to the shared song-library.json**, looked up from the Mac mini in one sitting (same matching rules as the jukebox), so every jukebox gets them without waiting on overnight finding.
+
 ## 1.17.1 — November 12, 2026
 
 **Settings reorganized** (Extras was a catch-all)
