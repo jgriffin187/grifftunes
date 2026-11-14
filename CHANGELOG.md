@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.7 — November 14, 2026
+
+- **Gentler overnight song finding** (Spotify's search blocks apply to the whole account, not just GriffTunes): one song per minute (was one per 20 seconds), at most 60 Spotify requests of any kind in the past hour (was 200), at most 3 in 30 seconds (was 4), and at most 150 songs per night (no cap before). Any slow-down from Spotify still ends the night. Settings' "about N nights" estimate uses 150 a night.
+
 ## 1.17.6 — November 14, 2026
 
 - Disconnecting Spotify or changing the Client ID also clears the saved **search pause** (Spotify's search quota, which GriffTunes otherwise waits out for 2 hours before trying again). Spotify's block since Nov 13 turned out to be search-only (`QUOTA_EXCEEDED`); playback, albums, playlists and devices kept working.
