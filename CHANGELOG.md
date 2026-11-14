@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.9 — November 14, 2026
+
+- **Decade radio from the song library:** 60s, 70s, 80s, 90s, 2000s and Today draw from every Hot 100 top-20 song that charted in those years and is already matched in the song library. No Spotify searches (falls back to the old search only if fewer than 12 songs are available).
+- **Never the same order:** each refill is a fresh random 40, dealt out one artist at a time as before. Each decade remembers its last 300 played songs across reloads and skips them; when a decade runs low on unplayed songs, its memory resets.
+
 ## 1.17.8 — November 14, 2026
 
 - **Couch Remote: Spotify search status.** A new row under Speakers and Lights shows whether Spotify is still blocking searches: red **BLOCKED** (since when, and when it was last checked), green **WORKING**, or orange **BUSY** with a countdown during a general slow-down. Tap it to check right now: one search, at most once every 10 minutes. While blocked, the jukebox also checks by itself once every 2 hours. Every real search the jukebox makes updates it too.
