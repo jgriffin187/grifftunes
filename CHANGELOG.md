@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.8 — November 14, 2026
+
+- **Couch Remote: Spotify search status.** A new row under Speakers and Lights shows whether Spotify is still blocking searches: red **BLOCKED** (since when, and when it was last checked), green **WORKING**, or orange **BUSY** with a countdown during a general slow-down. Tap it to check right now: one search, at most once every 10 minutes. While blocked, the jukebox also checks by itself once every 2 hours. Every real search the jukebox makes updates it too.
+
 ## 1.17.7 — November 14, 2026
 
 - **Gentler overnight song finding** (Spotify's search blocks apply to the whole account, not just GriffTunes): one song per minute (was one per 20 seconds), at most 60 Spotify requests of any kind in the past hour (was 200), at most 3 in 30 seconds (was 4), and at most 150 songs per night (no cap before). Any slow-down from Spotify still ends the night. Settings' "about N nights" estimate uses 150 a night.
