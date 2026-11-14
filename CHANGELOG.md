@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.22 — November 14, 2026
+
+**"Hey DJ, roast me"**
+
+- About 30 seconds of DJ Griff making fun of someone's music taste (3 or 4 jokes and a closer), out loud and on screen, in his personality setting (Friendly to Explicit, same hard limits). Free.
+- **Who:** "roast me" from the jukebox mic or the couch remote roasts the Spotify account owner (top and followed artists, songs played a lot lately, saved albums, playlist names) plus what the jukebox played in the last few hours. "Roast Liz" / "roast Carson" uses that family member's linked playlists (names and their most frequent artists). "Roast the room" / "roast us", or "roast me" from a guest's phone, uses only recent plays. Someone it doesn't know gets blamed for the room's taste.
+- Facts (artists, songs, albums, playlist names, counts) come only from that data; the jokes are made up. The Spotify reading is cached for a day and uses no searches.
+- **Play history:** the jukebox now remembers its last 100 plays and how each got there (picked by someone, radio, house mix, countdown, album carrying on).
+- On the WiiM the song pauses during the roast and picks up where it was; on this jukebox's own speaker the music dips. Clips on this jukebox can now run up to 80 seconds (was 30).
+
 ## 1.21 — November 14, 2026
 
 **Voice requests: queue, next or now** (like the + Queue / Play next / Play now buttons, picked by what you say)
