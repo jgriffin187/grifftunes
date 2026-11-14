@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.10 — November 14, 2026
+
+- **Covers for decade radio:** songs from the song library that had no cover saved now get one from Spotify's public embed info (no quota, no search), fetched two at a time in the background when a station refills, and briefly waited for right before a song starts. Covers are kept with the library, so each is fetched once.
+
 ## 1.17.9 — November 14, 2026
 
 - **Decade radio from the song library:** 60s, 70s, 80s, 90s, 2000s and Today draw from every Hot 100 top-20 song that charted in those years and is already matched in the song library. No Spotify searches (falls back to the old search only if fewer than 12 songs are available).
