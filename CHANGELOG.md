@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.19 — November 14, 2026
+
+**"Hey DJ" wake word** (step 2 of the GriffTunes Assistant)
+
+- **Settings → DJ Griff → Listen for "Hey DJ"** (off until you turn it on): the jukebox listens on its own microphone for the wake word. Detection runs on the Chromebox itself (openWakeWord's models in Chrome via onnxruntime-web, stored with the app); no sound leaves the basement until it hears "Hey DJ".
+- **When it hears it:** the Ask DJ window opens, the music dips to a fifth of its volume (on the WiiM, the WiiM's own volume), and about 5 seconds are recorded, including a moment before, so "Hey DJ, play Purple Rain" can be said in one breath. Gemini listens to that clip and works out the song; then it's the same as Ask DJ: library first, normal credits, DJ Griff answers. Tap the mic to stop early. Without a Writing key, the browser's speech recognition takes over instead.
+- **Sensitivity** (High to Low) and a **live meter** while Settings is open: say the wake word and watch the bar jump past the gold line. In Settings it's only a test, so nothing opens. The meter also shows how hard the computer is working (about 5 ms per 80 ms of sound in testing).
+- **The Hey DJ model** is trained separately (`wake/train_hey_dj.ipynb`, run in Google Colab, about an hour). Until `wake/hey_dj.onnx` is in place, it listens for **"Hey Jarvis"** instead, so the setup can be tested on the Chromebox now.
+- **The Ask DJ button** on the touchscreen now also dips the music while it listens, and shows a green dot while the jukebox is listening for "Hey DJ".
+
 ## 1.18 — November 14, 2026
 
 **Ask DJ Griff: song requests by voice** (step 1 of the GriffTunes Assistant)
