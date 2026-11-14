@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.26 — November 14, 2026
+
+**Made-to-order stations: "Hey DJ, play some 90s country"** (or "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"…)
+
+- Gemini turns the words into a station name, a year range and 25–40 artists who had hits in that style then. The station plays library hits (Hot 100 top 20 and Country Gold #1s) by those artists from those years, plus each artist's Spotify top songs released in those years.
+- **No Spotify searches:** an artist is found from one of their songs in the library (one track lookup), then their top songs (one more request); at most 3 new artists per refill, remembered for 3 days, and it stops at any sign of Spotify slowing down.
+- Starts right away and free, like picking a radio station (a paid song that's cut off goes back to the front of Up Next). It shows on the Alpine radio as the station name and plays with the usual radio variety (up to 3 songs per artist per refill, no artist twice within 4 songs) until you pick another station or say "radio off". The next "play some …" replaces it.
+- **Few matches:** under 15 library songs, the years widen by 5 each way; under 5, it suggests the closest built-in station instead.
+- Without Gemini, "play some 90s country / 80s pop / 90s rap / current hits" still works from the library's genre groups.
+
 ## 1.25 — November 14, 2026
 
 **Hey DJ controls**
