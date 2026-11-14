@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.20.2 — November 14, 2026
+
+- **Album art on the full-screen turntable for voice requests:** any song that starts without a saved cover now gets one as it starts (Spotify's public embed info, no quota), whether it's the song just asked for, one that comes up later in Up Next, or the rest of an album carrying on. Now Playing, the turntable's record label and the room colors update the moment it arrives.
+- Covers from Spotify's embed info are now saved at 640 px instead of 300 px, so they're sharp on the turntable.
+
 ## 1.20.1 — November 14, 2026
 
 - **The real "Hey DJ" model is here** (`wake/hey_dj.onnx`, trained in Colab with openWakeWord from synthetic voices). With the wake word set to Hey DJ (the default), the jukebox now listens for "Hey DJ" instead of the "Hey Jarvis" stand-in; reload GriffTunes to switch. In testing on new clips, it heard "hey DJ" 16 of 16 times (15 of 16 with noise added) and never woke for "hey jay", "hey day", "the DJ is great", "hey jarvis", "okay" or "play some music". It's most reliable with a short pause after "Hey DJ"; said all in one breath ("Hey DJ play Purple Rain…") it caught 3 of 8 at Medium and more at High.
