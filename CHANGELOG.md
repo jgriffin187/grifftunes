@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.20.3 — November 14, 2026
+
+**Fewer false "Hey DJ" wake-ups from the music** (it woke up during a Mase song with nobody talking to it)
+
+- **Steadier signal needed:** the wake word now has to stay over the sensitivity line for 2 frames in a row (160 ms), not just 1. A real "Hey DJ" stayed over it for 3 to 6 frames in every test clip, while music tends to spike for a single frame.
+- **When it wakes up on the music anyway:** if Gemini hears no request in the clip, the window says "No request heard. Back to the music" and closes after 2.5 seconds (instead of 15), and the music comes back up.
+- **Recent wake-ups in Settings → DJ Griff:** the last few times it woke up, with the score and what it heard (or "no request heard"), to help pick the right sensitivity.
+
 ## 1.20.2 — November 14, 2026
 
 - **Album art on the full-screen turntable for voice requests:** any song that starts without a saved cover now gets one as it starts (Spotify's public embed info, no quota), whether it's the song just asked for, one that comes up later in Up Next, or the rest of an album carrying on. Now Playing, the turntable's record label and the room colors update the moment it arrives.
