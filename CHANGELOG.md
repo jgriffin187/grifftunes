@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.20.1 — November 14, 2026
+
+- **The real "Hey DJ" model is here** (`wake/hey_dj.onnx`, trained in Colab with openWakeWord from synthetic voices). With the wake word set to Hey DJ (the default), the jukebox now listens for "Hey DJ" instead of the "Hey Jarvis" stand-in; reload GriffTunes to switch. In testing on new clips, it heard "hey DJ" 16 of 16 times (15 of 16 with noise added) and never woke for "hey jay", "hey day", "the DJ is great", "hey jarvis", "okay" or "play some music". It's most reliable with a short pause after "Hey DJ"; said all in one breath ("Hey DJ play Purple Rain…") it caught 3 of 8 at Medium and more at High.
+
 ## 1.20 — November 14, 2026
 
 **Whole albums by voice:** "Hey DJ, play the Alanis Morissette Jagged Little Pill album" (or "play the album Jagged Little Pill by Alanis Morissette", or on Ask DJ).

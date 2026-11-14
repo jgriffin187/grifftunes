@@ -4,7 +4,7 @@ GriffTunes listens for its wake word right in Chrome on the jukebox (`wake.js`, 
 
 - `melspectrogram.onnx`, `embedding_model.onnx`: openWakeWord's shared feature models (v0.5.1 release; github.com/dscripka/openWakeWord, Apache-2.0; the embedding model is based on Google's speech_embedding).
 - `hey_jarvis.onnx`: openWakeWord's pretrained "hey jarvis" model (CC BY-NC-SA 4.0), a stand-in for testing until `hey_dj.onnx` exists.
-- `hey_dj.onnx`: the custom "Hey DJ" model, made with the notebook below. GriffTunes uses it automatically once it's here.
+- `hey_dj.onnx`: the custom "Hey DJ" model (trained Nov 14, 2026 with the notebook below). GriffTunes uses it automatically.
 
 ## Training "Hey DJ"
 
