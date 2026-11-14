@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.19.3 — November 14, 2026
+
+**A voice request swapped the song that was playing** ("Physical" by Olivia Newton-John turned into Dua Lipa's "Physical" a minute in)
+
+- **The song's own lyrics aren't a request:** Gemini is now told what's playing and that its lyrics aren't a request. A clip that only catches the background song counts as "didn't catch that". A request for the title that's already playing, without naming another artist, is treated as "that's playing now" instead of a different artist's song with the same name.
+- **The right song comes back after DJ Griff talks on the WiiM:** the song is restarted by name at the spot where it paused, instead of a bare "resume" that Spotify could turn into something else. GriffTunes also waits for Spotify to report that song again before reading the speaker's state.
+- **No false wake-ups from DJ Griff:** the wake word is ignored while he's talking and for 3 seconds after.
+
 ## 1.19.2 — November 14, 2026
 
 - **DJ Griff is easier to hear on the WiiM:** while he talks (between songs and when he answers a voice request), the WiiM's volume goes up 10 points, then back to where it was before the music starts again. Settings → DJ Griff → **Louder than the music** sets how much (same volume, +5, +10, +15 or +20).
