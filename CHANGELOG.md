@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.19.2 — November 14, 2026
+
+- **DJ Griff is easier to hear on the WiiM:** while he talks (between songs and when he answers a voice request), the WiiM's volume goes up 10 points, then back to where it was before the music starts again. Settings → DJ Griff → **Louder than the music** sets how much (same volume, +5, +10, +15 or +20).
+
 ## 1.19.1 — November 14, 2026
 
 - **Album art for voice requests:** songs found in the song library that had no cover saved yet now get one before they're queued (from Spotify's public embed info: no quota, no search), so Now Playing, Up Next and the Ask DJ window show it. The close-match suggestions get covers the same way. Each cover is kept with the library, so it's fetched once.
