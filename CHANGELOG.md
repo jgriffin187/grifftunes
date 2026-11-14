@@ -2,6 +2,20 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.25 — November 14, 2026
+
+**Hey DJ controls**
+
+- **Skip:** "next track", "skip this song" (same as the Skip button: Up Next, then whatever is carrying on, then radio or house mix; no refund).
+- **Pause / resume:** "pause", "unpause", "resume", "keep playing".
+- **Volume:** "turn it up" / "turn it down" (5; "a lot" or "way" is 15), "volume to 40", "mute" (back to the previous volume with "unmute").
+- **Clear the queue:** empties Up Next right away (no confirmation, no undo).
+- **Radio:** "play the 80s station" (any station, also "the eighties station", "classic rock station") starts it now; a paid song that's cut off goes back to the front of Up Next. "Radio off".
+- **Lights and speakers:** "lights on" / "lights off", "speakers on" / "speakers off", same as the Lights window.
+- **"What's playing?"** / "who sings this?": DJ Griff answers out loud (song, artist, album, sometimes one fact).
+- **Who:** anyone at the jukebox (Hey DJ or the touchscreen's Ask DJ) and the couch remote. Guests' phones get "Only the couch remote can do that", like the buttons, except "what's playing".
+- **Quiet:** controls just do it, with a short note that closes after 2.5 seconds; no DJ Griff voice, so the WiiM never pauses just to say "skipping".
+
 ## 1.24.1 — November 14, 2026
 
 - **"Hey DJ, the gales of November came early" now always opens the memorial.** It's a line from the song itself, so Gemini sometimes took it as a request to play "The Wreck of the Edmund Fitzgerald" and just queued the song. Now the phrase is recognized from the words heard, before Gemini's reading, and does exactly what the Fitz button does: the full-screen story and voyage, with the song starting right away. "It's beginning to look a lot like Christmas" gets the same treatment. Both still count as song requests when they start with "play".
