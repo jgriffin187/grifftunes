@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.20.4 — November 14, 2026
+
+- **Describe a song instead of naming it:** "Hey DJ, play the Mase song from the Rugrats soundtrack" ("Take Me There"), "the song from Top Gun with the volleyball scene", "the one that goes 'is this the real life'". Gemini works out the exact song from its music knowledge; when several fit, the others show as choices.
+- **Songs with several artists match any of them:** "Take Me There" is credited to BLACKstreet & Mýa featuring Mase & Blinky Blink, and asking for it by Blackstreet, by Mýa or by Mase all find it. "Play some Mase" also lists songs he's featured on.
+
 ## 1.20.3 — November 14, 2026
 
 **Fewer false "Hey DJ" wake-ups from the music** (it woke up during a Mase song with nobody talking to it)
