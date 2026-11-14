@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.19.1 — November 14, 2026
+
+- **Album art for voice requests:** songs found in the song library that had no cover saved yet now get one before they're queued (from Spotify's public embed info: no quota, no search), so Now Playing, Up Next and the Ask DJ window show it. The close-match suggestions get covers the same way. Each cover is kept with the library, so it's fetched once.
+
 ## 1.19 — November 14, 2026
 
 **"Hey DJ" wake word** (step 2 of the GriffTunes Assistant)
