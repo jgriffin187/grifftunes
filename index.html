@@ -3520,7 +3520,7 @@ function openSettings(){
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
  const fa=$('#famAdd');if(fa)fa.onclick=()=>{collect();saveS();spLogin(true)};
  const fl=$('#famList');if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();TABC.clear();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
- const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');S.mode='demo';saveS();location.reload()};
+ const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');store.set('sp_block',{until:0,strikes:0});S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
  $('#setSave').onclick=()=>{const old=S.mode;collect();S.mode=mode;saveS();if(old!==S.mode){location.reload();return}applyName();renderCredits();renderQueue();keepAwake();if(S.phones)startHost();else stopHost();hostSync();closeModal($('#settingsModal'));TABC.clear();TRKC.clear();toast('Settings saved')};
