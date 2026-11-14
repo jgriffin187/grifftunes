@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.20 — November 14, 2026
+
+**Whole albums by voice:** "Hey DJ, play the Alanis Morissette Jagged Little Pill album" (or "play the album Jagged Little Pill by Alanis Morissette", or on Ask DJ).
+
+- **Same rules as Queue the whole album:** 5 credits (free on the couch remote and with Free play), all its songs to the end of Up Next, or starting right away when only the radio or house mix is playing. On the WiiM, DJ Griff announces it first, then track one starts.
+- **Found without searching Spotify when possible:** My Albums, the Christmas albums, a song from that album already in the song library (one track lookup), or the artist's album list (the artist comes from a library song or the Artists tab). Only then one Spotify album search, never while search is blocked and within the same 12-an-hour limit as song requests.
+- **Not found:** it says so and shows some of that artist's songs to tap instead. Out of credits: it says an album takes 5.
+
 ## 1.19.3 — November 14, 2026
 
 **A voice request swapped the song that was playing** ("Physical" by Olivia Newton-John turned into Dua Lipa's "Physical" a minute in)
