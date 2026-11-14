@@ -2,6 +2,19 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.18 — November 14, 2026
+
+**Ask DJ Griff: song requests by voice** (step 1 of the GriffTunes Assistant)
+
+- **Ask DJ** button in the top bar of the touchscreen (shown when a microphone is connected) and on guests' phones and the couch remote. Tap it, say a song ("Purple Rain by Prince"), and it's found and queued. Phones can also type the request.
+- **Understanding:** the browser's speech recognition hears the words (live on screen); Gemini, using DJ Griff's Writing key, turns them into the official title and artist and fixes mishearings ("prints" → Prince). Without the key, plain "song by artist" still works.
+- **Library first:** the song library (and the radio stations' remembered songs) is searched with no Spotify calls. Only if it isn't there does GriffTunes make one or two Spotify searches, never while search is blocked or slowed down and at most 12 an hour; a song found that way is added to the library.
+- **Same rules as + Queue:** 1 credit (free on the couch remote and with Free play), end of Up Next, or right away when only the radio or house mix is playing. A song already playing or in line isn't added again. Out of credits: it says so and shows the song with its + Queue button.
+- **DJ Griff answers** on screen and out loud, in his voice and personality. On this jukebox's own speaker the music dips while he talks; on the WiiM the song pauses for a few seconds, then picks up where it was (when the song would start right away, he talks first and then it starts). Settings → DJ Griff → Song requests by voice turns the button or his voice off.
+- **Not found:** it says so and offers close matches to tap: the same title by other artists and other songs by that artist from the library. Asking for just an artist ("play some Prince") shows a few of their songs to pick from.
+- Song library fix: Prince's "I Hate U" was matched to the wrong song; it will be looked up again.
+- Song requests only for now; skip, volume, radio and lights come later. Next: the "Hey DJ" wake word.
+
 ## 1.17.10 — November 14, 2026
 
 - **Covers for decade radio:** songs from the song library that had no cover saved now get one from Spotify's public embed info (no quota, no search), fetched two at a time in the background when a station refills, and briefly waited for right before a song starts. Covers are kept with the library, so each is fetched once.
