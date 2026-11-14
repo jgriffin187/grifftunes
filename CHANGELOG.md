@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.21 — November 14, 2026
+
+**Voice requests: queue, next or now** (like the + Queue / Play next / Play now buttons, picked by what you say)
+
+- **"Hey DJ, play X"** adds it to the end of Up Next (1 credit). **"…play X next"** (or "after this one") puts it at the front (2 credits). **"…play X now"** (or "right now", "immediately", "stop this and play X") stops the current song and plays it (3 credits). Gemini tells these apart from titles like "Now That We Found Love" or "Next to Me".
+- **Paused or stopped:** a request starts right away for 1 credit instead of waiting behind the paused song. The same goes for radio, house mix or a countdown, as before. Asking for the paused song itself just un-pauses it.
+- **Nothing paid gets lost:** a song someone picked that's cut off by "now" (or was paused) goes back to the front of Up Next and plays again right after.
+- **Albums** follow the same words ("play the X album now" starts it, "…next" puts it at the front) and stay 5 credits.
+- "Next" or "now" for a song that's already in Up Next moves it up. On the WiiM, DJ Griff answers first, then the song starts. Same rules for the Ask DJ button and phones; free on the couch remote and with Free play.
+
 ## 1.20.4 — November 14, 2026
 
 - **Describe a song instead of naming it:** "Hey DJ, play the Mase song from the Rugrats soundtrack" ("Take Me There"), "the song from Top Gun with the volleyball scene", "the one that goes 'is this the real life'". Gemini works out the exact song from its music knowledge; when several fit, the others show as choices.
