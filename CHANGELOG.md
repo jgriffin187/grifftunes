@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.4 — November 13, 2026
+
+- **Lights & speakers button:** when Hue speaker plugs are set up, the top-bar lights button shows a bulb plus a speaker. The bulb side glows gold while GriffTunes runs the lights (as before); sound waves appear on the speaker side, in cyan, while the speakers have power. Same tap, same window. Without speaker plugs it stays a plain bulb.
+
 ## 1.17.3 — November 13, 2026
 
 - **Countdown lists show all 20 songs** without scrolling: rows size themselves so 10 fit in each column (slimmer padding, 44 px covers). Longer lists, like the Christmas Countdown's 25, still scroll.
