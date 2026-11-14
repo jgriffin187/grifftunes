@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.24 — November 14, 2026
+
+- **"Hey DJ, the gales of November came early"** opens the Edmund Fitzgerald memorial and starts "The Wreck of the Edmund Fitzgerald" right away, the same as tapping the ship's bell: whatever was playing stops (a paid song goes back to the front of Up Next), the lights go stormy blue and the voyage begins. DJ Griff stays quiet, no jokes. If the ship's bell button was turned off in Settings, it's turned back on. "Start the Fitz memorial" works too; "play The Wreck of the Edmund Fitzgerald" still just plays the song.
+
 ## 1.23 — November 14, 2026
 
 **"Hey DJ, it's beginning to look a lot like Christmas"**
