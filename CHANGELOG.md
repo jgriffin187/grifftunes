@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.24.1 — November 14, 2026
+
+- **"Hey DJ, the gales of November came early" now always opens the memorial.** It's a line from the song itself, so Gemini sometimes took it as a request to play "The Wreck of the Edmund Fitzgerald" and just queued the song. Now the phrase is recognized from the words heard, before Gemini's reading, and does exactly what the Fitz button does: the full-screen story and voyage, with the song starting right away. "It's beginning to look a lot like Christmas" gets the same treatment. Both still count as song requests when they start with "play".
+
 ## 1.24 — November 14, 2026
 
 - **"Hey DJ, the gales of November came early"** opens the Edmund Fitzgerald memorial and starts "The Wreck of the Edmund Fitzgerald" right away, the same as tapping the ship's bell: whatever was playing stops (a paid song goes back to the front of Up Next), the lights go stormy blue and the voyage begins. DJ Griff stays quiet, no jokes. If the ship's bell button was turned off in Settings, it's turned back on. "Start the Fitz memorial" works too; "play The Wreck of the Edmund Fitzgerald" still just plays the song.
