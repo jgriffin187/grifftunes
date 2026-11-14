@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.17.6 — November 14, 2026
+
+- Disconnecting Spotify or changing the Client ID also clears the saved **search pause** (Spotify's search quota, which GriffTunes otherwise waits out for 2 hours before trying again). Spotify's block since Nov 13 turned out to be search-only (`QUOTA_EXCEEDED`); playback, albums, playlists and devices kept working.
+
 ## 1.17.5 — November 14, 2026
 
 - **Changing the Spotify Client ID** (Settings → Music), or tapping Disconnect, now drops the old app's sign-in and its stored slow-down timer, and asks you to connect again. Before, the jukebox kept using the old app's sign-in and kept counting down the old app's block, so a new app looked blocked too.
