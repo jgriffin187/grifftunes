@@ -2,6 +2,15 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.23 — November 14, 2026
+
+**"Hey DJ, it's beginning to look a lot like Christmas"**
+
+- Stops whatever is playing, turns on Christmas Mode (snow, lights, sleigh, red and green Hue) and starts a Christmas song right away, with DJ Griff kicking off the season out loud. If the Christmas tree setting was off, it's turned on. A countdown in progress stops.
+- A paid song that gets cut off goes back to the front of Up Next (paid picks still play before the Christmas music, as in Christmas Mode). House mix and radio songs are just replaced.
+- Also: "turn on Christmas mode", "let's get festive", "it's Christmas time". **"Christmas is over"** or "turn off Christmas mode" turns it off.
+- "Play It's Beginning to Look a Lot Like Christmas" is still a song request: it plays that song.
+
 ## 1.22 — November 14, 2026
 
 **"Hey DJ, roast me"**
