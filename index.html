@@ -2925,6 +2925,7 @@ const DJ_LIMITS=`Hard limits at every level: no slurs; no jokes about race, ethn
 async function djGemini(prompt,tone){
  tone=tone||djTone();
  const key=String(store.get('dj_gkey','')||'').trim()||djKey(),sys=`${DJ_STYLE[tone]}${ymLook()?DJ_YACHT:''}
+${djToday()}
 ${tone==='friendly'?'':DJ_TARGETS+'\n'+DJ_LIMITS+'\n'}Write what DJ Griff says right before the next song starts. Rules:
 - One to three short sentences, 45 words at most. It will be read aloud, so write it the way a DJ talks${tone==='friendly'?'':', with a setup and a punchline when there is a good one'}.
 - Say the song title and artist naturally, usually near the end so the song starts right after. Vary how you start; don't always say "up next".
@@ -2944,10 +2945,17 @@ ${tone==='friendly'?'':DJ_TARGETS+'\n'+DJ_LIMITS+'\n'}Write what DJ Griff says r
  if(tone==='explicit')return djGemini(prompt,'sarcasm');
  throw new Error('Gemini gave no line'+(last?' · '+last:''));
 }
+// The real date, so DJ Griff never guesses the month (he called mid-November both October and December)
+function djToday(){
+ const d=new Date(),full=d.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'}),mon=d.toLocaleDateString('en-US',{month:'long'});
+ let t=`Today's date is ${full}. The month is ${mon}; never say or imply it's any other month or season.`;
+ if(typeof xmasDays==='function'){const x=xmasDays();if(x>0&&x<=60)t+=` Christmas is ${x} day${x===1?'':'s'} away.`}
+ return t;
+}
 // What's going on in the room, for better material
 function djScene(t,how){
  const d=new Date(),day=d.toLocaleDateString('en-US',{weekday:'long'}),time=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
- const out=[`Right now it's ${day}, ${time}.`];
+ const out=[`Right now it's ${day}, ${d.toLocaleDateString('en-US',{month:'long',day:'numeric'})}, ${time}.`];
  const m=d.getMonth()+1,dd=d.getDate(),thanks=m===11&&d.getDay()===4&&dd>=22&&dd<=28;
  const hol=m===1&&dd===1?"New Year's Day":m===2&&dd===14?"Valentine's Day":m===3&&dd===17?"St. Patrick's Day":m===7&&dd===4?'the Fourth of July':m===10&&dd===31?'Halloween':thanks?'Thanksgiving':m===12&&dd===24?'Christmas Eve':m===12&&dd===25?'Christmas Day':m===12&&dd===31?"New Year's Eve":'';
  if(hol)out.push(`Today is ${hol}.`);
@@ -3907,6 +3915,7 @@ async function asRoast(q,res,src){
  res.state='roast';res.q={title:'',artist:''};res.say=`🔥 Roasting ${who}${res.from?` · from ${who}'s ${res.from} in the Family tab`:''}`;delete res.from;
  if(!key){res.say='DJ Griff needs his Writing key (Settings → DJ Griff → Setup) to roast anybody.';res.state='other';return}
  const sys=`${DJ_STYLE[tone]}
+${djToday()}
 ${DJ_LIMITS}
 Someone asked you to roast ${who}'s music taste, live over the speakers in the basement. Rules:
 - 70 to 90 words (about 30 seconds out loud): three or four jokes that build to a closer. ${tone==='friendly'?'Keep it a gentle, affectionate tease.':'Go for it; it\'s a roast.'}
@@ -4151,6 +4160,7 @@ async function asLine(res,q,src){
 async function asLineSay(what,who,tone){
  const key=String(store.get('dj_gkey','')||'').trim()||djKey();if(!key)return'';
  const sys=`${DJ_STYLE[tone]}${ymLook()?DJ_YACHT:''}
+${djToday()}
 ${tone==='friendly'?'':DJ_LIMITS+'\n'}Someone just asked you for a song out loud. Write what DJ Griff says back, right now, over the speakers. Rules:
 - One or two short sentences, 25 words at most. Say clearly what happened first; any joke is short and second.
 - Never invent facts. No emojis, hashtags, quotation marks, stage directions or sound effects. Don't mention being an AI or a voice assistant.`;
@@ -4548,7 +4558,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.1';
+const GT_VERSION='1.35.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.2 — November 15, 2026
+
+- **DJ Griff knows the date:** he was only told the day of the week, so he guessed the month (and called mid-November both October and December). Every DJ Griff line now gets today's full date and the month, plus how many days until Christmas from late October on, so Christmas Mode doesn't make him think it's already December.
+
 ## 1.35.1 — November 15, 2026
 
 - **Stays full screen:** if the jukebox drops out of full screen (the Chromebox slept or locked, or someone pressed Esc), the next tap puts it right back, including the tap that ends the screensaver. Before, it only went full screen on the very first tap after loading. The setting is now **Settings → Screen → Stay full screen**.
