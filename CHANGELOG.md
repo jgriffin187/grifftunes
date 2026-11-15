@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.7 — November 15, 2026
+
+- **Album art on the turntable during Christmas:** while the Christmas look was on (Christmas Mode, or the Christmas tab open), the full-screen turntable always showed the plain red-and-green GriffTunes label instead of the song's cover, even when Now Playing had the cover. Now the record shows the album art, with the Christmas colors around it. The Christmas label is only used for songs without a cover.
+
 ## 1.35.6 — November 15, 2026
 
 - **Warnings stay up long enough to read:** orange warning messages now stay on screen 6 to 15 seconds depending on how long they are (they used to vanish after 3½).

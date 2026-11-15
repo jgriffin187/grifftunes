@@ -4583,7 +4583,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.6';
+const GT_VERSION='1.35.7';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -8085,7 +8085,8 @@ function deck3Info(){
  $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="xmas"?"CHRISTMAS MODE":c.cd.chart==="xmascd"?`CHRISTMAS #${c.cd.pos}`:c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
- if(D3&&xmLook()){D3.setLabel(null,null);D3.setAccent('#c4001a','#0d8a40')}
+ // Christmas look: red and green, but the song's own cover still goes on the record (the Christmas label only when there's none)
+ if(D3&&xmLook()){D3.setAccent('#c4001a','#0d8a40');D3.setLabel(c&&c.img||null,null)}
  else if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
 }
 // Up next: the queue as a stack of record sleeves, with the next record sliding out of the top one
