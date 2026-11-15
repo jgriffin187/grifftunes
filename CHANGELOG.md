@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.33 — November 15, 2026
+
+- **Yacht Mode's rope looks like real boat rope:** twice as thick (22 px) and drawn as cream three-strand laid rope. Each strand is a rounded, twisted bundle with its own highlight, fine fibers and dark grooves between strands, instead of flat diagonal stripes. It stands out against the teak, casts a deeper shadow, and still creeps slowly clockwise. The app sits a little further in, and the flag line hangs from the middle of the rope.
+
 ## 1.32 — November 15, 2026
 
 - **Yacht Mode teak frame:** the thin rope is replaced by a wide, varnished teak frame around the whole screen: two planks per side, with wood grain, dark caulked seams, butt joints and a glossy finish, brass corner plates with screws, and a rope rail running along the inside edge. The app moves inward so nothing hides under the frame.

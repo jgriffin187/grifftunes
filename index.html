@@ -649,7 +649,7 @@ html.yachtlite #bg .blob{opacity:.12}
 #ytrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--tf:34px}
 html.yacht #ytrim{display:block}
 /* ⛵ teak frame: four varnished two-plank boards, each built as a top edge and rotated into place, with a rope rail along the inside */
-html.yacht #app{padding:80px 58px 54px}
+html.yacht #app{padding:90px 60px 56px}
 html.yacht #sailboat{bottom:calc(var(--tf,34px) + 1vh)}
 .yside{position:absolute;left:0;top:0;width:100vw;height:var(--tf);transform-origin:0 0}
 .yside.yR{left:100vw;width:100vh;transform:rotate(90deg)}
@@ -658,10 +658,10 @@ html.yacht #sailboat{bottom:calc(var(--tf,34px) + 1vh)}
 .yplank{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='40'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.42' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16  0 0 0 0 .07  0 0 0 0 .02  0 0 0 1.6 -.55'/%3E%3C/filter%3E%3Cfilter id='h' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 0.9' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 .78  0 0 0 0 .5  0 0 0 .9 -.42'/%3E%3C/filter%3E%3Crect width='520' height='20' fill='%239b5321'/%3E%3Crect y='20' width='520' height='20' fill='%23a95e27'/%3E%3Crect width='520' height='40' filter='url%28%23g%29'/%3E%3Crect width='520' height='40' filter='url%28%23h%29'/%3E%3Crect y='19.2' width='520' height='1.6' fill='%231c0e04'/%3E%3Crect x='0' width='1.6' height='20' fill='%231c0e04'/%3E%3Crect x='260' y='20' width='1.6' height='20' fill='%231c0e04'/%3E%3Cg fill='%233a1f0c' opacity='.8'%3E%3Ccircle cx='14' cy='10' r='1.3'/%3E%3Ccircle cx='274' cy='30' r='1.3'/%3E%3C/g%3E%3C/svg%3E") 0 0/520px 100% repeat-x;box-shadow:inset 0 1.5px 0 rgba(255,214,160,.45),inset 0 -2px 0 rgba(255,200,140,.18),0 0 0 1px #1c0e04}
 .yR .yplank{background-position:-173px 0}.yB .yplank{background-position:-311px 0}.yL .yplank{background-position:-97px 0}
 .yplank::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,236,200,.38),rgba(255,230,190,.08) 22%,rgba(0,0,0,0) 48%,rgba(255,220,170,.12) 62%,rgba(20,8,0,.42))}
-.yrail{position:absolute;left:0;right:0;top:calc(var(--tf) - 5px);height:11px;overflow:hidden;border-radius:6px;box-shadow:0 4px 7px rgba(0,0,0,.6),0 0 0 1px rgba(50,30,8,.6)}
-.yrail i{position:absolute;top:0;bottom:0;left:-12px;right:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='16'><defs><linearGradient id='s' gradientUnits='userSpaceOnUse' x1='0' y1='16' x2='7.68' y2='21.76' spreadMethod='repeat'><stop offset='0' stop-color='%235e3f18'/><stop offset='.1' stop-color='%239c7740'/><stop offset='.42' stop-color='%23f6e7bf'/><stop offset='.6' stop-color='%23dcc08a'/><stop offset='.88' stop-color='%2386613a'/><stop offset='1' stop-color='%235e3f18'/></linearGradient></defs><rect width='12' height='16' fill='url(%23s)'/></svg>") repeat-x 0 0/12px 100%;animation:yRopeRun 3.2s linear infinite;will-change:transform}
-.yrail::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,250,230,.45),rgba(255,255,255,.08) 35%,rgba(0,0,0,0) 52%,rgba(30,15,0,.55))}
-@keyframes yRopeRun{to{transform:translateX(12px)}}
+.yrail{position:absolute;left:0;right:0;top:calc(var(--tf) - 9px);height:22px;overflow:hidden;border-radius:11px;box-shadow:0 5px 9px rgba(0,0,0,.6),0 2px 3px rgba(0,0,0,.45)}
+.yrail i{position:absolute;top:0;bottom:0;left:-18px;right:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='22' viewBox='0 0 18 22'%3E%3Cdefs%3E%3CradialGradient id='r' cx='.5' cy='.36' r='.62'%3E%3Cstop offset='0' stop-color='%23fffdf6'/%3E%3Cstop offset='.38' stop-color='%23efe5cf'/%3E%3Cstop offset='.72' stop-color='%23c9b791'/%3E%3Cstop offset='1' stop-color='%237d6844'/%3E%3C/radialGradient%3E%3C/defs%3E%3Crect width='18' height='22' fill='%233e2f1b'/%3E%3Cellipse cx='-9' cy='11' rx='13.6' ry='7.3' transform='rotate%28-54 -9 11%29' fill='url%28%23r%29'/%3E%3Cellipse cx='9' cy='11' rx='13.6' ry='7.3' transform='rotate%28-54 9 11%29' fill='url%28%23r%29'/%3E%3Cellipse cx='27' cy='11' rx='13.6' ry='7.3' transform='rotate%28-54 27 11%29' fill='url%28%23r%29'/%3E%3Cg stroke='%238a7550' stroke-opacity='.28' stroke-width='.45'%3E%3Cpath d='M-15.5 22L-0.5 0' /%3E%3Cpath d='M-12.5 22L2.5 0' /%3E%3Cpath d='M-9.5 22L5.5 0' /%3E%3Cpath d='M2.5 22L17.5 0' /%3E%3Cpath d='M5.5 22L20.5 0' /%3E%3Cpath d='M8.5 22L23.5 0' /%3E%3Cpath d='M20.5 22L35.5 0' /%3E%3Cpath d='M23.5 22L38.5 0' /%3E%3Cpath d='M26.5 22L41.5 0' /%3E%3C/g%3E%3C/svg%3E") repeat-x 0 0/18px 100%;animation:yRopeRun 4s linear infinite;will-change:transform}
+.yrail::after{content:'';position:absolute;inset:0;border-radius:11px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(255,255,255,0) 30%,rgba(0,0,0,0) 55%,rgba(25,12,0,.5));box-shadow:inset 0 -2px 3px rgba(0,0,0,.35)}
+@keyframes yRopeRun{to{transform:translateX(18px)}}
 /* brass corner plates with slotted screws */
 .ycorner{position:absolute;width:58px;height:58px;border-radius:9px;background:radial-gradient(circle at 26% 26%,#2a1a04 0 1px,transparent 1.5px),radial-gradient(circle at 26% 26%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 74% 74%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 74% 26%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 26% 74%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 50% 50%,#3a2608 0 7px,#c9962e 8px,#fff0b0 10px,#a5701a 12px,transparent 13px),linear-gradient(135deg,#fff4c8,#e8b850 28%,#a8721a 60%,#e2b04a 80%,#7a5010);box-shadow:0 4px 9px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,238,180,.55),inset 0 -3px 4px rgba(0,0,0,.35)}
 .ycorner.c1{left:-4px;top:-4px}.ycorner.c2{right:-4px;top:-4px}.ycorner.c3{right:-4px;bottom:-4px}.ycorner.c4{left:-4px;bottom:-4px}
@@ -4464,7 +4464,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.32';
+const GT_VERSION='1.33';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7387,7 +7387,7 @@ function ymFlags(){
   Y:{d:R(Y)+[-20,-10,0,10,20].map(o=>`<path d="M${o} 0h5l20 20h-5z" fill="${Rd}"/>`).join('')}
  };
  const msg='GRIFFTUNES YACHT ROCK  ';
- const nSw=Math.max(3,Math.round(W/520)),swW=W/nSw,sag=16,y0=31,pitch=52;
+ const nSw=Math.max(3,Math.round(W/520)),swW=W/nSw,sag=16,y0=36,pitch=52;
  const yAt=x=>{const t=(x%swW)/swW;return y0+sag*4*t*(1-t)},slope=x=>{const t=(x%swW)/swW;return sag*4*(1-2*t)/swW};
  let line='',out=[],k=0,n=0;
  for(let i=0;i<nSw;i++){const x0=i*swW,x1=x0+swW;line+=`M${x0.toFixed(1)} ${y0}Q${(x0+swW/2).toFixed(1)} ${y0+sag*2} ${x1.toFixed(1)} ${y0}`}
