@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.8 — November 15, 2026
+
+- **The turntable always shows the real album art:** in every mode (Christmas, Yacht, radio, countdowns, playlists), the record on the full-screen turntable shows the song's own cover. If a song started without a cover, the turntable now fetches it as soon as the turntable is open (Spotify's public embed info, no quota), and Now Playing updates too. The plain GriffTunes label only appears if Spotify has no cover at all.
+
 ## 1.35.7 — November 15, 2026
 
 - **Album art on the turntable during Christmas:** while the Christmas look was on (Christmas Mode, or the Christmas tab open), the full-screen turntable always showed the plain red-and-green GriffTunes label instead of the song's cover, even when Now Playing had the cover. Now the record shows the album art, with the Christmas colors around it. The Christmas label is only used for songs without a cover.

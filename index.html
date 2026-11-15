@@ -4583,7 +4583,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.7';
+const GT_VERSION='1.35.8';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -8039,8 +8039,15 @@ function deckTarget(){
  const f=P.dur?Math.min(1,Math.max(0,P.pos/P.dur)):0;
  return g.angFor(g.outer-(g.outer-g.inner)*f);
 }
+// The turntable always shows the song's real album art: a song that started without a cover gets one (Spotify's public
+// embed info, no quota), once per song, and the record, Now Playing and the room colors update when it arrives
+function deckArtFill(c){
+ if(!c||c.img||c._artTry||typeof asCover!=='function')return;
+ c._artTry=true;
+ asCover(c).then(t=>{if(!t||!t.img||P.current!==c)return;try{renderNP()}catch(e){}if(DECK.open){deckInfo();if(D3)deck3Info()}}).catch(()=>{});
+}
 function deckInfo(){
- const c=P.current;
+ const c=P.current;deckArtFill(c);
  $('#dkLbl').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkBg').style.backgroundImage=c&&c.img?`url("${c.img}")`:'';
  $('#dkTitle').textContent=c?c.name:'Pick a song';$('#dkArtist').textContent=c?c.artist:'GriffTunes';
@@ -8085,7 +8092,9 @@ function deck3Info(){
  $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="xmas"?"CHRISTMAS MODE":c.cd.chart==="xmascd"?`CHRISTMAS #${c.cd.pos}`:c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
  $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
- // Christmas look: red and green, but the song's own cover still goes on the record (the Christmas label only when there's none)
+ // The record always gets the song's real album art, in every mode (Christmas, Yacht, radio, countdowns…); only the
+ // colors around it follow the mode. The plain GriffTunes label is just for a song with no cover at all.
+ deckArtFill(c);
  if(D3&&xmLook()){D3.setAccent('#c4001a','#0d8a40');D3.setLabel(c&&c.img||null,null)}
  else if(D3){D3.setLabel(c&&c.img||null,null);const cs=getComputedStyle(document.documentElement);D3.setAccent(cs.getPropertyValue('--accent').trim()||'#ff2bd6',cs.getPropertyValue('--accent2').trim()||'#22e4ff')}
 }
