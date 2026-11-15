@@ -4558,7 +4558,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.3';
+const GT_VERSION='1.35.4';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5579,8 +5579,15 @@ function xmasOffForRadio(st){
  xmasRender();try{hueTrack()}catch(e){}try{hostSync()}catch(e){}
  toast(`🎄 Christmas Mode off · ${st?st.name:'the radio'} is on`);
 }
+// Tuning to any other station also ends Yacht Mode (sea, flags, gulls, sunset lights). The Yacht Rock station keeps it.
+function ymOffForRadio(st){
+ if(REMOTE||typeof YM==='undefined'||!YM.on||(st&&st.id==='yacht'))return;
+ YM.on=false;store.set('yacht_on',false);
+ try{ymSync()}catch(e){}try{hueTrack()}catch(e){}try{hostSync()}catch(e){}
+ toast(`⚓ Yacht Mode off · ${st?st.name:'the radio'} is on`);
+}
 async function radioStart(st){
- xmasOffForRadio(st);
+ xmasOffForRadio(st);ymOffForRadio(st);
  if(CD.active){CD.active=false;CD.grad=null;CD.list=[];CD.idx=0;if(typeof renderCountdown==='function')renderCountdown()}
  const t=await radioNext();
  if(t&&S.radio&&S.station===st.id){await startTrack(t,false,st.name);return true}
@@ -5605,7 +5612,7 @@ async function toggleRadio(){
  if(S.radio){
   staticNoise();const st=stationById(S.station);
   if(radioNow()){toast(`Radio on · ${st.name} · FM ${st.fm}`);await radioStart(st)}
-  else{xmasOffForRadio(st);radioFill(st);toast(`Radio on · ${st.name} starts after the current picks`)}
+  else{xmasOffForRadio(st);ymOffForRadio(st);radioFill(st);toast(`Radio on · ${st.name} starts after the current picks`)}
  }else toast(P.current&&P.current.radio?'Radio off. This song will finish.':'Radio off');
 }
 (()=>{

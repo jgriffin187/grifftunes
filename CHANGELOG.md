@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.4 — November 15, 2026
+
+- **The radio ends Yacht Mode too:** starting any station other than Yacht Rock turns Yacht Mode off: the sea, flags, string lights, gulls, porthole, marina screensaver and sunset lights go away, and the Hue lights go back to album colors. Tuning to the Yacht Rock station keeps Yacht Mode on.
+
 ## 1.35.3 — November 15, 2026
 
 - **The radio ends Christmas Mode:** starting any radio station (the dial, the radio button, the Alpine presets, a phone or "Hey DJ, play the 90s station") now turns Christmas Mode off: the snow, string lights, sleigh, fireplace screensaver and Christmas Hue colors go away, and the lights go back to album colors. If the Christmas tab was open, the jukebox goes to the first tab. Before, Christmas songs took back over after the first radio song.
