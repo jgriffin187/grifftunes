@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.27.2 — November 14, 2026
+
+- **Yacht Mode ticker shows its facts:** the ticker only read facts for songs carrying chart information (countdowns), so in Yacht Mode the bar opened empty. Now it fills with the artist and year facts under the ⚓ YACHT badge.
+- **The sailboat stays in the water on the marina screensaver:** it sailed along the bottom of the screen, right over the dock. During the screensaver it now crosses the open water, a little smaller, among the moored boats.
+
 ## 1.27.1 — November 14, 2026
 
 - **Settings → DJ Griff → What "Hey DJ" knows:** a fold-out list of every Hey DJ command and what it does (songs and albums, stations, controls, questions and roasts, and the Christmas, Fitzgerald and Yacht modes).
