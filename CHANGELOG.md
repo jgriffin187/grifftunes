@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.29 — November 15, 2026
+
+- **80s screensaver:** while the radio is on the 80s station, the screensaver plays an 80s concert video (eighties-loop.mp4, Josh's clip) on a loop with no sound, with the usual mini player (cover, song, play/pause, skip, volume) along the bottom. It stays on during paid songs as long as the 80s station is still picked, and it replaces whichever screensaver is chosen (fine art, now playing or turntable). Christmas, the Fitzgerald memorial and Yacht Mode still come first. Changing stations, turning the radio off or Yacht Mode starting switches screensavers within 3 seconds without touching the lights. The clip was cropped to fill the screen (zoomed a little high to keep heads in frame), its black start and end trimmed, and its last 2 seconds fade into its first so the loop has no seam: 4 min 3 s, 720p, 39 MB. Turn it off with **Settings → Screen → 80s video screensaver**.
+
 ## 1.28.4 — November 15, 2026
 
 - **A song Spotify won't start no longer gets stuck on screen:** before, it stayed as Now Playing with nothing playing until someone tapped Skip. Now a paid song goes back to the front of Up Next and the jukebox tries again; a radio, house mix or countdown song is passed over for the next one. After three failures in a row it stops and says so (Up Next is saved; tap Play to try again).

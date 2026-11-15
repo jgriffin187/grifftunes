@@ -1107,6 +1107,7 @@ html:not(.remote) .askType{display:none}
 .fpWrap{background:#0b0604}
 #fpVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 60%}
 #mrVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 55%}
+.eiWrap{background:#05030a}.eiWrap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
 
 .gArt{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
 .gSlide.show .gArt{animation:kenburns 60s ease-in-out infinite alternate}
@@ -1593,7 +1594,7 @@ addEventListener('storage',e=>{if(e.key&&e.key.startsWith('jbx.'))MEMO.delete(e.
 addEventListener('pagehide',()=>{for(const k of[...SOON.keys()])store.set(k,MEMO.has(k)?MEMO.get(k):store.get(k))});
 const REMOTE_ROOM=new URLSearchParams(location.search).get('remote');
 const REMOTE=!!REMOTE_ROOM;
-const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,weekRefresh:true,refreshDay:0,refreshTime:'04:00',xmas:false,xmasSrc:'top',libNight:true,asst:true,asSpeak:true,hey:false,wakeThr:.5,wakeModel:'dj'};
+const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCredits:10,house:true,attractSecs:90,sfx:true,osk:true,volume:70,saver:'art',artSecs:40,autoFs:true,wake:true,phones:true,phoneVol:true,phoneCoins:true,radio:false,station:'80s',hue:null,hueMode:'auto',hueBri:80,hueFx:true,hueSaver:true,hueRadio:false,huePlugs:[],spkAuto:true,spkIdle:30,spkDevice:'',spkDeviceId:'',lyricsSaver:false,eiSaver:true,weekRefresh:true,refreshDay:0,refreshTime:'04:00',xmas:false,xmasSrc:'top',libNight:true,asst:true,asSpeak:true,hey:false,wakeThr:.5,wakeModel:'dj'};
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // "Listen for Hey DJ" and "Keep the screen awake" used to share one setting (S.wake), so turning Hey DJ off also let
 // the screen sleep. Hey DJ gets its own (S.hey), starting as it is now; the screen stays awake (its usual default).
@@ -4426,7 +4427,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.28.4';
+const GT_VERSION='1.29';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4562,6 +4563,7 @@ function openSettings(){
  <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button><button data-saver="deck" class="${S.saver==='deck'?'on':''}">Turntable</button></div>
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
+  <label class="tg" style="margin-top:8px"><span>80s video screensaver while the 80s station plays</span><input type="checkbox" id="fEiSaver" ${S.eiSaver!==false?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
@@ -4603,7 +4605,7 @@ function openSettings(){
  $('#setPanes').addEventListener('input',()=>{$('#setDirty').textContent='Unsaved changes'},{once:true});
  $('#setPanes').addEventListener('click',e=>{if(e.target.closest('.seg button'))$('#setDirty').textContent='Unsaved changes'});
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci){const v=ci.value.trim();if(v&&S.clientId&&v!==S.clientId)newClientId();S.clientId=v}S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;S.efz=$('#fEfz').checked;efzRender();{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci){const v=ci.value.trim();if(v&&S.clientId&&v!==S.clientId)newClientId();S.clientId=v}S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;S.efz=$('#fEfz').checked;efzRender();{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked;S.eiSaver=$('#fEiSaver').checked};
  tabItems('playlists').then(L=>{const sel=$('#fXmasSrc');if(!sel)return;(L||[]).filter(x=>x.type==='playlist'||x.type==='liked').forEach(x=>{if(x.id===S.xmasSrc)return;const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)})}).catch(()=>{});
 (provider===SPOTIFY?libLoad().then(()=>libCandidates()):Promise.resolve()).then(()=>libShow()).catch(()=>{const el=$('#libStat');if(el)el.textContent=libText()});
  $('#fLibNight').onchange=e=>{S.libNight=e.target.checked;saveS()};
@@ -4756,7 +4758,7 @@ async function artNext(){
   const pool=fits.length>=10?fits:AL;
   const a=pool[ART.idx++%pool.length];let src=artUrl(a,1686);
   try{await loadImg(src)}catch(e){src=artUrl(a,843);try{await loadImg(src)}catch(e2){continue}}
-  if(!galleryOn)return true;
+  if(!galleryOn||EI.vid)return true;
   const g=$('#gallery'),el=document.createElement('div');el.className='gSlide';
   el.innerHTML=`<img class="gArt" src="${src}" alt=""><div class="gLabel"><b>${esc(a.title)}</b><span>${esc(a.artist)}${a.date?', '+esc(a.date):''}</span><small>Art Institute of Chicago</small></div>`;
   g.insertBefore(el,$('#gNow'));
@@ -4771,6 +4773,7 @@ async function showGallery(){
  galleryOn=true;syncGalleryNow();$('#gallery').classList.add('on');
  if(xmLook()){fireStart();return}
  if(ymLook()){marinaStart();return}
+ if(eiLook()){eiStart();return}
  await artLoad();
  if(!attractOn||!galleryOn)return;
  if(!ART.list.length||!(await artNext())){
@@ -4779,7 +4782,7 @@ async function showGallery(){
  }
  clearInterval(ART.timer);ART.timer=setInterval(()=>{if(galleryOn)artNext()},Math.max(10,S.artSecs)*1000);
 }
-function showAttract(){attractOn=true;hueSaver(true);if(S.saver==='deck'){openDeck(true);return}if(S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
+function showAttract(){attractOn=true;hueSaver(true);const ei=eiLook();if(!ei&&S.saver==='deck'){openDeck(true);return}if(ei||S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
 function hideAttract(){fireStop();if(attractOn)hueSaver(false);if(DECK.saver)closeDeck();attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
 
 /* ---------- Wall display: full screen, wake lock, install ---------- */
@@ -6372,7 +6375,7 @@ function fireStart(){
  if(v.readyState>=2)show();else v.addEventListener('loadeddata',show,{once:true});
  v.play().catch(()=>{});
 }
-function fireStop(){try{marinaStop()}catch(e){}const v=FIRE.vid;if(v){v.pause();v.removeAttribute('src');v.load()}FIRE.vid=null;const el=$('#fpWrap');if(el)el.remove()}
+function fireStop(){try{marinaStop()}catch(e){}try{eiStop()}catch(e){}const v=FIRE.vid;if(v){v.pause();v.removeAttribute('src');v.load()}FIRE.vid=null;const el=$('#fpWrap');if(el)el.remove()}
 document.addEventListener('visibilitychange',()=>{const v=FIRE.vid;if(!v)return;if(document.hidden)v.pause();else v.play().catch(()=>{})});
 
 /* ---------- Christmas Mode ---------- */
@@ -7275,6 +7278,46 @@ function marinaStart(){
 }
 function marinaStop(){const v=YMAR.vid;if(v){v.pause();v.removeAttribute('src');v.load()}YMAR.vid=null;const el=$('#mrWrap');if(el)el.remove()}
 document.addEventListener('visibilitychange',()=>{const v=YMAR.vid;if(!v)return;if(document.hidden)v.pause();else v.play().catch(()=>{})});
+
+/* 80s screensaver: while the radio is on the 80s station, the screensaver is a silent concert loop (eighties-loop.mp4,
+   Josh's clip: cropped to 16:9, black ends trimmed, last 2 s cross-fade into the first). It replaces whichever
+   screensaver is picked; Christmas, the Fitz memorial and Yacht Mode come first. Settings → Screen can turn it off. */
+const EI={vid:null};
+function eiLook(){
+ if(REMOTE||S.eiSaver===false||xmLook()||ymLook()||(typeof EF!=='undefined'&&EF.open))return false;
+ return !!S.radio&&S.station==='80s';
+}
+function eiStart(){
+ const g=$('#gallery'),el=document.createElement('div');el.className='gSlide fpWrap eiWrap';el.dataset.ei='1';
+ el.innerHTML='<video src="eighties-loop.mp4" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>';
+ g.insertBefore(el,$('#gNow'));
+ $$('.gSlide',g).forEach(o=>{if(o!==el){o.classList.remove('show');setTimeout(()=>o.remove(),2800)}});
+ const v=EI.vid=el.querySelector('video');v.muted=true;
+ const show=()=>requestAnimationFrame(()=>el.classList.add('show'));
+ if(v.readyState>=2)show();else v.addEventListener('loadeddata',show,{once:true});
+ v.play().catch(()=>{});
+ $('#gNow').classList.remove('hide');
+}
+// Let go of the video but leave it on screen, so the next screensaver fades in over it (it removes the old slide)
+function eiRelease(){const v=EI.vid;EI.vid=null;if(!v)return;const el=v.parentNode;setTimeout(()=>{v.pause();v.removeAttribute('src');v.load();if(el)el.remove()},3000)}
+function eiStop(){const v=EI.vid;EI.vid=null;if(v){v.pause();v.removeAttribute('src');v.load()}$$('.eiWrap').forEach(e=>e.remove())}
+document.addEventListener('visibilitychange',()=>{const v=EI.vid;if(!v)return;if(document.hidden)v.pause();else v.play().catch(()=>{})});
+// The station can change while the screensaver is up (dial, voice, couch remote): switch screensavers without
+// touching the lights (hueSaver stays as it is)
+function eiSync(){
+ if(REMOTE||!attractOn)return;
+ const want=eiLook();if(want===!!EI.vid)return;
+ if(want){
+  if(DECK.saver)closeDeck();$('#attract').classList.remove('on');clearInterval(ART.timer);
+  if(!galleryOn){galleryOn=true;syncGalleryNow();$('#gallery').classList.add('on')}
+  eiStart();return;
+ }
+ if(galleryOn&&(xmLook()||ymLook()||S.saver==='art')){eiRelease();clearInterval(ART.timer);showGallery();return}
+ eiStop();galleryOn=false;$('#gallery').classList.remove('on');
+ if(S.saver==='deck'){openDeck(true);return}
+ syncAttract();$('#attract').classList.add('on');
+}
+setInterval(eiSync,3000);
 /* Signal flags strung along the top: a run of international code flags on a sagging line */
 function ymFlags(){
  const el=$('#yflags');if(!el||el.dataset.built)return;el.dataset.built='1';
