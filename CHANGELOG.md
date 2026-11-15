@@ -2,6 +2,18 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35 — November 15, 2026
+
+- **Yacht Mode extras:**
+  - **String lights** hang between the signal flags: warm white and amber bulbs that twinkle slowly and switch on just after the flags unfurl.
+  - **Wind gusts:** every 30 to 70 seconds, a gust ripples down the flag line from left to right, with streaks of wind blowing across the screen.
+  - **The flags follow the Smooth-o-Meter:** a Certified Yacht song gets a fresh breeze (the flags snap, the lights twinkle faster, and a gust comes through as the song starts). Yacht-adjacent songs fly normally. A Dinghy leaves the flags hanging limp with the lights dimmed.
+  - **Water shimmer:** little star-shaped glints wink on and off across the water, most of them in the sun's path.
+  - **Gentle roll:** the sea behind the jukebox slowly rocks, as if you're on a boat. The buttons and text stay still. Turn it off in **Settings → Fun → Gentle roll**.
+  - **Seagulls:** every minute or two, one to three gulls fly across the sky. Sometimes one glides in, lands on the bottom rope, looks around, hops a couple of times and flies off (never while the sailboat is going by).
+  - **Brass porthole:** the Now Playing cover turns round and sits behind a brass porthole with eight bolts and a glass reflection.
+- Gusts and gulls pause while the screensaver is up or the tab is hidden. Everything moves with transforms and opacity, to keep it light on the Chromebox.
+
 ## 1.34 — November 15, 2026
 
 - **Songs by their lyrics, with a Google search:** "Hey DJ, play the song that goes 'water so clear you can see to the bottom'". When a request quotes lyrics instead of a title, Gemini runs a Google search for those words before the song is looked up (a line from the middle of a verse was hit-or-miss from memory alone). It takes a second or two longer, only for lyric requests. If it's not sure, the other likely songs show up to tap.

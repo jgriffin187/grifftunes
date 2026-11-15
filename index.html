@@ -685,6 +685,40 @@ html.yIn #yflags>svg{animation:yLine .5s ease-out .2s both}
 html.yIn .yf b{animation:yfIn .55s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d)}
 @keyframes yfIn{from{transform:scaleY(0) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.yrail i,.yf i{animation:none}}
+/* ⛵ 1.35 extras: string lights on the flag line, wind gusts, flags that follow the Smooth-o-Meter, a gentle roll, seagulls, a brass porthole */
+#ylights{position:absolute;left:0;top:0;width:100%;height:84px;overflow:visible;pointer-events:none}
+.ylg{animation:ylTw var(--tw,3s) ease-in-out infinite alternate;animation-delay:var(--td,0s)}
+@keyframes ylTw{from{opacity:.45}to{opacity:1}}
+#ytrim[data-sm="yc"] .ylg{--tw:1.1s}
+#ytrim[data-sm="yd"] .ylg{animation:none;opacity:.35}
+#ytrim[data-sm="yd"] .ylc{fill:#e9c98a}
+html.yIn .ylb{animation:ylOn .5s ease-out both;animation-delay:var(--d)}
+@keyframes ylOn{0%,40%{opacity:0}60%{opacity:1}75%{opacity:.4}100%{opacity:1}}
+/* how the flags fly follows the Smooth-o-Meter: Certified Yacht snaps in a fresh breeze, a Dinghy hangs limp */
+#ytrim[data-sm="yc"] .yf i{animation:yfProud 2.1s ease-in-out infinite}
+#ytrim[data-sm="yd"] .yf i{animation:yfLimp 5.5s ease-in-out infinite}
+@keyframes yfProud{0%,100%{transform:rotate(-11deg) skewX(7deg) scaleX(.9)}50%{transform:rotate(11deg) skewX(-7deg) scaleX(1)}}
+@keyframes yfLimp{0%,100%{transform:rotate(-2deg) scaleX(.86) scaleY(1.04)}50%{transform:rotate(2deg) scaleX(.9) scaleY(1.04)}}
+/* a gust ripples down the line left to right */
+html.yGust:not(.yIn) .yf b{animation:yfGust 1.5s ease-in-out both;animation-delay:var(--g)}
+@keyframes yfGust{0%{transform:none}25%{transform:rotate(-24deg) skewX(10deg) scaleX(.8)}45%{transform:rotate(-14deg) skewX(-6deg) scaleX(.95)}65%{transform:rotate(-20deg) skewX(8deg) scaleX(.85)}100%{transform:none}}
+.ywind{position:absolute;left:0;height:2px;width:22vw;border-radius:2px;background:linear-gradient(90deg,rgba(255,240,220,0),rgba(255,240,220,.55),rgba(255,240,220,0));opacity:0;animation:yWind 1.9s ease-in-out forwards}
+@keyframes yWind{0%{transform:translateX(-25vw);opacity:0}20%{opacity:.8}80%{opacity:.6}100%{transform:translateX(105vw);opacity:0}}
+/* a gentle roll: only the sea behind the jukebox rocks, the buttons stay put */
+html.yacht.yRoll #sea{animation:seaRoll 11s ease-in-out infinite;transform-origin:50% 58%;will-change:transform}
+@keyframes seaRoll{0%,100%{transform:scale(1.06) rotate(-.8deg) translateY(-5px)}50%{transform:scale(1.06) rotate(.8deg) translateY(5px)}}
+/* seagulls */
+.ygull{position:absolute;left:0;top:0;pointer-events:none;will-change:transform}
+.ygull svg{display:block;width:100%;height:auto;overflow:visible}
+.ygull .gw{transform-origin:32px 14px;animation:gFlap 1.7s ease-in-out infinite}
+@keyframes gFlap{0%,34%,100%{transform:scaleY(1)}9%,26%{transform:scaleY(-.55)}17%{transform:scaleY(.9)}60%{transform:scaleY(.82)}}
+.ygull .gs{display:none}.ygull.stand .gf{display:none}.ygull.stand .gs{display:block}
+.ygull.stand .gs .gh{transform-origin:12px 11px;animation:gLook 2.6s steps(1) infinite}
+@keyframes gLook{0%{transform:none}45%{transform:rotate(-14deg)}70%{transform:rotate(8deg)}}
+/* Now Playing art behind a brass porthole */
+html.yacht .npArt{border-radius:50%;box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 0 2px #5a3c0c,0 0 34px rgba(255,170,80,.35)}
+html.yacht .npArt::after{content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='b' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff2bf'/%3E%3Cstop offset='.25' stop-color='%23e3b24a'/%3E%3Cstop offset='.55' stop-color='%23946112'/%3E%3Cstop offset='.78' stop-color='%23deac46'/%3E%3Cstop offset='1' stop-color='%236c460c'/%3E%3C/linearGradient%3E%3CradialGradient id='s' cx='.4' cy='.35' r='.7'%3E%3Cstop offset='0' stop-color='%23fff6cf'/%3E%3Cstop offset='.5' stop-color='%23d4a13c'/%3E%3Cstop offset='1' stop-color='%235e3d0a'/%3E%3C/radialGradient%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fff' stop-opacity='.42'/%3E%3Cstop offset='.35' stop-color='%23fff' stop-opacity='.06'/%3E%3Cstop offset='.6' stop-color='%23fff' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23aee' stop-opacity='.12'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='38' fill='url(%23g)'/%3E%3Cpath d='M26 30a32 32 0 0 1 22-12' stroke='%23fff' stroke-opacity='.55' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='50' r='44.5' fill='none' stroke='url(%23b)' stroke-width='11'/%3E%3Ccircle cx='50' cy='50' r='39.3' fill='none' stroke='%23311f05' stroke-width='1.4'/%3E%3Ccircle cx='50' cy='50' r='49.4' fill='none' stroke='%234a3008' stroke-width='1.2'/%3E%3Ccircle cx='50' cy='50' r='44.5' fill='none' stroke='%23fff3c8' stroke-opacity='.35' stroke-width='.6'/%3E%3Cg fill='url(%23s)' stroke='%234a3008' stroke-width='.5'%3E%3Ccircle cx='94.5' cy='50' r='2.6'/%3E%3Ccircle cx='81.5' cy='81.5' r='2.6'/%3E%3Ccircle cx='50' cy='94.5' r='2.6'/%3E%3Ccircle cx='18.5' cy='81.5' r='2.6'/%3E%3Ccircle cx='5.5' cy='50' r='2.6'/%3E%3Ccircle cx='18.5' cy='18.5' r='2.6'/%3E%3Ccircle cx='50' cy='5.5' r='2.6'/%3E%3Ccircle cx='81.5' cy='18.5' r='2.6'/%3E%3C/g%3E%3C/svg%3E") center/100% 100% no-repeat}
+@media (prefers-reduced-motion:reduce){.ylg,.ygull .gw,html.yacht.yRoll #sea{animation:none}}
 #sailboat{position:fixed;bottom:2vh;left:0;z-index:93;pointer-events:none;width:min(260px,26vw);opacity:0;transform:translateX(-30vw);filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sailboat svg{width:100%;height:auto;display:block;animation:boatBob 3.2s ease-in-out infinite}
 #sailboat .wake{animation:wakeFade 1.6s ease-in-out infinite alternate}
@@ -4514,7 +4548,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.34';
+const GT_VERSION='1.35';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4669,7 +4703,8 @@ function openSettings(){
   <div class="note">Puts the ship's bell in the top bar. Tap it for the memorial: the bells, the names and the lights turned blue.</div></div>
  <div class="field"><span class="lab">⛵ Yacht Mode</span>
   ${tg('fYacht','Show the sailboat button: Yacht Mode',S.yachtBtn!==false)}
-  <div class="note">Yacht Mode comes on by itself while the Yacht Rock station plays. The sailboat button (or “Hey DJ, set sail”) turns it on and starts the Yacht Rock station; tap it again (or “Hey DJ, dock the boat”) to turn both off. Golden-hour sea, a sailboat once per song, signal flags, the Smooth-o-Meter, sunset lights, a marina screensaver and a smoother DJ Griff. Christmas Mode and the Fitzgerald memorial take priority.</div></div>
+  ${tg('fYmRoll','Gentle roll: the sea behind the jukebox rocks slowly, like being on a boat',S.ymRoll!==false)}
+  <div class="note">Yacht Mode comes on by itself while the Yacht Rock station plays. The sailboat button (or “Hey DJ, set sail”) turns it on and starts the Yacht Rock station; tap it again (or “Hey DJ, dock the boat”) to turn both off. Golden-hour sea with a gentle roll and shimmering water, a sailboat once per song, signal flags with string lights that fly with the Smooth-o-Meter and the wind, seagulls, a brass porthole on Now Playing, the Smooth-o-Meter, sunset lights, a marina screensaver and a smoother DJ Griff. Christmas Mode and the Fitzgerald memorial take priority.</div></div>
  </div>
  <div class="sTab" data-st="system"><h3 class="stH">System</h3>
  <div class="field"><span class="lab">Jukebox upkeep</span>
@@ -4725,6 +4760,7 @@ function openSettings(){
  $('#fFrost').onchange=e=>{S.frost=e.target.checked;saveS();frostTick()};
  $('#fEfz').onchange=e=>{S.efz=e.target.checked;saveS();efzRender()};
  $('#fYacht').onchange=e=>{S.yachtBtn=e.target.checked;saveS();ymSync()};
+ $('#fYmRoll').onchange=e=>{S.ymRoll=e.target.checked;saveS();ymSync()};
  $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -7208,11 +7244,12 @@ function ymSync(){
  if(YM.on&&S.radio&&S.station!=='yacht'){YM.on=false;store.set('yacht_on',false)}
  const b=$('#yachtBtn');if(b){b.style.display=S.yachtBtn!==false?'':'none';b.classList.toggle('on',YM.on)}
  const was=YM.look;YM.look=ymLook();
- document.documentElement.classList.toggle('yacht',YM.look);if(YM.look)ymFlags();
+ document.documentElement.classList.toggle('yacht',YM.look);document.documentElement.classList.toggle('yRoll',S.ymRoll!==false);if(YM.look)ymFlags();
  if(was!==YM.look){
   seaSync();try{hueTrack()}catch(e){}
   if(YM.look){ymIntro();if(P.current){ymFlySoon(6000);ymPlayed(P.current)}}
   else{clearTimeout(YM.flyT);if(YM.tkFor){YM.tkFor=null;tkStop()}}
+  ymExtras(YM.look);
   try{hostSync()}catch(e){}
  }
  if(YM.look&&P.current&&YM.rateFor!==P.current.id)ymRateNow(P.current);
@@ -7245,7 +7282,7 @@ function ymHorn(){
 }
 // The sailboat glides along the bottom once per song, somewhere in its first half
 function ymFlySoon(ms){clearTimeout(YM.flyT);if(!ymLook())return;const d=P.dur||200000;YM.flyT=setTimeout(ymFly,ms||Math.min(90e3,Math.max(15e3,d*(.15+Math.random()*.35))))}
-function ymFly(){if(!ymLook()||$('#mrWrap'))return;const s=$('#sailboat');s.classList.remove('sail');void s.offsetWidth;s.classList.add('sail')}
+function ymFly(){if(!ymLook()||$('#mrWrap'))return;YM.sailTo=Date.now()+35e3;const s=$('#sailboat');s.classList.remove('sail');void s.offsetWidth;s.classList.add('sail')}
 // Smooth-o-Meter: a Yacht Rock station artist = Certified Yacht; a hit from 1976–1984 = Yacht-adjacent; anything else = Dinghy
 async function ymRate(t){
  const h=[...String(t.id||t.name)].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
@@ -7260,9 +7297,12 @@ async function ymRate(t){
 async function ymRateNow(t){
  YM.rateFor=t.id;const r=await ymRate(t);if(!P.current||P.current.id!==t.id)return;
  YM.rate=r;ymMeter(r);try{hostSync()}catch(e){}
+ if(r.score>=85)setTimeout(()=>ymGust(),1800);   // a Certified Yacht song gets a fresh breeze
 }
 function ymMeter(r){
- const el=$('#ymMeter');if(!el)return;
+ const el=$('#ymMeter'),tr=$('#ytrim');
+ if(tr){if(r)tr.dataset.sm=r.score>=85?'yc':r.score>=50?'ya':'yd';else delete tr.dataset.sm}
+ if(!el)return;
  if(!r){el.removeAttribute('data-on');return}
  el.setAttribute('data-on','1');
  el.querySelector('i').style.width=r.score+'%';
@@ -7344,8 +7384,24 @@ function seaFrame(ts){
  YSEA.raf=requestAnimationFrame(seaFrame);
  if(document.hidden||ts-YSEA.last<50)return;YSEA.last=ts;
  const x=YSEA.cv.getContext('2d');sunsetScene(x,YSEA.W,YSEA.H,ts/1000);
+ seaGlints(x,YSEA.W,YSEA.H,ts);
  // keep the jukebox readable: a soft darkening at the top and bottom
  const v=x.createLinearGradient(0,0,0,YSEA.H);v.addColorStop(0,'rgba(5,2,15,.35)');v.addColorStop(.5,'rgba(5,2,15,0)');v.addColorStop(1,'rgba(5,2,15,.35)');x.fillStyle=v;x.fillRect(0,0,YSEA.W,YSEA.H);
+}
+// Water shimmer: little star-shaped glints that wink on and off across the water, most of them in the sun's path
+const YGL=[];
+function seaGlints(x,W,H,ts){
+ const hz=H*.6,sx=W*.7;
+ for(let k=0;k<3&&YGL.length<70;k++){const d=Math.pow(Math.random(),.8),y=hz+4+d*d*(H-hz-4);
+  const near=Math.random()<.6,gx=near?sx+(Math.random()+Math.random()+Math.random()-1.5)*(W*.05+d*W*.12):Math.random()*W;
+  YGL.push({x:gx,y,s:1.2+d*3.2,b:ts,l:500+Math.random()*900,w:near?1:.55})}
+ x.save();x.globalCompositeOperation='lighter';
+ for(let i=YGL.length-1;i>=0;i--){const g=YGL[i],p=(ts-g.b)/g.l;if(p>=1){YGL.splice(i,1);continue}
+  const a=Math.sin(p*Math.PI)*g.w,r=g.s*(.6+.4*a);
+  x.fillStyle=`rgba(255,236,190,${(a*.85).toFixed(3)})`;
+  x.fillRect(g.x-r*1.6,g.y-.35,r*3.2,.7);x.fillRect(g.x-.35,g.y-r*.9,.7,r*1.8);
+  x.fillStyle=`rgba(255,250,230,${a.toFixed(3)})`;x.fillRect(g.x-.6,g.y-.6,1.2,1.2)}
+ x.restore();
 }
 /* Yacht Mode screensaver: a sunset over the waves (yacht-sunset.mp4, Josh's video: 58 s, no sound, its last 2 seconds
    cross-fade into its first so the loop has no seam), playing on a loop like the Christmas fireplace. */
@@ -7445,9 +7501,69 @@ function ymFlags(){
   const t=(x%swW)/swW;if(t<.07||t>.93||x<62||x>W-62)continue; // leave the anchor points clear
   const ch=msg[k++%msg.length],f=L[ch];if(!f)continue;
   const a=Math.atan(slope(x))*180/Math.PI,yy=yAt(x);
-  out.push(`<div class="yf" style="left:${(x-21).toFixed(1)}px;top:${(yy-.5).toFixed(1)}px;transform:rotate(${a.toFixed(1)}deg);--d:${(.35+n*.028).toFixed(3)}s"><b><i style="animation-delay:${(-(n*.16)%3.4).toFixed(2)}s"><svg viewBox="0 0 30 20">${f.d}<path d="${f.s||'M0 0h30v20H0z'}" fill="url(#yfShade)"/><path d="M0 .4h30" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg></i></b></div>`);n++;
+  out.push(`<div class="yf" style="left:${(x-21).toFixed(1)}px;top:${(yy-.5).toFixed(1)}px;transform:rotate(${a.toFixed(1)}deg);--d:${(.35+n*.028).toFixed(3)}s;--g:${(x/W*1.1).toFixed(2)}s"><b><i style="animation-delay:${(-(n*.16)%3.4).toFixed(2)}s"><svg viewBox="0 0 30 20">${f.d}<path d="${f.s||'M0 0h30v20H0z'}" fill="url(#yfShade)"/><path d="M0 .4h30" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg></i></b></div>`);n++;
  }
- el.innerHTML=`<svg aria-hidden="true"><defs><linearGradient id="yfShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset=".8" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs><path d="${line}" stroke="rgba(40,24,8,.55)" stroke-width="3.6" fill="none" transform="translate(0 1.5)"/><path d="${line}" stroke="#e6d2a2" stroke-width="2.4" fill="none"/>${Array.from({length:nSw-1},(_,i)=>`<circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0}" r="5" fill="#d9a83c" stroke="#6e4a10" stroke-width="1.5"/><circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0-1}" r="1.8" fill="#fff3c4"/>`).join('')}</svg>`+out.join('');
+ el.innerHTML=`<svg aria-hidden="true"><defs><linearGradient id="yfShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset=".8" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs><path d="${line}" stroke="rgba(40,24,8,.55)" stroke-width="3.6" fill="none" transform="translate(0 1.5)"/><path d="${line}" stroke="#e6d2a2" stroke-width="2.4" fill="none"/>${Array.from({length:nSw-1},(_,i)=>`<circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0}" r="5" fill="#d9a83c" stroke="#6e4a10" stroke-width="1.5"/><circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0-1}" r="1.8" fill="#fff3c4"/>`).join('')}</svg>`+out.join('')+ymLights(W,swW,pitch,yAt);
+}
+// String lights between the flags: warm bulbs hanging off the dressing line, twinkling slowly (above the flags so their glow falls on the cloth)
+function ymLights(W,swW,pitch,yAt){
+ let g='',n=0;
+ for(let x=pitch;x<W-8;x+=pitch){
+  const t=(x%swW)/swW;if(t<.07||t>.93||x<62||x>W-62)continue;
+  const y=yAt(x),amber=n%3===2;
+  g+=`<g class="ylb" style="--d:${(.9+n*.028).toFixed(3)}s"><circle class="ylg" cx="${x}" cy="${(y+7).toFixed(1)}" r="13" fill="url(#ylGlow)" style="--tw:${(2.2+((n*7)%10)/6).toFixed(2)}s;--td:${(-((n*.83)%3)).toFixed(2)}s"/><rect x="${x-1.6}" y="${(y+.5).toFixed(1)}" width="3.2" height="3" rx=".6" fill="#2b2014"/><ellipse class="ylc" cx="${x}" cy="${(y+6.6).toFixed(1)}" rx="3" ry="4" fill="${amber?'#ffc46b':'#fff1c9'}"/><ellipse cx="${x-.8}" cy="${(y+5.4).toFixed(1)}" rx=".8" ry="1.2" fill="#fff" opacity=".85"/></g>`;n++;
+ }
+ return `<svg id="ylights" aria-hidden="true"><defs><radialGradient id="ylGlow"><stop offset="0" stop-color="#ffe7a8" stop-opacity=".95"/><stop offset=".35" stop-color="#ffc56a" stop-opacity=".45"/><stop offset="1" stop-color="#ff9a3c" stop-opacity="0"/></radialGradient></defs>${g}</svg>`;
+}
+/* Wind gusts and seagull cameos, scheduled while Yacht Mode shows (asleep under the screensaver and when the tab is hidden) */
+const ymQuiet=()=>!YM.look||document.hidden||galleryOn||document.documentElement.classList.contains('yIn');
+function ymExtras(on){
+ clearTimeout(YM.gustT);clearTimeout(YM.gullT);
+ if(!on){$$('#ytrim .ygull,#ytrim .ywind').forEach(e=>e.remove());document.documentElement.classList.remove('yGust');return}
+ ymGustSoon(14e3+Math.random()*10e3);ymGullSoon(30e3+Math.random()*20e3);
+}
+function ymGustSoon(ms){clearTimeout(YM.gustT);YM.gustT=setTimeout(()=>{ymGust();ymGustSoon()},ms||28e3+Math.random()*40e3)}
+function ymGust(){
+ if(ymQuiet()||Date.now()-(YM.gustAt||0)<8e3)return;YM.gustAt=Date.now();
+ const h=document.documentElement,tr=$('#ytrim');h.classList.remove('yGust');void h.offsetWidth;h.classList.add('yGust');
+ clearTimeout(YM.gustOff);YM.gustOff=setTimeout(()=>h.classList.remove('yGust'),3000);
+ // a few streaks of wind blow across with it
+ for(let i=0;i<4;i++){const w=document.createElement('i');w.className='ywind';
+  w.style.top=(14+Math.random()*58).toFixed(1)+'vh';w.style.animationDelay=(i*.22+Math.random()*.2).toFixed(2)+'s';w.style.width=(14+Math.random()*16).toFixed(0)+'vw';
+  tr.appendChild(w);setTimeout(()=>w.remove(),2800)}
+}
+function ymGullSoon(ms){clearTimeout(YM.gullT);YM.gullT=setTimeout(()=>{ymGull();ymGullSoon()},ms||75e3+Math.random()*90e3)}
+const GULL_FLY=`<svg class="gf" viewBox="0 0 64 28"><g class="gw"><path d="M32 14C26 6 15 3 2 8c9-1 18 2 26 9z" fill="#f4f1ea"/><path d="M32 14c6-8 17-11 30-6-9-1-18 2-26 9z" fill="#f4f1ea"/><path d="M2 8c4-1.6 7-1.8 9-1.4l-3 3.2z" fill="#1d1d22"/><path d="M62 8c-4-1.6-7-1.8-9-1.4l3 3.2z" fill="#1d1d22"/><path d="M28 17c-6-7-14-9-22-8M36 17c6-7 14-9 22-8" stroke="#9aa3ad" stroke-width="1" fill="none" opacity=".7"/></g><ellipse cx="32" cy="15.5" rx="3.6" ry="5" fill="#fbfaf6"/><circle cx="32" cy="10.6" r="2.6" fill="#fbfaf6"/><path d="M31 12.4l1 2.4 1-2.4z" fill="#f2b632"/></svg>`;
+const GULL_STAND=`<svg class="gs" viewBox="0 0 40 44"><path d="M19 33v9M25 33v9M16 42h6M22 42h6" stroke="#f08a3a" stroke-width="1.6" stroke-linecap="round"/><path d="M30 26l9 4-10-1z" fill="#1d1d22"/><ellipse cx="22" cy="26" rx="10.5" ry="8" fill="#fbfaf6"/><path d="M14 22c6-4 14-4 20 1l4 6c-7 1-15 0-22-3z" fill="#a9b2bc"/><path d="M33 26l6 3-7 0z" fill="#25252a"/><g class="gh"><circle cx="12" cy="14" r="5.4" fill="#fbfaf6"/><path d="M7.4 13.6L1 15.4l6.6 1.6z" fill="#f2b632"/><circle cx="3.6" cy="15.6" r=".9" fill="#d8352f"/><circle cx="10.4" cy="12.6" r="1" fill="#141414"/></g><path d="M12 19c2 3 5 4 8 4" stroke="#fbfaf6" stroke-width="5" fill="none"/></svg>`;
+async function ymGull(){
+ if(ymQuiet())return;
+ const tr=$('#ytrim'),W=innerWidth,H=innerHeight,perch=Math.random()<.4&&Date.now()>(YM.sailTo||0)&&!tr.querySelector('.ygull');
+ const mk=(w)=>{const g=document.createElement('div');g.className='ygull';g.style.width=w+'px';g.innerHTML=GULL_FLY+GULL_STAND;tr.appendChild(g);return g};
+ try{
+  if(!perch){
+   // a flyby: one to three gulls drifting across the sky, bobbing on the breeze
+   const n=1+Math.floor(Math.random()*3),ltr=Math.random()<.5,y0=H*(.1+Math.random()*.2),dur=13e3+Math.random()*6e3;
+   const runs=[];
+   for(let i=0;i<n;i++){const s=i?.78-.1*i:1,g=mk(Math.round(54*s)),dy=i*(18+Math.random()*14),lag=i*(500+Math.random()*700);
+    const xa=ltr?-90:W+30,xb=ltr?W+30:-90,f=[];
+    for(let k=0;k<=8;k++){const p=k/8;f.push({transform:`translate(${(xa+(xb-xa)*p).toFixed(0)}px,${(y0+dy+Math.sin(p*9+i)*14-p*H*.05).toFixed(0)}px)`})}
+    runs.push(g.animate(f,{duration:dur,delay:lag,easing:'linear',fill:'both'}).finished.finally(()=>g.remove()))}
+   await Promise.all(runs);return;
+  }
+  // a cameo: glides in, lands on the bottom rope for a look around, then takes off again
+  const g=mk(54),tf=34,feet=H-(tf+13)+3,gh=54*44/40,lx=W*(.25+Math.random()*.5),ly=feet-gh*42/44;   // the bottom rope's top edge is 47 px up
+  await g.animate([{transform:`translate(${W+40}px,${H*.38}px)`},{transform:`translate(${(lx+W*.25).toFixed(0)}px,${(ly-60).toFixed(0)}px)`,offset:.7},{transform:`translate(${lx.toFixed(0)}px,${(ly-6).toFixed(0)}px)`}],{duration:6500,easing:'ease-out',fill:'forwards'}).finished;
+  if(!YM.look){g.remove();return}
+  g.classList.add('stand');
+  await g.animate([{transform:`translate(${lx.toFixed(0)}px,${(ly-6).toFixed(0)}px)`},{transform:`translate(${lx.toFixed(0)}px,${ly.toFixed(0)}px)`}],{duration:250,easing:'ease-in',fill:'forwards'}).finished;
+  // a couple of hops along the rope
+  let x=lx;for(const d of[0,1]){await new Promise(r=>setTimeout(r,2400+Math.random()*1600));if(!YM.look)break;const nx=x+(Math.random()<.5?-1:1)*(16+Math.random()*20);
+   await g.animate([{transform:`translate(${x.toFixed(0)}px,${ly.toFixed(0)}px)`},{transform:`translate(${((x+nx)/2).toFixed(0)}px,${(ly-12).toFixed(0)}px)`},{transform:`translate(${nx.toFixed(0)}px,${ly.toFixed(0)}px)`}],{duration:380,easing:'ease-in-out',fill:'forwards'}).finished;x=nx}
+  await new Promise(r=>setTimeout(r,1800+Math.random()*1500));
+  g.classList.remove('stand');
+  await g.animate([{transform:`translate(${x.toFixed(0)}px,${ly.toFixed(0)}px)`},{transform:`translate(${(x-W*.2).toFixed(0)}px,${(ly-H*.25).toFixed(0)}px)`,offset:.4},{transform:`translate(-120px,${(H*.12).toFixed(0)}px)`}],{duration:6000,easing:'ease-in',fill:'forwards'}).finished;
+  g.remove();
+ }catch(e){}
 }
 // the rope draws itself and the flags unfurl each time Yacht Mode starts
 function ymIntro(){
