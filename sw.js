@@ -7,6 +7,9 @@ const KEEP = [/\/vendor\//, /\/photos\//, /\/efz-bell\.mp3$/];
 // Fonts, the memorial's album cover and its photos (Wikimedia Commons): served from the copy on the jukebox, refreshed in the background.
 // Chart archive, song library and facts: big files that change at most weekly. Served from the jukebox while the copy
 // is under 6 hours old; after that the network is asked first, and the saved copy is the fallback when it can't be reached.
+// Hey DJ (wake.js and its models in wake/) and the About text: served from the copy on the jukebox, so Hey DJ starts even
+// without internet, and refreshed in the background so a retrained "Hey DJ" model arrives on the next load.
+const FRESHEN = [/\/wake\//, /\/wake\.js$/, /\/about\.html$/];
 const DATA = /\/(hot100-top20|country-top20|grad-facts|song-library)\.json$/, DATA_FRESH = 6 * 3600e3;
 const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
 self.addEventListener('install', () => self.skipWaiting());
@@ -32,6 +35,15 @@ self.addEventListener('fetch', e => {
       const r = await fetch(req);
       if (r.ok) c.put(req, r.clone());
       return r;
+    }));
+    return;
+  }
+  if (url.startsWith(self.location.origin) && FRESHEN.some(r => r.test(url.split('?')[0]))) {
+    e.respondWith(caches.open(ASSETS).then(async c => {
+      const hit = await c.match(req, { ignoreSearch: true });
+      const net = fetch(req).then(r => { if (r.ok) c.put(req.url.split('?')[0], r.clone()); return r; });
+      if (hit) { e.waitUntil(net.catch(() => {})); return hit; }
+      return net;
     }));
     return;
   }

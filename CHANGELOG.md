@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.28.4 — November 15, 2026
+
+- **A song Spotify won't start no longer gets stuck on screen:** before, it stayed as Now Playing with nothing playing until someone tapped Skip. Now a paid song goes back to the front of Up Next and the jukebox tries again; a radio, house mix or countdown song is passed over for the next one. After three failures in a row it stops and says so (Up Next is saved; tap Play to try again).
+- **Hey DJ answers sooner:** the answer shows on screen as soon as the song is found, and DJ Griff's line joins it (and he says it) a moment later. Before, the screen waited up to 5 more seconds for his line. His line is also written while the song covers load, not after. Gemini now gets 10 seconds to understand a "Hey DJ" recording and 7 for typed or Ask DJ words (it was 15 and 9), before the backup model is tried.
+- **Gemini's backup model works:** when gemini-2.5-flash fails, the newest Flash model takes over. It thinks before it answers, and with the old word limit it usually ran out before writing anything, so the backup almost never helped. It now has room to answer, for Hey DJ requests and DJ Griff's breaks.
+- **Hey DJ works without internet:** the jukebox keeps its own copy of the wake word models and wake.js, so after a reload with the Wi-Fi down it still listens for "Hey DJ" (the request itself still needs the internet). A retrained "Hey DJ" model is picked up on the next load.
+- **Lighter page:** the About pages moved to their own file (about.html), loaded the first time About is opened, so the jukebox reads 57 KB less at every start. The long description of what Hey DJ understands is written once and shared by typed and spoken requests (it was in the code twice).
+
 ## 1.28.3 — November 15, 2026
 
 A check-up of the whole jukebox, with these fixes:
