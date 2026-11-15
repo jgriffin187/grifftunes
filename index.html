@@ -2108,8 +2108,9 @@ const SPOTIFY={
     try{
      const me=m.id,all=await allPages(p=>famApi(m,p),'/me/playlists?limit=50',1000);
      out.push({id:'liked-'+m.id,type:'fliked',member:m.id,name:`${m.name}'s Liked Songs`,sub:m.full,img:LIKED_ART});
+     m.last={at:Date.now(),n:all.filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).length};saveFam();
      all.filter(x=>x&&((x.owner&&x.owner.id===me)||x.collaborative)).forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);const it=spItem(x,'playlist');it.type='fplaylist';it.member=m.id;it.sub=`${m.name}'s playlist`;out.push(it)});
-    }catch(e){out.push({id:'err-'+m.id,type:'ferr',member:m.id,name:m.name,sub:e.message,img:m.img||''})}
+    }catch(e){console.warn('[GriffTunes family]',m.name,e);m.last={at:Date.now(),err:e.message};saveFam();out.push({id:'err-'+m.id,type:'ferr',member:m.id,name:m.name,sub:e.message,img:m.img||''})}
    }
    if(!FAM.length)out.unshift({id:'fam-none',type:'ferr',name:'Add your family',sub:'In Settings, tap Add family member and have them sign in to Spotify. Their playlists show up here',img:LIKED_ART});
    return out;
@@ -2630,7 +2631,7 @@ function toast(msg,img){
  const el=document.createElement('div');el.className='toast'+(warn?' warn':'');
  el.innerHTML=(img&&!warn?`<img src="${esc(img)}" alt="">`:`<span class="tIcon">${warn?'!':'♪'}</span>`)+`<span>${esc(msg)}</span>`;
  const box=$('#toasts');box.appendChild(el);while(box.children.length>3)box.firstChild.remove();
- setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),400)},3400);
+ setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),400)},warn?Math.min(15000,Math.max(6000,String(msg).length*70)):3400);
 }
 function bump(el,cls){el.classList.remove(cls);void el.offsetWidth;el.classList.add(cls)}
 const cost=n=>S.freePlay?'':`<span class="cost">${n}</span>`;
@@ -3843,6 +3844,7 @@ async function asRoastMe(){
 // "Roast Liz": the Family tab member whose first name, full name or Spotify username matches (nicknames too: Liz = Elizabeth)
 const AS_NICK={liz:'elizabeth',lizzie:'elizabeth',beth:'elizabeth',eliza:'elizabeth',betsy:'elizabeth',libby:'elizabeth',josh:'joshua',mike:'michael',matt:'matthew',chris:'christopher',nick:'nicholas',tony:'anthony',kate:'katherine',katie:'katherine',kathy:'katherine',jen:'jennifer',jenny:'jennifer',sam:'samantha',alex:'alexander',ben:'benjamin',will:'william',bill:'william',bob:'robert',rob:'robert',jim:'james',jimmy:'james',tom:'thomas',dan:'daniel',dave:'david',steve:'steven',sue:'susan',meg:'margaret',maggie:'margaret',abby:'abigail',andy:'andrew',drew:'andrew',tim:'timothy',greg:'gregory',jon:'jonathan',nate:'nathan',zach:'zachary',jake:'jacob',max:'maxwell',ally:'allison',becky:'rebecca',cathy:'catherine',mandy:'amanda',vicky:'victoria',tori:'victoria'};
 // Names each member answers to: their Spotify first name and full name, plus anything typed in Settings → Called
+const spWhenFam=t=>{const m=Math.round((Date.now()-t)/60e3);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' hr ago':Math.round(m/1440)+' days ago'};
 function famNames(m){return[m.name,m.full,...String(m.call||'').split(',')].map(x=>String(x||'').trim()).filter(Boolean)}
 function asFamFind(name){
  const f=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,"'").replace(/'s\b/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
@@ -3883,7 +3885,7 @@ async function asRoastFam(m){
    const c=TRKC.get(provider.key+':'+it.type+':'+it.id+':'+(it.member||''));let tr=c&&c.tracks;
    if(!tr){const j=await famApi(m,it.type==='fliked'?'/me/tracks?limit=50&market=from_token':`/playlists/${it.id}/items?limit=${max}&market=from_token`);tr=((j&&j.items)||[]).filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean)}
    tr=tr.slice(0,max);if(it.type==='fliked')d.liked=tr.length;
-   for(const t of tr){const a=afLead(t.artist||'');if(a)cnt.set(a,(cnt.get(a)||0)+1);songs.push(`${t.name} by ${a}`)}}catch(e){}};
+   for(const t of tr){const a=afLead(t.artist||'');if(a)cnt.set(a,(cnt.get(a)||0)+1);songs.push(`${t.name} by ${a}`)}}catch(e){console.warn('[GriffTunes roast] songs in',it.name,e);d.songErr=`songs in “${it.name}”: ${e.message}`;m.last=Object.assign({},m.last,{songErr:d.songErr,at2:Date.now()});saveFam()}};
   if(liked)await take(liked,50);
   for(const it of shuffle(lists.slice()).slice(0,8))await take(it,60);
   d.artists=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).slice(0,15).map(([a,k])=>`${a} (${k} songs)`);
@@ -3933,8 +3935,9 @@ async function asRoast(q,res,src){
  }
  const key=String(store.get('dj_gkey','')||'').trim()||djKey(),tone=djTone();
  if(res.notFam){toast(`${res.notFam} doesn't match anyone in the Family tab (${FAM.length?FAM.map(m=>m.name).join(', '):'nobody added yet'}). Add the name under Settings → Family → Called. This roast uses tonight's songs`,'warn');delete res.notFam}
- if(res.famErr){toast(res.famErr,'warn');delete res.famErr}
+ if(res.famErr){toast(res.famErr,'warn');res.note=res.famErr;delete res.famErr}
  res.state='roast';res.q={title:'',artist:''};res.say=`🔥 Roasting ${who}${res.from?` · from ${who}'s ${res.from} in the Family tab`:''}`;delete res.from;
+ if(res.note){res.say+=` · ⚠ ${res.note}`;delete res.note}
  if(!key){res.say='DJ Griff needs his Writing key (Settings → DJ Griff → Setup) to roast anybody.';res.state='other';return}
  const sys=`${DJ_STYLE[tone]}
 ${djToday()}
@@ -4580,7 +4583,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.5';
+const GT_VERSION='1.35.6';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4618,7 +4621,7 @@ function openSettings(){
    <div class="field"><label for="fClient">Spotify Client ID</label><input type="text" id="fClient" value="${esc(S.clientId)}" placeholder="Paste Client ID"></div>
    <div class="btnRow">${connected?`<span class="ok">● Connected to Spotify</span><button class="btn" id="spOut">Disconnect</button>`:`<button class="btn spotify" id="spIn">Connect Spotify</button>`}</div>
    ${connected?`<div class="field"><span class="lab">Family members' playlists</span>
-    <div id="famList">${FAM.length?FAM.map(m=>`<div class="famRow"><img src="${esc(m.img||PLACEHOLDER)}" alt=""><span><b>${esc(m.full)}</b><small>Playlists in the Family tab</small><input type="text" class="famCall" data-famcall="${esc(m.id)}" value="${esc(m.call||'')}" placeholder="Called (for roasts): e.g. Liz, Mom" style="margin-top:6px;height:38px;font-size:14px"></span><button class="btn" data-famdel="${esc(m.id)}">Remove</button></div>`).join(''):'<p class="note">No family members yet.</p>'}</div>
+    <div id="famList">${FAM.length?FAM.map(m=>`<div class="famRow"><img src="${esc(m.img||PLACEHOLDER)}" alt=""><span><b>${esc(m.full)}</b><small>${m.last?(m.last.err?`⚠ ${esc(m.last.err)} (${esc(spWhenFam(m.last.at))})`:`✓ ${m.last.n} playlists loaded ${esc(spWhenFam(m.last.at))}`+(m.last.songErr?` · ⚠ ${esc(m.last.songErr)}`:'')):'Playlists in the Family tab'}</small><input type="text" class="famCall" data-famcall="${esc(m.id)}" value="${esc(m.call||'')}" placeholder="Called (for roasts): e.g. Liz, Mom" style="margin-top:6px;height:38px;font-size:14px"></span><button class="btn" data-famdel="${esc(m.id)}">Remove</button></div>`).join(''):'<p class="note">No family members yet.</p>'}</div>
     <div class="btnRow"><button class="btn spotify" id="famAdd"${FAM.length>=4?' disabled':''}>Add family member</button></div>
     <details class="note"><summary>Before adding someone</summary><ol>
      <li>In your Spotify developer dashboard, open the GriffTunes app → <b>User Management</b>, and add their name and the email on their Spotify account. Spotify allows you plus 4 people.</li>

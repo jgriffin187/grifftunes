@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.6 — November 15, 2026
+
+- **Warnings stay up long enough to read:** orange warning messages now stay on screen 6 to 15 seconds depending on how long they are (they used to vanish after 3½).
+- **Family playlist problems are easy to see:** each person under **Settings → Spotify → Family members' playlists** now shows how their playlists last loaded ("✓ 14 playlists loaded 2 min ago", or ⚠ and the exact error). When a roast can't use someone's playlists, the reason also stays in the Ask DJ window.
+
 ## 1.35.5 — November 15, 2026
 
 - **Roasting family members works more reliably:**
