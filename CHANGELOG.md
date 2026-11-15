@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.27.1 — November 14, 2026
+
+- **Settings → DJ Griff → What "Hey DJ" knows:** a fold-out list of every Hey DJ command and what it does (songs and albums, stations, controls, questions and roasts, and the Christmas, Fitzgerald and Yacht modes).
+
 ## 1.27 — November 14, 2026
 
 **⛵ Yacht Mode**
