@@ -1025,6 +1025,8 @@ html:not(.remote) .askType{display:none}
 .hdTable td:first-child{width:42%;font-weight:700;color:#fff}
 .hdTable td:last-child{color:var(--muted)}
 .hdTable .hdGrp th{text-align:left;padding:16px 10px 6px;font-family:Bungee;font-weight:400;font-size:12px;letter-spacing:.1em;color:var(--accent2)}
+.askWork{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 10px}
+.askProg{font-size:19px;font-weight:600;text-align:center;color:#fff;max-width:640px;line-height:1.35}
 .askAlts{display:flex;flex-direction:column;gap:6px}
 .askAlts .tNum,.askAlts .tDur,.askAlts .act.n,.askAlts .act.w{display:none}
 @media (max-width:820px){
@@ -3989,16 +3991,51 @@ async function asSpotify(title,artist){
  }
  return null;
 }
+/* ---------- Songs picked by their lyrics: "play the song that goes 'water so clear you can see to the bottom'" ----------
+   Gemini's memory alone is hit-or-miss on a line from the middle of a verse, so lyric requests get a Google search
+   (Gemini with Search grounding) before the song is looked up. A second or two slower, only for lyric requests. */
+function asLyricWords(q,heard){
+ if(q&&q.lyric)return q.lyric;
+ const m=String(heard||'').match(/(?:that goes|lyrics?(?: that say| that goes| about)?|that says|the one with)\s+["“']?(.{8,140}?)["”']?\s*$/i);
+ return m?m[1]:'';
+}
+async function asLyricSearch(words,artist){
+ const key=String(store.get('dj_gkey','')||'').trim()||djKey();if(!key||!words)return null;
+ const prompt=`Use Google Search to find the song whose lyrics include these words${artist?` (it may be by ${artist})`:''}: "${words}"
+The words were heard over loud music, so they may be slightly off. Answer in exactly this form, nothing else:
+TITLE: <the song's official title>
+ARTIST: <the main artist>
+ALSO: <up to two other songs it could be, as title — artist; separated by semicolons, or none>`;
+ for(const m of['gemini-2.5-flash','gemini-flash-latest']){
+  try{
+   const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(key)}`,{method:'POST',headers:{'Content-Type':'application/json'},signal:tmo(20000),
+    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],tools:[{google_search:{}}],generationConfig:{temperature:.1,maxOutputTokens:2048}})});
+   const j=await r.json().catch(()=>({}));if(!r.ok)continue;
+   const txt=((j.candidates&&j.candidates[0]&&j.candidates[0].content&&j.candidates[0].content.parts)||[]).filter(p=>p.text&&!p.thought).map(p=>p.text).join('\n');
+   const g=k=>((txt.match(new RegExp('^\\s*\\**'+k+'\\**:\\s*(.+)$','im'))||[])[1]||'').replace(/[*"“”]/g,'').trim();
+   const title=g('TITLE'),art=g('ARTIST');if(!title||/^(unknown|none|n\/a)$/i.test(title))continue;
+   const also=g('ALSO').split(/\s*;\s*/).map(x=>x.split(/\s+[—–-]\s+/)).filter(x=>x.length===2&&!/^none$/i.test(x[0])).map(([t,a])=>({title:t.trim(),artist:a.trim()})).slice(0,2);
+   return{title,artist:art,also};
+  }catch(e){}
+ }
+ return null;
+}
+// What the Ask DJ window says while it works, so nobody wonders whether it's stuck
+function asStep(txt){
+ if(REMOTE)return;
+ const el=$('#askProg');if(el){el.textContent=txt;bump(el,'pop')}
+ asHint(txt);
+}
 // what's playing, so Gemini can tell the background song's lyrics from the request
 function asNowLine(){const c=P.current;return c&&!P.paused?`\nPlaying in the room right now: "${c.name}" by ${afLead(c.artist)}. Its lyrics are not a request.`:''}
 // What Hey DJ understands beyond song requests: shared by the typed/heard text (asParse) and the recording (asParseAudio)
-const AS_KINDS=()=>` kind is "roast" when they ask DJ Griff to roast, make fun of, diss or rate someone's music taste; then target is "me" (themselves), "room" (us, everyone, the room, this party) or the person's first name, and title and artist are empty. kind is "christmas" when they announce Christmas or ask for Christmas Mode: "it's beginning to look a lot like Christmas" said as an announcement (but "play It's Beginning to Look a Lot Like Christmas" is a song request), "turn on Christmas mode", "let's get festive", "it's Christmas time"; target is "on", or "off" for "turn off Christmas mode", "Christmas is over", "no more Christmas music". kind is "fitz" for "the gales of November came early" (or close to it) said as an announcement, or "start the Fitz memorial" / "Fitz mode" / "ring the bell for the Fitzgerald"; but "play The Wreck of the Edmund Fitzgerald" is a song request. kind is "control" for playback controls and questions about the music; then action is one of: "skip" (next track, skip this song), "pause", "resume" (unpause, keep playing), "volup" / "voldown" (turn it up / down; amount 5 normally, 15 for "a lot", "way up"), "volset" (set the volume to a number; amount is that number from 0 to 100), "mute", "unmute", "clear" (clear the queue / Up Next), "nowplaying" (what's playing, who sings this, what song is this), "radio" (play a radio station; station is its name, one of: ${STATIONS.map(x=>x.name).join(', ')}), "radiooff", "lightson", "lightsoff", "speakerson", "speakersoff", "mirrorballon", "mirrorballoff" (turn the mirrorball / disco ball on or off). kind is "mix" when they ask for a style or era of music rather than one song, album or artist ("play some 90s country", "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"); then name is a short station name ("90s Country"), from and to are the years (current hits: the last two years), genre is one of pop, country, hiphop, rock, other, and artists lists 25 to 40 artists who had hits in that style in those years. "Play the 80s station" (a station by name) is a control, not a mix. kind is "yacht" for Yacht Mode: "set sail", "let's get smooth", "yacht mode", "yacht rock mode" → target "on"; "dock the boat", "yacht mode off", "drop anchor" → target "off".`;
+const AS_KINDS=()=>` kind is "roast" when they ask DJ Griff to roast, make fun of, diss or rate someone's music taste; then target is "me" (themselves), "room" (us, everyone, the room, this party) or the person's first name, and title and artist are empty. kind is "christmas" when they announce Christmas or ask for Christmas Mode: "it's beginning to look a lot like Christmas" said as an announcement (but "play It's Beginning to Look a Lot Like Christmas" is a song request), "turn on Christmas mode", "let's get festive", "it's Christmas time"; target is "on", or "off" for "turn off Christmas mode", "Christmas is over", "no more Christmas music". kind is "fitz" for "the gales of November came early" (or close to it) said as an announcement, or "start the Fitz memorial" / "Fitz mode" / "ring the bell for the Fitzgerald"; but "play The Wreck of the Edmund Fitzgerald" is a song request. kind is "control" for playback controls and questions about the music; then action is one of: "skip" (next track, skip this song), "pause", "resume" (unpause, keep playing), "volup" / "voldown" (turn it up / down; amount 5 normally, 15 for "a lot", "way up"), "volset" (set the volume to a number; amount is that number from 0 to 100), "mute", "unmute", "clear" (clear the queue / Up Next), "nowplaying" (what's playing, who sings this, what song is this), "radio" (play a radio station; station is its name, one of: ${STATIONS.map(x=>x.name).join(', ')}), "radiooff", "lightson", "lightsoff", "speakerson", "speakersoff", "mirrorballon", "mirrorballoff" (turn the mirrorball / disco ball on or off). kind is "mix" when they ask for a style or era of music rather than one song, album or artist ("play some 90s country", "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"); then name is a short station name ("90s Country"), from and to are the years (current hits: the last two years), genre is one of pop, country, hiphop, rock, other, and artists lists 25 to 40 artists who had hits in that style in those years. "Play the 80s station" (a station by name) is a control, not a mix. kind is "yacht" for Yacht Mode: "set sail", "let's get smooth", "yacht mode", "yacht rock mode" → target "on"; "dock the boat", "yacht mode off", "drop anchor" → target "off". lyric: when they pick a song by quoting its lyrics ("the song that goes…", "the one with the lyrics…", or words that are clearly a line from a song rather than its title), copy those lyric words here exactly as said; otherwise empty.`;
 // The answer's shape: Gemini fills this in (heard: what the person said, only when Gemini listened to the recording)
 function asSchema(heard){
- const p={kind:{type:'STRING',enum:['song','album','artist','roast','christmas','fitz','control','mix','yacht','other','unclear']},title:{type:'STRING'},artist:{type:'STRING'},also:{type:'ARRAY',items:{type:'OBJECT',properties:{title:{type:'STRING'},artist:{type:'STRING'}},required:['title','artist']}},when:{type:'STRING',enum:['queue','next','now']},target:{type:'STRING'},action:{type:'STRING'},amount:{type:'NUMBER'},station:{type:'STRING'},name:{type:'STRING'},from:{type:'NUMBER'},to:{type:'NUMBER'},genre:{type:'STRING'},artists:{type:'ARRAY',items:{type:'STRING'}}};
+ const p={kind:{type:'STRING',enum:['song','album','artist','roast','christmas','fitz','control','mix','yacht','other','unclear']},title:{type:'STRING'},artist:{type:'STRING'},also:{type:'ARRAY',items:{type:'OBJECT',properties:{title:{type:'STRING'},artist:{type:'STRING'}},required:['title','artist']}},when:{type:'STRING',enum:['queue','next','now']},target:{type:'STRING'},action:{type:'STRING'},amount:{type:'NUMBER'},station:{type:'STRING'},name:{type:'STRING'},from:{type:'NUMBER'},to:{type:'NUMBER'},genre:{type:'STRING'},artists:{type:'ARRAY',items:{type:'STRING'}},lyric:{type:'STRING'}};
  return{type:'OBJECT',properties:heard?Object.assign({heard:{type:'STRING'}},p):p,required:(heard?['heard']:[]).concat(['kind','title','artist','also','when'])};
 }
-const asNorm=o=>({heard:String(o.heard||'').trim(),kind:o.kind,title:String(o.title||'').trim(),artist:String(o.artist||'').trim(),also:(Array.isArray(o.also)?o.also:[]).slice(0,2),when:o.when,target:String(o.target||''),action:String(o.action||''),amount:+o.amount||0,station:String(o.station||''),name:String(o.name||''),from:+o.from||0,to:+o.to||0,genre:String(o.genre||''),artists:(Array.isArray(o.artists)?o.artists:[]).map(String).slice(0,50)});
+const asNorm=o=>({heard:String(o.heard||'').trim(),kind:o.kind,title:String(o.title||'').trim(),artist:String(o.artist||'').trim(),also:(Array.isArray(o.also)?o.also:[]).slice(0,2),when:o.when,target:String(o.target||''),action:String(o.action||''),amount:+o.amount||0,station:String(o.station||''),name:String(o.name||''),from:+o.from||0,to:+o.to||0,genre:String(o.genre||''),artists:(Array.isArray(o.artists)?o.artists:[]).map(String).slice(0,50),lyric:String(o.lyric||'').trim()});
 // Ask Gemini for the reading: gemini-2.5-flash (no thinking, quick), then the newest Flash if that fails. The newest Flash may
 // think before it answers, so it gets room for that (with 400 tokens it often ran out before writing anything).
 // ms: how long each one gets. Returns {q} or {err}.
@@ -4096,8 +4133,18 @@ async function asHandle(text,alts,src,pre){
  if(!asOn())return{state:'off',say:'Voice requests are turned off in Settings → DJ Griff.'};
  if(!text&&!pre)return{state:'unclear',say:"I didn't catch that. Tap the mic and try again."};
  if(provider===SPOTIFY)await libLoad();
- let q=pre||null;if(!q)try{q=await asParse(text,alts)}catch(e){console.warn('[GriffTunes] Assistant',e)}
+ const mine=src==='jukebox';
+ let q=pre||null;if(!q){if(mine)asStep('Working out what you asked for…');try{q=await asParse(text,alts)}catch(e){console.warn('[GriffTunes] Assistant',e)}}
  if(!q)q=asRough(text);
+ // picked by its lyrics: look it up on Google before trusting Gemini's memory
+ {const words=(q.kind==='song'||q.kind==='unclear'||!q.kind)?asLyricWords(q,text||(pre&&pre.heard)):'';
+  if(words){
+   if(mine)asStep(`Searching Google for “${words.length>60?words.slice(0,57)+'…':words}”…`);
+   const g=await asLyricSearch(words,'');
+   if(g){q=Object.assign({},q,{kind:'song',title:g.title,artist:g.artist,also:g.also.length?g.also:q.also||[]});if(mine)asStep(`Sounds like “${g.title}” by ${g.artist}. Finding it…`)}
+   else if(mine&&q.title)asStep(`Best guess: “${q.title}”${q.artist?' by '+q.artist:''}. Finding it…`);
+  }else if(mine&&q.kind==='song'&&q.title)asStep(`Finding “${q.title}”${q.artist?' by '+q.artist:''}…`);
+  else if(mine&&q.kind==='album'&&q.title)asStep(`Finding the album “${q.title}”…`);}
  const res={heard:text||(pre&&pre.heard)||'',q:{title:q.title,artist:q.artist},state:'',say:''};
  // Special phrases always win over Gemini's reading. "The gales of November came early" is a line from the Fitzgerald song,
  // so Gemini may take it as a request for that song; said as an announcement (not "play …"), it opens the memorial.
@@ -4292,11 +4339,14 @@ function asShow(r){
 }
 async function asSubmit(text,alts){
  if(AS.busy)return;AS.busy=true;lastInput=Date.now();
- $('#askHeard').textContent=`“${text}”`;$('#askOut').innerHTML='<div class="loading"><div class="spin"></div></div>';asHint('Looking for it…');
+ $('#askHeard').textContent=`“${text}”`;$('#askOut').innerHTML='<div class="loading askWork"><div class="spin"></div><div class="askProg" id="askProg">Working out what you asked for…</div></div>';asHint('Looking for it…');
+ // phones can't see the jukebox's steps, so they get a running commentary of their own
+ let pt=[];if(REMOTE){const lyr=/goes|lyric|says|the one with/i.test(text);
+  pt=[[3500,lyr?'Searching Google for those lyrics…':'Looking in the song library…'],[9000,'Still looking…'],[18000,'Almost there…']].map(([ms,m])=>setTimeout(()=>{const el=$('#askProg');if(el&&AS.busy){el.textContent=m;asHint(m)}},ms))}
  let r;
  try{r=REMOTE?await rcall({t:'ask',text,alts:(alts||[]).slice(0,2)}):await asHandle(text,alts,'jukebox')}
  catch(e){r={state:'error',say:e.message||'Something went wrong'}}
- finally{AS.busy=false}
+ finally{AS.busy=false;pt.forEach(clearTimeout)}
  asShow(r);
 }
 $('#askBtn').onclick=e=>{e.preventDefault();asOpen(true)};
@@ -4373,7 +4423,7 @@ async function asWake(){
  let clip=null;
  try{clip=await GTWake.record(5000)}finally{AS.on=false;HD.rec=false;$('#askOrb').classList.remove('on');duckEnd()}
  if(!clip)return;
- AS.busy=true;$('#askOut').innerHTML='<div class="loading"><div class="spin"></div></div>';asHint('Looking for it…');
+ AS.busy=true;$('#askOut').innerHTML='<div class="loading askWork"><div class="spin"></div><div class="askProg" id="askProg">Listening to what you said…</div></div>';asHint('Listening to what you said…');
  let r;
  try{const q=await asParseAudio(clip,key);r=q?await asHandle(q.heard||'',[],'jukebox',q):{state:'unclear',say:"I didn't catch that. Say “Hey DJ” and try again."}}
  catch(e){r={state:'error',say:e.message||'Something went wrong'}}
@@ -4464,7 +4514,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.33';
+const GT_VERSION='1.34';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4573,7 +4623,7 @@ function openSettings(){
 
  <div class="field"><details class="djSetup hdHelp"><summary>What “Hey DJ” knows · every command</summary>
   <div class="note" style="margin-top:10px">Say “Hey DJ”, pause a beat, then the request. The same words work on the <b>Ask DJ</b> button and from phones (guests’ phones can’t use the controls). Gemini understands looser wording too, like “can you make it louder”.</div>
-  <table class="hdTable"><tr class="hdGrp"><th colspan="2">Songs and albums</th></tr><tr><td>“Play Purple Rain by Prince”</td><td>Adds it to the end of Up Next · 1 credit. Starts right away if the music is paused or stopped, or only the radio, house mix or a countdown is on.</td></tr><tr><td>“…play it next” / “…after this one”</td><td>Puts it at the front of Up Next · 2 credits.</td></tr><tr><td>“…play it now” / “stop this and play…”</td><td>Cuts in right away · 3 credits. A paid song that gets cut off goes back to the front of Up Next.</td></tr><tr><td>“Play the Mase song from the Rugrats soundtrack”</td><td>Describe a song (a movie, a lyric, a scene) and Gemini works out which one.</td></tr><tr><td>“Play some Prince”</td><td>Shows a few of that artist’s songs to tap.</td></tr><tr><td>“Play the Alanis Morissette Jagged Little Pill album”</td><td>The whole album · 5 credits (“…now” and “…next” work too).</td></tr><tr class="hdGrp"><th colspan="2">Stations</th></tr><tr><td>“Play the 80s station” (any station)</td><td>Switches to that radio station now · free.</td></tr><tr><td>“Play some 90s country” / “80s pop” / “90s rap” / “current hits” / “yacht rock”</td><td>A made-to-order station from those years and artists · free. Plays until you change stations.</td></tr><tr><td>“Radio off”</td><td>Turns the radio off; the song playing finishes.</td></tr><tr class="hdGrp"><th colspan="2">Controls (jukebox and couch remote; not guests’ phones)</th></tr><tr><td>“Next track” / “skip this song”</td><td>Same as the Skip button.</td></tr><tr><td>“Pause” / “unpause” / “resume”</td><td>Pauses or carries on.</td></tr><tr><td>“Turn it up” / “turn it down”</td><td>Volume ±5 (“a lot” or “way up” is ±15).</td></tr><tr><td>“Volume to 40”</td><td>Sets the volume.</td></tr><tr><td>“Mute” / “unmute”</td><td>Volume to 0 / back to where it was.</td></tr><tr><td>“Clear the queue”</td><td>Empties Up Next right away (no undo).</td></tr><tr><td>“Lights on” / “lights off”</td><td>Same as the Lights window.</td></tr><tr><td>“Speakers on” / “speakers off”</td><td>Switches the Evolve smart plugs.</td></tr><tr><td>“Turn the mirrorball on” / “mirrorball off”</td><td>Switches the mirrorball’s smart plug.</td></tr><tr class="hdGrp"><th colspan="2">Questions and fun</th></tr><tr><td>“What’s playing?” / “who sings this?”</td><td>DJ Griff answers out loud, sometimes with a fact.</td></tr><tr><td>“Roast me”</td><td>About 30 seconds on your music taste (your Spotify + what’s played tonight). Free.</td></tr><tr><td>“Roast Liz” / “roast Carson”</td><td>Roasts that person’s playlists and Liked Songs from the Family tab (nicknames work: Liz finds an Elizabeth).</td></tr><tr><td>“Roast the room” / “roast us”</td><td>Roasts what’s been played in the last few hours.</td></tr><tr class="hdGrp"><th colspan="2">Modes</th></tr><tr><td>“It’s beginning to look a lot like Christmas”</td><td>Christmas Mode on and a Christmas song right away. “Christmas is over” turns it off.</td></tr><tr><td>“The gales of November came early”</td><td>The Edmund Fitzgerald memorial, same as the Fitz button.</td></tr><tr><td>“Set sail” / “let’s get smooth”</td><td>Yacht Mode on and the Yacht Rock station. “Dock the boat” turns both off.</td></tr></table>
+  <table class="hdTable"><tr class="hdGrp"><th colspan="2">Songs and albums</th></tr><tr><td>“Play Purple Rain by Prince”</td><td>Adds it to the end of Up Next · 1 credit. Starts right away if the music is paused or stopped, or only the radio, house mix or a countdown is on.</td></tr><tr><td>“…play it next” / “…after this one”</td><td>Puts it at the front of Up Next · 2 credits.</td></tr><tr><td>“…play it now” / “stop this and play…”</td><td>Cuts in right away · 3 credits. A paid song that gets cut off goes back to the front of Up Next.</td></tr><tr><td>“Play the Mase song from the Rugrats soundtrack”</td><td>Describe a song (a movie, a lyric, a scene) and Gemini works out which one.</td></tr><tr><td>“Play the song that goes ‘water so clear you can see to the bottom’”</td><td>Quote some lyrics: it searches Google for them first, then finds the song.</td></tr><tr><td>“Play some Prince”</td><td>Shows a few of that artist’s songs to tap.</td></tr><tr><td>“Play the Alanis Morissette Jagged Little Pill album”</td><td>The whole album · 5 credits (“…now” and “…next” work too).</td></tr><tr class="hdGrp"><th colspan="2">Stations</th></tr><tr><td>“Play the 80s station” (any station)</td><td>Switches to that radio station now · free.</td></tr><tr><td>“Play some 90s country” / “80s pop” / “90s rap” / “current hits” / “yacht rock”</td><td>A made-to-order station from those years and artists · free. Plays until you change stations.</td></tr><tr><td>“Radio off”</td><td>Turns the radio off; the song playing finishes.</td></tr><tr class="hdGrp"><th colspan="2">Controls (jukebox and couch remote; not guests’ phones)</th></tr><tr><td>“Next track” / “skip this song”</td><td>Same as the Skip button.</td></tr><tr><td>“Pause” / “unpause” / “resume”</td><td>Pauses or carries on.</td></tr><tr><td>“Turn it up” / “turn it down”</td><td>Volume ±5 (“a lot” or “way up” is ±15).</td></tr><tr><td>“Volume to 40”</td><td>Sets the volume.</td></tr><tr><td>“Mute” / “unmute”</td><td>Volume to 0 / back to where it was.</td></tr><tr><td>“Clear the queue”</td><td>Empties Up Next right away (no undo).</td></tr><tr><td>“Lights on” / “lights off”</td><td>Same as the Lights window.</td></tr><tr><td>“Speakers on” / “speakers off”</td><td>Switches the Evolve smart plugs.</td></tr><tr><td>“Turn the mirrorball on” / “mirrorball off”</td><td>Switches the mirrorball’s smart plug.</td></tr><tr class="hdGrp"><th colspan="2">Questions and fun</th></tr><tr><td>“What’s playing?” / “who sings this?”</td><td>DJ Griff answers out loud, sometimes with a fact.</td></tr><tr><td>“Roast me”</td><td>About 30 seconds on your music taste (your Spotify + what’s played tonight). Free.</td></tr><tr><td>“Roast Liz” / “roast Carson”</td><td>Roasts that person’s playlists and Liked Songs from the Family tab (nicknames work: Liz finds an Elizabeth).</td></tr><tr><td>“Roast the room” / “roast us”</td><td>Roasts what’s been played in the last few hours.</td></tr><tr class="hdGrp"><th colspan="2">Modes</th></tr><tr><td>“It’s beginning to look a lot like Christmas”</td><td>Christmas Mode on and a Christmas song right away. “Christmas is over” turns it off.</td></tr><tr><td>“The gales of November came early”</td><td>The Edmund Fitzgerald memorial, same as the Fitz button.</td></tr><tr><td>“Set sail” / “let’s get smooth”</td><td>Yacht Mode on and the Yacht Rock station. “Dock the boat” turns both off.</td></tr></table>
  </details></div>
  <div class="field"><details class="djSetup" id="djSetup"${(!djKey()||DJ.fails)?' open':''}><summary>Setup · keys, WiiM and Firebase</summary>
   <span class="lab" style="margin-top:12px">Voice key · Google Cloud (Text-to-Speech)</span>

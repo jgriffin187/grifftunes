@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.34 — November 15, 2026
+
+- **Songs by their lyrics, with a Google search:** "Hey DJ, play the song that goes 'water so clear you can see to the bottom'". When a request quotes lyrics instead of a title, Gemini runs a Google search for those words before the song is looked up (a line from the middle of a verse was hit-or-miss from memory alone). It takes a second or two longer, only for lyric requests. If it's not sure, the other likely songs show up to tap.
+- **The Ask DJ window says what it's doing:** under the spinner, step by step: "Listening to what you said…", "Working out what you asked for…", "Searching Google for 'water so clear…'…", "Sounds like 'Miami' by Will Smith. Finding it…". Phones show their own running messages while the jukebox works ("Searching Google for those lyrics…", "Still looking…").
+
 ## 1.33 — November 15, 2026
 
 - **Yacht Mode's rope looks like real boat rope:** twice as thick (22 px) and drawn as cream three-strand laid rope. Each strand is a rounded, twisted bundle with its own highlight, fine fibers and dark grooves between strands, instead of flat diagonal stripes. It stands out against the teak, casts a deeper shadow, and still creeps slowly clockwise. The app sits a little further in, and the flag line hangs from the middle of the rope.
