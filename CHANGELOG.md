@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.28.1 — November 15, 2026
+
+- **Mirrorball follows every party mode:** 1.28 only noticed when the *first* party mode came on. A mode still on from before a reload (Yacht Mode and Christmas Mode are remembered), or a second mode starting while another was on, didn't switch it. Now each mode is watched on its own: Christmas Mode, the Fitzgerald memorial and Yacht Mode each turn the mirrorball on when they start, even if you'd switched it off by hand in the meantime. It still goes off when the last one ends, and a reload never switches it.
+- **"Hey DJ, turn the mirrorball on / off":** also "turn on the mirror ball", "mirrorball off" and "disco ball on/off". Works at the jukebox and from the couch remote (guests' phones get "Only the couch remote can do that"). Listed in Settings → DJ Griff → What "Hey DJ" knows.
+
 ## 1.28 — November 15, 2026
 
 - **🪩 Mirrorball:** a new mirrorball button in the top bar, next to the lights, switches the Hue smart plug named **Mirrorball** on and off. It glows and spins while the mirrorball is on, and it's on the Couch Remote too. GriffTunes finds the plug by name; a different plug can be picked in Settings → Lights, and the mirrorball plug is left out of the speaker plug list.
