@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.9 — November 15, 2026
+
+- **Easier volume on the Couch Remote (phones):** the volume bar no longer jumps around under a fingertip. Touching the bar never changes the volume; sliding moves it from where it already is, at about half the old speed (a full swipe across the bar is ~50 points), with a light buzz every 5 points on Android. Vertical swipes on the bar still scroll the page. The − / + buttons now show on phones too (2 points per tap, hold to keep going), and the number pops up over the knob while you change it. A bigger knob, and the jukebox's reply no longer snaps the knob back right after you let go.
+
 ## 1.35.8 — November 15, 2026
 
 - **The turntable always shows the real album art:** in every mode (Christmas, Yacht, radio, countdowns, playlists), the record on the full-screen turntable shows the song's own cover. If a song started without a cover, the turntable now fetches it as soon as the turntable is open (Spotify's public embed info, no quota), and Now Playing updates too. The plain GriffTunes label only appears if Spotify has no cover at all.

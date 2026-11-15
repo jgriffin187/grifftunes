@@ -933,7 +933,13 @@ html.remote #devChip{display:none!important}
 .volStep:active{background:rgba(255,255,255,.2);transform:scale(.94)}
 .volNum{position:absolute;bottom:calc(100% - 2px);transform:translateX(-50%);min-width:38px;padding:3px 8px;border-radius:9px;background:rgba(10,12,24,.92);border:1px solid rgba(255,255,255,.2);color:#fff;font:700 15px/1.2 Outfit,sans-serif;text-align:center;font-variant-numeric:tabular-nums;opacity:0;pointer-events:none;transition:opacity .25s;z-index:3}
 .volNum.on{opacity:1}
-html.remote .volStep,html.remote .volNum{display:none}
+html.remote .volStep{width:46px;height:46px}
+html.remote .volNum{bottom:calc(100% + 4px);font-size:17px;min-width:44px}
+.volTrack{position:relative;flex:1;min-width:0;display:flex;align-items:center}
+.volPad{position:absolute;left:-6px;right:-6px;top:-16px;bottom:-16px;touch-action:pan-y;z-index:2;cursor:ew-resize}
+html.remote .volTrack input{pointer-events:none;height:8px}
+html.remote .volTrack input::-webkit-slider-thumb{width:30px;height:30px}
+.volTrack.drag input::-webkit-slider-thumb{transform:scale(1.15);box-shadow:0 0 22px var(--accent2)}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:9px;background:rgba(255,255,255,.16);outline:none}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 0 14px var(--accent2)}
 input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 14px var(--accent2)}
@@ -4583,7 +4589,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.8';
+const GT_VERSION='1.35.9';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5049,8 +5055,10 @@ function setVol(v,from,noEngine){
 // the number over the knob while the volume is being changed on the touchscreen
 let volNumT=null;
 function volShow(){
- const n=$('#volNum');if(!n||REMOTE)return;
- n.textContent=Math.round(S.volume);n.style.left=(vol.offsetLeft+13+(vol.offsetWidth-26)*S.volume/100)+'px';
+ const n=$('#volNum');if(!n)return;
+ n.textContent=Math.round(S.volume);
+ if(REMOTE){const box=n.parentElement.getBoundingClientRect(),r=vol.getBoundingClientRect();n.style.left=(r.left-box.left+15+(r.width-30)*S.volume/100)+'px'}
+ else n.style.left=(vol.offsetLeft+13+(vol.offsetWidth-26)*S.volume/100)+'px';
  n.classList.add('on');clearTimeout(volNumT);volNumT=setTimeout(()=>n.classList.remove('on'),1400);
 }
 vol.addEventListener('input',()=>{if(REMOTE){remoteVol(+vol.value);return}setVol(+vol.value);volShow()});
@@ -5058,13 +5066,36 @@ vol.addEventListener('input',()=>{if(REMOTE){remoteVol(+vol.value);return}setVol
 (function volSteps(){
  const STEP=2;let rep=null;
  const stop=()=>{clearTimeout(rep);rep=null};
- const step=d=>{const v=Math.max(0,Math.min(100,Math.round(S.volume)+d*STEP));if(v!==S.volume){setVol(v);sfx('tick')}volShow()};
+ const step=d=>{const v=Math.max(0,Math.min(100,Math.round(S.volume)+d*STEP));if(v!==S.volume){if(REMOTE){vol.value=v;remoteVol(v);try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}}else{setVol(v);sfx('tick')}}volShow()};
  for(const[id,d]of[['#volDn',-1],['#volUp',1]]){
   const b=$(id);if(!b)continue;
   b.addEventListener('pointerdown',e=>{e.preventDefault();stop();step(d);const again=()=>{step(d);rep=setTimeout(again,130)};rep=setTimeout(again,450)});
   for(const ev of['pointerup','pointercancel','pointerleave'])b.addEventListener(ev,stop);
   b.addEventListener('contextmenu',e=>e.preventDefault());
  }
+})();
+// Couch remote (phone): the slider is only a few hundred pixels wide, so 1 pixel was ~⅓ of a volume point and
+// a fingertip landing on the bar made it jump. On phones the bar is a "fine drag" pad instead: touching it never
+// changes the volume, and sliding moves it relative to where you started at about half speed (a full swipe
+// across the bar = ~50 points). Vertical swipes still scroll the page. − / + step 2.
+(function phoneVolPad(){
+ if(!REMOTE)return;
+ const wrap=document.createElement('span');wrap.className='volTrack';vol.before(wrap);wrap.appendChild(vol);
+ const pad=document.createElement('span');pad.className='volPad';pad.setAttribute('aria-hidden','true');wrap.appendChild(pad);
+ const GAIN=.5,DEAD=6;let g=null;
+ pad.addEventListener('pointerdown',e=>{if(e.button>0)return;g={id:e.pointerId,x0:e.clientX,v0:Math.round(S.volume),live:false,last:Math.round(S.volume)};try{pad.setPointerCapture(e.pointerId)}catch(_){}volShow()});
+ pad.addEventListener('pointermove',e=>{
+  if(!g||e.pointerId!==g.id)return;const dx=e.clientX-g.x0;
+  if(!g.live){if(Math.abs(dx)<DEAD)return;g.live=true;g.x0=e.clientX;wrap.classList.add('drag');return}
+  const w=Math.max(120,vol.getBoundingClientRect().width-30);
+  const v=Math.max(0,Math.min(100,Math.round(g.v0+dx/w*100*GAIN)));
+  if(v===g.last)return;
+  if(Math.floor(v/5)!==Math.floor(g.last/5))try{navigator.vibrate&&navigator.vibrate(6)}catch(_){}
+  if(v<=0||v>=100)g.x0=e.clientX,g.v0=v; // pinned at an end: sliding back moves it right away
+  g.last=v;vol.value=v;remoteVol(v);volShow();
+ });
+ const end=e=>{if(!g||e.pointerId!==g.id)return;g=null;wrap.classList.remove('drag');rVolAt=Date.now()+800;volShow()};
+ for(const ev of['pointerup','pointercancel','lostpointercapture'])pad.addEventListener(ev,end);
 })();
 addEventListener('resize',()=>{layoutFlow();sizeShelf()});
 function tickClock(){const d=new Date();let h=d.getHours()%12||12;$('#clock').innerHTML=`${h}<i>:</i>${String(d.getMinutes()).padStart(2,'0')}`}
