@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.5 — November 15, 2026
+
+- **Roasting family members works more reliably:**
+  - "Roast Liz's music", "roast my wife" and names the voice hears a letter off (Karson, Carsen) now find the right person in the Family tab. DJ Griff's voice helper is also told the family's names, so it spells them the way the Family tab does.
+  - **Settings → Spotify → Family members' playlists** now has a **Called** box for each person: the names DJ Griff should know them by, separated by commas (for example "Liz, Mom" or "Carson, buddy"). It's needed when a Spotify account's name isn't the person's real name.
+  - If Spotify is slow or blocking for a moment, the roast uses the playlists the Family tab already loaded instead of coming up empty.
+  - When a roast can't use someone's playlists, the warning now says why: who the Family tab has, or what went wrong loading their playlists (for example an expired sign-in).
+
 ## 1.35.4 — November 15, 2026
 
 - **The radio ends Yacht Mode too:** starting any station other than Yacht Rock turns Yacht Mode off: the sea, flags, string lights, gulls, porthole, marina screensaver and sunset lights go away, and the Hue lights go back to album colors. Tuning to the Yacht Rock station keeps Yacht Mode on.

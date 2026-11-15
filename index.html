@@ -1829,6 +1829,7 @@ async function famAdd(code){
  if(me.id===mine){toast("That's your own account. On the Spotify sign-in page, tap 'Not you?' and sign in as the family member.",'warn');return}
  const first=String(me.display_name||me.id).split(' ')[0];
  const m={id:me.id,name:first,full:me.display_name||me.id,img:spImg(me.images),tok:t};
+ {const old=FAM.find(x=>x.id===m.id);if(old&&old.call)m.call=old.call}
  FAM=FAM.filter(x=>x.id!==m.id).concat([m]);saveFam();if(typeof TABC!=='undefined')TABC.clear();
  toast(`${first}'s playlists added to the Family tab`);
 }
@@ -3841,23 +3842,38 @@ async function asRoastMe(){
 }
 // "Roast Liz": the Family tab member whose first name, full name or Spotify username matches (nicknames too: Liz = Elizabeth)
 const AS_NICK={liz:'elizabeth',lizzie:'elizabeth',beth:'elizabeth',eliza:'elizabeth',betsy:'elizabeth',libby:'elizabeth',josh:'joshua',mike:'michael',matt:'matthew',chris:'christopher',nick:'nicholas',tony:'anthony',kate:'katherine',katie:'katherine',kathy:'katherine',jen:'jennifer',jenny:'jennifer',sam:'samantha',alex:'alexander',ben:'benjamin',will:'william',bill:'william',bob:'robert',rob:'robert',jim:'james',jimmy:'james',tom:'thomas',dan:'daniel',dave:'david',steve:'steven',sue:'susan',meg:'margaret',maggie:'margaret',abby:'abigail',andy:'andrew',drew:'andrew',tim:'timothy',greg:'gregory',jon:'jonathan',nate:'nathan',zach:'zachary',jake:'jacob',max:'maxwell',ally:'allison',becky:'rebecca',cathy:'catherine',mandy:'amanda',vicky:'victoria',tori:'victoria'};
+// Names each member answers to: their Spotify first name and full name, plus anything typed in Settings → Called
+function famNames(m){return[m.name,m.full,...String(m.call||'').split(',')].map(x=>String(x||'').trim()).filter(Boolean)}
 function asFamFind(name){
- const f=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9 ]/g,'').trim();
- const w=f(name).split(' ')[0];if(!w||w.length<2)return null;
- const full=AS_NICK[w]||w;
- const score=m=>{const first=f(m.name).split(' ')[0],all=f(m.full),id=f(m.id).replace(/ /g,'');
-  if(first===w||first===full||(AS_NICK[first]||first)===full)return 3;
-  if(all.split(' ').includes(w)||all.split(' ').includes(full))return 2;
+ const f=x=>String(x||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[’']/g,"'").replace(/'s\b/g,'').replace(/[^a-z0-9 ]/g,'').replace(/\s+/g,' ').trim();
+ const said=f(name).replace(/^(my|our|the)\s+/,'');if(!said||said.length<2)return null;
+ const w=said.split(' ')[0],full=AS_NICK[w]||w;
+ // small spelling slips from speech (Karson, Carsen, Lizz): one letter off, two for longer names
+ const lev=(a,b)=>{if(Math.abs(a.length-b.length)>2)return 9;let p=[...Array(b.length+1).keys()];for(let i=1;i<=a.length;i++){const c=[i];for(let j=1;j<=b.length;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[b.length]};
+ const near=(a,b)=>a.length>=3&&b.length>=3&&lev(a,b)<=(Math.min(a.length,b.length)>=6?2:1);
+ const score=m=>{
+  const calls=String(m.call||'').split(',').map(f).filter(Boolean);
+  if(calls.includes(said)||calls.includes(w))return 5;
+  const first=f(m.name).split(' ')[0],all=f(m.full),id=f(m.id).replace(/ /g,'');
+  if(first===w||first===full||(AS_NICK[first]||first)===full)return 4;
+  if(all.split(' ').includes(w)||all.split(' ').includes(full))return 3;
+  if(calls.some(c=>near(c,w))||near(first,w)||all.split(' ').some(x=>near(x,w)))return 2;
   if(w.length>=3&&(id.startsWith(w)||id.includes(w)||first.startsWith(w)||w.startsWith(first)))return 1;
   return 0};
  let best=null,bs=0;for(const m of FAM){const sc=score(m);if(sc>bs){bs=sc;best=m}}
+ if(!best)console.info('[GriffTunes roast] no Family member matches',JSON.stringify(name),'· members:',FAM.map(m=>famNames(m).join('/')).join(', '));
  return best;
 }
 async function asRoastFam(m){
  const ck='roast_fam_'+m.id,c=store.get(ck,null);if(c&&Date.now()-c.at<864e5&&c.d&&(c.d.lists.length||c.d.artists.length))return c.d;
  const d={name:m.name,lists:[],artists:[],songs:[],liked:0,n:0};
  try{
-  const items=((await tabItems('family'))||[]).filter(x=>x.member===m.id);
+  const cached=(TABC.get(tabKey('family'))||{}).items||[];
+  let items=[];try{items=((await tabItems('family'))||[]).filter(x=>x.member===m.id)}catch(e){d.err=e.message}
+  // a Spotify slow-down or a hiccup shouldn't hide playlists the Family tab already loaded
+  if(!items.some(x=>x.type==='fplaylist'||x.type==='fliked')){const old=cached.filter(x=>x.member===m.id&&x.type!=='ferr');if(old.length)items=old}
+  const bad=items.find(x=>x.type==='ferr');if(bad){d.err=bad.sub;items=items.filter(x=>x.type!=='ferr')}
+  console.info('[GriffTunes roast]',m.name,'· Family tab items:',items.length,d.err?'· problem: '+d.err:'');
   const lists=items.filter(x=>x.type==='fplaylist'),liked=items.find(x=>x.type==='fliked');
   d.lists=lists.slice(0,40).map(x=>x.name);d.n=lists.length;
   const cnt=new Map(),songs=[];
@@ -3873,7 +3889,7 @@ async function asRoastFam(m){
   d.artists=[...cnt.entries()].sort((a,b)=>b[1]-a[1]).slice(0,15).map(([a,k])=>`${a} (${k} songs)`);
   d.songs=shuffle([...new Set(songs)]).slice(0,12);
  }catch(e){}
- if(d.lists.length||d.artists.length)store.set(ck,{at:Date.now(),d});
+ if(d.lists.length||d.artists.length){const keep=Object.assign({},d);delete keep.err;store.set(ck,{at:Date.now(),d:keep})}
  return d;
 }
 function asRoastRoom(){
@@ -3889,14 +3905,19 @@ async function asRoast(q,res,src){
  const room=asRoastRoom();
  const roomLines=()=>{const o=[];if(room.total){o.push(`Played on the jukebox in the last few hours (${room.total} songs, ${room.picks} picked by people): ${room.plays.join('; ')}.`);if(room.repeat.length)o.push(`Artists that came up more than once: ${room.repeat.join(', ')}.`)}else o.push('Barely anything has been played on the jukebox in the last few hours.');return o};
  if(fam){
-  const d=await asRoastFam(fam);who=t.split(' ')[0].replace(/^\w/,c=>c.toUpperCase());   // the name as said (Liz, not Elizabeth)
+  const d=await asRoastFam(fam);
+  // the name as said (Liz, not Elizabeth), but not "Wife" for "my wife" or a Spotify username like 31xq7…
+  const said=t.replace(/['’]s\b/g,'').replace(/^(my|our|the)\s+/,'').split(' ')[0],rel=/^(wife|husband|son|daughter|kid|kids|mom|mother|dad|father|brother|sister|boy|girl|hubby|wifey)$/;
+  const call=String(fam.call||'').split(',')[0].trim(),plain=/^[a-z][a-z'-]*$/i.test(fam.name)?fam.name:'';
+  who=(said&&!rel.test(said)?said:call||plain||said||'them').replace(/^\w/,c=>c.toUpperCase());
   d.name=who;
   if(d.lists.length)facts.push(`${who}'s ${d.n} Spotify playlists (from the jukebox's Family tab): ${d.lists.join('; ')}.`);
   if(d.artists.length)facts.push(`Artists that show up most in ${who}'s playlists and Liked Songs: ${d.artists.join(', ')}.`);
   if(d.songs&&d.songs.length)facts.push(`Some songs from ${who}'s playlists and Liked Songs: ${d.songs.join('; ')}.`);
   facts.push(`Roast ${who}'s taste only from this. Don't use anyone else's music.`);
   res.from=d.lists.length?`${d.n} playlist${d.n===1?'':'s'}${d.liked?' and Liked Songs':''}`:'';
-  if(!d.lists.length&&!d.artists.length)facts.push(`You have no data on ${fam.name}'s music, so roast them for keeping their taste a secret and roast the room instead.`,...roomLines());
+  if(!d.lists.length&&!d.artists.length)res.famErr=`Couldn't load ${fam.name}'s playlists${d.err?': '+d.err:' (the Family tab came back empty for them)'}. This roast uses tonight's songs`;
+  if(!d.lists.length&&!d.artists.length)facts.push(`You have no data on ${who}'s music, so roast them for keeping their taste a secret and roast the room instead.`,...roomLines());
  }else if(t==='room'||src==='phone'||(t!=='me'&&!fam)){
   who=t!=='me'&&t!=='room'&&src!=='phone'?t.replace(/^\w/,c=>c.toUpperCase()):'everyone in the basement';
   if(t!=='me'&&t!=='room'&&src!=='phone'){facts.push(`You don't know ${who}'s music, so roast what the room has been playing tonight and blame them for it.`);res.notFam=who}
@@ -3911,7 +3932,8 @@ async function asRoast(q,res,src){
   facts.push(...roomLines());
  }
  const key=String(store.get('dj_gkey','')||'').trim()||djKey(),tone=djTone();
- if(res.notFam){toast(`${res.notFam} isn't in the Family tab, so this roast uses what's been played tonight`,'warn');delete res.notFam}
+ if(res.notFam){toast(`${res.notFam} doesn't match anyone in the Family tab (${FAM.length?FAM.map(m=>m.name).join(', '):'nobody added yet'}). Add the name under Settings → Family → Called. This roast uses tonight's songs`,'warn');delete res.notFam}
+ if(res.famErr){toast(res.famErr,'warn');delete res.famErr}
  res.state='roast';res.q={title:'',artist:''};res.say=`🔥 Roasting ${who}${res.from?` · from ${who}'s ${res.from} in the Family tab`:''}`;delete res.from;
  if(!key){res.say='DJ Griff needs his Writing key (Settings → DJ Griff → Setup) to roast anybody.';res.state='other';return}
  const sys=`${DJ_STYLE[tone]}
@@ -4072,7 +4094,7 @@ function asStep(txt){
 // what's playing, so Gemini can tell the background song's lyrics from the request
 function asNowLine(){const c=P.current;return c&&!P.paused?`\nPlaying in the room right now: "${c.name}" by ${afLead(c.artist)}. Its lyrics are not a request.`:''}
 // What Hey DJ understands beyond song requests: shared by the typed/heard text (asParse) and the recording (asParseAudio)
-const AS_KINDS=()=>` kind is "roast" when they ask DJ Griff to roast, make fun of, diss or rate someone's music taste; then target is "me" (themselves), "room" (us, everyone, the room, this party) or the person's first name, and title and artist are empty. kind is "christmas" when they announce Christmas or ask for Christmas Mode: "it's beginning to look a lot like Christmas" said as an announcement (but "play It's Beginning to Look a Lot Like Christmas" is a song request), "turn on Christmas mode", "let's get festive", "it's Christmas time"; target is "on", or "off" for "turn off Christmas mode", "Christmas is over", "no more Christmas music". kind is "fitz" for "the gales of November came early" (or close to it) said as an announcement, or "start the Fitz memorial" / "Fitz mode" / "ring the bell for the Fitzgerald"; but "play The Wreck of the Edmund Fitzgerald" is a song request. kind is "control" for playback controls and questions about the music; then action is one of: "skip" (next track, skip this song), "pause", "resume" (unpause, keep playing), "volup" / "voldown" (turn it up / down; amount 5 normally, 15 for "a lot", "way up"), "volset" (set the volume to a number; amount is that number from 0 to 100), "mute", "unmute", "clear" (clear the queue / Up Next), "nowplaying" (what's playing, who sings this, what song is this), "radio" (play a radio station; station is its name, one of: ${STATIONS.map(x=>x.name).join(', ')}), "radiooff", "lightson", "lightsoff", "speakerson", "speakersoff", "mirrorballon", "mirrorballoff" (turn the mirrorball / disco ball on or off). kind is "mix" when they ask for a style or era of music rather than one song, album or artist ("play some 90s country", "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"); then name is a short station name ("90s Country"), from and to are the years (current hits: the last two years), genre is one of pop, country, hiphop, rock, other, and artists lists 25 to 40 artists who had hits in that style in those years. "Play the 80s station" (a station by name) is a control, not a mix. kind is "yacht" for Yacht Mode: "set sail", "let's get smooth", "yacht mode", "yacht rock mode" → target "on"; "dock the boat", "yacht mode off", "drop anchor" → target "off". lyric: when they pick a song by quoting its lyrics ("the song that goes…", "the one with the lyrics…", or words that are clearly a line from a song rather than its title), copy those lyric words here exactly as said; otherwise empty.`;
+const AS_KINDS=()=>` kind is "roast" when they ask DJ Griff to roast, make fun of, diss or rate someone's music taste; then target is "me" (themselves), "room" (us, everyone, the room, this party) or the person's first name, and title and artist are empty.${FAM.length?` People in the Family tab: ${FAM.map(m=>famNames(m).join(' / ')).join('; ')}. When the person to roast sounds like one of them (or is called "my wife", "my son", "mom" and so on, and one of these names says so), set target to that name exactly as written here.`:''} kind is "christmas" when they announce Christmas or ask for Christmas Mode: "it's beginning to look a lot like Christmas" said as an announcement (but "play It's Beginning to Look a Lot Like Christmas" is a song request), "turn on Christmas mode", "let's get festive", "it's Christmas time"; target is "on", or "off" for "turn off Christmas mode", "Christmas is over", "no more Christmas music". kind is "fitz" for "the gales of November came early" (or close to it) said as an announcement, or "start the Fitz memorial" / "Fitz mode" / "ring the bell for the Fitzgerald"; but "play The Wreck of the Edmund Fitzgerald" is a song request. kind is "control" for playback controls and questions about the music; then action is one of: "skip" (next track, skip this song), "pause", "resume" (unpause, keep playing), "volup" / "voldown" (turn it up / down; amount 5 normally, 15 for "a lot", "way up"), "volset" (set the volume to a number; amount is that number from 0 to 100), "mute", "unmute", "clear" (clear the queue / Up Next), "nowplaying" (what's playing, who sings this, what song is this), "radio" (play a radio station; station is its name, one of: ${STATIONS.map(x=>x.name).join(', ')}), "radiooff", "lightson", "lightsoff", "speakerson", "speakersoff", "mirrorballon", "mirrorballoff" (turn the mirrorball / disco ball on or off). kind is "mix" when they ask for a style or era of music rather than one song, album or artist ("play some 90s country", "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"); then name is a short station name ("90s Country"), from and to are the years (current hits: the last two years), genre is one of pop, country, hiphop, rock, other, and artists lists 25 to 40 artists who had hits in that style in those years. "Play the 80s station" (a station by name) is a control, not a mix. kind is "yacht" for Yacht Mode: "set sail", "let's get smooth", "yacht mode", "yacht rock mode" → target "on"; "dock the boat", "yacht mode off", "drop anchor" → target "off". lyric: when they pick a song by quoting its lyrics ("the song that goes…", "the one with the lyrics…", or words that are clearly a line from a song rather than its title), copy those lyric words here exactly as said; otherwise empty.`;
 // The answer's shape: Gemini fills this in (heard: what the person said, only when Gemini listened to the recording)
 function asSchema(heard){
  const p={kind:{type:'STRING',enum:['song','album','artist','roast','christmas','fitz','control','mix','yacht','other','unclear']},title:{type:'STRING'},artist:{type:'STRING'},also:{type:'ARRAY',items:{type:'OBJECT',properties:{title:{type:'STRING'},artist:{type:'STRING'}},required:['title','artist']}},when:{type:'STRING',enum:['queue','next','now']},target:{type:'STRING'},action:{type:'STRING'},amount:{type:'NUMBER'},station:{type:'STRING'},name:{type:'STRING'},from:{type:'NUMBER'},to:{type:'NUMBER'},genre:{type:'STRING'},artists:{type:'ARRAY',items:{type:'STRING'}},lyric:{type:'STRING'}};
@@ -4558,7 +4580,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.4';
+const GT_VERSION='1.35.5';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4596,7 +4618,7 @@ function openSettings(){
    <div class="field"><label for="fClient">Spotify Client ID</label><input type="text" id="fClient" value="${esc(S.clientId)}" placeholder="Paste Client ID"></div>
    <div class="btnRow">${connected?`<span class="ok">● Connected to Spotify</span><button class="btn" id="spOut">Disconnect</button>`:`<button class="btn spotify" id="spIn">Connect Spotify</button>`}</div>
    ${connected?`<div class="field"><span class="lab">Family members' playlists</span>
-    <div id="famList">${FAM.length?FAM.map(m=>`<div class="famRow"><img src="${esc(m.img||PLACEHOLDER)}" alt=""><span><b>${esc(m.full)}</b><small>Playlists in the Family tab</small></span><button class="btn" data-famdel="${esc(m.id)}">Remove</button></div>`).join(''):'<p class="note">No family members yet.</p>'}</div>
+    <div id="famList">${FAM.length?FAM.map(m=>`<div class="famRow"><img src="${esc(m.img||PLACEHOLDER)}" alt=""><span><b>${esc(m.full)}</b><small>Playlists in the Family tab</small><input type="text" class="famCall" data-famcall="${esc(m.id)}" value="${esc(m.call||'')}" placeholder="Called (for roasts): e.g. Liz, Mom" style="margin-top:6px;height:38px;font-size:14px"></span><button class="btn" data-famdel="${esc(m.id)}">Remove</button></div>`).join(''):'<p class="note">No family members yet.</p>'}</div>
     <div class="btnRow"><button class="btn spotify" id="famAdd"${FAM.length>=4?' disabled':''}>Add family member</button></div>
     <details class="note"><summary>Before adding someone</summary><ol>
      <li>In your Spotify developer dashboard, open the GriffTunes app → <b>User Management</b>, and add their name and the email on their Spotify account. Spotify allows you plus 4 people.</li>
@@ -4780,7 +4802,8 @@ function openSettings(){
  renderHueSettings();
  const si=$('#spIn');if(si)si.onclick=()=>{collect();S.mode='spotify';saveS();spLogin()};
  const fa=$('#famAdd');if(fa)fa.onclick=()=>{collect();saveS();spLogin(true)};
- const fl=$('#famList');if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();TABC.clear();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
+ const fl=$('#famList');if(fl)fl.addEventListener('change',e=>{const i=e.target.closest('[data-famcall]');if(!i)return;const m=FAM.find(x=>x.id===i.dataset.famcall);if(!m)return;m.call=i.value.split(',').map(x=>x.trim()).filter(Boolean).join(', ');i.value=m.call;saveFam();toast(m.call?`DJ Griff will know ${m.name} as ${m.call}`:`${m.name} goes by their Spotify name again`)});
+ if(fl)fl.onclick=e=>{const b=e.target.closest('[data-famdel]');if(!b)return;FAM=FAM.filter(x=>x.id!==b.dataset.famdel);saveFam();TABC.clear();b.closest('.famRow').remove();if(!FAM.length)fl.innerHTML='<p class="note">No family members yet.</p>';buildTabs();if(tabId==='family')loadTab(provider.tabs[0].id);toast('Removed')};
  const so=$('#spOut');if(so)so.onclick=()=>{tok=null;store.del('sp_tokens');store.set('sp_block',{until:0,strikes:0});store.set('sp_quota',{until:0});S.mode='demo';saveS();location.reload()};
  $('#resetCredits').onclick=()=>{credits=0;store.set('credits',0);renderCredits();toast('Credits reset')};
  $('#clearQueue').onclick=()=>{P.queue=[];saveQueue();renderQueue();toast('Queue cleared')};
