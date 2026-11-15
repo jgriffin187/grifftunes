@@ -4427,7 +4427,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.29';
+const GT_VERSION='1.30';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4563,7 +4563,7 @@ function openSettings(){
  <div class="field"><span class="lab">Screensaver</span><div class="seg" id="fSaver"><button data-saver="art" class="${S.saver==='art'?'on':''}">Fine art gallery</button><button data-saver="np" class="${S.saver==='np'?'on':''}">Now playing</button><button data-saver="deck" class="${S.saver==='deck'?'on':''}">Turntable</button></div>
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
-  <label class="tg" style="margin-top:8px"><span>80s video screensaver while the 80s station plays</span><input type="checkbox" id="fEiSaver" ${S.eiSaver!==false?'checked':''}><i></i></label>
+  <label class="tg" style="margin-top:8px"><span>Decade video screensavers (80s and 90s stations)</span><input type="checkbox" id="fEiSaver" ${S.eiSaver!==false?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
@@ -7279,34 +7279,41 @@ function marinaStart(){
 function marinaStop(){const v=YMAR.vid;if(v){v.pause();v.removeAttribute('src');v.load()}YMAR.vid=null;const el=$('#mrWrap');if(el)el.remove()}
 document.addEventListener('visibilitychange',()=>{const v=YMAR.vid;if(!v)return;if(document.hidden)v.pause();else v.play().catch(()=>{})});
 
-/* 80s screensaver: while the radio is on the 80s station, the screensaver is a silent concert loop (eighties-loop.mp4,
-   Josh's clip: cropped to 16:9, black ends trimmed, last 2 s cross-fade into the first). It replaces whichever
-   screensaver is picked; Christmas, the Fitz memorial and Yacht Mode come first. Settings → Screen can turn it off. */
-const EI={vid:null};
+/* Decade screensavers: while the radio is on a station listed here, the screensaver is that station's silent video loop
+   (Josh's clips; each one's last 2 s cross-fade into its first). 80s: a concert, cropped to 16:9 with the black ends
+   trimmed. 90s: a retro weather-channel screen, kept whole with its edge colors stretched out to fill the sides.
+   They replace whichever screensaver is picked; Christmas, the Fitz memorial and Yacht Mode come first.
+   Settings → Screen can turn them off. */
+const EI={vid:null,src:''};
+const EI_VIDS={'80s':'eighties-loop.mp4','90s':'nineties-loop.mp4'};
+// The video the screensaver should show right now, or '' for none
 function eiLook(){
- if(REMOTE||S.eiSaver===false||xmLook()||ymLook()||(typeof EF!=='undefined'&&EF.open))return false;
- return !!S.radio&&S.station==='80s';
+ if(REMOTE||S.eiSaver===false||xmLook()||ymLook()||(typeof EF!=='undefined'&&EF.open)||!S.radio)return '';
+ return EI_VIDS[S.station]||'';
 }
 function eiStart(){
+ const src=eiLook();if(!src)return;
  const g=$('#gallery'),el=document.createElement('div');el.className='gSlide fpWrap eiWrap';el.dataset.ei='1';
- el.innerHTML='<video src="eighties-loop.mp4" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>';
+ el.innerHTML='<video src="'+src+'" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>';
  g.insertBefore(el,$('#gNow'));
  $$('.gSlide',g).forEach(o=>{if(o!==el){o.classList.remove('show');setTimeout(()=>o.remove(),2800)}});
- const v=EI.vid=el.querySelector('video');v.muted=true;
+ const v=EI.vid=el.querySelector('video');EI.src=src;v.muted=true;
  const show=()=>requestAnimationFrame(()=>el.classList.add('show'));
  if(v.readyState>=2)show();else v.addEventListener('loadeddata',show,{once:true});
  v.play().catch(()=>{});
  $('#gNow').classList.remove('hide');
 }
 // Let go of the video but leave it on screen, so the next screensaver fades in over it (it removes the old slide)
-function eiRelease(){const v=EI.vid;EI.vid=null;if(!v)return;const el=v.parentNode;setTimeout(()=>{v.pause();v.removeAttribute('src');v.load();if(el)el.remove()},3000)}
-function eiStop(){const v=EI.vid;EI.vid=null;if(v){v.pause();v.removeAttribute('src');v.load()}$$('.eiWrap').forEach(e=>e.remove())}
+function eiRelease(){const v=EI.vid;EI.vid=null;EI.src='';if(!v)return;const el=v.parentNode;setTimeout(()=>{v.pause();v.removeAttribute('src');v.load();if(el)el.remove()},3000)}
+function eiStop(){const v=EI.vid;EI.vid=null;EI.src='';if(v){v.pause();v.removeAttribute('src');v.load()}$$('.eiWrap').forEach(e=>e.remove())}
 document.addEventListener('visibilitychange',()=>{const v=EI.vid;if(!v)return;if(document.hidden)v.pause();else v.play().catch(()=>{})});
 // The station can change while the screensaver is up (dial, voice, couch remote): switch screensavers without
 // touching the lights (hueSaver stays as it is)
 function eiSync(){
  if(REMOTE||!attractOn)return;
- const want=eiLook();if(want===!!EI.vid)return;
+ const want=eiLook();if(want===EI.src)return;
+ // one decade's video to another's: fade the new one in over the old
+ if(want&&EI.vid){eiRelease();eiStart();return}
  if(want){
   if(DECK.saver)closeDeck();$('#attract').classList.remove('on');clearInterval(ART.timer);
   if(!galleryOn){galleryOn=true;syncGalleryNow();$('#gallery').classList.add('on')}

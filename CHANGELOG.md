@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.30 — November 15, 2026
+
+- **90s screensaver:** while the radio is on the 90s station, the screensaver plays a retro weather-channel screen (nineties-loop.mp4, Josh's clip) on a loop with no sound, with the mini player, working the same way as the 80s one. The clip is 4:3 and is mostly text (logo and clock at the top, a ticker at the bottom), so it isn't cropped: its edge colors are stretched out to fill the sides of the screen. Its last 2 seconds fade into its first: 3 min 58 s, 720p, 17 MB. Changing between the 80s and 90s stations while the screensaver is up fades one video into the other.
+- The Settings switch is now **Settings → Screen → Decade video screensavers (80s and 90s stations)**; it turns both off.
+
 ## 1.29 — November 15, 2026
 
 - **80s screensaver:** while the radio is on the 80s station, the screensaver plays an 80s concert video (eighties-loop.mp4, Josh's clip) on a loop with no sound, with the usual mini player (cover, song, play/pause, skip, volume) along the bottom. It stays on during paid songs as long as the 80s station is still picked, and it replaces whichever screensaver is chosen (fine art, now playing or turntable). Christmas, the Fitzgerald memorial and Yacht Mode still come first. Changing stations, turning the radio off or Yacht Mode starting switches screensavers within 3 seconds without touching the lights. The clip was cropped to fill the screen (zoomed a little high to keep heads in frame), its black start and end trimmed, and its last 2 seconds fade into its first so the loop has no seam: 4 min 3 s, 720p, 39 MB. Turn it off with **Settings → Screen → 80s video screensaver**.
