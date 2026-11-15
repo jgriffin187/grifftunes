@@ -542,6 +542,7 @@ html.efzOn #toasts{z-index:99}
 .alpTop{display:flex;align-items:center;gap:16px;margin:0 6px 14px}
 .alpHint{font-size:20px;color:rgba(255,255,255,.82);flex:1}
 .alpHint b{color:#8dff9e}
+.alpX.alpOff{margin-left:auto;color:#ffb238;border-color:rgba(255,178,56,.55)}#alp:not(.radioLive) .alpOff{display:none}
 .alpX{height:56px;padding:0 28px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.1);color:#fff;font:700 19px/1 'Outfit',sans-serif;cursor:pointer}
 .alpUnit{position:relative;width:100%;aspect-ratio:2197/710;container-type:inline-size;border-radius:1.2cqw;user-select:none;-webkit-user-select:none;touch-action:manipulation;
  background:linear-gradient(180deg,#1c1c1c 0%,#121212 45%,#0e0e0e 100%);
@@ -1535,7 +1536,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
  <div class="efAfter"><p>Ring the bell for the 29?</p><button class="go" id="efAfterRing">🔔 Ring the bell</button><button id="efAfterClose">Close</button></div>
  <div class="efBellStage"><svg id="efBellSvg" viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2a3 3 0 0 1 3 3v1.4c6.2 1.4 10 6.8 10 14.6v8.5l4 5.5H3l4-5.5V21c0-7.8 3.8-13.2 10-14.6V5a3 3 0 0 1 3-3z" fill="#e8c26a" stroke="#7a5a1c" stroke-width="1.2"/><path d="M9 31h22" stroke="#7a5a1c" stroke-width="1.2"/><circle cx="20" cy="39.5" r="3.6" fill="#c99a3a" stroke="#7a5a1c" stroke-width="1"/><path d="M13 12c1.5-2.5 3.5-3.6 5.5-4" stroke="#fff6d8" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/></svg><div id="efBellN"></div><div id="efBellName"></div><div id="efCandles"></div><button id="efBellStop">Stop</button></div>
 </div>
-<div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
+<div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX alpOff" id="alpOff">Radio off</button><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
 <canvas id="snow" aria-hidden="true"></canvas>
 <div id="ytrim" aria-hidden="true"><div class="yside yT"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yR"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yB"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yL"><div class="yplank"></div><div class="yrail"><i></i></div></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
 
@@ -4589,7 +4590,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.9';
+const GT_VERSION='1.35.10';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5662,9 +5663,10 @@ async function tune(idx){
  // Picking a station always switches now; songs people queued still play after this one
  await radioStart(st);
 }
+// The radio button: on → off (and the radio leaves the screen), off → on. Phones show the dial when it comes on
+// so you can pick a station; the jukebox's button opens the Alpine faceplate instead of turning it on.
 async function toggleRadio(){
- if(S.radio&&$('#radio').style.display==='none'){RADIO.peek=P.current&&P.current.id;renderRadio();sfx('tick');toast(`${stationById(S.station).name} comes back after this song. Turn the dial to switch now, or tap the radio button again to turn it off`);return}
- if(REMOTE){remoteCd({t:'radio',on:!S.radio});return}
+ if(REMOTE){if(!S.radio)RADIO.peek=P.current&&P.current.id;remoteCd({t:'radio',on:!S.radio});return}
  S.radio=!S.radio;saveS();renderRadio();renderQueue();sfx('tick');
  if(S.radio){
   staticNoise();const st=stationById(S.station);
@@ -5684,7 +5686,7 @@ async function toggleRadio(){
   if(stEl)tune(+stEl.dataset.st);else renderRadio()};
  dial.addEventListener('pointerup',end);dial.addEventListener('pointercancel',()=>{x0=null;dial.classList.remove('dragging');renderRadio()});
 })();
-$('#radioBtn').onclick=()=>{if(alpOn()){alpOpen();return}toggleRadio()};
+$('#radioBtn').onclick=()=>{if(alpOn()&&!S.radio){alpOpen();return}if(alpOn()&&ALP.open)alpClose();toggleRadio()};
 buildDial();
 /* ---------- Alpine car-radio faceplate (the jukebox's radio) ----------
    Modeled on Josh's own 1990s Alpine 7280 cassette deck: the 📻 button opens the
@@ -5761,6 +5763,7 @@ function alpPaint(){
   box.querySelectorAll('.apInd').forEach(el=>{const k=el.dataset.ind;el.classList.toggle('on',k==='seek'?ALP.roll!=null:k==='st'?on&&!ALP.mono:!!ALP[k]);el.classList.toggle('blink',k==='seek')});
  }
  $('#alpUnit')&&$('#alpUnit').classList.toggle('off',!on&&ALP.roll==null);
+ $('#alp')&&$('#alp').classList.toggle('radioLive',on);
  $$('#alpMini .apLcd').forEach(b=>b.parentElement.classList.toggle('off',!on));
  $('#apKnob')&&$('#apKnob').style.setProperty('--v',S.volume);
 }
@@ -5808,6 +5811,7 @@ if(!REMOTE){
  $('#alpUnit').addEventListener('pointerdown',()=>alpIdle(),true);
  $('#alp .alpScrim').onclick=()=>alpClose();
  $('#alpX').onclick=()=>{sfx('tick');alpClose()};
+ $('#alpOff').onclick=()=>{alpPowerOff();alpClose()};
  $('#alpMini').onclick=()=>alpOpen();
  $('#alpUnit').addEventListener('click',e=>{
   const p=e.target.closest('.apPre');if(p){sfx('tick');alpTune(p.dataset.id);return}
@@ -8240,7 +8244,7 @@ const TIPS={
  devChip:'The speaker playing now. Click to change it',
  devRefresh:'Look for speakers again',
  alpMini:'Open the radio to change stations',
- radioBtn:()=>S.radio?'Radio is on: tap to turn it off or change stations':'Radio: nonstop music when Up Next is empty',
+ radioBtn:()=>S.radio?'Radio is on: tap to turn it off':'Radio: nonstop music when Up Next is empty',
  lyrBtn:'Show sing-along lyrics',
  dkCtlPlay:()=>P.current&&!P.paused?'Pause':'Play',
  dkCtlNext:'Next song',

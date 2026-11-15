@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.10 — November 15, 2026
+
+- **The radio button turns the radio off:** on the jukebox and the Couch Remote, tapping the lit radio button now turns the radio off and takes it off the screen (a radio song that's playing finishes). When the radio is off, the button turns it back on: the jukebox opens the Alpine faceplate to pick a station, and phones show the dial. The faceplate also has a **Radio off** button next to Close (tapping the volume knob still works too).
+- **Fix:** turning the radio off from a phone didn't work. The jukebox ignored the request because of a leftover check from the old tuning dial.
+
 ## 1.35.9 — November 15, 2026
 
 - **Easier volume on the Couch Remote (phones):** the volume bar no longer jumps around under a fingertip. Touching the bar never changes the volume; sliding moves it from where it already is, at about half the old speed (a full swipe across the bar is ~50 points), with a light buzz every 5 points on Android. Vertical swipes on the bar still scroll the page. The − / + buttons now show on phones too (2 points per tap, hold to keep going), and the number pops up over the knob while you change it. A bigger knob, and the jukebox's reply no longer snaps the knob back right after you let go.
