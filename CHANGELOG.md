@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.1 — November 15, 2026
+
+- **Stays full screen:** if the jukebox drops out of full screen (the Chromebox slept or locked, or someone pressed Esc), the next tap puts it right back, including the tap that ends the screensaver. Before, it only went full screen on the very first tap after loading. The setting is now **Settings → Screen → Stay full screen**.
+
 ## 1.35 — November 15, 2026
 
 - **Yacht Mode extras:**

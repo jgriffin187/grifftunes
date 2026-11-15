@@ -4548,7 +4548,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35';
+const GT_VERSION='1.35.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4688,7 +4688,7 @@ function openSettings(){
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
-  ${tg('fAutoFs','Go full screen on first tap',S.autoFs)}
+  ${tg('fAutoFs','Stay full screen (any tap puts it back)',S.autoFs)}
   <div class="btnRow"><button class="btn" id="fsNow">Full screen now</button>${isInstalledApp()?'<span class="ok">● Running as installed app</span>':'<button class="btn primary" id="installApp">Install GriffTunes app</button>'}</div>
  </div>
  </div>
@@ -4925,13 +4925,15 @@ async function installApp(){
  toast('In Chrome: menu ⋮ → Cast, save and share → Install page as app','warn');
 }
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-let fsTried=false,swallowClick=false;
+let swallowClick=false;
+// Keep full screen: any tap puts it back if it was lost (sleep, lock, Esc). A tap is the only time a page may ask for it.
+const fsNeeded=()=>S.autoFs&&!document.fullscreenElement&&!matchMedia('(display-mode: fullscreen)').matches;
 addEventListener('click',e=>{
+ // the tap that ends the screensaver is swallowed below, but it still counts for full screen
+ if(fsNeeded())goFullscreen();
  if(swallowClick){swallowClick=false;e.stopPropagation();e.preventDefault();return}
  if(actx&&actx.state==='suspended')actx.resume();
  if(SpotifyEngine.player&&!SpotifyEngine.activated){SpotifyEngine.activated=true;try{SpotifyEngine.player.activateElement()}catch(err){}}
- // the installed app can still open as an ordinary window with a title bar (ChromeOS does this), so go by whether the screen is really full
- if(S.autoFs&&!fsTried&&!matchMedia('(display-mode: fullscreen)').matches){fsTried=true;goFullscreen()}
  keepAwake();
 },true);
 ['pointerdown','keydown'].forEach(ev=>addEventListener(ev,e=>{
