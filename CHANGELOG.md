@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.35.3 — November 15, 2026
+
+- **The radio ends Christmas Mode:** starting any radio station (the dial, the radio button, the Alpine presets, a phone or "Hey DJ, play the 90s station") now turns Christmas Mode off: the snow, string lights, sleigh, fireplace screensaver and Christmas Hue colors go away, and the lights go back to album colors. If the Christmas tab was open, the jukebox goes to the first tab. Before, Christmas songs took back over after the first radio song.
+
 ## 1.35.2 — November 15, 2026
 
 - **DJ Griff knows the date:** he was only told the day of the week, so he guessed the month (and called mid-November both October and December). Every DJ Griff line now gets today's full date and the month, plus how many days until Christmas from late October on, so Christmas Mode doesn't make him think it's already December.
