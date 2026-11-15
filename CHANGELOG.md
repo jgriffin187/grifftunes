@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.28.2 — November 15, 2026
+
+- **"Roast Liz" / "roast Carson" use their Family tab music:** the roast now finds the family member even when their Spotify name isn't spelled the way it's said (a nickname like Liz finds an Elizabeth; a username like lizgriffin works too). It reads their Liked Songs and up to 8 of their playlists (it used to look at only 2) for their most frequent artists and some actual songs, and roasts only that. The on-screen line says what it used ("from Liz's 6 playlists and Liked Songs in the Family tab"); someone who isn't in the Family tab gets a note that the room's music was used instead. What it reads is remembered for a day.
+
 ## 1.28.1 — November 15, 2026
 
 - **Mirrorball follows every party mode:** 1.28 only noticed when the *first* party mode came on. A mode still on from before a reload (Yacht Mode and Christmas Mode are remembered), or a second mode starting while another was on, didn't switch it. Now each mode is watched on its own: Christmas Mode, the Fitzgerald memorial and Yacht Mode each turn the mirrorball on when they start, even if you'd switched it off by hand in the meantime. It still goes off when the last one ends, and a reload never switches it.
