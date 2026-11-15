@@ -53,6 +53,7 @@ svg{display:block}
 #app{position:relative;z-index:1;height:100vh;display:flex;flex-direction:column;padding:16px 22px 20px;gap:14px}
 header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .logo{display:flex;flex-direction:column;line-height:1;cursor:pointer;margin-right:4px;min-width:0}
+.logo .l2{transition:transform 2.1s ease-in,filter 2.1s ease-in}.logo.holding .l2{transform:scale(.93);filter:brightness(1.7) saturate(1.4)}
 .logo .l1{font-family:Bungee;font-size:14px;letter-spacing:.34em;color:var(--gold);text-shadow:0 0 10px rgba(255,210,63,.6);white-space:nowrap}
 .logo .l2{font-family:Monoton;font-size:46px;color:#fff;white-space:nowrap;text-shadow:0 0 4px #fff,0 0 14px var(--accent),0 0 32px var(--accent),0 0 64px var(--accent);animation:flicker 8s infinite}
 @keyframes flicker{0%,17%,21%,24%,52%,56%,100%{opacity:1}19%,23%,54%{opacity:.5}}
@@ -645,30 +646,36 @@ html.yacht #sea{display:block}
 html.yacht #bg .blob{opacity:0;transition:opacity 1.5s}
 html.yachtlite body{background:linear-gradient(180deg,#1b0f36 0%,#5a2366 30%,#c8466e 55%,#ff8a47 70%,#1f4d6e 85%,#071a2c 100%) fixed}
 html.yachtlite #bg .blob{opacity:.12}
-#ytrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--rp:14px}
+#ytrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--tf:34px}
 html.yacht #ytrim{display:block}
-/* twisted rope: four strips, each drawn as a top edge and rotated into place, so the strands run clockwise */
-.yrope{position:absolute;left:0;top:0;height:var(--rp);width:100vw;overflow:hidden;border-radius:calc(var(--rp)/2);transform-origin:0 0;box-shadow:0 3px 6px rgba(0,0,0,.5),0 0 0 1px rgba(60,38,12,.55)}
-.yrope i{position:absolute;top:0;bottom:0;left:-12px;right:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='16'><defs><linearGradient id='s' gradientUnits='userSpaceOnUse' x1='0' y1='16' x2='7.68' y2='21.76' spreadMethod='repeat'><stop offset='0' stop-color='%235e3f18'/><stop offset='.1' stop-color='%239c7740'/><stop offset='.42' stop-color='%23f6e7bf'/><stop offset='.6' stop-color='%23dcc08a'/><stop offset='.88' stop-color='%2386613a'/><stop offset='1' stop-color='%235e3f18'/></linearGradient></defs><rect width='12' height='16' fill='url(%23s)'/></svg>") repeat-x 0 0/12px 100%;animation:yRopeRun 2.6s linear infinite;will-change:transform}
-.yrope::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,250,230,.45),rgba(255,255,255,.1) 32%,rgba(0,0,0,0) 52%,rgba(30,15,0,.55))}
-.yrope.yR{left:100vw;width:100vh;transform:rotate(90deg)}
-.yrope.yB{left:100vw;top:100vh;transform:rotate(180deg)}
-.yrope.yL{top:100vh;width:100vh;transform:rotate(270deg)}
+/* ⛵ teak frame: four varnished two-plank boards, each built as a top edge and rotated into place, with a rope rail along the inside */
+html.yacht #app{padding:80px 58px 54px}
+html.yacht #sailboat{bottom:calc(var(--tf,34px) + 1vh)}
+.yside{position:absolute;left:0;top:0;width:100vw;height:var(--tf);transform-origin:0 0}
+.yside.yR{left:100vw;width:100vh;transform:rotate(90deg)}
+.yside.yB{left:100vw;top:100vh;transform:rotate(180deg)}
+.yside.yL{top:100vh;width:100vh;transform:rotate(270deg)}
+.yplank{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='40'%3E%3Cfilter id='g' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.0035 0.42' numOctaves='3' seed='11' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16  0 0 0 0 .07  0 0 0 0 .02  0 0 0 1.6 -.55'/%3E%3C/filter%3E%3Cfilter id='h' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.002 0.9' numOctaves='2' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 .78  0 0 0 0 .5  0 0 0 .9 -.42'/%3E%3C/filter%3E%3Crect width='520' height='20' fill='%239b5321'/%3E%3Crect y='20' width='520' height='20' fill='%23a95e27'/%3E%3Crect width='520' height='40' filter='url%28%23g%29'/%3E%3Crect width='520' height='40' filter='url%28%23h%29'/%3E%3Crect y='19.2' width='520' height='1.6' fill='%231c0e04'/%3E%3Crect x='0' width='1.6' height='20' fill='%231c0e04'/%3E%3Crect x='260' y='20' width='1.6' height='20' fill='%231c0e04'/%3E%3Cg fill='%233a1f0c' opacity='.8'%3E%3Ccircle cx='14' cy='10' r='1.3'/%3E%3Ccircle cx='274' cy='30' r='1.3'/%3E%3C/g%3E%3C/svg%3E") 0 0/520px 100% repeat-x;box-shadow:inset 0 1.5px 0 rgba(255,214,160,.45),inset 0 -2px 0 rgba(255,200,140,.18),0 0 0 1px #1c0e04}
+.yR .yplank{background-position:-173px 0}.yB .yplank{background-position:-311px 0}.yL .yplank{background-position:-97px 0}
+.yplank::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,236,200,.38),rgba(255,230,190,.08) 22%,rgba(0,0,0,0) 48%,rgba(255,220,170,.12) 62%,rgba(20,8,0,.42))}
+.yrail{position:absolute;left:0;right:0;top:calc(var(--tf) - 5px);height:11px;overflow:hidden;border-radius:6px;box-shadow:0 4px 7px rgba(0,0,0,.6),0 0 0 1px rgba(50,30,8,.6)}
+.yrail i{position:absolute;top:0;bottom:0;left:-12px;right:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='16'><defs><linearGradient id='s' gradientUnits='userSpaceOnUse' x1='0' y1='16' x2='7.68' y2='21.76' spreadMethod='repeat'><stop offset='0' stop-color='%235e3f18'/><stop offset='.1' stop-color='%239c7740'/><stop offset='.42' stop-color='%23f6e7bf'/><stop offset='.6' stop-color='%23dcc08a'/><stop offset='.88' stop-color='%2386613a'/><stop offset='1' stop-color='%235e3f18'/></linearGradient></defs><rect width='12' height='16' fill='url(%23s)'/></svg>") repeat-x 0 0/12px 100%;animation:yRopeRun 3.2s linear infinite;will-change:transform}
+.yrail::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,250,230,.45),rgba(255,255,255,.08) 35%,rgba(0,0,0,0) 52%,rgba(30,15,0,.55))}
 @keyframes yRopeRun{to{transform:translateX(12px)}}
-/* brass grommets hide the corner joins */
-.ycorner{position:absolute;width:30px;height:30px;border-radius:50%;margin:-1px;background:radial-gradient(circle at 50% 50%,#3a2608 0 4px,#c9962e 5px,#fff2b8 7px,transparent 8px),radial-gradient(circle at 34% 30%,#fff6cc,#e9bb4c 32%,#a56f17 68%,#5a3906);box-shadow:0 3px 7px rgba(0,0,0,.55),inset 0 0 0 1.5px rgba(255,236,170,.5),inset 0 -2px 3px rgba(0,0,0,.35)}
-.ycorner.c1{left:0;top:0}.ycorner.c2{right:0;top:0}.ycorner.c3{right:0;bottom:0}.ycorner.c4{left:0;bottom:0}
+/* brass corner plates with slotted screws */
+.ycorner{position:absolute;width:58px;height:58px;border-radius:9px;background:radial-gradient(circle at 26% 26%,#2a1a04 0 1px,transparent 1.5px),radial-gradient(circle at 26% 26%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 74% 74%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 74% 26%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 26% 74%,#fff3c4 0,#d9a83c 3px,#7a5210 5px,transparent 5.6px),radial-gradient(circle at 50% 50%,#3a2608 0 7px,#c9962e 8px,#fff0b0 10px,#a5701a 12px,transparent 13px),linear-gradient(135deg,#fff4c8,#e8b850 28%,#a8721a 60%,#e2b04a 80%,#7a5010);box-shadow:0 4px 9px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,238,180,.55),inset 0 -3px 4px rgba(0,0,0,.35)}
+.ycorner.c1{left:-4px;top:-4px}.ycorner.c2{right:-4px;top:-4px}.ycorner.c3{right:-4px;bottom:-4px}.ycorner.c4{left:-4px;bottom:-4px}
 /* signal flags on a sagging dressing line (spells GRIFFTUNES · YACHT ROCK) */
-#yflags{position:absolute;left:0;right:0;top:0;height:64px}
+#yflags{position:absolute;left:0;right:0;top:0;height:84px}
 #yflags>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.yf{position:absolute;width:28px;height:20px;transform-origin:50% 0}
+.yf{position:absolute;width:42px;height:28px;transform-origin:50% 0}
 .yf b,.yf i{display:block;width:100%;height:100%;transform-origin:50% 0}
 .yf i{animation:yfSway 3.4s ease-in-out infinite;will-change:transform}
 .yf svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.45))}
 @keyframes yfSway{0%,100%{transform:rotate(-6deg) skewX(4deg) scaleX(.94)}50%{transform:rotate(6deg) skewX(-4deg) scaleX(1)}}
 /* entrance: the rope draws itself clockwise, the grommets pop on, then the flags unfurl left to right */
-html.yIn .yrope{animation:yDraw .42s ease-in-out both}
-html.yIn .yrope.yR{animation-delay:.38s}html.yIn .yrope.yB{animation-delay:.76s}html.yIn .yrope.yL{animation-delay:1.14s}
+html.yIn .yside{animation:yDraw .42s ease-in-out both}
+html.yIn .yside.yR{animation-delay:.38s}html.yIn .yside.yB{animation-delay:.76s}html.yIn .yside.yL{animation-delay:1.14s}
 @keyframes yDraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 html.yIn .ycorner{animation:yPop .45s cubic-bezier(.3,1.7,.5,1) both}
 html.yIn .ycorner.c1{animation-delay:.05s}html.yIn .ycorner.c2{animation-delay:.42s}html.yIn .ycorner.c3{animation-delay:.8s}html.yIn .ycorner.c4{animation-delay:1.18s}
@@ -677,7 +684,7 @@ html.yIn #yflags>svg{animation:yLine .5s ease-out .2s both}
 @keyframes yLine{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
 html.yIn .yf b{animation:yfIn .55s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d)}
 @keyframes yfIn{from{transform:scaleY(0) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.yrope i,.yf i{animation:none}}
+@media (prefers-reduced-motion:reduce){.yrail i,.yf i{animation:none}}
 #sailboat{position:fixed;bottom:2vh;left:0;z-index:93;pointer-events:none;width:min(260px,26vw);opacity:0;transform:translateX(-30vw);filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sailboat svg{width:100%;height:auto;display:block;animation:boatBob 3.2s ease-in-out infinite}
 #sailboat .wake{animation:wakeFade 1.6s ease-in-out infinite alternate}
@@ -1488,7 +1495,8 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 <div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
 <canvas id="snow" aria-hidden="true"></canvas>
-<div id="ytrim" aria-hidden="true"><div class="yrope yT"><i></i></div><div class="yrope yR"><i></i></div><div class="yrope yB"><i></i></div><div class="yrope yL"><i></i></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
+<div id="ytrim" aria-hidden="true"><div class="yside yT"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yR"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yB"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yL"><div class="yplank"></div><div class="yrail"><i></i></div></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
+
 <div id="sailboat" aria-hidden="true"><svg viewBox="0 0 260 220"><path d="M128 18v150" stroke="#3b2a24" stroke-width="5"/><path d="M134 24c40 30 70 82 78 136H134z" fill="#fbf5ea"/><path d="M134 24c40 30 70 82 78 136H134z" fill="none" stroke="#e6d7bc" stroke-width="2"/><path d="M122 40c-28 32-48 76-54 120h54z" fill="#f3ead8"/><path d="M134 70h74M134 110h66" stroke="#e8dcc4" stroke-width="2"/><path d="M128 18l26 8-26 8z" fill="#ff5a5f"/><path d="M30 168h200l-24 34H50z" fill="#f7f3ec"/><path d="M30 168h200l-4 6H34z" fill="#1d4fa3"/><path d="M44 186h170" stroke="#d65a4a" stroke-width="4"/><circle cx="92" cy="181" r="4" fill="#2a3f5c"/><circle cx="112" cy="181" r="4" fill="#2a3f5c"/><circle cx="132" cy="181" r="4" fill="#2a3f5c"/><path class="wake" d="M0 210c30-10 50 6 80-2s50-12 90-2" stroke="rgba(255,255,255,.7)" stroke-width="4" fill="none" stroke-linecap="round"/></svg></div>
 <canvas id="frost" aria-hidden="true"></canvas><div id="heatGlow" aria-hidden="true"></div><div id="drips" aria-hidden="true"></div>
 <button id="heater" aria-label="Turn on the heater to melt the frost">🔥 Heater</button>
@@ -4456,7 +4464,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.31';
+const GT_VERSION='1.32';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7379,23 +7387,49 @@ function ymFlags(){
   Y:{d:R(Y)+[-20,-10,0,10,20].map(o=>`<path d="M${o} 0h5l20 20h-5z" fill="${Rd}"/>`).join('')}
  };
  const msg='GRIFFTUNES YACHT ROCK  ';
- const nSw=Math.max(3,Math.round(W/520)),swW=W/nSw,sag=15,y0=6,pitch=36;
+ const nSw=Math.max(3,Math.round(W/520)),swW=W/nSw,sag=16,y0=31,pitch=52;
  const yAt=x=>{const t=(x%swW)/swW;return y0+sag*4*t*(1-t)},slope=x=>{const t=(x%swW)/swW;return sag*4*(1-2*t)/swW};
  let line='',out=[],k=0,n=0;
  for(let i=0;i<nSw;i++){const x0=i*swW,x1=x0+swW;line+=`M${x0.toFixed(1)} ${y0}Q${(x0+swW/2).toFixed(1)} ${y0+sag*2} ${x1.toFixed(1)} ${y0}`}
  for(let x=pitch/2;x<W-8;x+=pitch){
-  const t=(x%swW)/swW;if(t<.05||t>.95)continue; // leave the anchor points clear
+  const t=(x%swW)/swW;if(t<.07||t>.93||x<62||x>W-62)continue; // leave the anchor points clear
   const ch=msg[k++%msg.length],f=L[ch];if(!f)continue;
   const a=Math.atan(slope(x))*180/Math.PI,yy=yAt(x);
-  out.push(`<div class="yf" style="left:${(x-14).toFixed(1)}px;top:${(yy-.5).toFixed(1)}px;transform:rotate(${a.toFixed(1)}deg);--d:${(.35+n*.028).toFixed(3)}s"><b><i style="animation-delay:${(-(n*.16)%3.4).toFixed(2)}s"><svg viewBox="0 0 30 20">${f.d}<path d="${f.s||'M0 0h30v20H0z'}" fill="url(#yfShade)"/><path d="M0 .4h30" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg></i></b></div>`);n++;
+  out.push(`<div class="yf" style="left:${(x-21).toFixed(1)}px;top:${(yy-.5).toFixed(1)}px;transform:rotate(${a.toFixed(1)}deg);--d:${(.35+n*.028).toFixed(3)}s"><b><i style="animation-delay:${(-(n*.16)%3.4).toFixed(2)}s"><svg viewBox="0 0 30 20">${f.d}<path d="${f.s||'M0 0h30v20H0z'}" fill="url(#yfShade)"/><path d="M0 .4h30" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg></i></b></div>`);n++;
  }
- el.innerHTML=`<svg aria-hidden="true"><defs><linearGradient id="yfShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset=".8" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs><path d="${line}" stroke="rgba(40,24,8,.55)" stroke-width="3.6" fill="none" transform="translate(0 1.5)"/><path d="${line}" stroke="#e6d2a2" stroke-width="2.2" fill="none"/></svg>`+out.join('');
+ el.innerHTML=`<svg aria-hidden="true"><defs><linearGradient id="yfShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset=".8" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs><path d="${line}" stroke="rgba(40,24,8,.55)" stroke-width="3.6" fill="none" transform="translate(0 1.5)"/><path d="${line}" stroke="#e6d2a2" stroke-width="2.4" fill="none"/>${Array.from({length:nSw-1},(_,i)=>`<circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0}" r="5" fill="#d9a83c" stroke="#6e4a10" stroke-width="1.5"/><circle cx="${((i+1)*swW).toFixed(1)}" cy="${y0-1}" r="1.8" fill="#fff3c4"/>`).join('')}</svg>`+out.join('');
 }
 // the rope draws itself and the flags unfurl each time Yacht Mode starts
 function ymIntro(){
  const h=document.documentElement;h.classList.remove('yIn');void h.offsetWidth;h.classList.add('yIn');
  clearTimeout(YM.inT);YM.inT=setTimeout(()=>h.classList.remove('yIn'),3500);
 }
+/* Hidden reset: hold the GriffTunes logo for 3 seconds. Ends Yacht/Christmas/Fitz, closes every overlay and the
+   screensaver, sets the screensaver back to the fine art gallery and the lights back to album colors, and goes to the
+   first tab. The music keeps playing (except the Yacht station, which ending Yacht Mode turns off). */
+async function gtHome(){
+ if(REMOTE)return;
+ try{if(EF.open)efzClose()}catch(e){}
+ try{if(XM.active)await xmasSet(false)}catch(e){}
+ try{if(YM.on)await ymSet(false)}catch(e){}
+ try{if(AS.on)asStop()}catch(e){}
+ try{hideAttract()}catch(e){}
+ $$('.modal.open').forEach(closeModal);
+ try{if(LYR.open)closeLyrics()}catch(e){}
+ try{if(DECK.open)closeDeck()}catch(e){}
+ try{if(ALP.open)alpClose()}catch(e){}
+ S.saver='art';S.hueMode='auto';saveS();renderLightsBtn();
+ try{if(hueOn()){await hueLightsOn();hueGroup({effect:'none'});hueApply()}}catch(e){}
+ try{loadTab(provider.tabs[0].id)}catch(e){}
+ lastInput=Date.now();
+ sfx('coin');toast('🏠 Back to normal: home screen, art screensaver, album-color lights');
+}
+(()=>{const lg=$('#logo');if(!lg)return;let t=null,t2=null;
+ const end=()=>{clearTimeout(t);clearTimeout(t2);lg.classList.remove('holding')};
+ lg.addEventListener('pointerdown',()=>{end();t2=setTimeout(()=>lg.classList.add('holding'),900);t=setTimeout(()=>{end();gtHome()},3000)});
+ ['pointerup','pointerleave','pointercancel'].forEach(ev=>lg.addEventListener(ev,end));
+ lg.addEventListener('contextmenu',e=>e.preventDefault());
+})();
 addEventListener('resize',()=>{clearTimeout(YM.rsT);YM.rsT=setTimeout(()=>{if(YM.look)ymFlags()},300)});
 setInterval(()=>{if(!REMOTE)ymSync()},3000);
 

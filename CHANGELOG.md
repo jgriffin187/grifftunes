@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.32 — November 15, 2026
+
+- **Yacht Mode teak frame:** the thin rope is replaced by a wide, varnished teak frame around the whole screen: two planks per side, with wood grain, dark caulked seams, butt joints and a glossy finish, brass corner plates with screws, and a rope rail running along the inside edge. The app moves inward so nothing hides under the frame.
+- **The signal flags have their own band:** they hang from the rope rail, below the frame and above the header, about 1.5× bigger than before, with brass eyes where the line is tied off. They still spell GRIFFTUNES · YACHT ROCK. The entrance still draws the frame around the screen, then the flags unfurl.
+- **Hidden "back to normal":** hold the GriffTunes logo for 3 seconds (it brightens as you hold). It ends Yacht Mode, Christmas Mode and the Fitzgerald memorial; closes the screensaver and any open window, the turntable, lyrics and the car radio; sets the screensaver back to the fine art gallery and the lights back to Album colors (turning them on); and goes to the first tab. The music keeps playing, except that ending Yacht Mode turns the Yacht station off as usual. A quick tap on the logo does nothing.
+
 ## 1.31 — November 15, 2026
 
 - **Yacht Mode's rope border is a real rope now:** a thicker twisted rope with shaded strands that drift slowly clockwise around the screen, as if it's being pulled through, with brass grommets at the four corners.
