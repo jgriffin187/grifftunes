@@ -88,10 +88,13 @@ async function start(opts){
 }
 async function stop(){
  W.running=false;q=[];pre=[];if(recBuf&&W.recStop)W.recStop();
- try{src&&src.disconnect();node&&node.disconnect()}catch(e){}
- try{stream&&stream.getTracks().forEach(t=>t.stop())}catch(e){}
- try{ctx&&await ctx.close()}catch(e){}
- ctx=stream=src=node=null;reset();
+ // let go of this session right away: a start() right after (switching the wake word model) gets fresh ones, and this
+ // stop finishing later can't clear the new session's microphone
+ const c=ctx,s=stream,sr=src,n=node;ctx=stream=src=node=null;reset();
+ if(n)n.port.onmessage=null;
+ try{sr&&sr.disconnect();n&&n.disconnect()}catch(e){}
+ try{s&&s.getTracks().forEach(t=>t.stop())}catch(e){}
+ try{c&&await c.close()}catch(e){}
 }
 // Record what's said right after the wake word (with a little before it), up to ms long or until W.recStop(); resolves to a WAV blob
 function record(ms){

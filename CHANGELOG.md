@@ -2,6 +2,22 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.28.3 — November 15, 2026
+
+A check-up of the whole jukebox, with these fixes:
+
+- **"Listen for Hey DJ" and "Keep the screen awake" are separate again:** both switches were saving to the same setting, so turning Hey DJ off also let the screen go to sleep, and the screen switch in Settings → System didn't do anything. Hey DJ stays the way it is now; the screen stays awake.
+- **Skip never gets stuck:** if finding the next song hangs (a slow answer from Spotify, the WiiM or the internet), tapping Skip again after 25 seconds moves on anyway. Spotify requests now give up after 20 seconds, WiiM commands after 8 and DJ Griff's clip upload after 20. A paid song caught in a stuck skip goes back to the front of Up Next, and a speaker retry for an old song can no longer take the speaker back from the new one.
+- **No more falling back to demo mode after a reload without internet:** GriffTunes stays on Spotify, shows "Offline · retrying" and connects as soon as the internet is back (or tries again every 30 seconds to 2 minutes). Up Next is kept.
+- **Lighter on the Chromebox:** the saved song lists (albums and artist hits) and the radio's remembered artist songs are kept in memory instead of being read from storage and decoded on every look-up, and several list changes in a row are saved once.
+- **Gentler on Spotify:**
+  - "Roast Liz" reads the first page of each playlist and of Liked Songs (up to 9 requests, none if the Family tab already has them). Before, it could ask for every page of 8 playlists.
+  - Albums and artist pages opened on phones come from the jukebox's saved copy, like on the touchscreen. An artist page used to cost 3 Spotify searches every time.
+  - A family member whose Spotify sign-in stops working is asked about once, not over and over.
+- **Mirrorball:** a reload while the Yacht Rock station was playing switched the mirrorball on when the song was picked back up. It's left alone now, as with the other modes.
+- **Changing the wake word model** (Hey DJ / Hey Jarvis): a timing gap meant the old listener, shutting down, could clear the new one's microphone connection. That can't happen now.
+- "Hey DJ" with something it can't do yet now says "Try a song, like Purple Rain by Prince, or skip", not "I can only find songs".
+
 ## 1.28.2 — November 15, 2026
 
 - **"Roast Liz" / "roast Carson" use their Family tab music:** the roast now finds the family member even when their Spotify name isn't spelled the way it's said (a nickname like Liz finds an Elizabeth; a username like lizgriffin works too). It reads their Liked Songs and up to 8 of their playlists (it used to look at only 2) for their most frequent artists and some actual songs, and roasts only that. The on-screen line says what it used ("from Liz's 6 playlists and Liked Songs in the Family tab"); someone who isn't in the Family tab gets a note that the room's music was used instead. What it reads is remembered for a day.
