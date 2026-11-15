@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.27.3 — November 14, 2026
+
+- **Yacht Mode screensaver is now Josh's sunset video:** waves rolling up a beach under a blazing sunset, in place of the drawn marina. Saved without sound (the jukebox's music plays over it) and smaller (14 MB), with its last 2 seconds cross-faded into its first, so the loop has no jump. It plays on a loop like the Christmas fireplace, with the mini player and the yacht ticker on top, and pauses while the screen is hidden. The cartoon sailboat doesn't cross the real beach.
+
 ## 1.27.2 — November 14, 2026
 
 - **Yacht Mode ticker shows its facts:** the ticker only read facts for songs carrying chart information (countdowns), so in Yacht Mode the bar opened empty. Now it fills with the artist and year facts under the ⚓ YACHT badge.
