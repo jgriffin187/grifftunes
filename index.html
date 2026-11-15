@@ -645,10 +645,39 @@ html.yacht #sea{display:block}
 html.yacht #bg .blob{opacity:0;transition:opacity 1.5s}
 html.yachtlite body{background:linear-gradient(180deg,#1b0f36 0%,#5a2366 30%,#c8466e 55%,#ff8a47 70%,#1f4d6e 85%,#071a2c 100%) fixed}
 html.yachtlite #bg .blob{opacity:.12}
-#ytrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;border:9px solid transparent;border-image:repeating-linear-gradient(45deg,#d9bf8c 0 5px,#a07a45 5px 10px,#e8d3a6 10px 15px) 9}
+#ytrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--rp:14px}
 html.yacht #ytrim{display:block}
-#yflags{position:absolute;left:-9px;right:-9px;top:-9px;height:40px;opacity:.95;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))}
-#yflags svg{width:100%;height:100%;display:block}
+/* twisted rope: four strips, each drawn as a top edge and rotated into place, so the strands run clockwise */
+.yrope{position:absolute;left:0;top:0;height:var(--rp);width:100vw;overflow:hidden;border-radius:calc(var(--rp)/2);transform-origin:0 0;box-shadow:0 3px 6px rgba(0,0,0,.5),0 0 0 1px rgba(60,38,12,.55)}
+.yrope i{position:absolute;top:0;bottom:0;left:-12px;right:0;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='16'><defs><linearGradient id='s' gradientUnits='userSpaceOnUse' x1='0' y1='16' x2='7.68' y2='21.76' spreadMethod='repeat'><stop offset='0' stop-color='%235e3f18'/><stop offset='.1' stop-color='%239c7740'/><stop offset='.42' stop-color='%23f6e7bf'/><stop offset='.6' stop-color='%23dcc08a'/><stop offset='.88' stop-color='%2386613a'/><stop offset='1' stop-color='%235e3f18'/></linearGradient></defs><rect width='12' height='16' fill='url(%23s)'/></svg>") repeat-x 0 0/12px 100%;animation:yRopeRun 2.6s linear infinite;will-change:transform}
+.yrope::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,250,230,.45),rgba(255,255,255,.1) 32%,rgba(0,0,0,0) 52%,rgba(30,15,0,.55))}
+.yrope.yR{left:100vw;width:100vh;transform:rotate(90deg)}
+.yrope.yB{left:100vw;top:100vh;transform:rotate(180deg)}
+.yrope.yL{top:100vh;width:100vh;transform:rotate(270deg)}
+@keyframes yRopeRun{to{transform:translateX(12px)}}
+/* brass grommets hide the corner joins */
+.ycorner{position:absolute;width:30px;height:30px;border-radius:50%;margin:-1px;background:radial-gradient(circle at 50% 50%,#3a2608 0 4px,#c9962e 5px,#fff2b8 7px,transparent 8px),radial-gradient(circle at 34% 30%,#fff6cc,#e9bb4c 32%,#a56f17 68%,#5a3906);box-shadow:0 3px 7px rgba(0,0,0,.55),inset 0 0 0 1.5px rgba(255,236,170,.5),inset 0 -2px 3px rgba(0,0,0,.35)}
+.ycorner.c1{left:0;top:0}.ycorner.c2{right:0;top:0}.ycorner.c3{right:0;bottom:0}.ycorner.c4{left:0;bottom:0}
+/* signal flags on a sagging dressing line (spells GRIFFTUNES · YACHT ROCK) */
+#yflags{position:absolute;left:0;right:0;top:0;height:64px}
+#yflags>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.yf{position:absolute;width:28px;height:20px;transform-origin:50% 0}
+.yf b,.yf i{display:block;width:100%;height:100%;transform-origin:50% 0}
+.yf i{animation:yfSway 3.4s ease-in-out infinite;will-change:transform}
+.yf svg{display:block;width:100%;height:100%;filter:drop-shadow(0 2px 1.5px rgba(0,0,0,.45))}
+@keyframes yfSway{0%,100%{transform:rotate(-6deg) skewX(4deg) scaleX(.94)}50%{transform:rotate(6deg) skewX(-4deg) scaleX(1)}}
+/* entrance: the rope draws itself clockwise, the grommets pop on, then the flags unfurl left to right */
+html.yIn .yrope{animation:yDraw .42s ease-in-out both}
+html.yIn .yrope.yR{animation-delay:.38s}html.yIn .yrope.yB{animation-delay:.76s}html.yIn .yrope.yL{animation-delay:1.14s}
+@keyframes yDraw{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+html.yIn .ycorner{animation:yPop .45s cubic-bezier(.3,1.7,.5,1) both}
+html.yIn .ycorner.c1{animation-delay:.05s}html.yIn .ycorner.c2{animation-delay:.42s}html.yIn .ycorner.c3{animation-delay:.8s}html.yIn .ycorner.c4{animation-delay:1.18s}
+@keyframes yPop{from{transform:scale(0) rotate(-120deg)}to{transform:none}}
+html.yIn #yflags>svg{animation:yLine .5s ease-out .2s both}
+@keyframes yLine{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+html.yIn .yf b{animation:yfIn .55s cubic-bezier(.3,1.6,.5,1) both;animation-delay:var(--d)}
+@keyframes yfIn{from{transform:scaleY(0) rotate(-25deg);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.yrope i,.yf i{animation:none}}
 #sailboat{position:fixed;bottom:2vh;left:0;z-index:93;pointer-events:none;width:min(260px,26vw);opacity:0;transform:translateX(-30vw);filter:drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sailboat svg{width:100%;height:auto;display:block;animation:boatBob 3.2s ease-in-out infinite}
 #sailboat .wake{animation:wakeFade 1.6s ease-in-out infinite alternate}
@@ -1459,7 +1488,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 <div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
 <canvas id="snow" aria-hidden="true"></canvas>
-<div id="ytrim" aria-hidden="true"><div id="yflags"></div></div>
+<div id="ytrim" aria-hidden="true"><div class="yrope yT"><i></i></div><div class="yrope yR"><i></i></div><div class="yrope yB"><i></i></div><div class="yrope yL"><i></i></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
 <div id="sailboat" aria-hidden="true"><svg viewBox="0 0 260 220"><path d="M128 18v150" stroke="#3b2a24" stroke-width="5"/><path d="M134 24c40 30 70 82 78 136H134z" fill="#fbf5ea"/><path d="M134 24c40 30 70 82 78 136H134z" fill="none" stroke="#e6d7bc" stroke-width="2"/><path d="M122 40c-28 32-48 76-54 120h54z" fill="#f3ead8"/><path d="M134 70h74M134 110h66" stroke="#e8dcc4" stroke-width="2"/><path d="M128 18l26 8-26 8z" fill="#ff5a5f"/><path d="M30 168h200l-24 34H50z" fill="#f7f3ec"/><path d="M30 168h200l-4 6H34z" fill="#1d4fa3"/><path d="M44 186h170" stroke="#d65a4a" stroke-width="4"/><circle cx="92" cy="181" r="4" fill="#2a3f5c"/><circle cx="112" cy="181" r="4" fill="#2a3f5c"/><circle cx="132" cy="181" r="4" fill="#2a3f5c"/><path class="wake" d="M0 210c30-10 50 6 80-2s50-12 90-2" stroke="rgba(255,255,255,.7)" stroke-width="4" fill="none" stroke-linecap="round"/></svg></div>
 <canvas id="frost" aria-hidden="true"></canvas><div id="heatGlow" aria-hidden="true"></div><div id="drips" aria-hidden="true"></div>
 <button id="heater" aria-label="Turn on the heater to melt the frost">🔥 Heater</button>
@@ -4427,7 +4456,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.30';
+const GT_VERSION='1.31';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7124,7 +7153,7 @@ function ymSync(){
  document.documentElement.classList.toggle('yacht',YM.look);if(YM.look)ymFlags();
  if(was!==YM.look){
   seaSync();try{hueTrack()}catch(e){}
-  if(YM.look){if(P.current){ymFlySoon(6000);ymPlayed(P.current)}}
+  if(YM.look){ymIntro();if(P.current){ymFlySoon(6000);ymPlayed(P.current)}}
   else{clearTimeout(YM.flyT);if(YM.tkFor){YM.tkFor=null;tkStop()}}
   try{hostSync()}catch(e){}
  }
@@ -7327,25 +7356,47 @@ function eiSync(){
 setInterval(eiSync,3000);
 /* Signal flags strung along the top: a run of international code flags on a sagging line */
 function ymFlags(){
- const el=$('#yflags');if(!el||el.dataset.built)return;el.dataset.built='1';
- const F=[
-  '<rect width="20" height="14" fill="#fff"/><path d="M10 0h10l-5 7 5 7H10z" fill="#1d4fa3"/>',
-  '<path d="M0 0h20l-5 7 5 7H0z" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#1d4fa3"/><rect y="3" width="20" height="8" fill="#fff"/><rect y="5" width="20" height="4" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#f6c21c"/><rect y="4" width="20" height="6" fill="#1d4fa3"/>',
-  '<rect width="20" height="7" fill="#1d4fa3"/><rect y="7" width="20" height="7" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#fff"/><path d="M10 1l8 6-8 6-8-6z" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#f6c21c"/><rect x="3.3" width="3.3" height="14" fill="#1d4fa3"/><rect x="10" width="3.3" height="14" fill="#1d4fa3"/><rect x="16.7" width="3.3" height="14" fill="#1d4fa3"/>',
-  '<rect width="10" height="14" fill="#fff"/><rect x="10" width="10" height="14" fill="#d82a2a"/>',
-  '<rect width="10" height="14" fill="#f6c21c"/><rect x="10" width="10" height="14" fill="#1d4fa3"/>',
-  '<path d="M0 0h20v14z" fill="#f6c21c"/><path d="M0 0v14h20z" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#1d4fa3"/><rect x="6" y="4" width="8" height="6" fill="#fff"/>',
-  '<rect width="10" height="7" fill="#d82a2a"/><rect x="10" width="10" height="7" fill="#fff"/><rect y="7" width="10" height="7" fill="#fff"/><rect x="10" y="7" width="10" height="7" fill="#d82a2a"/>',
-  '<rect width="20" height="14" fill="#fff"/><rect x="8" width="4" height="14" fill="#1d4fa3"/><rect y="5" width="20" height="4" fill="#1d4fa3"/>'];
- const W=Math.max(800,innerWidth),n=Math.max(12,Math.round(W/62)),flags=[];
- for(let i=0;i<n;i++){const xx=20+i*(W-40)/(n-1),u=(xx-W/2)/(W/2),yy=4+14*(1-u*u);flags.push(`<g transform="translate(${(xx-10).toFixed(1)},${yy.toFixed(1)}) rotate(${(u*-6).toFixed(1)} 10 0)">${F[i%F.length]}</g>`)}
- el.innerHTML=`<svg viewBox="0 0 ${W} 40" preserveAspectRatio="xMidYMin slice"><path d="M0 4Q${W/2} 36 ${W} 4" stroke="#d9c39b" stroke-width="1.6" fill="none"/>${flags.join('')}</svg>`;
+ const el=$('#yflags');if(!el)return;
+ const W=innerWidth;if(el.dataset.w==W)return;el.dataset.w=W;
+ // International Code of Signals flags, 30×20, hung by the top edge
+ const R=(c,x=0,y=0,w=30,h=20)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${c}"/>`;
+ const Y='#f6c21c',B='#1d4fa3',Rd='#d82a2a',Wt='#f7f3ea',K='#151515';
+ const L={
+  A:{d:`<path d="M0 0h30l-8 10 8 10H0z" fill="${B}"/>${R(Wt,0,0,15)}`,s:'M0 0h30l-8 10 8 10H0z'},
+  C:{d:R(B)+R(Wt,0,4,30,12)+R(Rd,0,8,30,4)},
+  E:{d:R(B,0,0,30,10)+R(Rd,0,10,30,10)},
+  F:{d:R(Wt)+`<path d="M15 0L30 10 15 20 0 10z" fill="${Rd}"/>`},
+  G:{d:[0,1,2,3,4,5].map(i=>R(i%2?B:Y,i*5,0,5,20)).join('')},
+  H:{d:R(Wt,0,0,15)+R(Rd,15,0,15)},
+  I:{d:R(Y)+`<circle cx="15" cy="10" r="5.5" fill="${K}"/>`},
+  K:{d:R(Y,0,0,15)+R(B,15,0,15)},
+  N:{d:[0,1,2,3].map(r=>[0,1,2,3].map(c=>R((r+c)%2?Wt:B,c*7.5,r*5,7.5,5)).join('')).join('')},
+  O:{d:R(Y)+`<path d="M0 0h30v20z" fill="${Rd}"/>`},
+  R:{d:R(Rd)+R(Y,12.5,0,5,20)+R(Y,0,7.5,30,5)},
+  S:{d:R(Wt)+R(B,10,6.5,10,7)},
+  T:{d:R(Rd,0,0,10)+R(Wt,10,0,10)+R(B,20,0,10)},
+  U:{d:R(Rd,0,0,15,10)+R(Wt,15,0,15,10)+R(Wt,0,10,15,10)+R(Rd,15,10,15,10)},
+  Y:{d:R(Y)+[-20,-10,0,10,20].map(o=>`<path d="M${o} 0h5l20 20h-5z" fill="${Rd}"/>`).join('')}
+ };
+ const msg='GRIFFTUNES YACHT ROCK  ';
+ const nSw=Math.max(3,Math.round(W/520)),swW=W/nSw,sag=15,y0=6,pitch=36;
+ const yAt=x=>{const t=(x%swW)/swW;return y0+sag*4*t*(1-t)},slope=x=>{const t=(x%swW)/swW;return sag*4*(1-2*t)/swW};
+ let line='',out=[],k=0,n=0;
+ for(let i=0;i<nSw;i++){const x0=i*swW,x1=x0+swW;line+=`M${x0.toFixed(1)} ${y0}Q${(x0+swW/2).toFixed(1)} ${y0+sag*2} ${x1.toFixed(1)} ${y0}`}
+ for(let x=pitch/2;x<W-8;x+=pitch){
+  const t=(x%swW)/swW;if(t<.05||t>.95)continue; // leave the anchor points clear
+  const ch=msg[k++%msg.length],f=L[ch];if(!f)continue;
+  const a=Math.atan(slope(x))*180/Math.PI,yy=yAt(x);
+  out.push(`<div class="yf" style="left:${(x-14).toFixed(1)}px;top:${(yy-.5).toFixed(1)}px;transform:rotate(${a.toFixed(1)}deg);--d:${(.35+n*.028).toFixed(3)}s"><b><i style="animation-delay:${(-(n*.16)%3.4).toFixed(2)}s"><svg viewBox="0 0 30 20">${f.d}<path d="${f.s||'M0 0h30v20H0z'}" fill="url(#yfShade)"/><path d="M0 .4h30" stroke="rgba(0,0,0,.35)" stroke-width=".8"/></svg></i></b></div>`);n++;
+ }
+ el.innerHTML=`<svg aria-hidden="true"><defs><linearGradient id="yfShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".22"/><stop offset=".28" stop-color="#fff" stop-opacity=".2"/><stop offset=".55" stop-color="#000" stop-opacity=".1"/><stop offset=".8" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs><path d="${line}" stroke="rgba(40,24,8,.55)" stroke-width="3.6" fill="none" transform="translate(0 1.5)"/><path d="${line}" stroke="#e6d2a2" stroke-width="2.2" fill="none"/></svg>`+out.join('');
 }
+// the rope draws itself and the flags unfurl each time Yacht Mode starts
+function ymIntro(){
+ const h=document.documentElement;h.classList.remove('yIn');void h.offsetWidth;h.classList.add('yIn');
+ clearTimeout(YM.inT);YM.inT=setTimeout(()=>h.classList.remove('yIn'),3500);
+}
+addEventListener('resize',()=>{clearTimeout(YM.rsT);YM.rsT=setTimeout(()=>{if(YM.look)ymFlags()},300)});
 setInterval(()=>{if(!REMOTE)ymSync()},3000);
 
 // Winter paintings for the screensaver while Christmas Mode is on

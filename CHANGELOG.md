@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.31 — November 15, 2026
+
+- **Yacht Mode's rope border is a real rope now:** a thicker twisted rope with shaded strands that drift slowly clockwise around the screen, as if it's being pulled through, with brass grommets at the four corners.
+- **The signal flags hang on a dressing line:** the line sags in swags between anchor points, the flags are bigger, sway in a breeze that ripples down the line and have cloth shading. They're real International Code of Signals flags spelling **GRIFFTUNES · YACHT ROCK**, over and over.
+- **Entrance:** when Yacht Mode starts, the rope draws itself around the screen, the corner grommets pop on, and the flags unfurl from left to right (about 2.5 seconds).
+- The flags rebuild to fit when the screen size changes. Everything moves with transforms only, to keep it light on the Chromebox.
+
 ## 1.30 — November 15, 2026
 
 - **90s screensaver:** while the radio is on the 90s station, the screensaver plays a retro weather-channel screen (nineties-loop.mp4, Josh's clip) on a loop with no sound, with the mini player, working the same way as the 80s one. The clip is 4:3 and is mostly text (logo and clock at the top, a ticker at the bottom), so it isn't cropped: its edge colors are stretched out to fill the sides of the screen. Its last 2 seconds fade into its first: 3 min 58 s, 720p, 17 MB. Changing between the 80s and 90s stations while the screensaver is up fades one video into the other.
