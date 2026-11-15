@@ -2,6 +2,19 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.27 — November 14, 2026
+
+**⛵ Yacht Mode**
+
+- **When:** on by itself while the Yacht Rock station plays (paid picks in between keep it on). The new **sailboat button** in the top bar (next to the tree and the bell), or "Hey DJ, set sail" / "let's get smooth", turns it on and starts the Yacht Rock station (a paid song that's cut off goes back to the front of Up Next), with a ship's horn. Tap it again, or "Hey DJ, dock the boat", to turn both off. Picking another station ends it. Christmas Mode and the Fitzgerald memorial win over it. The button can be hidden in Settings → Fun.
+- **Screen:** a golden-hour sea replaces the color blobs (sun setting on the horizon, its path shimmering on the water, rolling swells); a sailboat glides along the bottom once per song; international signal flags strung across the top; a rope border; a captain's hat on the GT coin; inserted coins become sand dollars.
+- **Smooth-o-Meter** in Now Playing: Certified Yacht (a Yacht Rock station artist), Yacht-adjacent (a hit from 1976–1984) or Dinghy, with a score.
+- **Hue sunset:** orange, coral, gold, teal and sea blue at about 70% brightness; one bulb drifts to a new color every 30 seconds.
+- **Marina screensaver:** boats bobbing at their moorings at sunset, gulls overhead, the dock in front, with the usual mini player.
+- **Ticker:** the usual artist and year facts (when the song's year is known) under a blue-and-white ⚓ YACHT badge.
+- **DJ Griff → Captain Griff:** a smooth, late-night yacht rock host, at your personality level, for his breaks and answers.
+- **Phones:** the sunset colors and the Smooth-o-Meter.
+
 ## 1.26 — November 14, 2026
 
 **Made-to-order stations: "Hey DJ, play some 90s country"** (or "80s pop", "90s rap", "current hits", "70s disco", "yacht rock", "90s grunge"…)
