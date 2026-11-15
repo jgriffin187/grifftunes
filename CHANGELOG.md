@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.28 — November 15, 2026
+
+- **🪩 Mirrorball:** a new mirrorball button in the top bar, next to the lights, switches the Hue smart plug named **Mirrorball** on and off. It glows and spins while the mirrorball is on, and it's on the Couch Remote too. GriffTunes finds the plug by name; a different plug can be picked in Settings → Lights, and the mirrorball plug is left out of the speaker plug list.
+- **Party modes turn it on:** turning on Christmas Mode, the Edmund Fitzgerald memorial or Yacht Mode (the sailboat button or the Yacht Rock station) turns the mirrorball on. Going straight from one mode to another keeps it on. When the last mode ends, it turns off, even if it was switched on by hand first. Nothing else turns it off (not the screensaver, idle or the overnight hours).
+- Light effects (album colors, Party, flashes, Christmas and Yacht colors) never switch the mirrorball plug.
+
 ## 1.27.3 — November 14, 2026
 
 - **Yacht Mode screensaver is now Josh's sunset video:** waves rolling up a beach under a blazing sunset, in place of the drawn marina. Saved without sound (the jukebox's music plays over it) and smaller (14 MB), with its last 2 seconds cross-faded into its first, so the loop has no jump. It plays on a loop like the Christmas fireplace, with the mini player and the yacht ticker on top, and pauses while the screen is hidden. The cartoon sailboat doesn't cross the real beach.
