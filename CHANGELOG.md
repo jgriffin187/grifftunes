@@ -2,6 +2,12 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.38 — November 16, 2026
+
+- **All Too Well: short-film slideshow.** While the song plays, 46 stills from Taylor Swift's *All Too Well: The Short Film* cover the browse area (tabs, carousel and shelves) for all ten minutes; search, Up Next and phones still work. The stills follow the chapter cards: the scarf at the door (Autumn), the drive and the woods and the lake (Upstate), the dance by the fridge light, then the dinner and the fights (The Kitchen), the party and the 21st birthday (Twenty-One), the breaking point (The Bridge), the lonely nights and the typewriter (The Scarf), and the book reading and the man in the red scarf in the snow (First Snow). Each one gets 5–15 seconds with a slow Ken Burns drift and a crossfade, and a small chapter label sits in the corner. The bridge sing-along still takes over on top.
+  - Files: `atw/01.jpg`–`atw/46.jpg` (932×700, the film's 4:3 frame, about 1.9 MB in all). The service worker keeps them cached after the first play. Which stills go with which chapter: `TW_SHOW` in index.html.
+  - Setting: **Settings → Fun → Short-film slideshow** (on by default).
+
 ## 1.37.1 — November 16, 2026
 
 - **Back to normal (hold the logo 3 s) now ends All Too Well mode.** The mode lasts as long as the song, so the reset skips to the next song (Up Next, the radio or the house mix): the scarf, leaves, lights and bridge takeover all go away, and no leftover scarf is put in the corner.

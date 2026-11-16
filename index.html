@@ -812,6 +812,24 @@ html.atw .twMeter[data-on]{display:block;background:rgba(50,8,14,.5);border-colo
 @keyframes twKeepIn{from{opacity:0;transform:translateY(20px)}}
 @keyframes twWink{30%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}}
 html.remote #twKeep,html.remote .atwBtn{display:none!important}
+/* 🎞 All Too Well: stills from the short film fill the browse area while the song plays */
+.browse{position:relative}
+#twShow{position:absolute;inset:0;z-index:6;display:none;border-radius:22px;overflow:hidden;background:#0b0305;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,170,170,.18)}
+html.atw.twShowOn #twShow{display:block;animation:tsIn 1.6s ease both}
+@keyframes tsIn{from{opacity:0}}
+.tsImg{position:absolute;inset:-2%;background:#0b0305 center/cover no-repeat;opacity:0;transition:opacity 2.2s ease;will-change:transform,opacity}
+.tsImg.on{opacity:1}
+.tsImg.kb1{animation:kb1 var(--kd,16s) ease-in-out both}
+.tsImg.kb2{animation:kb2 var(--kd,16s) ease-in-out both}
+.tsImg.kb3{animation:kb3 var(--kd,16s) ease-in-out both}
+.tsImg.kb4{animation:kb4 var(--kd,16s) ease-in-out both}
+@keyframes kb1{from{transform:scale(1.04) translate(0,0)}to{transform:scale(1.16) translate(-2.5%,-1.5%)}}
+@keyframes kb2{from{transform:scale(1.16) translate(2%,1%)}to{transform:scale(1.04) translate(0,0)}}
+@keyframes kb3{from{transform:scale(1.06) translate(2.5%,0)}to{transform:scale(1.15) translate(-2%,1%)}}
+@keyframes kb4{from{transform:scale(1.15) translate(-2%,-1%)}to{transform:scale(1.05) translate(2%,1%)}}
+#twShow::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(10,2,4,.55) 100%),linear-gradient(180deg,transparent 70%,rgba(10,2,4,.55))}
+.tsTag{position:absolute;left:26px;bottom:20px;z-index:2;font-family:'Special Elite','Courier New',monospace;font-size:17px;letter-spacing:.22em;color:rgba(255,226,214,.85);text-shadow:0 2px 8px rgba(0,0,0,.8)}
+@media (prefers-reduced-motion:reduce){.tsImg.kb1,.tsImg.kb2,.tsImg.kb3,.tsImg.kb4{animation:none}}
 /* 🎤 the bridge sing-along takeover (under the scarf, over everything else) */
 #twBridge{position:fixed;inset:0;z-index:93;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:60px 90px;text-align:center;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,#7a0c20,#2a0308 70%);color:#fff}
 #twBridge.on{display:flex;animation:tbIn .7s ease both}
@@ -1522,6 +1540,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
    <div class="shelf" id="shelf"></div>
    <div class="cdPanel" id="cdPanel" style="display:none"></div>
    <div class="cdPanel ybPanel" id="ybPanel" style="display:none"></div>
+   <div id="twShow" aria-hidden="true"><div class="tsImg"></div><div class="tsImg"></div><div class="tsTag"></div></div>
   </section>
 
   <aside class="side">
@@ -4715,7 +4734,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.37.1';
+const GT_VERSION='1.38';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4870,6 +4889,7 @@ function openSettings(){
   <div class="note">Puts the ship's bell in the top bar. Tap it for the memorial: the bells, the names and the lights turned blue.</div></div>
  <div class="field"><span class="lab">🧣 All Too Well (10 Minute Version)</span>
   ${tg('fAtw','Show the scarf button: All Too Well (10 Minute Version)',S.atwBtn!==false)}
+  ${tg('fAtwShow','Short-film slideshow: stills from the All Too Well short film cover the carousel and shelves',S.atwShow!==false)}
   ${tg('fAtwBr','Bridge sing-along: the bridge lyrics fill the screen, karaoke style',S.atwBridge!==false)}
   <div class="note">Tap the scarf twice (or say “Hey DJ, the ten minute version”) to play it right away. While it plays, from the button or any other way: a red knit scarf around the screen, falling leaves, chapter cards, a fading Polaroid, the Heartbreak-o-Meter and burgundy lights that breathe.</div></div>
  <div class="field"><span class="lab">⛵ Yacht Mode</span>
@@ -4934,6 +4954,7 @@ function openSettings(){
  $('#fYmRoll').onchange=e=>{S.ymRoll=e.target.checked;saveS();ymSync()};
  $('#fAtw').onchange=e=>{S.atwBtn=e.target.checked;saveS();twRender()};
  $('#fAtwBr').onchange=e=>{S.atwBridge=e.target.checked;saveS()};
+ $('#fAtwShow').onchange=e=>{S.atwShow=e.target.checked;saveS();if(!S.atwShow)twShowStop()};
  $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -8022,13 +8043,13 @@ function twBegin(){
  const t=P.current;TW.for=t.id;TW.ci=-1;TW.br=null;TW.max=0;TW.sing=false;TW.snow=false;TW.cue=null;TW.breathT=Date.now();
  if(t.id!==TW_ID&&t.id&&t.id!==store.get('atw_id',null))store.set('atw_id',t.id);
  if(attractOn)hideAttract();
- twCues(t);twIntro();twLeavesStart();twKeepRender();
+ twCues(t);twIntro();twLeavesStart();twKeepRender();tsPreload();
 }
 function twEnd(){
  const done=TW.max>=.93;
  lastInput=Date.now();   // the screensaver waits its usual time after the song, not right away
  TW.for=null;TW.sing=false;TW.cue=null;
- twLeavesStop();twMeter(null);$('#twSing').classList.remove('on');twBrClose();
+ twLeavesStop();twShowStop();twMeter(null);$('#twSing').classList.remove('on');twBrClose();
  document.documentElement.style.removeProperty('--twFade');
  if(done){store.set('atw_keep',Date.now());setTimeout(()=>{twKeepRender();toast('🧣 Tissues are on the house.')},1500)}
 }
@@ -8050,7 +8071,7 @@ function twFrame(){
  if(!P.paused&&sec>=kitchen&&sec<kitchen+8){if(TW.cue!=='fridge')twCue('fridge')}else if(TW.cue==='fridge')twCueEnd();
  const sn=sec>=snow;
  if(sn!==TW.snow){TW.snow=sn;if(twHueOk())hueMood()}
- twMeter(sec);twBreathe();
+ twMeter(sec);twBreathe();twShowTick(sec);
 }
 
 /* ---------- 🎤 All Too Well: the bridge sing-along ----------
@@ -8171,6 +8192,50 @@ function twBridgeTick(sec){
  const ms=sec*1000,open=ms>=br.t0-4200&&ms<br.t1+4200;
  if(open&&!TWB.on)twBrOpen();
  else if(!open&&TWB.on)twBrClose();
+}
+/* ---------- 🎞 All Too Well: the short-film slideshow ----------
+   While the song plays, stills from the short film cover the browse area (tabs, carousel and shelves) for all ten minutes;
+   search, Up Next and phones still work. Each chapter card has its own set of stills (atw/NN.jpg, 932×700 from the film's
+   4:3 frame), spread across that chapter: 5 to 15 seconds each with a slow Ken Burns drift and a 2 s crossfade, looping
+   inside a long chapter. Two layers only, one moving at a time. The service worker keeps atw/ cached after the first time. */
+const TW_SHOW={
+ autumn:[1,2,3,4],
+ upstate:[5,6,7,8,9,10],
+ kitchen:[17,18,19,15,16,11,12,13,14,26,27,28,29],
+ '21':[20,21,22,23,24,25],
+ bridge:[30,31,32,33],
+ scarf:[34,35,36,37,38,39,40],
+ snow:[41,42,43,44,45,46]
+};
+const TS={cur:null,layer:0,pre:false};
+const tsSrc=n=>`atw/${String(n).padStart(2,'0')}.jpg`;
+function tsPreload(){if(TS.pre)return;TS.pre=true;Object.values(TW_SHOW).flat().forEach(n=>{const i=new Image();i.decoding='async';i.src=tsSrc(n)})}
+function tsShow(n,dur){
+ const box=$('#twShow');if(!box)return;
+ const L=box.querySelectorAll('.tsImg'),next=L[TS.layer^1],cur=L[TS.layer];
+ next.className='tsImg';void next.offsetWidth;
+ next.style.backgroundImage=`url("${tsSrc(n)}")`;
+ next.style.setProperty('--kd',Math.round(dur+2.5)+'s');
+ next.classList.add('kb'+(1+Math.floor(Math.random()*4)),'on');
+ cur.classList.remove('on');TS.layer^=1;TS.cur=n;
+}
+function twShowTick(sec){
+ const on=S.atwShow!==false;
+ document.documentElement.classList.toggle('twShowOn',on);
+ if(!on)return;
+ const ch=TW.ch||TW_CH.map(c=>Object.assign({},c,{at:c.fb}));
+ let i=0;ch.forEach((c,k)=>{if(sec>=c.at)i=k});
+ const c=ch[i],pool=TW_SHOW[c.id]||TW_SHOW.autumn;
+ const start=sec<ch[0].at?0:c.at,end=i+1<ch.length?ch[i+1].at:twDur();
+ const len=Math.max(5,Math.min(15,(end-start)/pool.length));
+ const n=pool[Math.floor(Math.max(0,sec-start)/len)%pool.length];
+ if(n!==TS.cur)tsShow(n,len);
+ const tag=$('#twShow .tsTag'),t='CHAPTER '+TW_ROMAN[i]+' · '+c.name.toUpperCase();
+ if(tag&&tag.textContent!==t)tag.textContent=t;
+}
+function twShowStop(){
+ TS.cur=null;document.documentElement.classList.remove('twShowOn');
+ $$('#twShow .tsImg').forEach(l=>{l.className='tsImg';l.style.backgroundImage=''});
 }
 // the folded scarf left in the corner
 function twKeepRender(){
