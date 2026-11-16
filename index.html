@@ -827,6 +827,9 @@ html.atw.twShowOn #twShow{display:block;animation:tsIn 1.6s ease both}
 @keyframes kb2{from{transform:scale(1.16) translate(2%,1%)}to{transform:scale(1.04) translate(0,0)}}
 @keyframes kb3{from{transform:scale(1.06) translate(2.5%,0)}to{transform:scale(1.15) translate(-2%,1%)}}
 @keyframes kb4{from{transform:scale(1.15) translate(-2%,-1%)}to{transform:scale(1.05) translate(2%,1%)}}
+#twShow::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;background:radial-gradient(ellipse at 38% 48%,rgba(200,235,255,.55),rgba(150,200,255,.18) 45%,transparent 75%);mix-blend-mode:screen;opacity:0;transition:opacity 1.2s ease}
+#twShow.tsFridge::before{opacity:1;animation:tsFr 2.4s ease-in-out infinite}
+@keyframes tsFr{50%{opacity:.7}}
 #twShow::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 45%,transparent 55%,rgba(10,2,4,.55) 100%),linear-gradient(180deg,transparent 70%,rgba(10,2,4,.55))}
 .tsTag{position:absolute;left:26px;bottom:20px;z-index:2;font-family:'Special Elite','Courier New',monospace;font-size:17px;letter-spacing:.22em;color:rgba(255,226,214,.85);text-shadow:0 2px 8px rgba(0,0,0,.8)}
 @media (prefers-reduced-motion:reduce){.tsImg.kb1,.tsImg.kb2,.tsImg.kb3,.tsImg.kb4{animation:none}}
@@ -4734,7 +4737,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.38';
+const GT_VERSION='1.38.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -8201,7 +8204,7 @@ function twBridgeTick(sec){
 const TW_SHOW={
  autumn:[1,2,3,4],
  upstate:[5,6,7,8,9,10],
- kitchen:[17,18,19,15,16,11,12,13,14,26,27,28,29],
+ kitchen:[47,17,18,19,15,16,11,12,13,14,26,27,28,29],   // 47 = the open fridge: always on screen for the fridge-light moment
  '21':[20,21,22,23,24,25],
  bridge:[30,31,32,33],
  scarf:[34,35,36,37,38,39,40],
@@ -8228,13 +8231,16 @@ function twShowTick(sec){
  const c=ch[i],pool=TW_SHOW[c.id]||TW_SHOW.autumn;
  const start=sec<ch[0].at?0:c.at,end=i+1<ch.length?ch[i+1].at:twDur();
  const len=Math.max(5,Math.min(15,(end-start)/pool.length));
- const n=pool[Math.floor(Math.max(0,sec-start)/len)%pool.length];
- if(n!==TS.cur)tsShow(n,len);
+ // the fridge-light moment: the open-fridge still is up (it arrives 1.5 s early, so the crossfade is done) while the lights flash cool white
+ const kc=ch.find(x=>x.id==='kitchen'),fridge=!!kc&&sec>=kc.at-1.5&&sec<kc.at+9;
+ const n=fridge?47:pool[Math.floor(Math.max(0,sec-start)/len)%pool.length];
+ if(n!==TS.cur)tsShow(n,fridge?10:len);
+ $('#twShow').classList.toggle('tsFridge',!!kc&&sec>=kc.at&&sec<kc.at+8);
  const tag=$('#twShow .tsTag'),t='CHAPTER '+TW_ROMAN[i]+' · '+c.name.toUpperCase();
  if(tag&&tag.textContent!==t)tag.textContent=t;
 }
 function twShowStop(){
- TS.cur=null;document.documentElement.classList.remove('twShowOn');
+ TS.cur=null;document.documentElement.classList.remove('twShowOn');$('#twShow').classList.remove('tsFridge');
  $$('#twShow .tsImg').forEach(l=>{l.className='tsImg';l.style.backgroundImage=''});
 }
 // the folded scarf left in the corner

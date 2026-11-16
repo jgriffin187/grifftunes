@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.38.1 — November 16, 2026
+
+- **All Too Well slideshow: the fridge.** A new still (`atw/47.jpg`) of the couple dancing by the open, glowing refrigerator. It opens The Kitchen chapter and is always on screen for the refrigerator-light moment: it fades in 1.5 s early so it's fully up when the Hue lights flash cool white, stays about 10 s, and a soft cool-white glow pulses over the fridge side of the picture for those 8 seconds (even without Hue).
+
 ## 1.38 — November 16, 2026
 
 - **All Too Well: short-film slideshow.** While the song plays, 46 stills from Taylor Swift's *All Too Well: The Short Film* cover the browse area (tabs, carousel and shelves) for all ten minutes; search, Up Next and phones still work. The stills follow the chapter cards: the scarf at the door (Autumn), the drive and the woods and the lake (Upstate), the dance by the fridge light, then the dinner and the fights (The Kitchen), the party and the 21st birthday (Twenty-One), the breaking point (The Bridge), the lonely nights and the typewriter (The Scarf), and the book reading and the man in the red scarf in the snow (First Snow). Each one gets 5–15 seconds with a slow Ken Burns drift and a crossfade, and a small chapter label sits in the corner. The bridge sing-along still takes over on top.
