@@ -2,6 +2,17 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.37 — November 16, 2026
+
+- **All Too Well: the bridge sing-along.** For just the bridge, the whole screen (inside the scarf) turns into karaoke:
+  - "THE BRIDGE · EVERYBODY SING", a big 3-2-1 count-in, and bouncing mics.
+  - Each line huge, with a gold wipe that sweeps across in time with the singing, the line just sung above and the next one waiting below.
+  - Cheers that change line by line, and "LOUDER! 📣" if the room goes quiet.
+  - **Basement Volume** meter from the Chromebox's USB mic (only when the mic is already allowed for Hey DJ; it never asks). It learns how loud the music is during the count-in, so it measures the singing: Whisper → Shower singer → Karaoke night → Arena → Eras Tour 🏟️.
+  - At the end: a rating and a burst of hearts, scarves and leaves, then back to the jukebox.
+  - The lines come from the song's synced lyrics (lrclib, like the lyrics screen) as it plays; nothing is stored in GriffTunes. The bridge is found by its "casually cruel" line. No synced lyrics → just the SING IT flash, as before. The Bridge chapter card now shows before the takeover.
+  - Setting: **Settings → Fun → Bridge sing-along** (on by default).
+
 ## 1.36.1 — November 16, 2026
 
 - **All Too Well mode:** the scarf button now says **ATW**. No screensaver while the song plays (if the screensaver was already up, it closes; afterwards it waits its usual time). The scarf is rebuilt: chunkier V-stitch knit with a rolled inside edge, ribbed cuffs in all four corners covering the joins, a little fringe along the bottom corners, and no more fringe hanging over the top-bar buttons. The frame is thinner and takes less room.

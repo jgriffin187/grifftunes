@@ -812,6 +812,44 @@ html.atw .twMeter[data-on]{display:block;background:rgba(50,8,14,.5);border-colo
 @keyframes twKeepIn{from{opacity:0;transform:translateY(20px)}}
 @keyframes twWink{30%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}}
 html.remote #twKeep,html.remote .atwBtn{display:none!important}
+/* 🎤 the bridge sing-along takeover (under the scarf, over everything else) */
+#twBridge{position:fixed;inset:0;z-index:93;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:60px 90px;text-align:center;pointer-events:none;background:radial-gradient(ellipse at 50% 40%,#7a0c20,#2a0308 70%);color:#fff}
+#twBridge.on{display:flex;animation:tbIn .7s ease both}
+#twBridge.out{animation:tbOut .7s ease both}
+@keyframes tbIn{from{opacity:0;transform:scale(1.04)}}
+@keyframes tbOut{to{opacity:0;transform:scale(.98)}}
+#twBridge::before{content:'';position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 120%,rgba(255,120,140,.07) 0 6deg,transparent 6deg 14deg);animation:tbRays 18s linear infinite;pointer-events:none}
+@keyframes tbRays{to{transform:rotate(8deg) scale(1.1)}}
+.tbTop{position:relative;font-family:Bungee,Outfit,sans-serif;font-size:24px;letter-spacing:.12em;padding:10px 26px;border-radius:999px;background:rgba(255,60,90,.22);border:2px solid rgba(255,140,160,.7);box-shadow:0 0 24px rgba(255,60,90,.5);animation:tbPulse 1.2s ease-in-out infinite}
+@keyframes tbPulse{50%{box-shadow:0 0 44px rgba(255,90,120,.85);transform:scale(1.04)}}
+.tbCount{position:relative;font-family:Bungee,Outfit,sans-serif;font-size:150px;line-height:1;color:#ffd36b;text-shadow:0 0 40px rgba(255,180,60,.8);min-height:0}
+.tbCount:empty{display:none}
+.tbPrev,.tbNext{position:relative;max-width:1500px;font-family:Outfit,sans-serif;font-weight:600;font-size:30px;color:rgba(255,220,225,.45);min-height:40px;transition:opacity .3s}
+.tbNext{color:rgba(255,235,240,.72)}
+.tbLine{position:relative;max-width:1600px;font-family:Outfit,sans-serif;font-weight:900;line-height:1.12;letter-spacing:.01em;min-height:80px}
+.tbBase{color:rgba(255,255,255,.3)}
+.tbFill{position:absolute;inset:0;background:linear-gradient(90deg,#ffe28a,#ff9a5a 50%,#ff4f7a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 14px rgba(255,120,120,.65));clip-path:inset(-20% 100% -20% 0)}
+.tbLine.pop{animation:tbPop .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes tbPop{from{transform:scale(.86);opacity:.2}}
+.tbCheer{position:relative;font-family:'Caveat',cursive;font-size:44px;color:#ffc9a8;transform:rotate(-3deg);min-height:50px}
+.tbCheer.pop{animation:tbCheer .6s cubic-bezier(.3,1.8,.5,1)}
+@keyframes tbCheer{from{transform:rotate(-3deg) scale(.4);opacity:0}}
+.tbMeter{position:relative;display:none;width:640px;margin-top:8px}
+#twBridge.mic .tbMeter{display:block}
+.tbMeter small{display:block;font-family:Bungee,Outfit,sans-serif;font-size:15px;letter-spacing:.16em;color:#ff9aa8;margin-bottom:6px}
+.tbBar{height:22px;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden;box-shadow:inset 0 2px 6px rgba(0,0,0,.5)}
+.tbBar i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#ffd36b,#ff7a26,#ff3b5c);box-shadow:0 0 16px rgba(255,90,90,.8);transition:width .12s}
+.tbMeter b{display:block;margin-top:6px;font-family:Outfit,sans-serif;font-size:22px;font-weight:800;color:#ffe6d6}
+.tbMic{position:absolute;left:7%;top:50%;font-size:110px;transform:translateY(-50%);animation:tbMic 1s ease-in-out infinite}
+.tbMic.r{left:auto;right:7%;animation-delay:-.5s}
+@keyframes tbMic{50%{transform:translateY(-58%) rotate(-12deg)}}
+.tbDone{position:relative;display:none;font-family:Outfit,sans-serif;font-weight:900;font-size:58px;color:#ffe28a;text-shadow:0 0 30px rgba(255,160,60,.7);max-width:1500px}
+#twBridge.end .tbDone{display:block;animation:tbPop .6s cubic-bezier(.3,1.6,.5,1)}
+#twBridge.end .tbLine,#twBridge.end .tbPrev,#twBridge.end .tbNext,#twBridge.end .tbCheer,#twBridge.end .tbMeter,#twBridge.end .tbCount{display:none}
+.tbHearts{position:absolute;left:0;right:0;top:55%;height:0}
+.tbHearts span{position:absolute;animation:tbBurst 2.6s cubic-bezier(.2,.7,.3,1) both}
+@keyframes tbBurst{0%{transform:translate(0,0) scale(.3);opacity:1}70%{opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--r)) scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){#twBridge::before,.tbTop,.tbMic{animation:none}}
 @media (prefers-reduced-motion:reduce){.tfringe,#twSing.on,.atwBtn.ask{animation:none}}
 #sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(600px,70vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 6px rgba(255,230,170,.45)) drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sleigh svg{width:100%;height:auto;display:block}
@@ -1616,6 +1654,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 <canvas id="twLeaves" aria-hidden="true"></canvas>
 <div id="twCard" aria-hidden="true"><small></small><b></b><span></span></div>
 <div id="twSing" aria-hidden="true">SING IT 🎤</div>
+<div id="twBridge" aria-hidden="true"><div class="tbMic">🎤</div><div class="tbMic r">🎤</div><div class="tbTop">THE BRIDGE · EVERYBODY SING</div><div class="tbCount"></div><div class="tbPrev"></div><div class="tbLine"><span class="tbBase"></span><span class="tbFill"></span></div><div class="tbNext"></div><div class="tbCheer"></div><div class="tbMeter"><small>BASEMENT VOLUME</small><div class="tbBar"><i></i></div><b></b></div><div class="tbDone"></div><div class="tbHearts"></div></div>
 <button id="twKeep" aria-label="A red scarf"><svg viewBox="0 0 62 46" aria-hidden="true"><path d="M6 20c8-6 42-6 50 0v12c-8-5-42-5-50 0z" fill="#b3192f" stroke="#6e0a19" stroke-width="1.2"/><path d="M6 26c8-5 42-5 50 0" stroke="#7d0d1e" stroke-width="1" fill="none"/><path d="M8 22c8-4 38-4 46 0" stroke="#e0445a" stroke-width="1" fill="none" opacity=".6"/><path d="M40 16l8 1 2 20-8 2z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1.1"/><path d="M42.5 39v5M44.5 38.6v5.6M46.5 38.2v5.4M48.5 37.8v5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div id="ytrim" aria-hidden="true"><div class="yside yT"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yR"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yB"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yL"><div class="yplank"></div><div class="yrail"><i></i></div></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
 
@@ -4676,7 +4715,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.36.1';
+const GT_VERSION='1.37';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4831,6 +4870,7 @@ function openSettings(){
   <div class="note">Puts the ship's bell in the top bar. Tap it for the memorial: the bells, the names and the lights turned blue.</div></div>
  <div class="field"><span class="lab">🧣 All Too Well (10 Minute Version)</span>
   ${tg('fAtw','Show the scarf button: All Too Well (10 Minute Version)',S.atwBtn!==false)}
+  ${tg('fAtwBr','Bridge sing-along: the bridge lyrics fill the screen, karaoke style',S.atwBridge!==false)}
   <div class="note">Tap the scarf twice (or say “Hey DJ, the ten minute version”) to play it right away. While it plays, from the button or any other way: a red knit scarf around the screen, falling leaves, chapter cards, a fading Polaroid, the Heartbreak-o-Meter and burgundy lights that breathe.</div></div>
  <div class="field"><span class="lab">⛵ Yacht Mode</span>
   ${tg('fYacht','Show the sailboat button: Yacht Mode',S.yachtBtn!==false)}
@@ -4893,6 +4933,7 @@ function openSettings(){
  $('#fYacht').onchange=e=>{S.yachtBtn=e.target.checked;saveS();ymSync()};
  $('#fYmRoll').onchange=e=>{S.ymRoll=e.target.checked;saveS();ymSync()};
  $('#fAtw').onchange=e=>{S.atwBtn=e.target.checked;saveS();twRender()};
+ $('#fAtwBr').onchange=e=>{S.atwBridge=e.target.checked;saveS()};
  $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -7858,6 +7899,8 @@ async function twCues(t){
    const hits=L.filter(x=>c.k.test(x.text));if(!hits.length)continue;
    c.at=Math.max(1,(c.last?hits[hits.length-1]:hits[0]).t/1000-1);n++;
   }
+  const br=twBridgeFind(L);
+  if(br){TW.br=br;const c=ch.find(x=>x.id==='bridge');if(c)c.at=Math.max(1,br.t0/1000-12)}
   ch.sort((a,b)=>a.at-b.at);
   console.info('[GriffTunes All Too Well] chapter times from synced lyrics:',n,ch.map(c=>c.id+'@'+Math.round(c.at)).join(' '));
  }catch(e){}
@@ -7974,7 +8017,7 @@ function twLeavesFrame(ts){
 }
 function twIntro(){const h=document.documentElement;h.classList.remove('twIn');void h.offsetWidth;h.classList.add('twIn');clearTimeout(TW.inT);TW.inT=setTimeout(()=>h.classList.remove('twIn'),3000)}
 function twBegin(){
- const t=P.current;TW.for=t.id;TW.ci=-1;TW.max=0;TW.sing=false;TW.snow=false;TW.cue=null;TW.breathT=Date.now();
+ const t=P.current;TW.for=t.id;TW.ci=-1;TW.br=null;TW.max=0;TW.sing=false;TW.snow=false;TW.cue=null;TW.breathT=Date.now();
  if(t.id!==TW_ID&&t.id&&t.id!==store.get('atw_id',null))store.set('atw_id',t.id);
  if(attractOn)hideAttract();
  twCues(t);twIntro();twLeavesStart();twKeepRender();
@@ -7983,7 +8026,7 @@ function twEnd(){
  const done=TW.max>=.93;
  lastInput=Date.now();   // the screensaver waits its usual time after the song, not right away
  TW.for=null;TW.sing=false;TW.cue=null;
- twLeavesStop();twMeter(null);$('#twSing').classList.remove('on');
+ twLeavesStop();twMeter(null);$('#twSing').classList.remove('on');twBrClose();
  document.documentElement.style.removeProperty('--twFade');
  if(done){store.set('atw_keep',Date.now());setTimeout(()=>{twKeepRender();toast('🧣 Tissues are on the house.')},1500)}
 }
@@ -7999,12 +8042,133 @@ function twFrame(){
  // the cues
  const at=id=>{const c=ch.find(x=>x.id===id);return c?c.at:1e9};
  const kitchen=at('kitchen'),bridge=at('bridge'),snow=at('snow');
- const sing=!P.paused&&sec>=bridge&&sec<bridge+32;
- if(sing!==TW.sing){TW.sing=sing;$('#twSing').classList.toggle('on',sing);if(sing)twCue('sing');else if(TW.cue==='sing')twCueEnd()}
+ const sing=!P.paused&&(TW.br?sec*1000>=TW.br.t0-1000&&sec*1000<TW.br.t1:sec>=bridge&&sec<bridge+32);
+ twBridgeTick(sec);
+ if(sing!==TW.sing){TW.sing=sing;$('#twSing').classList.toggle('on',sing&&!TWB.on);if(sing)twCue('sing');else if(TW.cue==='sing')twCueEnd()}
  if(!P.paused&&sec>=kitchen&&sec<kitchen+8){if(TW.cue!=='fridge')twCue('fridge')}else if(TW.cue==='fridge')twCueEnd();
  const sn=sec>=snow;
  if(sn!==TW.snow){TW.snow=sn;if(twHueOk())hueMood()}
  twMeter(sec);twBreathe();
+}
+
+/* ---------- 🎤 All Too Well: the bridge sing-along ----------
+   For just the bridge, a full-screen karaoke takeover (under the scarf): a 3-2-1 count-in, each line big with a gold wipe
+   timed to the singing, the next line waiting below, cheers, and a Basement Volume meter from the Chromebox's USB mic
+   (only if the mic is already allowed; it never asks). The meter subtracts the music it hears during the count-in, so it
+   measures the room singing along. At the end: a rating and a burst of hearts. The lines come from the song's synced
+   lyrics (lrclib, the same source as the lyrics screen) at play time; no lyrics are stored in GriffTunes. No synced lyrics →
+   no takeover (the SING IT flash still shows). The bridge is found by its "casually cruel" line: it starts one line before
+   and runs to the next line that ends in "too well" (8 lines at most). */
+const TWB={on:false,raf:0,k:-2,lastPos:-1,at:0,stream:null,ac:null,an:null,buf:null,base:0,baseN:0,lvl:0,sum:0,n:0,done:false,micTry:false};
+function twBridgeFind(L){
+ const ci=L.findIndex(x=>/casually cruel/i.test(x.text||''));if(ci<1)return null;
+ let s=ci-1;while(s>0&&!L[s].text)s--;
+ let e=ci;for(let k=ci+1;k<L.length&&k<=s+7;k++){if(!L[k].text)break;e=k;if(/too well\W*$/i.test(L[k].text))break}
+ const lines=L.slice(s,e+1).filter(x=>x.text);
+ const t1=L[e+1]?L[e+1].t:L[e].t+5000;
+ return{lines,t0:lines[0].t,t1:Math.min(t1,lines[lines.length-1].t+9000)};
+}
+function twBrPos(){
+ if(P.pos!==TWB.lastPos){TWB.lastPos=P.pos;TWB.at=performance.now()}
+ return P.paused?P.pos:P.pos+Math.min(450,performance.now()-TWB.at);
+}
+async function twBrMic(){
+ if(TWB.micTry)return;TWB.micTry=true;
+ try{
+  const p=await navigator.permissions.query({name:'microphone'});if(p.state!=='granted'||!TWB.on)return;
+  const st=await navigator.mediaDevices.getUserMedia({audio:Object.assign({echoCancellation:false,noiseSuppression:false,autoGainControl:false},S.wakeMic?{deviceId:{exact:S.wakeMic}}:{})});
+  if(!TWB.on){st.getTracks().forEach(t=>t.stop());return}
+  const ac=new (window.AudioContext||window.webkitAudioContext)(),an=ac.createAnalyser();an.fftSize=1024;
+  ac.createMediaStreamSource(st).connect(an);
+  Object.assign(TWB,{stream:st,ac,an,buf:new Float32Array(an.fftSize)});
+  $('#twBridge').classList.add('mic');
+ }catch(e){console.info('[GriffTunes All Too Well] no mic for the volume meter:',e&&e.message)}
+}
+function twBrMicStop(){
+ try{TWB.stream&&TWB.stream.getTracks().forEach(t=>t.stop())}catch(e){}
+ try{TWB.ac&&TWB.ac.close()}catch(e){}
+ TWB.stream=TWB.ac=TWB.an=null;
+}
+function twBrRms(){
+ if(!TWB.an)return 0;TWB.an.getFloatTimeDomainData(TWB.buf);let s=0;for(const v of TWB.buf)s+=v*v;return Math.sqrt(s/TWB.buf.length);
+}
+const TWB_LV=['Whisper','Shower singer','Karaoke night','Arena','Eras Tour 🏟️'];
+const TWB_CHEER=['Everybody!','You know this one!','From the heart! ❤️','Louder for the people upstairs!','Whole basement!','Big finish! 🎤'];
+function twBrOpen(){
+ const el=$('#twBridge');if(!el||TWB.on)return;
+ Object.assign(TWB,{on:true,k:-2,lastPos:-1,base:0,baseN:0,lvl:0,sum:0,n:0,done:false,micTry:false});
+ el.classList.remove('mic','end','out');el.querySelector('.tbDone').textContent='';
+ el.querySelector('.tbPrev').textContent='';el.querySelector('.tbNext').textContent='';twBrSet('','');
+ el.classList.add('on');$('#twSing').classList.remove('on');
+ twBrMic();
+ if(!TWB.raf)TWB.raf=requestAnimationFrame(twBrFrame);
+}
+function twBrSet(txt,cheer){
+ const el=$('#twBridge'),ln=el.querySelector('.tbLine');
+ ln.querySelector('.tbBase').textContent=txt;ln.querySelector('.tbFill').textContent=txt;
+ ln.style.fontSize=txt.length>52?'46px':txt.length>38?'56px':'66px';
+ ln.classList.remove('pop');void ln.offsetWidth;if(txt)ln.classList.add('pop');
+ if(cheer!=null){const c=el.querySelector('.tbCheer');c.textContent=cheer;c.classList.remove('pop');void c.offsetWidth;c.classList.add('pop')}
+}
+function twBrClose(){
+ const el=$('#twBridge');TWB.on=false;cancelAnimationFrame(TWB.raf);TWB.raf=0;twBrMicStop();
+ if(el){el.classList.add('out');setTimeout(()=>{if(!TWB.on)el.classList.remove('on','out','end','mic')},700)}
+}
+function twBrFinish(){
+ if(TWB.done)return;TWB.done=true;
+ const el=$('#twBridge'),avg=TWB.n?TWB.sum/TWB.n:-1;
+ let msg;
+ if(avg<0)msg='🎤 What a bridge. Taylor would be proud.';
+ else{const i=Math.min(4,Math.floor(avg*5.5));msg=['🎤 Next time, louder. We know you know it.','🎤 Shower-singer bridge! Solid.','🎤 Karaoke-night bridge! The basement showed up.','🎤 Arena-level bridge!','🏟️ Eras Tour-level bridge! Stadium voices.'][i]}
+ el.querySelector('.tbDone').textContent=msg;el.classList.add('end');
+ const box=el.querySelector('.tbHearts');box.innerHTML='';
+ for(let i=0;i<26;i++){const s=document.createElement('span');s.textContent=['❤️','🧣','✨','🍂'][i%4];
+  s.style.cssText=`left:${50+(Math.random()-.5)*20}%;--dx:${(Math.random()-.5)*1400}px;--dy:${-200-Math.random()*520}px;--r:${(Math.random()-.5)*720}deg;animation-delay:${Math.random()*.25}s;font-size:${26+Math.random()*26}px`;box.appendChild(s)}
+ twBrMicStop();
+}
+function twBrFrame(){
+ TWB.raf=requestAnimationFrame(twBrFrame);
+ const br=TW.br;if(!br||!TWB.on)return;
+ const el=$('#twBridge'),pos=twBrPos(),L=br.lines;
+ // the count-in
+ const cnt=el.querySelector('.tbCount');
+ if(pos<br.t0){
+  const n=Math.ceil((br.t0-pos)/1000);cnt.textContent=n<=3&&n>0?n:'';cnt.dataset.n=n;
+  if(TWB.an&&n<=3){TWB.base+=twBrRms();TWB.baseN++}   // learn how loud the music alone is
+ }else cnt.textContent='';
+ // the line
+ let k=-1;for(let i=0;i<L.length;i++){if(L[i].t<=pos)k=i;else break}
+ if(pos>=br.t1){twBrFinish()}
+ else if(k!==TWB.k){
+  TWB.k=k;
+  el.querySelector('.tbPrev').textContent=k>0?L[k-1].text:'';
+  el.querySelector('.tbNext').textContent=k+1<L.length?L[k+1].text:(k<0?'':'');
+  if(k<0){twBrSet('',null);el.querySelector('.tbNext').textContent=L[0].text}
+  else twBrSet(L[k].text,TWB_CHEER[Math.min(TWB_CHEER.length-1,k)]);
+ }
+ if(k>=0&&!TWB.done){
+  const a=L[k].t,b=k+1<L.length?L[k+1].t:br.t1,p=Math.max(0,Math.min(1,(pos-a)/Math.max(400,(b-a)*.9)));
+  el.querySelector('.tbFill').style.clipPath=`inset(-20% ${((1-p)*100).toFixed(2)}% -20% 0)`;
+ }
+ // Basement Volume
+ if(TWB.an&&!TWB.done&&pos>=br.t0-3000){
+  const base=TWB.baseN?TWB.base/TWB.baseN:.02,r=twBrRms();
+  const v=Math.max(0,Math.min(1,(r-base*1.05)/(base*1.6+.015)));
+  TWB.lvl=TWB.lvl*.85+v*.15;
+  if(pos>=br.t0){TWB.sum+=TWB.lvl;TWB.n++}
+  const m=el.querySelector('.tbMeter');
+  m.querySelector('i').style.width=(TWB.lvl*100).toFixed(1)+'%';
+  m.querySelector('b').textContent=TWB_LV[Math.min(4,Math.floor(TWB.lvl*5))];
+  if(pos>=br.t0&&TWB.lvl<.18&&k>=1&&k<L.length-1)el.querySelector('.tbCheer').textContent='LOUDER! 📣';
+ }
+}
+/* runs once a second from twFrame */
+function twBridgeTick(sec){
+ const br=TW.br;
+ if(!br||S.atwBridge===false||P.paused&&!TWB.on){if(TWB.on&&(!br||S.atwBridge===false))twBrClose();return}
+ const ms=sec*1000,open=ms>=br.t0-4200&&ms<br.t1+4200;
+ if(open&&!TWB.on)twBrOpen();
+ else if(!open&&TWB.on)twBrClose();
 }
 // the folded scarf left in the corner
 function twKeepRender(){
