@@ -2,6 +2,18 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.36 — November 15, 2026
+
+- **All Too Well (10 Minute Version) mode:** a new red scarf button (**10:13**) in the top bar. Tap it twice, or say "Hey DJ, play the ten minute version", and Taylor Swift's "All Too Well (10 Minute Version)" starts right away. The look comes on whenever that song plays (however it was picked) and leaves when it ends:
+  - **A red knit scarf** knits itself around the screen, with fringed ends hanging from the top corners.
+  - **Falling maple leaves** pile up along the bottom. In the last chapter, they turn to snow.
+  - **Chapter cards** in typewriter type mark the story (Autumn, Upstate, The Kitchen, Twenty-One, The Bridge, The Scarf, First Snow), timed from the song's synced lyrics, with estimates as a backup.
+  - **The cover becomes a Polaroid** that slowly fades over the ten minutes.
+  - **Heartbreak-o-Meter:** climbs from "Mild ache" to "Devastated", with a **SING IT** flash for the bridge.
+  - **Lights:** burgundy and amber that slowly breathe, cool white "open fridge" light in the kitchen, full brightness for the bridge and pale winter blue at the end. The lights never turn off, and the mirrorball is left alone.
+  - **Afterwards:** if the song plays to the end, a folded red scarf stays in the bottom-left corner for the rest of the night. Tap it. The logo-hold reset clears it.
+  - Christmas Mode and the Fitzgerald memorial come first. Guests' phones can't start it. Turn the button off in **Settings → Fun**.
+
 ## 1.35.10 — November 15, 2026
 
 - **The radio button turns the radio off:** on the jukebox and the Couch Remote, tapping the lit radio button now turns the radio off and takes it off the screen (a radio song that's playing finishes). When the radio is off, the button turns it back on: the jukebox opens the Alpine faceplate to pick a station, and phones show the dial. The faceplate also has a **Radio off** button next to Close (tapping the volume knob still works too).

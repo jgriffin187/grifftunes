@@ -29,7 +29,7 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bungee&family=IM+Fell+English&family=Monoton&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Caveat:wght@500&family=IM+Fell+English&family=Monoton&family=Outfit:wght@400;500;600;700;800&family=Special+Elite&display=swap" rel="stylesheet">
 <style>
 @property --accent{syntax:'<color>';inherits:true;initial-value:#ff2bd6}
 @property --accent2{syntax:'<color>';inherits:true;initial-value:#22e4ff}
@@ -741,6 +741,71 @@ html.yacht .ymMeter[data-on],html.yachtlite .ymMeter[data-on]{display:block}
 html.yacht #npTicker .tkBadge,html.yacht #gTkBadge,html.yacht #dkTkBadge{background:#1d4fa3;color:#fff;box-shadow:inset 0 0 0 3px #f4efe6,inset 0 0 0 5px #1d4fa3,inset 0 0 0 6px #ff5a5f}
 .yachtBtn svg{filter:drop-shadow(0 0 6px rgba(255,170,90,.55))}
 .yachtBtn.on{background:rgba(255,140,70,.18);border-color:rgba(255,170,90,.6);box-shadow:0 0 16px rgba(255,140,70,.35)}
+/* 🧣 All Too Well (10 Minute Version) mode: a red knit scarf frame, falling leaves, chapter cards, a Polaroid, burgundy lights */
+.atwBtn svg{filter:drop-shadow(0 0 6px rgba(230,60,70,.55))}
+.atwBtn.on{background:rgba(200,30,50,.2);border-color:rgba(255,120,120,.6);box-shadow:0 0 16px rgba(220,40,60,.4)}
+.atwBtn.ask{background:rgba(200,30,50,.32);border-color:#ff8a8a;animation:twAsk 1s ease-in-out infinite}
+@keyframes twAsk{50%{box-shadow:0 0 22px rgba(255,90,90,.75)}}
+html.atw #app{padding:46px 46px 40px}
+html.atw #bg::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% -10%,rgba(200,50,40,.28),rgba(70,12,14,.5) 55%,rgba(18,4,6,.72));animation:twBgIn 2.5s ease both}
+@keyframes twBgIn{from{opacity:0}}
+#twtrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--sf:30px}
+html.atw #twtrim{display:block}
+.tside{position:absolute;left:0;top:0;width:100vw;height:var(--sf);transform-origin:0 0;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))}
+.tside.tR{left:100vw;width:100vh;transform:rotate(90deg)}
+.tside.tB{left:100vw;top:100vh;transform:rotate(180deg)}
+.tside.tL{top:100vh;width:100vh;transform:rotate(270deg)}
+.tknit{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='30'%3E%3Crect width='16' height='30' fill='%235e0915'/%3E%3Cg fill='%23b3192f' stroke='%23720b1c' stroke-width='.6'%3E%3Cellipse cx='4.6' cy='5' rx='2.7' ry='4.6' transform='rotate(-32 4.6 5)'/%3E%3Cellipse cx='11.4' cy='5' rx='2.7' ry='4.6' transform='rotate(32 11.4 5)'/%3E%3Cellipse cx='4.6' cy='15' rx='2.7' ry='4.6' transform='rotate(-32 4.6 15)'/%3E%3Cellipse cx='11.4' cy='15' rx='2.7' ry='4.6' transform='rotate(32 11.4 15)'/%3E%3Cellipse cx='4.6' cy='25' rx='2.7' ry='4.6' transform='rotate(-32 4.6 25)'/%3E%3Cellipse cx='11.4' cy='25' rx='2.7' ry='4.6' transform='rotate(32 11.4 25)'/%3E%3C/g%3E%3Cg fill='%23e0445a' opacity='.55'%3E%3Cellipse cx='3.6' cy='3.6' rx='.9' ry='2' transform='rotate(-32 3.6 3.6)'/%3E%3Cellipse cx='10.6' cy='3.6' rx='.9' ry='2' transform='rotate(32 10.6 3.6)'/%3E%3Cellipse cx='3.6' cy='13.6' rx='.9' ry='2' transform='rotate(-32 3.6 13.6)'/%3E%3Cellipse cx='10.6' cy='13.6' rx='.9' ry='2' transform='rotate(32 10.6 13.6)'/%3E%3Cellipse cx='3.6' cy='23.6' rx='.9' ry='2' transform='rotate(-32 3.6 23.6)'/%3E%3Cellipse cx='10.6' cy='23.6' rx='.9' ry='2' transform='rotate(32 10.6 23.6)'/%3E%3C/g%3E%3C/svg%3E") repeat-x}
+.tR .tknit{background-position:-5px 0}.tB .tknit{background-position:-9px 0}.tL .tknit{background-position:-3px 0}
+/* wool fuzz and a soft shadow on the inside edge */
+.tknit::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,170,170,.18),transparent 30%,transparent 70%,rgba(30,0,4,.5));box-shadow:0 0 3px 1px rgba(200,40,60,.35)}
+.tside::before{content:'';position:absolute;left:0;right:0;bottom:-3px;height:3px;background:repeating-linear-gradient(90deg,rgba(190,35,55,.9) 0 2px,transparent 2px 5px)}
+/* the scarf's ends hang from the top corners: a knotted band and a fringe */
+.tend{position:absolute;top:0;width:58px;height:120px}
+.tend.e1{left:6px}.tend.e2{right:6px}
+.tend b{position:absolute;left:0;right:0;top:calc(var(--sf) - 6px);height:16px;border-radius:5px;background:linear-gradient(180deg,#d42a42,#7d0d1e);box-shadow:0 3px 5px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,190,190,.35)}
+.tend i{position:absolute;left:4px;right:4px;top:calc(var(--sf) + 8px);height:62px;background:repeating-linear-gradient(90deg,#b3192f 0 3px,#7d0d1e 3px 4px,transparent 4px 6px);-webkit-mask:linear-gradient(180deg,#000 70%,transparent);mask:linear-gradient(180deg,#000 70%,transparent);transform-origin:50% 0;animation:twFringe 5.5s ease-in-out infinite}
+.tend.e2 i{animation-delay:-2.2s}
+@keyframes twFringe{0%,100%{transform:skewX(0)}50%{transform:skewX(5deg)}}
+html.twIn .tside{animation:twKnit .55s ease-in-out both}
+html.twIn .tside.tR{animation-delay:.5s}html.twIn .tside.tB{animation-delay:1s}html.twIn .tside.tL{animation-delay:1.5s}
+html.twIn .tend{animation:twDrop .7s cubic-bezier(.3,1.5,.5,1) 2s both}
+@keyframes twKnit{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes twDrop{from{transform:translateY(-120px);opacity:0}}
+#twLeaves{position:fixed;inset:0;width:100vw;height:100vh;z-index:92;pointer-events:none;display:none}
+html.atw #twLeaves,#twLeaves.fade{display:block}
+#twLeaves.fade{transition:opacity 4s;opacity:0}
+/* chapter cards, typed like the pages of a book */
+#twCard{position:fixed;left:50%;top:38%;z-index:93;pointer-events:none;transform:translate(-50%,-50%);text-align:center;padding:22px 46px 20px;border-radius:6px;background:rgba(24,6,9,.74);border:1px solid rgba(255,190,170,.28);box-shadow:0 20px 60px rgba(0,0,0,.6);color:#f6e6d8;font-family:'Special Elite','Courier New',monospace;opacity:0;display:none;min-width:420px}
+#twCard.on{display:block;animation:twCardIn 7.5s ease both}
+#twCard small{display:block;font-size:15px;letter-spacing:.32em;color:#e88b7a}
+#twCard b{display:block;font-weight:400;font-size:46px;margin:6px 0 4px;letter-spacing:.04em}
+#twCard span{display:block;font-family:'Caveat',cursive;font-size:30px;color:#ffc9a8}
+@keyframes twCardIn{0%{opacity:0;transform:translate(-50%,-44%)}12%,82%{opacity:1;transform:translate(-50%,-50%)}100%{opacity:0;transform:translate(-50%,-53%)}}
+/* SING IT */
+#twSing{position:fixed;left:50%;bottom:9vh;z-index:93;pointer-events:none;transform:translateX(-50%);font-family:Bungee;font-size:44px;letter-spacing:.06em;color:#fff;text-shadow:0 0 18px #ff3b5c,0 0 42px #ff3b5c;display:none}
+#twSing.on{display:block;animation:twSing 1.1s ease-in-out infinite}
+@keyframes twSing{50%{transform:translateX(-50%) scale(1.08);text-shadow:0 0 26px #ff7088,0 0 60px #ff3b5c}}
+/* the cover becomes a Polaroid that slowly fades, like an old memory */
+html.atw .npArt{border-radius:3px;background:#f5efe3;padding:9px 9px 34px;box-sizing:border-box;transform:rotate(-2.5deg);box-shadow:0 18px 40px rgba(0,0,0,.6),0 0 30px rgba(220,60,60,.3)}
+html.atw .npArt img{border-radius:1px;filter:sepia(var(--twFade,0)) saturate(calc(1 - var(--twFade,0)*.5)) brightness(calc(1 + var(--twFade,0)*.12));transition:filter 3s}
+html.atw .npArt::after{content:'all too well \2661';position:absolute;left:0;right:0;bottom:3px;text-align:center;font-family:'Caveat',cursive;font-size:22px;color:#6b2a2a}
+/* Heartbreak-o-Meter */
+.twMeter{display:none}
+html.atw .twMeter[data-on]{display:block;background:rgba(50,8,14,.5);border-color:rgba(255,150,150,.4)}
+.twMeter small{color:#ff9a9a}
+.twMeter .ymBar i{background:linear-gradient(90deg,#ffb24a,#e0445a,#8c0f24)}
+.twMeter b{color:#ffd0c4}
+.twMeter.sing b{color:#fff;text-shadow:0 0 10px #ff3b5c}
+/* the scarf left behind after the song */
+#twKeep{position:fixed;left:14px;bottom:12px;z-index:95;width:62px;height:46px;border:0;padding:0;background:none;display:none;cursor:pointer;filter:drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+#twKeep.on{display:block;animation:twKeepIn 1.6s ease both}
+#twKeep.wink{animation:twWink .7s ease}
+#twKeep svg{width:100%;height:100%}
+@keyframes twKeepIn{from{opacity:0;transform:translateY(20px)}}
+@keyframes twWink{30%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}}
+html.remote #twKeep,html.remote .atwBtn{display:none!important}
+@media (prefers-reduced-motion:reduce){.tend i,#twSing.on,.atwBtn.ask{animation:none}}
 #sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(600px,70vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 6px rgba(255,230,170,.45)) drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sleigh svg{width:100%;height:auto;display:block}
 #sleigh .deer{animation:deerBob .9s ease-in-out infinite}#sleigh .d2{animation-delay:-.22s}#sleigh .d3{animation-delay:-.45s}#sleigh .d4{animation-delay:-.67s}
@@ -1391,6 +1456,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
   <button class="xmasBtn" id="xmasBtn" aria-label="Christmas Mode" style="display:none"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 2l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#ffd23f"/><path d="M16 11l7 9h-3.5l6 8H19l3 4H10l3-4H5.5l6-8H8z" fill="#1fbf5a"/><rect x="14" y="32" width="4" height="4" rx="1" fill="#8b5a2b"/><circle cx="13" cy="20" r="1.4" fill="#ff3b3b"/><circle cx="19" cy="24" r="1.4" fill="#ffd23f"/><circle cx="12.5" cy="28" r="1.4" fill="#3bb7ff"/><circle cx="20" cy="29" r="1.4" fill="#ff3b3b"/></svg><span id="xmasDays"></span></button>
   <button class="xmasBtn efzBtn" id="efzBtn" aria-label="Edmund Fitzgerald memorial" style="display:none"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2a3 3 0 0 1 3 3v1.4c6.2 1.4 10 6.8 10 14.6v8.5l4 5.5H3l4-5.5V21c0-7.8 3.8-13.2 10-14.6V5a3 3 0 0 1 3-3z" fill="#e8c26a" stroke="#7a5a1c" stroke-width="1.2"/><path d="M9 31h22" stroke="#7a5a1c" stroke-width="1.2"/><circle cx="20" cy="39.5" r="3.6" fill="#c99a3a" stroke="#7a5a1c" stroke-width="1"/><path d="M13 12c1.5-2.5 3.5-3.6 5.5-4" stroke="#fff6d8" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/></svg><span>Fitz</span></button>
   <button class="xmasBtn yachtBtn" id="yachtBtn" aria-label="Yacht Mode" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4v26" stroke="#e8d7b8" stroke-width="2"/><path d="M21.5 6c7 5 11 12 12 20H21.5z" fill="#fff"/><path d="M18.5 10c-5 5-8 10-9 16h9z" fill="#f2e9d6"/><path d="M5 29h30l-4 7H9z" fill="#ff7a4a"/><path d="M2 38c6-2 10 1 16-1s10-2 20 0" stroke="#5fd3e6" stroke-width="2" fill="none"/></svg><span>Yacht</span></button>
+  <button class="xmasBtn atwBtn" id="atwBtn" aria-label="All Too Well (10 Minute Version)" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 8c6-3 20-3 26 0l-2 7c-6-2.5-16-2.5-22 0z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M24 13l5 1-4 17-6-1z" fill="#a8172a" stroke="#6e0a19" stroke-width="1"/><path d="M12 14l5-1 1 16-6 1z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M12.5 30v6M14.5 30v6.5M16.5 29.5v6M19.5 30.5v6M21.5 31v6M23.5 31v5.5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 10.5c5-1.6 15-1.6 20 0" stroke="#ff8a8a" stroke-width=".9" fill="none" opacity=".6"/></svg><span>10:13</span></button>
   <div class="clock" id="clock"></div>
   <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
   <button class="iconBtn" id="mbBtn" aria-label="Mirrorball" data-icon="mball" style="display:none"></button>
@@ -1420,6 +1486,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
     <div class="npTitle" id="npTitle"></div>
     <div class="npArtist" id="npArtist"></div>
     <div class="ymMeter" id="ymMeter"><small>SMOOTH-O-METER</small><div class="ymBar"><i></i></div><b></b></div>
+    <div class="ymMeter twMeter" id="twMeter"><small>HEARTBREAK-O-METER</small><div class="ymBar"><i></i></div><b></b></div>
     <div class="npTicker" id="npTicker"><div class="tkBadge" id="tkBadge"></div><div class="tkWin"><div class="tkTrack" id="tkTrack"></div></div></div>
     <button class="houseBtn" id="houseBtn" data-icon="sparkle" style="display:none"><span>Start House Mix</span></button>
     <canvas id="viz"></canvas>
@@ -1501,7 +1568,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 
 <div class="modal about" id="aboutModal"><div class="sheet card">
  <div class="sHead"><h2>About GriffTunes <small class="abVer">v1.1</small></h2><button class="closeBtn static" data-close aria-label="Close" data-icon="close"></button></div>
- <nav class="abToc" id="abToc"><button data-ab="ab-welcome">Welcome</button><button data-ab="ab-setup">The setup</button><button data-ab="ab-play">Playing music</button><button data-ab="ab-radio">Radio</button><button data-ab="ab-countdown">Countdowns</button><button data-ab="ab-grad">Grad Year</button><button data-ab="ab-facts">Fun facts</button><button data-ab="ab-screen">Screensavers</button><button data-ab="ab-xmas">Christmas</button><button data-ab="ab-efz">Fitzgerald memorial</button><button data-ab="ab-phones">Phones</button><button data-ab="ab-lights">Lights</button><button data-ab="ab-settings">Settings</button><button data-ab="ab-help">Troubleshooting</button><button data-ab="ab-data">Data sources</button><button data-ab="ab-dev">For developers</button><button data-ab="ab-versions">Versions</button></nav>
+ <nav class="abToc" id="abToc"><button data-ab="ab-welcome">Welcome</button><button data-ab="ab-setup">The setup</button><button data-ab="ab-play">Playing music</button><button data-ab="ab-radio">Radio</button><button data-ab="ab-countdown">Countdowns</button><button data-ab="ab-grad">Grad Year</button><button data-ab="ab-facts">Fun facts</button><button data-ab="ab-screen">Screensavers</button><button data-ab="ab-xmas">Christmas</button><button data-ab="ab-efz">Fitzgerald memorial</button><button data-ab="ab-atw">All Too Well</button><button data-ab="ab-phones">Phones</button><button data-ab="ab-lights">Lights</button><button data-ab="ab-settings">Settings</button><button data-ab="ab-help">Troubleshooting</button><button data-ab="ab-data">Data sources</button><button data-ab="ab-dev">For developers</button><button data-ab="ab-versions">Versions</button></nav>
  <div class="sBody abBody" id="abBody"></div>
 </div></div>
 <div class="modal settings" id="settingsModal"><div class="sheet card">
@@ -1538,6 +1605,11 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 <div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX alpOff" id="alpOff">Radio off</button><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
 <canvas id="snow" aria-hidden="true"></canvas>
+<div id="twtrim" aria-hidden="true"><div class="tside tT"><div class="tknit"></div></div><div class="tside tR"><div class="tknit"></div></div><div class="tside tB"><div class="tknit"></div></div><div class="tside tL"><div class="tknit"></div></div><div class="tend e1"><b></b><i></i></div><div class="tend e2"><b></b><i></i></div></div>
+<canvas id="twLeaves" aria-hidden="true"></canvas>
+<div id="twCard" aria-hidden="true"><small></small><b></b><span></span></div>
+<div id="twSing" aria-hidden="true">SING IT 🎤</div>
+<button id="twKeep" aria-label="A red scarf"><svg viewBox="0 0 62 46" aria-hidden="true"><path d="M6 20c8-6 42-6 50 0v12c-8-5-42-5-50 0z" fill="#b3192f" stroke="#6e0a19" stroke-width="1.2"/><path d="M6 26c8-5 42-5 50 0" stroke="#7d0d1e" stroke-width="1" fill="none"/><path d="M8 22c8-4 38-4 46 0" stroke="#e0445a" stroke-width="1" fill="none" opacity=".6"/><path d="M40 16l8 1 2 20-8 2z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1.1"/><path d="M42.5 39v5M44.5 38.6v5.6M46.5 38.2v5.4M48.5 37.8v5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/></svg></button>
 <div id="ytrim" aria-hidden="true"><div class="yside yT"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yR"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yB"><div class="yplank"></div><div class="yrail"><i></i></div></div><div class="yside yL"><div class="yplank"></div><div class="yrail"><i></i></div></div><div id="yflags"></div><span class="ycorner c1"></span><span class="ycorner c2"></span><span class="ycorner c3"></span><span class="ycorner c4"></span></div>
 
 <div id="sailboat" aria-hidden="true"><svg viewBox="0 0 260 220"><path d="M128 18v150" stroke="#3b2a24" stroke-width="5"/><path d="M134 24c40 30 70 82 78 136H134z" fill="#fbf5ea"/><path d="M134 24c40 30 70 82 78 136H134z" fill="none" stroke="#e6d7bc" stroke-width="2"/><path d="M122 40c-28 32-48 76-54 120h54z" fill="#f3ead8"/><path d="M134 70h74M134 110h66" stroke="#e8dcc4" stroke-width="2"/><path d="M128 18l26 8-26 8z" fill="#ff5a5f"/><path d="M30 168h200l-24 34H50z" fill="#f7f3ec"/><path d="M30 168h200l-4 6H34z" fill="#1d4fa3"/><path d="M44 186h170" stroke="#d65a4a" stroke-width="4"/><circle cx="92" cy="181" r="4" fill="#2a3f5c"/><circle cx="112" cy="181" r="4" fill="#2a3f5c"/><circle cx="132" cy="181" r="4" fill="#2a3f5c"/><path class="wake" d="M0 210c30-10 50 6 80-2s50-12 90-2" stroke="rgba(255,255,255,.7)" stroke-width="4" fill="none" stroke-linecap="round"/></svg></div>
@@ -4226,7 +4298,8 @@ async function asHandle(text,alts,src,pre){
  // so Gemini may take it as a request for that song; said as an announcement (not "play …"), it opens the memorial.
  {const said=String(res.heard||text||''),playish=/^\s*(hey[\s,]+(dj|deejay|dee jay|d j)[\s,]*)?(dj griff[\s,]*)?(please\s+|can you\s+|could you\s+)?(play|put on|queue|add)\b/i;
   if(/gales? of november/i.test(said)&&!playish.test(said))q=Object.assign({},q,{kind:'fitz'});
-  else if(/beginning to look a lot like christmas/i.test(said)&&!playish.test(said))q=Object.assign({},q,{kind:'christmas',target:'on'});}
+  else if(/beginning to look a lot like christmas/i.test(said)&&!playish.test(said))q=Object.assign({},q,{kind:'christmas',target:'on'});
+  else if(/\b(ten|10)[- ]?minute version\b|\b(all )?too well mode\b/i.test(said)||(q.kind==='song'&&/all too well/i.test(q.title)&&/(ten|10)[- ]?min/i.test(q.title+' '+said)))q=Object.assign({},q,{kind:'atw'});}
  const np=P.current;
  if(np&&!P.paused&&q.kind==='song'&&q.title&&songKey(q.title)===songKey(np.name)&&(!q.artist||(!asArtMatch(np.artist,q.artist)&&!asFlat(res.heard).includes(asFlat(afLead(q.artist)))))){
   res.state='already';res.track=np;res.say=`That's “${np.name}”, playing now. To hear a different version, say the artist too.`;return out(res);
@@ -4238,6 +4311,12 @@ async function asHandle(text,alts,src,pre){
   const on=String(q.target||'on').toLowerCase()!=='off';
   if(on&&xmLook()){res.state='other';res.say='Christmas Mode is on. Turn it off first to set sail.';return out(res)}
   await ymSet(on);res.say=on?'⛵ Yacht Mode on · smooth sailing.':'⚓ Docked · Yacht Mode off.';return out(res);
+ }
+ if(q.kind==='atw'){
+  res.q={title:'',artist:''};res.state='control';
+  if(src==='phone'){res.state='other';res.say='Only the jukebox and the couch remote can start that one.';return out(res)}
+  if(xmLook()){res.state='other';res.say='Christmas Mode is on. Turn it off first for All Too Well.';return out(res)}
+  const ok=await twStart();res.say=ok?'🧣 All Too Well (10 Minute Version). Grab a scarf.':"Couldn't start it right now.";return out(res);
  }
  if(q.kind==='mix'){await asMix(q,res,src);return out(res)}
  if(q.kind==='control'){await asControl(q,res,src);return out(res)}
@@ -4590,7 +4669,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.35.10';
+const GT_VERSION='1.36';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4699,7 +4778,7 @@ function openSettings(){
 
  <div class="field"><details class="djSetup hdHelp"><summary>What “Hey DJ” knows · every command</summary>
   <div class="note" style="margin-top:10px">Say “Hey DJ”, pause a beat, then the request. The same words work on the <b>Ask DJ</b> button and from phones (guests’ phones can’t use the controls). Gemini understands looser wording too, like “can you make it louder”.</div>
-  <table class="hdTable"><tr class="hdGrp"><th colspan="2">Songs and albums</th></tr><tr><td>“Play Purple Rain by Prince”</td><td>Adds it to the end of Up Next · 1 credit. Starts right away if the music is paused or stopped, or only the radio, house mix or a countdown is on.</td></tr><tr><td>“…play it next” / “…after this one”</td><td>Puts it at the front of Up Next · 2 credits.</td></tr><tr><td>“…play it now” / “stop this and play…”</td><td>Cuts in right away · 3 credits. A paid song that gets cut off goes back to the front of Up Next.</td></tr><tr><td>“Play the Mase song from the Rugrats soundtrack”</td><td>Describe a song (a movie, a lyric, a scene) and Gemini works out which one.</td></tr><tr><td>“Play the song that goes ‘water so clear you can see to the bottom’”</td><td>Quote some lyrics: it searches Google for them first, then finds the song.</td></tr><tr><td>“Play some Prince”</td><td>Shows a few of that artist’s songs to tap.</td></tr><tr><td>“Play the Alanis Morissette Jagged Little Pill album”</td><td>The whole album · 5 credits (“…now” and “…next” work too).</td></tr><tr class="hdGrp"><th colspan="2">Stations</th></tr><tr><td>“Play the 80s station” (any station)</td><td>Switches to that radio station now · free.</td></tr><tr><td>“Play some 90s country” / “80s pop” / “90s rap” / “current hits” / “yacht rock”</td><td>A made-to-order station from those years and artists · free. Plays until you change stations.</td></tr><tr><td>“Radio off”</td><td>Turns the radio off; the song playing finishes.</td></tr><tr class="hdGrp"><th colspan="2">Controls (jukebox and couch remote; not guests’ phones)</th></tr><tr><td>“Next track” / “skip this song”</td><td>Same as the Skip button.</td></tr><tr><td>“Pause” / “unpause” / “resume”</td><td>Pauses or carries on.</td></tr><tr><td>“Turn it up” / “turn it down”</td><td>Volume ±5 (“a lot” or “way up” is ±15).</td></tr><tr><td>“Volume to 40”</td><td>Sets the volume.</td></tr><tr><td>“Mute” / “unmute”</td><td>Volume to 0 / back to where it was.</td></tr><tr><td>“Clear the queue”</td><td>Empties Up Next right away (no undo).</td></tr><tr><td>“Lights on” / “lights off”</td><td>Same as the Lights window.</td></tr><tr><td>“Speakers on” / “speakers off”</td><td>Switches the Evolve smart plugs.</td></tr><tr><td>“Turn the mirrorball on” / “mirrorball off”</td><td>Switches the mirrorball’s smart plug.</td></tr><tr class="hdGrp"><th colspan="2">Questions and fun</th></tr><tr><td>“What’s playing?” / “who sings this?”</td><td>DJ Griff answers out loud, sometimes with a fact.</td></tr><tr><td>“Roast me”</td><td>About 30 seconds on your music taste (your Spotify + what’s played tonight). Free.</td></tr><tr><td>“Roast Liz” / “roast Carson”</td><td>Roasts that person’s playlists and Liked Songs from the Family tab (nicknames work: Liz finds an Elizabeth).</td></tr><tr><td>“Roast the room” / “roast us”</td><td>Roasts what’s been played in the last few hours.</td></tr><tr class="hdGrp"><th colspan="2">Modes</th></tr><tr><td>“It’s beginning to look a lot like Christmas”</td><td>Christmas Mode on and a Christmas song right away. “Christmas is over” turns it off.</td></tr><tr><td>“The gales of November came early”</td><td>The Edmund Fitzgerald memorial, same as the Fitz button.</td></tr><tr><td>“Set sail” / “let’s get smooth”</td><td>Yacht Mode on and the Yacht Rock station. “Dock the boat” turns both off.</td></tr></table>
+  <table class="hdTable"><tr class="hdGrp"><th colspan="2">Songs and albums</th></tr><tr><td>“Play Purple Rain by Prince”</td><td>Adds it to the end of Up Next · 1 credit. Starts right away if the music is paused or stopped, or only the radio, house mix or a countdown is on.</td></tr><tr><td>“…play it next” / “…after this one”</td><td>Puts it at the front of Up Next · 2 credits.</td></tr><tr><td>“…play it now” / “stop this and play…”</td><td>Cuts in right away · 3 credits. A paid song that gets cut off goes back to the front of Up Next.</td></tr><tr><td>“Play the Mase song from the Rugrats soundtrack”</td><td>Describe a song (a movie, a lyric, a scene) and Gemini works out which one.</td></tr><tr><td>“Play the song that goes ‘water so clear you can see to the bottom’”</td><td>Quote some lyrics: it searches Google for them first, then finds the song.</td></tr><tr><td>“Play some Prince”</td><td>Shows a few of that artist’s songs to tap.</td></tr><tr><td>“Play the Alanis Morissette Jagged Little Pill album”</td><td>The whole album · 5 credits (“…now” and “…next” work too).</td></tr><tr class="hdGrp"><th colspan="2">Stations</th></tr><tr><td>“Play the 80s station” (any station)</td><td>Switches to that radio station now · free.</td></tr><tr><td>“Play some 90s country” / “80s pop” / “90s rap” / “current hits” / “yacht rock”</td><td>A made-to-order station from those years and artists · free. Plays until you change stations.</td></tr><tr><td>“Radio off”</td><td>Turns the radio off; the song playing finishes.</td></tr><tr class="hdGrp"><th colspan="2">Controls (jukebox and couch remote; not guests’ phones)</th></tr><tr><td>“Next track” / “skip this song”</td><td>Same as the Skip button.</td></tr><tr><td>“Pause” / “unpause” / “resume”</td><td>Pauses or carries on.</td></tr><tr><td>“Turn it up” / “turn it down”</td><td>Volume ±5 (“a lot” or “way up” is ±15).</td></tr><tr><td>“Volume to 40”</td><td>Sets the volume.</td></tr><tr><td>“Mute” / “unmute”</td><td>Volume to 0 / back to where it was.</td></tr><tr><td>“Clear the queue”</td><td>Empties Up Next right away (no undo).</td></tr><tr><td>“Lights on” / “lights off”</td><td>Same as the Lights window.</td></tr><tr><td>“Speakers on” / “speakers off”</td><td>Switches the Evolve smart plugs.</td></tr><tr><td>“Turn the mirrorball on” / “mirrorball off”</td><td>Switches the mirrorball’s smart plug.</td></tr><tr class="hdGrp"><th colspan="2">Questions and fun</th></tr><tr><td>“What’s playing?” / “who sings this?”</td><td>DJ Griff answers out loud, sometimes with a fact.</td></tr><tr><td>“Roast me”</td><td>About 30 seconds on your music taste (your Spotify + what’s played tonight). Free.</td></tr><tr><td>“Roast Liz” / “roast Carson”</td><td>Roasts that person’s playlists and Liked Songs from the Family tab (nicknames work: Liz finds an Elizabeth).</td></tr><tr><td>“Roast the room” / “roast us”</td><td>Roasts what’s been played in the last few hours.</td></tr><tr class="hdGrp"><th colspan="2">Modes</th></tr><tr><td>“It’s beginning to look a lot like Christmas”</td><td>Christmas Mode on and a Christmas song right away. “Christmas is over” turns it off.</td></tr><tr><td>“The gales of November came early”</td><td>The Edmund Fitzgerald memorial, same as the Fitz button.</td></tr><tr><td>“Set sail” / “let’s get smooth”</td><td>Yacht Mode on and the Yacht Rock station. “Dock the boat” turns both off.</td></tr><tr><td>“Play the ten minute version” / “All Too Well mode”</td><td>All Too Well (10 Minute Version) right away, with the scarf, leaves and lights · free. Not from guests’ phones.</td></tr></table>
  </details></div>
  <div class="field"><details class="djSetup" id="djSetup"${(!djKey()||DJ.fails)?' open':''}><summary>Setup · keys, WiiM and Firebase</summary>
   <span class="lab" style="margin-top:12px">Voice key · Google Cloud (Text-to-Speech)</span>
@@ -4743,6 +4822,9 @@ function openSettings(){
  <div class="field"><span class="lab">Edmund Fitzgerald memorial</span>
   ${tg('fEfz','Show the ship\'s bell button: Edmund Fitzgerald memorial',S.efz!==false)}
   <div class="note">Puts the ship's bell in the top bar. Tap it for the memorial: the bells, the names and the lights turned blue.</div></div>
+ <div class="field"><span class="lab">🧣 All Too Well (10 Minute Version)</span>
+  ${tg('fAtw','Show the scarf button: All Too Well (10 Minute Version)',S.atwBtn!==false)}
+  <div class="note">Tap the scarf twice (or say “Hey DJ, the ten minute version”) to play it right away. While it plays, from the button or any other way: a red knit scarf around the screen, falling leaves, chapter cards, a fading Polaroid, the Heartbreak-o-Meter and burgundy lights that breathe.</div></div>
  <div class="field"><span class="lab">⛵ Yacht Mode</span>
   ${tg('fYacht','Show the sailboat button: Yacht Mode',S.yachtBtn!==false)}
   ${tg('fYmRoll','Gentle roll: the sea behind the jukebox rocks slowly, like being on a boat',S.ymRoll!==false)}
@@ -4803,6 +4885,7 @@ function openSettings(){
  $('#fEfz').onchange=e=>{S.efz=e.target.checked;saveS();efzRender()};
  $('#fYacht').onchange=e=>{S.yachtBtn=e.target.checked;saveS();ymSync()};
  $('#fYmRoll').onchange=e=>{S.ymRoll=e.target.checked;saveS();ymSync()};
+ $('#fAtw').onchange=e=>{S.atwBtn=e.target.checked;saveS();twRender()};
  $('#fXmas').onchange=e=>{S.xmas=e.target.checked;if(!S.xmas&&XM.active)xmasSet(false);saveS();xmasRender();toast(S.xmas?'Christmas tree added to the top bar. Tap it to start Christmas Mode':'Christmas tree removed from the top bar')};
  $('#fWeekly').onchange=e=>{$('#fWeeklyWhen').style.opacity=e.target.checked?1:.4};$('#fWeeklyWhen').style.opacity=S.weekRefresh?1:.4;
  $('#fSaver').addEventListener('click',e=>{const b=e.target.closest('[data-saver]');if(!b)return;saver=b.dataset.saver;$$('#fSaver button').forEach(x=>x.classList.toggle('on',x===b))});
@@ -5940,7 +6023,7 @@ async function hueMood(){
  const t=P.current||(xmLook()?{id:'xmas-tab',name:'Christmas'}:null),real=P.current;
  if(!t){hueGroup({effect:'none',ct:370,bri:Math.round(hueB()*.6),transitiontime:20});return}
  const st=t.radio&&S.radio&&STATIONS.find(x=>x.name===t.radio);
- let pal=xmLook()?xmasPal(t):ymLook()?yachtPal():st&&S.hueRadio&&STATION_COLORS[st.id]?{cols:STATION_COLORS[st.id].map(c=>({rgb:cssRgb(c),w:1}))}:await artPalette(t);
+ let pal=xmLook()?xmasPal(t):twLook()?twPal():ymLook()?yachtPal():st&&S.hueRadio&&STATION_COLORS[st.id]?{cols:STATION_COLORS[st.id].map(c=>({rgb:cssRgb(c),w:1}))}:await artPalette(t);
  if(pal.fail||(!pal.gray&&!pal.cols.length))pal={cols:['#ff2bd6','#22e4ff'].map(c=>({rgb:cssRgb(c),w:1})),fallback:true};
  if(real!==P.current)return;
  const onIds=await hueOnLights();
@@ -5952,6 +6035,7 @@ async function hueMood(){
  HUE.q=HUE.q.filter(c=>!c.mood);
  const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();
  if(xmLook()){xmasHue(lights,B,t);huePump();return}
+ if(twLook()){twHue(lights,B,t);huePump();return}
  if(ymLook()){yachtHue(lights,B,t);huePump();return}
  const plan=pal.gray?[]:lightPlan(pal.cols,lights.filter(L=>L.kind==='color').length);
  const lead=pal.gray?null:pal.cols[0].rgb,warm=lead?(()=>{const[h]=rgb2hsl(...lead);return h<70||h>290})():true;
@@ -7324,7 +7408,7 @@ function xmasFly(){
 const YM={on:!!store.get('yacht_on',false),look:false,flyT:null,rate:null,rateFor:null,tkFor:null};
 const YACHT=()=>STATIONS.find(x=>x.id==='yacht');
 function ymLook(){
- if(REMOTE||xmLook()||(typeof EF!=='undefined'&&EF.open))return false;
+ if(REMOTE||xmLook()||(typeof EF!=='undefined'&&EF.open)||twLook())return false;
  return YM.on||(!!S.radio&&S.station==='yacht'&&!!P.current);
 }
 function ymSync(){
@@ -7668,6 +7752,7 @@ async function gtHome(){
  try{if(EF.open)efzClose()}catch(e){}
  try{if(XM.active)await xmasSet(false)}catch(e){}
  try{if(YM.on)await ymSet(false)}catch(e){}
+ try{twKeepClear()}catch(e){}
  try{if(AS.on)asStop()}catch(e){}
  try{hideAttract()}catch(e){}
  $$('.modal.open').forEach(closeModal);
@@ -7688,6 +7773,258 @@ async function gtHome(){
 })();
 addEventListener('resize',()=>{clearTimeout(YM.rsT);YM.rsT=setTimeout(()=>{if(YM.look)ymFlags()},300)});
 setInterval(()=>{if(!REMOTE)ymSync()},3000);
+
+/* ---------- 🧣 All Too Well (10 Minute Version) mode ----------
+   On whenever that song plays on the jukebox (the scarf button, "Hey DJ, the ten minute version", or picked any other way),
+   and off when it ends. A red knit scarf frames the screen, maple leaves fall and pile up along the bottom (snow in the last
+   chapter), typewriter chapter cards mark the story, the cover turns into a Polaroid that slowly fades, the Heartbreak-o-Meter
+   climbs, and the Hue lights go burgundy and amber and slowly breathe. The chapter times come from the song's synced lyrics
+   (lrclib, the same as the lyrics screen; only the times are used, nothing is shown); the numbers below are the backup.
+   Christmas and the Fitzgerald memorial win. The mirrorball stays as it is (it's not a party song). When the song plays to
+   the end, a folded red scarf is left in the bottom corner for the rest of the night (8 hours, or until the logo-hold reset). */
+const TW_ID='5enxwA8aAbwZbf5qCHORXi';
+const TW_SONG={id:TW_ID,uri:'spotify:track:'+TW_ID,name:"All Too Well (10 Minute Version) (Taylor's Version) (From The Vault)",artist:'Taylor Swift',album:"Red (Taylor's Version)",img:'',duration:613026,ctx:false};
+const TW_CH=[
+ {id:'autumn',fb:2,name:'Autumn',sub:'a cold night, a warm house'},
+ {id:'upstate',k:/upstate/i,fb:45,name:'Upstate',sub:'the long way, on purpose'},
+ {id:'kitchen',k:/refrigerator/i,fb:70,name:'The Kitchen',sub:'dancing by the open fridge',cue:'fridge'},
+ {id:'21',k:/twenty[- ]?one/i,fb:290,name:'Twenty-One',sub:'he never showed'},
+ {id:'bridge',k:/casually cruel/i,fb:360,name:'The Bridge',sub:'everybody, all together',cue:'sing'},
+ {id:'scarf',k:/scarf/i,last:true,fb:470,name:'The Scarf',sub:'some things you keep'},
+ {id:'snow',k:/snow/i,fb:545,name:'First Snow',sub:'years later',cue:'snow'}
+];
+const TW_ROMAN=['I','II','III','IV','V','VI','VII','VIII'];
+const TWHUE=['#8c0f24','#c21d2e','#ff7a26','#b8461b','#ffb24a'],TWSNOW=['#cfe0ff','#9fb8e8','#f2f4ff'];
+const TW={look:false,for:null,ch:null,ci:-1,max:0,sing:false,snow:false,cue:null,breathT:0,breathHi:false,askT:null,cardT:null};
+function twIs(t){
+ if(!t)return false;
+ if(t.id===TW_ID||t.id===store.get('atw_id',null))return true;
+ const n=String(t.name||'');
+ return /all too well/i.test(n)&&/10[- ]?min/i.test(n)&&/taylor swift/i.test(String(t.artist||''));
+}
+function twLook(){
+ if(REMOTE||xmLook()||(typeof EF!=='undefined'&&EF.open))return false;
+ return twIs(P.current);
+}
+const twCalm=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+function twSecs(){return P.current?Math.max(0,(P.pos||0)/1000):0}
+function twDur(){return Math.max(60,((P.dur||(P.current&&P.current.duration)||613026)/1000))}
+// the scarf button: tap once to ask, again within 4 s to play all 10:13 of it
+function twRender(){
+ const b=$('#atwBtn');if(!b)return;
+ b.style.display=!REMOTE&&S.atwBtn!==false?'':'none';b.classList.toggle('on',TW.look);
+}
+function twTap(){
+ const b=$('#atwBtn');sfx('tick');
+ if(TW.look){toast('🧣 Already playing. All ten minutes of it.');return}
+ if(!b.classList.contains('ask')){
+  b.classList.add('ask');b.querySelector('span').textContent='Play?';
+  clearTimeout(TW.askT);TW.askT=setTimeout(()=>{b.classList.remove('ask');b.querySelector('span').textContent='10:13'},4000);
+  return;
+ }
+ clearTimeout(TW.askT);b.classList.remove('ask');b.querySelector('span').textContent='10:13';
+ twStart();
+}
+async function twStart(){
+ if(REMOTE)return false;
+ if(xmLook()){toast('Christmas Mode is on. Turn it off first for All Too Well.','warn');return false}
+ if(EF.open)return false;
+ if(twIs(P.current)){toast('🧣 Already playing. All ten minutes of it.');return true}
+ hideAttract();sfx('coin');
+ if(P.current&&P.current.cd&&CD.active)CD.idx=Math.max(0,CD.idx-1);
+ // a song paid for and cut off goes back to the front of the line
+ if(P.current&&!P.current.house&&!P.current.radio&&!P.current.cd&&!P.current.efz&&!P.current.xmas){P.queue.unshift(Object.assign({},P.current));saveQueue();renderQueue()}
+ const t=Object.assign({},TW_SONG);try{await asCover(t)}catch(e){}
+ await startTrack(t);
+ toast('🧣 All Too Well (10 Minute Version). Grab a scarf.');
+ return true;
+}
+// chapter times: from the synced lyrics when lrclib has them, otherwise the backup numbers
+async function twCues(t){
+ const ch=TW_CH.map(c=>Object.assign({},c,{at:c.fb}));TW.ch=ch;
+ try{
+  const d=await lyrFetch(t);
+  if(TW.for!==t.id||!d||!d.synced)return;
+  const L=d.synced;let n=0;
+  for(const c of ch){
+   if(!c.k)continue;
+   const hits=L.filter(x=>c.k.test(x.text));if(!hits.length)continue;
+   c.at=Math.max(1,(c.last?hits[hits.length-1]:hits[0]).t/1000-1);n++;
+  }
+  ch.sort((a,b)=>a.at-b.at);
+  console.info('[GriffTunes All Too Well] chapter times from synced lyrics:',n,ch.map(c=>c.id+'@'+Math.round(c.at)).join(' '));
+ }catch(e){}
+ ch.sort((a,b)=>a.at-b.at);
+}
+function twCard(i){
+ const c=TW.ch[i],el=$('#twCard');if(!c||!el)return;
+ el.querySelector('small').textContent='CHAPTER '+TW_ROMAN[i];
+ el.querySelector('b').textContent=c.name;el.querySelector('span').textContent=c.sub;
+ el.classList.remove('on');void el.offsetWidth;el.classList.add('on');
+ clearTimeout(TW.cardT);TW.cardT=setTimeout(()=>el.classList.remove('on'),7600);
+}
+// the Heartbreak-o-Meter climbs over the whole song
+function twMeter(sec){
+ const el=$('#twMeter');if(!el)return;
+ if(sec==null){el.removeAttribute('data-on');return}
+ const f=Math.min(1,sec/twDur());let v=Math.round(12+80*Math.pow(f,.8)),lab;
+ if(TW.sing){v=100;lab='SING IT 🎤'}
+ else if(TW.snow){v=Math.max(v,97);lab='Devastated'}
+ else lab=v<30?'Mild ache':v<55?'Sad girl autumn':v<75?'Full scarf':v<90?'Ugly crying':'Devastated';
+ el.setAttribute('data-on','1');el.classList.toggle('sing',TW.sing);
+ el.querySelector('i').style.width=Math.min(100,v)+'%';
+ el.querySelector('b').textContent=`${lab} · ${Math.min(100,v)}%`;
+}
+/* lights: burgundy, red, amber, rust and candle gold that slowly breathe; a cool white flash of open-fridge light in the
+   kitchen; full brightness for the bridge; pale winter blue for the last chapter. Never off. */
+const twPal=()=>({cols:(TW.snow?TWSNOW:TWHUE).map(c=>({rgb:cssRgb(c),w:1}))});
+function twHue(lights,B,t){
+ const pal=TW.snow?TWSNOW:TWHUE,cl=lights.filter(L=>L.kind==='color'),col=Math.max(1,Math.round(B*(TW.snow?.38:.62))),glow=Math.max(1,Math.round(B*.25));
+ HUE.last={song:t.name,gray:false,fallback:false,colors:pal.map(c=>({rgb:cssRgb(c),share:1})),lights:[]};renderLightSwatch();
+ const order=shuffle(cl.slice());
+ lights.forEach(L=>{
+  let body;
+  if(L.kind==='color'){const rgb=cssRgb(pal[order.indexOf(L)%pal.length]);body={effect:'none',xy:rgbToXy(...rgb),bri:col,transitiontime:40};HUE.last.lights.push({name:L.name,rgb})}
+  else if(L.kind==='ct')body={ct:TW.snow?250:454,bri:glow,transitiontime:40};
+  else body={bri:glow,transitiontime:40};
+  HUE.q.push({path:`/lights/${L.id}/state`,body,gap:120,mood:true});
+ });
+}
+const twHueOk=()=>hueOn()&&S.hueMode==='auto'&&!HUE.dim;
+function twGroup(body){HUE.q=HUE.q.filter(c=>!c.twb);HUE.q.push({path:`/groups/${S.hue.cmdGroup||S.hue.group}/action`,body,gap:1000,group:true,mood:true,twb:true});huePump()}
+function twBreathe(){
+ if(!twHueOk()||TW.cue)return;
+ const now=Date.now();if(now-TW.breathT<6500)return;TW.breathT=now;
+ TW.breathHi=!TW.breathHi;const B=hueB();
+ twGroup({bri:Math.max(8,Math.round(B*(TW.snow?(TW.breathHi?.4:.22):(TW.breathHi?.7:.4)))),transitiontime:60});
+}
+function twCue(kind){
+ if(!twHueOk())return;
+ TW.cue=kind;const B=hueB();
+ if(kind==='fridge')twGroup({effect:'none',ct:153,bri:Math.round(B*.85),transitiontime:6});
+ else if(kind==='sing')twGroup({bri:B,transitiontime:15});
+}
+function twCueEnd(){if(!TW.cue)return;TW.cue=null;TW.breathT=Date.now();if(twHueOk())hueMood()}
+/* falling leaves: drawn ahead of time into small sprites; at most 22 in the air and 70 on the ground, ~30 frames a second,
+   asleep when the tab is hidden. In the snow chapter the new ones are snowflakes. */
+const TWL={cv:null,cx:null,raf:0,last:0,air:[],pile:[],spr:null,W:0,H:0,stop:false};
+function twSprites(){
+ if(TWL.spr)return TWL.spr;
+ const cols=['#c21d2e','#e0442a','#ff7a26','#b8461b','#ffb24a','#8c0f24'],out=[];
+ for(const c of cols)for(let s=0;s<2;s++){
+  const cv=document.createElement('canvas');cv.width=cv.height=56;const x=cv.getContext('2d');x.translate(28,28);
+  x.fillStyle=c;x.strokeStyle='rgba(60,10,10,.55)';x.lineWidth=1.2;x.beginPath();
+  if(s===0){ // maple
+   const pts=[[0,-24],[5,-12],[14,-16],[11,-5],[22,-4],[16,4],[19,12],[7,9],[3,17],[0,12],[-3,17],[-7,9],[-19,12],[-16,4],[-22,-4],[-11,-5],[-14,-16],[-5,-12]];
+   pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b));
+  }else{ // oval leaf
+   x.moveTo(0,-22);x.quadraticCurveTo(15,-6,0,18);x.quadraticCurveTo(-15,-6,0,-22);
+  }
+  x.closePath();x.fill();x.stroke();
+  x.strokeStyle='rgba(70,15,10,.6)';x.beginPath();x.moveTo(0,-18);x.lineTo(0,24);x.stroke();
+  out.push(cv);
+ }
+ return TWL.spr=out;
+}
+function twLeavesSize(){const cv=TWL.cv,d=Math.min(1.5,devicePixelRatio||1);TWL.W=innerWidth;TWL.H=innerHeight;cv.width=Math.round(TWL.W*d);cv.height=Math.round(TWL.H*d);TWL.cx.setTransform(d,0,0,d,0,0)}
+function twLeaf(top){
+ const snow=TW.snow;
+ return{x:Math.random()*TWL.W,y:top?Math.random()*TWL.H*.85-TWL.H*.3:-40,s:snow?2+Math.random()*3.5:.5+Math.random()*.45,vy:snow?28+Math.random()*30:40+Math.random()*45,
+  sw:20+Math.random()*50,ph:Math.random()*6.3,fr:.6+Math.random()*1.1,r:Math.random()*6.3,vr:(Math.random()-.5)*2.4,spr:Math.floor(Math.random()*12),snow};
+}
+function twLeavesStart(){
+ const cv=$('#twLeaves');if(!cv)return;cv.classList.remove('fade');cv.style.opacity='';
+ TWL.cv=cv;TWL.cx=cv.getContext('2d');twLeavesSize();twSprites();TWL.stop=false;
+ TWL.air=[];TWL.pile=[];const n=twCalm()?6:22;for(let i=0;i<n;i++)TWL.air.push(twLeaf(true));
+ if(!TWL.raf){TWL.last=0;TWL.raf=requestAnimationFrame(twLeavesFrame)}
+}
+function twLeavesStop(){
+ const cv=$('#twLeaves');if(!cv)return;
+ TWL.stop=true;cv.classList.add('fade');
+ setTimeout(()=>{if(TW.look)return;cancelAnimationFrame(TWL.raf);TWL.raf=0;cv.classList.remove('fade');if(TWL.cx)TWL.cx.clearRect(0,0,TWL.W,TWL.H);TWL.air=[];TWL.pile=[]},4200);
+}
+function twLeavesFrame(ts){
+ TWL.raf=requestAnimationFrame(twLeavesFrame);
+ if(document.hidden)return;
+ if(TWL.last&&ts-TWL.last<33)return;
+ const dt=TWL.last?Math.min(.1,(ts-TWL.last)/1000):.033;TWL.last=ts;
+ if(TWL.W!==innerWidth||TWL.H!==innerHeight)twLeavesSize();
+ const x=TWL.cx,W=TWL.W,H=TWL.H,floor=H-28,calm=twCalm();x.clearRect(0,0,W,H);
+ for(const p of TWL.pile){x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=.9;x.drawImage(TWL.spr[p.spr],-28*p.s,-28*p.s,56*p.s,56*p.s);x.restore()}
+ x.globalAlpha=1;
+ for(let i=TWL.air.length-1;i>=0;i--){
+  const p=TWL.air[i];p.ph+=p.fr*dt;p.y+=p.vy*dt;p.r+=p.vr*dt;
+  const px=p.x+(calm?0:Math.sin(p.ph)*p.sw);
+  if(p.snow){x.fillStyle='rgba(240,246,255,.85)';x.beginPath();x.arc(px,p.y,p.s,0,6.283);x.fill()}
+  else{x.save();x.translate(px,p.y);x.rotate(p.r);x.scale(Math.cos(p.ph*1.3)*.35+.65,1);x.drawImage(TWL.spr[p.spr],-28*p.s,-28*p.s,56*p.s,56*p.s);x.restore()}
+  const land=floor-Math.random()*10;
+  if(p.y>land){
+   TWL.air.splice(i,1);
+   if(!p.snow){TWL.pile.push({x:px,y:land+4,r:p.r,s:p.s,spr:p.spr});if(TWL.pile.length>70)TWL.pile.shift()}
+   if(!TWL.stop)TWL.air.push(twLeaf(false));
+  }
+ }
+}
+function twIntro(){const h=document.documentElement;h.classList.remove('twIn');void h.offsetWidth;h.classList.add('twIn');clearTimeout(TW.inT);TW.inT=setTimeout(()=>h.classList.remove('twIn'),3000)}
+function twBegin(){
+ const t=P.current;TW.for=t.id;TW.ci=-1;TW.max=0;TW.sing=false;TW.snow=false;TW.cue=null;TW.breathT=Date.now();
+ if(t.id!==TW_ID&&t.id&&t.id!==store.get('atw_id',null))store.set('atw_id',t.id);
+ twCues(t);twIntro();twLeavesStart();twKeepRender();
+}
+function twEnd(){
+ const done=TW.max>=.93;
+ TW.for=null;TW.sing=false;TW.cue=null;
+ twLeavesStop();twMeter(null);$('#twSing').classList.remove('on');
+ document.documentElement.style.removeProperty('--twFade');
+ if(done){store.set('atw_keep',Date.now());setTimeout(()=>{twKeepRender();toast('🧣 Tissues are on the house.')},1500)}
+}
+function twFrame(){
+ const sec=twSecs(),f=Math.min(1,sec/twDur());TW.max=Math.max(TW.max,f);
+ document.documentElement.style.setProperty('--twFade',Math.min(.55,f*.6).toFixed(3));
+ const ch=TW.ch||TW_CH.map(c=>Object.assign({},c,{at:c.fb}));
+ let i=-1;ch.forEach((c,k)=>{if(sec>=c.at)i=k});
+ if(i!==TW.ci){
+  const was=TW.ci;TW.ci=i;
+  if(i>=0&&(was>=0||sec-ch[i].at<25))twCard(i);   // joining partway through shows the chapter it's in, unless it's long past
+ }
+ // the cues
+ const at=id=>{const c=ch.find(x=>x.id===id);return c?c.at:1e9};
+ const kitchen=at('kitchen'),bridge=at('bridge'),snow=at('snow');
+ const sing=!P.paused&&sec>=bridge&&sec<bridge+32;
+ if(sing!==TW.sing){TW.sing=sing;$('#twSing').classList.toggle('on',sing);if(sing)twCue('sing');else if(TW.cue==='sing')twCueEnd()}
+ if(!P.paused&&sec>=kitchen&&sec<kitchen+8){if(TW.cue!=='fridge')twCue('fridge')}else if(TW.cue==='fridge')twCueEnd();
+ const sn=sec>=snow;
+ if(sn!==TW.snow){TW.snow=sn;if(twHueOk())hueMood()}
+ twMeter(sec);twBreathe();
+}
+// the folded scarf left in the corner
+function twKeepRender(){
+ const b=$('#twKeep');if(!b)return;
+ const at=store.get('atw_keep',0),on=!REMOTE&&!TW.look&&at&&Date.now()-at<8*3600e3;
+ if(!on&&at&&Date.now()-at>=8*3600e3)store.del('atw_keep');
+ b.classList.toggle('on',!!on);
+}
+function twKeepClear(){store.del('atw_keep');twKeepRender()}
+function twSync(){
+ if(REMOTE)return;
+ twRender();
+ const on=twLook();
+ document.documentElement.classList.toggle('atw',on);
+ if(on&&P.current&&TW.for&&P.current.id!==TW.for){twEnd();TW.look=false}   // a different version started right after
+ if(on!==TW.look){
+  TW.look=on;
+  if(on)twBegin();else twEnd();
+  twRender();twKeepRender();
+  try{hueTrack()}catch(e){}
+  try{ymSync()}catch(e){}
+ }
+ if(on)twFrame();
+}
+if(!REMOTE){
+ $('#atwBtn').onclick=twTap;
+ $('#twKeep').onclick=()=>{const b=$('#twKeep');sfx('tick');b.classList.remove('wink');void b.offsetWidth;b.classList.add('wink');toast(['🧣 Some things you keep.','🧣 It still smells like autumn.','🧣 Finders keepers.'][Math.floor(Math.random()*3)])};
+ setInterval(twSync,1000);setTimeout(()=>{twRender();twKeepRender()},500);
+}
 
 // Winter paintings for the screensaver while Christmas Mode is on
 const XART={list:[],loading:null};
