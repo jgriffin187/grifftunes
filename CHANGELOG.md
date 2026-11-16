@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.37.1 — November 16, 2026
+
+- **Back to normal (hold the logo 3 s) now ends All Too Well mode.** The mode lasts as long as the song, so the reset skips to the next song (Up Next, the radio or the house mix): the scarf, leaves, lights and bridge takeover all go away, and no leftover scarf is put in the corner.
+
 ## 1.37 — November 16, 2026
 
 - **All Too Well: the bridge sing-along.** For just the bridge, the whole screen (inside the scarf) turns into karaoke:

@@ -4715,7 +4715,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.37';
+const GT_VERSION='1.37.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7801,6 +7801,8 @@ async function gtHome(){
  try{if(XM.active)await xmasSet(false)}catch(e){}
  try{if(YM.on)await ymSet(false)}catch(e){}
  try{twKeepClear()}catch(e){}
+ // All Too Well mode lives as long as its song does, so the reset moves on to the next song (Up Next, the radio or the house mix)
+ try{if(twIs(P.current)){TW.max=0;await advance();twSync()}}catch(e){}
  try{if(AS.on)asStop()}catch(e){}
  try{hideAttract()}catch(e){}
  $$('.modal.open').forEach(closeModal);
