@@ -741,37 +741,44 @@ html.yacht .ymMeter[data-on],html.yachtlite .ymMeter[data-on]{display:block}
 html.yacht #npTicker .tkBadge,html.yacht #gTkBadge,html.yacht #dkTkBadge{background:#1d4fa3;color:#fff;box-shadow:inset 0 0 0 3px #f4efe6,inset 0 0 0 5px #1d4fa3,inset 0 0 0 6px #ff5a5f}
 .yachtBtn svg{filter:drop-shadow(0 0 6px rgba(255,170,90,.55))}
 .yachtBtn.on{background:rgba(255,140,70,.18);border-color:rgba(255,170,90,.6);box-shadow:0 0 16px rgba(255,140,70,.35)}
+.sbTxt{min-width:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left}
+.searchBtn{min-width:0}
 /* 🧣 All Too Well (10 Minute Version) mode: a red knit scarf frame, falling leaves, chapter cards, a Polaroid, burgundy lights */
 .atwBtn svg{filter:drop-shadow(0 0 6px rgba(230,60,70,.55))}
 .atwBtn.on{background:rgba(200,30,50,.2);border-color:rgba(255,120,120,.6);box-shadow:0 0 16px rgba(220,40,60,.4)}
 .atwBtn.ask{background:rgba(200,30,50,.32);border-color:#ff8a8a;animation:twAsk 1s ease-in-out infinite}
 @keyframes twAsk{50%{box-shadow:0 0 22px rgba(255,90,90,.75)}}
-html.atw #app{padding:46px 46px 40px}
+html.atw #app{padding:34px 36px 32px}
 html.atw #bg::after{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% -10%,rgba(200,50,40,.28),rgba(70,12,14,.5) 55%,rgba(18,4,6,.72));animation:twBgIn 2.5s ease both}
 @keyframes twBgIn{from{opacity:0}}
-#twtrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--sf:30px}
+#twtrim{position:fixed;inset:0;z-index:94;pointer-events:none;display:none;--sf:28px}
 html.atw #twtrim{display:block}
-.tside{position:absolute;left:0;top:0;width:100vw;height:var(--sf);transform-origin:0 0;filter:drop-shadow(0 3px 4px rgba(0,0,0,.55))}
+.tside{position:absolute;left:0;top:0;width:100vw;height:var(--sf);transform-origin:0 0;filter:drop-shadow(0 4px 5px rgba(0,0,0,.6))}
 .tside.tR{left:100vw;width:100vh;transform:rotate(90deg)}
 .tside.tB{left:100vw;top:100vh;transform:rotate(180deg)}
 .tside.tL{top:100vh;width:100vh;transform:rotate(270deg)}
-.tknit{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='30'%3E%3Crect width='16' height='30' fill='%235e0915'/%3E%3Cg fill='%23b3192f' stroke='%23720b1c' stroke-width='.6'%3E%3Cellipse cx='4.6' cy='5' rx='2.7' ry='4.6' transform='rotate(-32 4.6 5)'/%3E%3Cellipse cx='11.4' cy='5' rx='2.7' ry='4.6' transform='rotate(32 11.4 5)'/%3E%3Cellipse cx='4.6' cy='15' rx='2.7' ry='4.6' transform='rotate(-32 4.6 15)'/%3E%3Cellipse cx='11.4' cy='15' rx='2.7' ry='4.6' transform='rotate(32 11.4 15)'/%3E%3Cellipse cx='4.6' cy='25' rx='2.7' ry='4.6' transform='rotate(-32 4.6 25)'/%3E%3Cellipse cx='11.4' cy='25' rx='2.7' ry='4.6' transform='rotate(32 11.4 25)'/%3E%3C/g%3E%3Cg fill='%23e0445a' opacity='.55'%3E%3Cellipse cx='3.6' cy='3.6' rx='.9' ry='2' transform='rotate(-32 3.6 3.6)'/%3E%3Cellipse cx='10.6' cy='3.6' rx='.9' ry='2' transform='rotate(32 10.6 3.6)'/%3E%3Cellipse cx='3.6' cy='13.6' rx='.9' ry='2' transform='rotate(-32 3.6 13.6)'/%3E%3Cellipse cx='10.6' cy='13.6' rx='.9' ry='2' transform='rotate(32 10.6 13.6)'/%3E%3Cellipse cx='3.6' cy='23.6' rx='.9' ry='2' transform='rotate(-32 3.6 23.6)'/%3E%3Cellipse cx='10.6' cy='23.6' rx='.9' ry='2' transform='rotate(32 10.6 23.6)'/%3E%3C/g%3E%3C/svg%3E") repeat-x}
-.tR .tknit{background-position:-5px 0}.tB .tknit{background-position:-9px 0}.tL .tknit{background-position:-3px 0}
-/* wool fuzz and a soft shadow on the inside edge */
-.tknit::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,170,170,.18),transparent 30%,transparent 70%,rgba(30,0,4,.5));box-shadow:0 0 3px 1px rgba(200,40,60,.35)}
-.tside::before{content:'';position:absolute;left:0;right:0;bottom:-3px;height:3px;background:repeating-linear-gradient(90deg,rgba(190,35,55,.9) 0 2px,transparent 2px 5px)}
-/* the scarf's ends hang from the top corners: a knotted band and a fringe */
-.tend{position:absolute;top:0;width:58px;height:120px}
-.tend.e1{left:6px}.tend.e2{right:6px}
-.tend b{position:absolute;left:0;right:0;top:calc(var(--sf) - 6px);height:16px;border-radius:5px;background:linear-gradient(180deg,#d42a42,#7d0d1e);box-shadow:0 3px 5px rgba(0,0,0,.5),inset 0 2px 0 rgba(255,190,190,.35)}
-.tend i{position:absolute;left:4px;right:4px;top:calc(var(--sf) + 8px);height:62px;background:repeating-linear-gradient(90deg,#b3192f 0 3px,#7d0d1e 3px 4px,transparent 4px 6px);-webkit-mask:linear-gradient(180deg,#000 70%,transparent);mask:linear-gradient(180deg,#000 70%,transparent);transform-origin:50% 0;animation:twFringe 5.5s ease-in-out infinite}
-.tend.e2 i{animation-delay:-2.2s}
-@keyframes twFringe{0%,100%{transform:skewX(0)}50%{transform:skewX(5deg)}}
+/* chunky stockinette: one column of V stitches per 12 px, four rows across the band */
+.tknit{position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='14'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23d8324a'/%3E%3Cstop offset='.55' stop-color='%23b1182e'/%3E%3Cstop offset='1' stop-color='%23800f20'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='12' height='14' fill='%233d040c'/%3E%3Cg id='r'%3E%3Cellipse cx='3.5' cy='4.2' rx='2.75' ry='4.9' transform='rotate(-36 3.5 4.2)' fill='url(%23g)'/%3E%3Cellipse cx='8.5' cy='4.2' rx='2.75' ry='4.9' transform='rotate(36 8.5 4.2)' fill='url(%23g)'/%3E%3Cpath d='M2.2 1.6q1.2 1.6 2.6 3.2M9.8 1.6q-1.2 1.6-2.6 3.2' stroke='%23f07a88' stroke-width='.7' fill='none' opacity='.55'/%3E%3C/g%3E%3Cuse href='%23r' y='7'/%3E%3Cuse href='%23r' y='-7'/%3E%3C/svg%3E") repeat;background-size:12px 14px}
+.tR .tknit{background-position:-4px 0}.tB .tknit{background-position:-8px 0}.tL .tknit{background-position:-2px 0}
+/* soft wool sheen and a rolled inside edge instead of a hard line */
+.tknit::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,190,190,.14),transparent 35%,transparent 62%,rgba(40,0,6,.55) 88%,rgba(255,120,140,.25) 94%,rgba(30,0,4,.7))}
+.tside::before{content:'';position:absolute;left:0;right:0;bottom:-2px;height:4px;border-radius:2px;background:linear-gradient(180deg,#a3142a,#5e0814);filter:blur(.6px)}
+/* the corners: ribbed cuffs, like the ends of a scarf, with a little fringe along the bottom */
+.tcorner{position:absolute;width:46px;height:46px;background:repeating-linear-gradient(90deg,#c01d34 0 3px,#8a0f22 3px 4px,#d93048 4px 5px,#a3142a 5px 7px);box-shadow:0 4px 10px rgba(0,0,0,.6),inset 0 0 8px rgba(40,0,6,.55)}
+.tcorner::after{content:'';position:absolute;inset:0;border-radius:inherit;background:radial-gradient(circle at 35% 30%,rgba(255,200,200,.28),transparent 55%)}
+.tcorner.c1{left:0;top:0;border-radius:0 0 14px 0}
+.tcorner.c2{right:0;top:0;border-radius:0 0 0 14px}
+.tcorner.c3{right:0;bottom:0;border-radius:14px 0 0 0}
+.tcorner.c4{left:0;bottom:0;border-radius:0 14px 0 0}
+.tfringe{position:absolute;bottom:3px;width:44px;height:22px;background:repeating-linear-gradient(180deg,#c01d34 0 2px,#7a0d1d 2px 3px,transparent 3px 5px);transform-origin:0 50%;animation:twFringe 5.5s ease-in-out infinite}
+.tfringe.f4{left:46px;-webkit-mask:linear-gradient(90deg,#000 55%,transparent);mask:linear-gradient(90deg,#000 55%,transparent)}
+.tfringe.f3{right:46px;transform-origin:100% 50%;-webkit-mask:linear-gradient(270deg,#000 55%,transparent);mask:linear-gradient(270deg,#000 55%,transparent);animation-delay:-2.4s}
+@keyframes twFringe{0%,100%{transform:skewY(0)}50%{transform:skewY(-4deg)}}
 html.twIn .tside{animation:twKnit .55s ease-in-out both}
 html.twIn .tside.tR{animation-delay:.5s}html.twIn .tside.tB{animation-delay:1s}html.twIn .tside.tL{animation-delay:1.5s}
-html.twIn .tend{animation:twDrop .7s cubic-bezier(.3,1.5,.5,1) 2s both}
+html.twIn .tcorner,html.twIn .tfringe{animation:twPop .5s cubic-bezier(.3,1.6,.5,1) 2.05s both}
 @keyframes twKnit{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
-@keyframes twDrop{from{transform:translateY(-120px);opacity:0}}
+@keyframes twPop{from{transform:scale(0);opacity:0}}
 #twLeaves{position:fixed;inset:0;width:100vw;height:100vh;z-index:92;pointer-events:none;display:none}
 html.atw #twLeaves,#twLeaves.fade{display:block}
 #twLeaves.fade{transition:opacity 4s;opacity:0}
@@ -805,7 +812,7 @@ html.atw .twMeter[data-on]{display:block;background:rgba(50,8,14,.5);border-colo
 @keyframes twKeepIn{from{opacity:0;transform:translateY(20px)}}
 @keyframes twWink{30%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}}
 html.remote #twKeep,html.remote .atwBtn{display:none!important}
-@media (prefers-reduced-motion:reduce){.tend i,#twSing.on,.atwBtn.ask{animation:none}}
+@media (prefers-reduced-motion:reduce){.tfringe,#twSing.on,.atwBtn.ask{animation:none}}
 #sleigh{position:fixed;top:6vh;left:0;z-index:93;pointer-events:none;width:min(600px,70vw);opacity:0;transform:translateX(110vw);filter:drop-shadow(0 0 6px rgba(255,230,170,.45)) drop-shadow(0 6px 10px rgba(0,0,0,.45))}
 #sleigh svg{width:100%;height:auto;display:block}
 #sleigh .deer{animation:deerBob .9s ease-in-out infinite}#sleigh .d2{animation-delay:-.22s}#sleigh .d3{animation-delay:-.45s}#sleigh .d4{animation-delay:-.67s}
@@ -1449,14 +1456,14 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
  <header class="top">
   <div class="logo" id="logo"><span class="l1"></span><span class="l2"></span></div>
   <div class="badge" id="modeBadge">Demo</div>
-  <button class="searchBtn" id="openSearch"><span data-icon="search"></span>Search songs, artists &amp; albums</button>
+  <button class="searchBtn" id="openSearch"><span data-icon="search"></span><span class="sbTxt">Search songs, artists &amp; albums</span></button>
   <button class="askBtn" id="askBtn" aria-label="Ask DJ Griff for a song" style="display:none"><span data-icon="mic"></span><b>Ask DJ</b></button>
   <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
   <button class="xmasBtn" id="xmasBtn" aria-label="Christmas Mode" style="display:none"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 2l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#ffd23f"/><path d="M16 11l7 9h-3.5l6 8H19l3 4H10l3-4H5.5l6-8H8z" fill="#1fbf5a"/><rect x="14" y="32" width="4" height="4" rx="1" fill="#8b5a2b"/><circle cx="13" cy="20" r="1.4" fill="#ff3b3b"/><circle cx="19" cy="24" r="1.4" fill="#ffd23f"/><circle cx="12.5" cy="28" r="1.4" fill="#3bb7ff"/><circle cx="20" cy="29" r="1.4" fill="#ff3b3b"/></svg><span id="xmasDays"></span></button>
   <button class="xmasBtn efzBtn" id="efzBtn" aria-label="Edmund Fitzgerald memorial" style="display:none"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2a3 3 0 0 1 3 3v1.4c6.2 1.4 10 6.8 10 14.6v8.5l4 5.5H3l4-5.5V21c0-7.8 3.8-13.2 10-14.6V5a3 3 0 0 1 3-3z" fill="#e8c26a" stroke="#7a5a1c" stroke-width="1.2"/><path d="M9 31h22" stroke="#7a5a1c" stroke-width="1.2"/><circle cx="20" cy="39.5" r="3.6" fill="#c99a3a" stroke="#7a5a1c" stroke-width="1"/><path d="M13 12c1.5-2.5 3.5-3.6 5.5-4" stroke="#fff6d8" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/></svg><span>Fitz</span></button>
   <button class="xmasBtn yachtBtn" id="yachtBtn" aria-label="Yacht Mode" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4v26" stroke="#e8d7b8" stroke-width="2"/><path d="M21.5 6c7 5 11 12 12 20H21.5z" fill="#fff"/><path d="M18.5 10c-5 5-8 10-9 16h9z" fill="#f2e9d6"/><path d="M5 29h30l-4 7H9z" fill="#ff7a4a"/><path d="M2 38c6-2 10 1 16-1s10-2 20 0" stroke="#5fd3e6" stroke-width="2" fill="none"/></svg><span>Yacht</span></button>
-  <button class="xmasBtn atwBtn" id="atwBtn" aria-label="All Too Well (10 Minute Version)" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 8c6-3 20-3 26 0l-2 7c-6-2.5-16-2.5-22 0z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M24 13l5 1-4 17-6-1z" fill="#a8172a" stroke="#6e0a19" stroke-width="1"/><path d="M12 14l5-1 1 16-6 1z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M12.5 30v6M14.5 30v6.5M16.5 29.5v6M19.5 30.5v6M21.5 31v6M23.5 31v5.5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 10.5c5-1.6 15-1.6 20 0" stroke="#ff8a8a" stroke-width=".9" fill="none" opacity=".6"/></svg><span>10:13</span></button>
+  <button class="xmasBtn atwBtn" id="atwBtn" aria-label="All Too Well (10 Minute Version)" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 8c6-3 20-3 26 0l-2 7c-6-2.5-16-2.5-22 0z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M24 13l5 1-4 17-6-1z" fill="#a8172a" stroke="#6e0a19" stroke-width="1"/><path d="M12 14l5-1 1 16-6 1z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M12.5 30v6M14.5 30v6.5M16.5 29.5v6M19.5 30.5v6M21.5 31v6M23.5 31v5.5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 10.5c5-1.6 15-1.6 20 0" stroke="#ff8a8a" stroke-width=".9" fill="none" opacity=".6"/></svg><span>ATW</span></button>
   <div class="clock" id="clock"></div>
   <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
   <button class="iconBtn" id="mbBtn" aria-label="Mirrorball" data-icon="mball" style="display:none"></button>
@@ -1605,7 +1612,7 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
 </div>
 <div id="alp" aria-label="Car radio"><div class="alpScrim"></div><div class="alpBox"><div class="alpTop"><div class="alpHint">Tap <b>1–6</b> to change the station · <b>BAND</b> for more stations · drag the <b>knob</b> for volume</div><button class="alpX alpOff" id="alpOff">Radio off</button><button class="alpX" id="alpX">Close</button></div><div class="alpUnit" id="alpUnit"></div></div></div>
 <canvas id="snow" aria-hidden="true"></canvas>
-<div id="twtrim" aria-hidden="true"><div class="tside tT"><div class="tknit"></div></div><div class="tside tR"><div class="tknit"></div></div><div class="tside tB"><div class="tknit"></div></div><div class="tside tL"><div class="tknit"></div></div><div class="tend e1"><b></b><i></i></div><div class="tend e2"><b></b><i></i></div></div>
+<div id="twtrim" aria-hidden="true"><div class="tside tT"><div class="tknit"></div></div><div class="tside tR"><div class="tknit"></div></div><div class="tside tB"><div class="tknit"></div></div><div class="tside tL"><div class="tknit"></div></div><div class="tcorner c1"></div><div class="tcorner c2"></div><div class="tfringe f3"></div><div class="tfringe f4"></div><div class="tcorner c3"></div><div class="tcorner c4"></div></div>
 <canvas id="twLeaves" aria-hidden="true"></canvas>
 <div id="twCard" aria-hidden="true"><small></small><b></b><span></span></div>
 <div id="twSing" aria-hidden="true">SING IT 🎤</div>
@@ -4669,7 +4676,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.36';
+const GT_VERSION='1.36.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5031,7 +5038,7 @@ async function showGallery(){
  }
  clearInterval(ART.timer);ART.timer=setInterval(()=>{if(galleryOn)artNext()},Math.max(10,S.artSecs)*1000);
 }
-function showAttract(){attractOn=true;hueSaver(true);const ei=eiLook();if(!ei&&S.saver==='deck'){openDeck(true);return}if(ei||S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
+function showAttract(){if(twLook())return;attractOn=true;hueSaver(true);const ei=eiLook();if(!ei&&S.saver==='deck'){openDeck(true);return}if(ei||S.saver==='art'){showGallery();if(S.lyricsSaver&&P.current&&LYR.cur!==P.current.id)setTimeout(lyrTrack,50);return}syncAttract();$('#attract').classList.add('on')}
 function hideAttract(){fireStop();if(attractOn)hueSaver(false);if(DECK.saver)closeDeck();attractOn=false;galleryOn=false;clearInterval(ART.timer);$('#attract').classList.remove('on');$('#gallery').classList.remove('on')}
 
 /* ---------- Wall display: full screen, wake lock, install ---------- */
@@ -5069,7 +5076,7 @@ addEventListener('click',e=>{
  if(attractOn&&galleryOn&&e.target.closest&&e.target.closest('.gCtl'))return;
  if(attractOn){hideAttract();swallowClick=true;setTimeout(()=>{swallowClick=false},700);e.stopPropagation();e.preventDefault()}
 },true));
-setInterval(()=>{if(!attractOn&&!LYR.open&&!EF.open&&!(DECK.open&&!DECK.saver)&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
+setInterval(()=>{if(!attractOn&&!LYR.open&&!EF.open&&!twLook()&&!(DECK.open&&!DECK.saver)&&S.attractSecs>0&&Date.now()-lastInput>S.attractSecs*1000)showAttract()},1000);
 
 /* ---------- Global events ---------- */
 document.addEventListener('click',e=>{
@@ -7819,10 +7826,10 @@ function twTap(){
  if(TW.look){toast('🧣 Already playing. All ten minutes of it.');return}
  if(!b.classList.contains('ask')){
   b.classList.add('ask');b.querySelector('span').textContent='Play?';
-  clearTimeout(TW.askT);TW.askT=setTimeout(()=>{b.classList.remove('ask');b.querySelector('span').textContent='10:13'},4000);
+  clearTimeout(TW.askT);TW.askT=setTimeout(()=>{b.classList.remove('ask');b.querySelector('span').textContent='ATW'},4000);
   return;
  }
- clearTimeout(TW.askT);b.classList.remove('ask');b.querySelector('span').textContent='10:13';
+ clearTimeout(TW.askT);b.classList.remove('ask');b.querySelector('span').textContent='ATW';
  twStart();
 }
 async function twStart(){
@@ -7969,10 +7976,12 @@ function twIntro(){const h=document.documentElement;h.classList.remove('twIn');v
 function twBegin(){
  const t=P.current;TW.for=t.id;TW.ci=-1;TW.max=0;TW.sing=false;TW.snow=false;TW.cue=null;TW.breathT=Date.now();
  if(t.id!==TW_ID&&t.id&&t.id!==store.get('atw_id',null))store.set('atw_id',t.id);
+ if(attractOn)hideAttract();
  twCues(t);twIntro();twLeavesStart();twKeepRender();
 }
 function twEnd(){
  const done=TW.max>=.93;
+ lastInput=Date.now();   // the screensaver waits its usual time after the song, not right away
  TW.for=null;TW.sing=false;TW.cue=null;
  twLeavesStop();twMeter(null);$('#twSing').classList.remove('on');
  document.documentElement.style.removeProperty('--twFade');

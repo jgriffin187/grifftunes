@@ -2,9 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.36.1 — November 16, 2026
+
+- **All Too Well mode:** the scarf button now says **ATW**. No screensaver while the song plays (if the screensaver was already up, it closes; afterwards it waits its usual time). The scarf is rebuilt: chunkier V-stitch knit with a rolled inside edge, ribbed cuffs in all four corners covering the joins, a little fringe along the bottom corners, and no more fringe hanging over the top-bar buttons. The frame is thinner and takes less room.
+- **Top bar:** the search box label now shortens with "…" instead of wrapping onto several lines when the bar is crowded.
+
 ## 1.36 — November 15, 2026
 
-- **All Too Well (10 Minute Version) mode:** a new red scarf button (**10:13**) in the top bar. Tap it twice, or say "Hey DJ, play the ten minute version", and Taylor Swift's "All Too Well (10 Minute Version)" starts right away. The look comes on whenever that song plays (however it was picked) and leaves when it ends:
+- **All Too Well (10 Minute Version) mode:** a new red scarf button (**10:13**, now **ATW**) in the top bar. Tap it twice, or say "Hey DJ, play the ten minute version", and Taylor Swift's "All Too Well (10 Minute Version)" starts right away. The look comes on whenever that song plays (however it was picked) and leaves when it ends:
   - **A red knit scarf** knits itself around the screen, with fringed ends hanging from the top corners.
   - **Falling maple leaves** pile up along the bottom. In the last chapter, they turn to snow.
   - **Chapter cards** in typewriter type mark the story (Autumn, Upstate, The Kitchen, Twenty-One, The Bridge, The Scarf, First Snow), timed from the song's synced lyrics, with estimates as a backup.
