@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.38.2 — November 17, 2026
+
+- **Fix: the screensaver showed in a regular Chrome window instead of full screen.** The screen-awake lock could quietly lapse (Chrome can drop it, and a request at load can fail), so ChromeOS dimmed and turned off the display under the screensaver, which takes Chrome out of full screen. The tap that wakes the display goes to ChromeOS, not GriffTunes, so the screensaver came back windowed. GriffTunes now checks the lock every 20 seconds and takes it back if it's gone.
+- **Settings → Screen** now shows when GriffTunes last left full screen, whether the screensaver was up, and whether the screen-awake lock was on, to help track down any other cause.
+
 ## 1.38.1 — November 16, 2026
 
 - **All Too Well slideshow: the fridge.** A new still (`atw/47.jpg`) of the couple dancing by the open, glowing refrigerator. It opens The Kitchen chapter and is always on screen for the refrigerator-light moment: it fades in 1.5 s early so it's fully up when the Hue lights flash cool white, stays about 10 s, and a soft cool-white glow pulses over the fridge side of the picture for those 8 seconds (even without Hue).

@@ -4737,7 +4737,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.38.1';
+const GT_VERSION='1.38.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4878,6 +4878,7 @@ function openSettings(){
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
   ${tg('fAutoFs','Stay full screen (any tap puts it back)',S.autoFs)}
+  ${(()=>{const f=store.get('fs_lost',null);return f&&f.at?`<div class="note">Last left full screen: ${spWhen(f.at)}${f.saver?' during the screensaver':''}. Screen-awake lock was ${f.wake?'on':'off'}.</div>`:''})()}
   <div class="btnRow"><button class="btn" id="fsNow">Full screen now</button>${isInstalledApp()?'<span class="ok">● Running as installed app</span>':'<button class="btn primary" id="installApp">Install GriffTunes app</button>'}</div>
  </div>
  </div>
@@ -5116,6 +5117,16 @@ async function keepAwake(){
  try{if(!wakeLock||wakeLock.released)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}
 }
 document.addEventListener('visibilitychange',keepAwake);
+// Chrome can let go of the screen-awake lock on its own (and a request at load can fail). Without it ChromeOS dims and
+// turns the display off while the screensaver is up, which takes Chrome out of full screen; the tap that wakes the
+// display goes to ChromeOS, not the page, so the screensaver came back up windowed. Check every 20 seconds.
+setInterval(()=>{if(S.wake&&(!wakeLock||wakeLock.released))keepAwake()},20000);
+// Remember when and how full screen was last lost, for Settings → Screen
+document.addEventListener('fullscreenchange',()=>{
+ if(document.fullscreenElement||REMOTE)return;
+ store.set('fs_lost',{at:Date.now(),saver:!!attractOn,wake:!!(wakeLock&&!wakeLock.released),vis:document.visibilityState});
+ console.info('[GriffTunes] left full screen',store.get('fs_lost'));
+});
 let installEvt=null;
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();installEvt=e});
 async function installApp(){
