@@ -3000,6 +3000,7 @@ async function resumeNow(){
  // a song picked back up after a reload isn't a party mode starting (the Yacht Rock station counts once a song is on):
  // note it as already on, so the mirrorball isn't switched
  try{if(MB.party)MB.party=mbModes()}catch(e){}
+ try{ymDockFor(P.current)}catch(e){}   // a non-Yacht Rock song picked back up still docks the boat
  if(engine.target!==j.device.id)engine.useDevice({id:j.device.id,name:j.device.name});
  SPK.session=true;SPK.lastPlay=Date.now();
  if(typeof j.device.volume_percent==='number')setVol(j.device.volume_percent,null,true);
@@ -4773,7 +4774,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.39';
+const GT_VERSION='1.39.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

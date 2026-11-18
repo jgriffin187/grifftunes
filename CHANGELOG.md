@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.39.1 — November 18, 2026
+
+- Yacht Mode also docks when GriffTunes reloads in the middle of a song that isn't Yacht Rock (the song picked back up from Spotify), not just when a new song starts.
+
 ## 1.39 — November 18, 2026
 
 - **Yacht Mode docks itself for songs that aren't Yacht Rock.** When a song starts that isn't from the Yacht Rock station and isn't by one of the station's artists, Yacht Mode turns off along with the Yacht Rock station, and the frame, flags, sea, Hue colors and mirrorball go back to normal. A paid pick by a Yacht Rock artist keeps it on. (`ymDockFor()`, called from `startTrack`.)
