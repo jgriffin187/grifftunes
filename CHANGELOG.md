@@ -5,6 +5,7 @@ Newest first. Version numbers also show in GriffTunes under **Settings → About
 ## 1.41 — November 18, 2026
 
 - **Offsite backup.** Settings → System → Offsite backup → **Save backup** downloads one file (`grifftunes-backup-YYYY-MM-DD.json`) with the settings, genre picks, lists, Up Next, credits and every song the library has found on Spotify. It holds **no keys or sign-ins**: the Gemini keys, owner key, Spotify sign-ins, family members' sign-ins, Couch Remote link, Hue bridge username and Spotify Client ID are all left out, so it's safe to keep in Google Drive or on a USB stick. **Restore backup** (tap twice) puts it all back and keeps whatever keys the jukebox already has. On a brand-new jukebox, re-enter the keys and re-add family members afterwards (RESTORE.md in the backup package walks through it). The existing "Move to a new jukebox" setup file is unchanged and still carries the keys, for moving to a new jukebox only.
+- **RESTORE.md** (how to rebuild GriffTunes from a backup: the repo, Pages, keys, network and devices) and **scripts/make_backup.sh** (builds the monthly offsite zip: full git history, plain code, CDN libraries and fonts, checksums).
 
 ## 1.40 — November 18, 2026
 
