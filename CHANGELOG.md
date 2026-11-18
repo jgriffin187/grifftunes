@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.41 — November 18, 2026
+
+- **Offsite backup.** Settings → System → Offsite backup → **Save backup** downloads one file (`grifftunes-backup-YYYY-MM-DD.json`) with the settings, genre picks, lists, Up Next, credits and every song the library has found on Spotify. It holds **no keys or sign-ins**: the Gemini keys, owner key, Spotify sign-ins, family members' sign-ins, Couch Remote link, Hue bridge username and Spotify Client ID are all left out, so it's safe to keep in Google Drive or on a USB stick. **Restore backup** (tap twice) puts it all back and keeps whatever keys the jukebox already has. On a brand-new jukebox, re-enter the keys and re-add family members afterwards (RESTORE.md in the backup package walks through it). The existing "Move to a new jukebox" setup file is unchanged and still carries the keys, for moving to a new jukebox only.
+
 ## 1.40 — November 18, 2026
 
 - **"Update · tap to reload" button.** When a new version is published, a glowing green button appears in the top bar next to the Spotify badge; tap it to reload right away (no more two-finger click → Chrome menu → Reload). The jukebox now checks for updates every 2 minutes instead of 10, and still reloads by itself if things go quiet. The Couch Remote's **Reload jukebox** button does the same thing from the couch.

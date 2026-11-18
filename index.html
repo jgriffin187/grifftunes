@@ -4779,7 +4779,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.40';
+const GT_VERSION='1.41';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4953,6 +4953,9 @@ function openSettings(){
  <div class="field"><span class="lab">Move to a new jukebox</span>
   <div class="btnRow"><button class="btn" id="setupSave">Save setup file</button><button class="btn" id="setupLoad">Load setup file</button><input type="file" id="setupFile" accept=".json,application/json" hidden></div>
   <div class="note">Brings Spotify, Hue, family members, genre picks, Up Next and the Couch Remote to another computer. Save here, put the file in Google Drive, load it on the new jukebox, then sign in to Spotify once. It holds private keys: delete it after the move, and turn the old jukebox off.</div></div>
+ <div class="field"><span class="lab">Offsite backup</span>
+  <div class="btnRow"><button class="btn" id="bkSave">Save backup</button><button class="btn" id="bkLoad">Restore backup</button><input type="file" id="bkFile" accept=".json,application/json" hidden></div>
+  <div class="note">Settings, genre picks, lists, Up Next, credits and every song the library has found, with no keys or sign-ins, so it's safe to keep. Save one each month into the GriffTunes Backups folder in Google Drive. Restoring keeps the keys this jukebox already has; on a new one, re-enter them as RESTORE.md explains.</div></div>
  <div class="field"><span class="lab">About</span>
   <div class="note" style="margin-top:0">GriffTunes v${GT_VERSION}</div>
   <div class="btnRow"><button class="btn" id="sysAbout">What's new and how it works</button></div></div>
@@ -4971,6 +4974,9 @@ function openSettings(){
  $('#libNow').onclick=()=>{if(provider!==SPOTIFY){toast('Connect Spotify first');return}LIB.manual=!LIB.manual;$('#libNow').textContent=LIB.manual?'Stop finding songs':'Find songs now while idle';toast(LIB.manual?'Finding songs whenever nothing is playing. It goes slowly to keep Spotify happy':'Stopped finding songs')};
  $('#libDl').onclick=()=>{libDownload();toast('Song library downloaded')};
  $('#setupSave').onclick=()=>setupSave();
+ $('#bkSave').onclick=()=>backupSave().catch(e=>toast("Couldn't save the backup: "+e.message,'warn'));
+ $('#bkLoad').onclick=e=>{const b=e.currentTarget;if(!b.dataset.arm){b.dataset.arm='1';b.textContent='Tap again: restore over this jukebox';setTimeout(()=>{if(b.isConnected){delete b.dataset.arm;b.textContent='Restore backup'}},5000);return}delete b.dataset.arm;b.textContent='Restore backup';$('#bkFile').value='';$('#bkFile').click()};
+ $('#bkFile').onchange=e=>{const f=e.target.files&&e.target.files[0];if(f)backupLoad(f).catch(er=>toast("Couldn't restore: "+er.message,'warn'))};
  $('#fDj').onchange=e=>{S.dj=e.target.checked;saveS();djReset();$('#djStat').textContent=S.dj?(djKey()?'DJ Griff is on. First break in a song or two.':'Add the Google Cloud key under Setup, then tap Preview.'):'DJ Griff is off.';if(S.dj&&!djKey())$('#djSetup').open=true};
  $('#fDjKey').onchange=e=>{store.set('dj_key',e.target.value.trim());DJ.prep=null};
  $('#fDjGKey').onchange=e=>{store.set('dj_gkey',e.target.value.trim());DJ.prep=null};
@@ -6791,6 +6797,45 @@ async function setupLoad(file){
  ['sp_follow','sp_follow_403','hue_conn'].forEach(k=>store.del(k));
  toast(`Setup loaded (${n} items). Reloading… then sign in to Spotify once`);
  setTimeout(()=>location.reload(),1800);
+}
+/* ---------- Offsite backup: everything this jukebox has learned, with no keys or sign-ins ----------
+   Unlike the setup file, it's safe to keep in Google Drive or on a USB stick for good. Restoring keeps whatever keys
+   the jukebox already has; on a fresh one you re-enter them (see RESTORE.md in the backup package). */
+const BK_SECRET=new Set(['dj_key','dj_gkey','owner_key','sp_tokens','pkce','remote_link']);
+// short-lived state that would be wrong or stale on another day or machine
+const BK_SKIP=new Set(['np_now','sp_block','sp_quota','sp_rq','sp_refused','sp_follow','sp_follow_403','hue_conn','wk_refresh_at','nr_cache','as_srch','sp_srch','wake_log','fs_lost','pkce']);
+function bkClean(k,raw){
+ let v;try{v=JSON.parse(raw)}catch(e){return raw}
+ if(k==='settings'&&v&&typeof v==='object'){v=Object.assign({},v);delete v.clientId;if(v.hue&&typeof v.hue==='object'){v.hue=Object.assign({},v.hue);delete v.hue.user}}
+ if(k==='family'&&Array.isArray(v))v=v.map(m=>{const o=Object.assign({},m);delete o.tok;return o});
+ return JSON.stringify(v);
+}
+async function backupSave(){
+ const data={};
+ for(let i=0;i<localStorage.length;i++){const lk=localStorage.key(i);if(!lk||!lk.startsWith('jbx.'))continue;const k=lk.slice(4);
+  if(BK_SECRET.has(k)||BK_SKIP.has(k)||/^yb_sp_\d+$/.test(k))continue;data[k]=bkClean(k,localStorage.getItem(lk))}
+ await libLoad();
+ const lib={};let n=0;for(const[k,v]of LIB.map){if(v&&v.shared)continue;lib[k]=v;n++}
+ const d=new Date(),ds=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify({app:'grifftunes-backup',v:1,version:GT_VERSION,at:Date.now(),data,lib})],{type:'application/json'}));a.download=`grifftunes-backup-${ds}.json`;document.body.appendChild(a);a.click();a.remove();
+ toast(`Backup saved to Downloads (${Object.keys(data).length} settings, ${n.toLocaleString()} library songs, no keys). Put it in the GriffTunes Backups folder in Google Drive`);
+}
+async function backupLoad(file){
+ let j;try{j=JSON.parse(await file.text())}catch(e){toast("That file isn't a GriffTunes backup",'warn');return}
+ if(!j||j.app!=='grifftunes-backup'||!j.data||typeof j.data!=='object'){toast("That file isn't a GriffTunes backup",'warn');return}
+ let n=0;
+ for(const[k,raw]of Object.entries(j.data)){
+  if(typeof raw!=='string'||BK_SECRET.has(k)||BK_SKIP.has(k))continue;
+  let v;try{v=JSON.parse(raw)}catch(e){continue}
+  // keep the keys and sign-ins this jukebox already has
+  if(k==='settings'&&v&&typeof v==='object'){const cur=store.get('settings',{})||{};if(cur.clientId)v.clientId=cur.clientId;if(v.hue&&cur.hue&&cur.hue.user&&cur.hue.ip===v.hue.ip)v.hue.user=cur.hue.user;else if(v.hue&&!v.hue.user)v.hue=cur.hue||null}
+  if(k==='family'&&Array.isArray(v)){const cur=store.get('family',[])||[];v=v.map(m=>{const o=cur.find(x=>x.id===m.id);return o&&o.tok?Object.assign({},m,{tok:o.tok}):m}).filter(m=>m.tok)}
+  try{localStorage.setItem('jbx.'+k,JSON.stringify(v));n++}catch(e){}
+ }
+ let s=0;if(j.lib&&typeof j.lib==='object'){await libLoad();for(const[k,v]of Object.entries(j.lib)){if(!v)continue;const h=LIB.map.get(k);if(h&&h.t&&!v.t)continue;LIB.map.set(k,v);await libPut(k,v);s++}}
+ ['sp_follow','sp_follow_403','hue_conn'].forEach(k=>store.del(k));
+ toast(`Backup restored (${n} settings, ${s.toLocaleString()} library songs). Reloading…`);
+ setTimeout(()=>location.reload(),2200);
 }
 function libDownload(){
  const songs={};for(const[k,v]of LIB.map)songs[k]=v.t?[v.t.id,v.t.name,v.t.artist,v.t.album||'',v.t.img||'',v.t.duration||0]:null;
