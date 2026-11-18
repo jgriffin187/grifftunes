@@ -67,6 +67,16 @@ If the repo name or account changes, the address changes too, and the Spotify Re
 - The Couch Remote QR code and owner link stay private.
 - GriffTunes never turns the Hue lights off automatically. The one exception: the mirrorball turns off when a party mode ends.
 
+## Monthly backups (Mac mini)
+
+The Mac mini makes the zip by itself on the 1st of every month at 3:17 AM and saves it to Google Drive → GriffTunes Backups. It keeps the newest 6. A notification then reminds you to save the jukebox's own backup file into the same folder. It was set up once with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jgriffin187/grifftunes/main/scripts/install_mac_backup.sh | bash
+```
+
+Run one now: `launchctl kickstart gui/$(id -u)/com.grifftunes.backup`. The log is at `~/Library/Logs/grifftunes-backup.log`.
+
 ## Making a backup by hand
 
 ```bash

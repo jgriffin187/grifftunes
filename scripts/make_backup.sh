@@ -46,7 +46,8 @@ if [ -n "$NOTES" ] && [ -d "$NOTES" ]; then mkdir -p "$PKG/notes"; cp -r "$NOTES
 } > "$PKG/BACKUP-INFO.txt"
 
 # 5. Checksums (inside the package) and the zip
-( cd "$PKG" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS )
+if command -v sha256sum >/dev/null; then SUM="sha256sum"; else SUM="shasum -a 256"; fi   # macOS has shasum
+( cd "$PKG" && find . -type f ! -name SHA256SUMS | LC_ALL=C sort | while IFS= read -r f; do $SUM "$f"; done > SHA256SUMS )
 rm -f "$OUT/$NAME.zip"
 ( cd "$WORK" && zip -qr -X "$OUT/$NAME.zip" "$NAME" )
 cat "$PKG/BACKUP-INFO.txt"
