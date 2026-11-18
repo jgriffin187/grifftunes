@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.40 — November 18, 2026
+
+- **"Update · tap to reload" button.** When a new version is published, a glowing green button appears in the top bar next to the Spotify badge; tap it to reload right away (no more two-finger click → Chrome menu → Reload). The jukebox now checks for updates every 2 minutes instead of 10, and still reloads by itself if things go quiet. The Couch Remote's **Reload jukebox** button does the same thing from the couch.
+
 ## 1.39.2 — November 18, 2026
 
 - **My Albums shows every saved album.** It used to load only the 50 most recently saved; it now follows Spotify's pages like My Playlists does (up to 1,000, one page at a time).

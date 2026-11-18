@@ -304,7 +304,7 @@
 <h3>For developers</h3>
 <h4>How it's built</h4>
 <ul>
-<li><b>No build step:</b> the whole app is one file, <code>index.html</code> (HTML, CSS and JavaScript, about 470 KB), with no frameworks. Editing it and pushing to <code>main</code> on GitHub publishes it through GitHub Pages within a minute or two. The jukebox notices the new version and reloads itself when it's quiet.</li>
+<li><b>No build step:</b> the whole app is one file, <code>index.html</code> (HTML, CSS and JavaScript, about 470 KB), with no frameworks. Editing it and pushing to <code>main</code> on GitHub publishes it through GitHub Pages within a minute or two. The jukebox checks every 2 minutes; when a new version is out, a green <b>Update · tap to reload</b> button shows in the top bar (tap it to reload now), and it also reloads itself when it's quiet.</li>
 <li><b>Other files:</b>
  <ul>
  <li><code>deckvideo.js</code> + <code>turntable-loop.mp4</code>: the turntable.</li>

@@ -62,6 +62,10 @@ header.top{display:flex;align-items:center;gap:16px;height:78px;flex:none}
 .badge.spotify{color:#1ed760;border-color:rgba(30,215,96,.5)}
 .badge.warn{color:var(--gold);border-color:rgba(255,210,63,.5)}
 .badge.busy{color:#ff9f43;border-color:rgba(255,159,67,.6);background:rgba(255,159,67,.12);cursor:pointer}.badge.busy::before{animation:blink 1s steps(2) infinite}
+.updBtn{display:none;height:40px;padding:0 16px;border-radius:99px;align-items:center;gap:8px;border:1px solid #1ed760;background:rgba(30,215,96,.16);color:#1ed760;font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;cursor:pointer;box-shadow:0 0 18px rgba(30,215,96,.4);animation:updGlow 2.4s ease-in-out infinite}
+.updBtn.show{display:flex}.updBtn svg{width:16px;height:16px}
+@keyframes updGlow{50%{box-shadow:0 0 4px rgba(30,215,96,.2)}}
+html.remote .updBtn{display:none!important}
 .badge.back{color:#1ed760;border-color:#1ed760;background:rgba(30,215,96,.18);box-shadow:0 0 18px rgba(30,215,96,.45)}
 .searchBtn{flex:1;max-width:640px;height:62px;border-radius:999px;display:flex;align-items:center;gap:14px;padding:0 26px;background:rgba(255,255,255,.08);border:1px solid var(--stroke);color:var(--muted);font-size:20px;font-weight:500;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:transform .15s,border-color .3s;margin-left:auto}
 .searchBtn:active{transform:scale(.98);border-color:var(--accent2)}
@@ -1550,6 +1554,7 @@ html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
  <header class="top">
   <div class="logo" id="logo"><span class="l1"></span><span class="l2"></span></div>
   <div class="badge" id="modeBadge">Demo</div>
+  <button class="updBtn" id="updBtn" aria-label="A new version of GriffTunes is ready. Tap to reload"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>Update · tap to reload</button>
   <button class="searchBtn" id="openSearch"><span data-icon="search"></span><span class="sbTxt">Search songs, artists &amp; albums</span></button>
   <button class="askBtn" id="askBtn" aria-label="Ask DJ Griff for a song" style="display:none"><span data-icon="mic"></span><b>Ask DJ</b></button>
   <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
@@ -4774,7 +4779,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.39.2';
+const GT_VERSION='1.40';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -9171,7 +9176,8 @@ $('#ybPanel').addEventListener('change',e=>{if(e.target.id==='gyRange'&&!GY.matc
 ['yb_people','yb_art','gy_mode'].forEach(k=>store.del(k));
 
 /* ---------- Auto-update: the jukebox picks up new versions on its own ---------- */
-// Checks GitHub Pages every 10 minutes; when a new version is out, reloads at a quiet moment (nothing playing, no menus open).
+// Checks GitHub Pages every 2 minutes (a tiny HEAD request); when a new version is out, an "Update · tap to reload" button
+// shows in the top bar, and the jukebox also reloads by itself at a quiet moment (nothing playing, no menus open).
 const UPD={base:null,ready:false,quietSince:0};
 async function pageHash(){
  // ask only for the page's fingerprint (a few hundred bytes); download the whole page only if the server doesn't give one
@@ -9182,9 +9188,11 @@ async function pageHash(){
 }
 async function updCheck(){
  if(REMOTE||!crypto.subtle||location.protocol==='file:')return;
- try{const h=await pageHash();if(!UPD.base)UPD.base=h;else if(h!==UPD.base&&!UPD.ready){UPD.ready=true;console.info('[GriffTunes] new version available; reloading when quiet')}}catch(e){}
+ try{const h=await pageHash();if(!UPD.base)UPD.base=h;else if(h!==UPD.base&&!UPD.ready){UPD.ready=true;$('#updBtn').classList.add('show');console.info('[GriffTunes] new version available; tap Update or it reloads when quiet')}}catch(e){}
 }
-setTimeout(updCheck,20000);setInterval(updCheck,10*60000);
+setTimeout(updCheck,20000);setInterval(updCheck,2*60000);
+// Tap the Update button: reload now. Music on a Spotify speaker keeps playing and is picked back up, Up Next is kept.
+$('#updBtn').onclick=()=>{sfx('tick');toast('Reloading GriffTunes…');setTimeout(()=>location.reload(),600)};
 setInterval(()=>{
  if(!UPD.ready)return;
  const quiet=(!P.current||P.paused)&&!P.queue.length&&!$('.modal.open')&&!(typeof DECK!=='undefined'&&DECK.open&&!DECK.saver)&&!EF.open&&!LYR.open&&!ALP.open;
