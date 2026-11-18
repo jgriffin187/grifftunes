@@ -985,6 +985,8 @@ html.covered .layout *,html.covered .top *{animation-play-state:paused!important
 #deck.loading3 .dk3Load{display:grid}#deck.loading3 .dk{opacity:0}
 .dkBg{position:absolute;left:50%;top:50%;width:14vw;height:14vh;margin:-7vh 0 0 -7vw;background-size:cover;background-position:center;filter:blur(12px) saturate(1.5) brightness(.32);transform:scale(9);will-change:transform}
 .dkClose{position:absolute;top:18px;right:18px;z-index:5}
+/* Yacht Mode's teak frame and flag line sit above the turntable, so bring the close button inside them */
+html.yacht .dkClose{top:98px;right:58px;background:rgba(0,0,0,.6)}
 .dk{position:relative}
 .dkPlinth{position:relative;border-radius:26px;overflow:hidden;
  background:radial-gradient(ellipse 70% 60% at 30% 20%,rgba(255,255,255,.07),transparent 60%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 2px,rgba(0,0,0,.02) 2px 4px),linear-gradient(160deg,#25232a,#121116 55%,#0b0a0e);
@@ -4737,7 +4739,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.38.2';
+const GT_VERSION='1.38.3';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

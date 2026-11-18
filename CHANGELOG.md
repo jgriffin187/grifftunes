@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.38.3 — November 18, 2026
+
+- **Fix: no way out of the full-screen turntable in Yacht Mode.** The teak frame, brass corner plate and signal flags sit on top of the turntable and covered its close (X) button in the top-right corner. In Yacht Mode the X now sits just inside the frame, below the flag line.
+
 ## 1.38.2 — November 17, 2026
 
 - **Fix: the screensaver showed in a regular Chrome window instead of full screen.** The screen-awake lock could quietly lapse (Chrome can drop it, and a request at load can fail), so ChromeOS dimmed and turned off the display under the screensaver, which takes Chrome out of full screen. The tap that wakes the display goes to ChromeOS, not GriffTunes, so the screensaver came back windowed. GriffTunes now checks the lock every 20 seconds and takes it back if it's gone.
