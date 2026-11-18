@@ -10,7 +10,7 @@ Each monthly backup lands in Google Drive → **GriffTunes Backups** as `GriffTu
 | `grifftunes.bundle` | The whole git repo with **every version and commit** (code, videos, art, wake-word models, chart data, CHANGELOG). |
 | `grifftunes-code/` | The current code as plain files, so nothing has to be unpacked with git. |
 | `third-party/` | Copies of what GriffTunes loads from the internet at runtime: PeerJS 1.5.4 (Couch Remote / phones), qrcode-generator 1.4.4 (QR codes), and the fonts (Bungee, Caveat, IM Fell English, Monoton, Outfit, Special Elite) as Fontsource npm packages. |
-| `notes/` | The Claude project notes (handoff, assistant plan). |
+| `notes/` | The Claude project notes (handoff, assistant plan), when the backup was made by the monthly task. CHANGELOG.md has the full history of every version either way. |
 | `RESTORE.md` | This file. |
 | `SHA256SUMS` | Checksums. `sha256sum -c SHA256SUMS` confirms the zip isn't damaged. |
 
