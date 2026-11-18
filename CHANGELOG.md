@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.39 — November 18, 2026
+
+- **Yacht Mode docks itself for songs that aren't Yacht Rock.** When a song starts that isn't from the Yacht Rock station and isn't by one of the station's artists, Yacht Mode turns off along with the Yacht Rock station, and the frame, flags, sea, Hue colors and mirrorball go back to normal. A paid pick by a Yacht Rock artist keeps it on. (`ymDockFor()`, called from `startTrack`.)
+- **Up Next stays usable when Now Playing gets tall.** If Up Next would show fewer than about three rows (Yacht Mode's frame and Smooth-o-Meter on a 1080p screen showed just one), Now Playing switches to its compact layout, with the art beside the title (`html.npTight`). If that still isn't enough, the visualizer is hidden too (`html.npTight2`). `npFit()` checks on resize and whenever the Now Playing card changes size. On the 24" screen in Yacht Mode, Up Next goes from 1 row to 4.
+
 ## 1.38.3 — November 18, 2026
 
 - **Fix: no way out of the full-screen turntable in Yacht Mode.** The teak frame, brass corner plate and signal flags sit on top of the turntable and covered its close (X) button in the top-right corner. In Yacht Mode the X now sits just inside the frame, below the flag line.

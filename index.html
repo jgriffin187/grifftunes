@@ -1441,7 +1441,40 @@ html.remote.noPhoneVol .ctrls .vol{display:none!important}
  .side{gap:12px}
  .queue{padding:14px 12px 10px 16px}
  .qHead{margin-bottom:8px;font-size:16px}
+ .ymMeter{grid-column:1/-1}
 }
+/* Not enough room for Up Next (Yacht Mode's frame, a meter or a short screen): npFit() adds html.npTight, the same
+   compact Now Playing as short screens, and html.npTight2 also drops the visualizer if that still isn't enough */
+ html.npTight .np{display:grid;grid-template-columns:186px minmax(0,1fr);column-gap:14px;padding:16px 20px 16px}
+ html.npTight .npLabel{grid-column:1/-1}
+ html.npTight .npStage{grid-column:1;grid-row:2/4;height:124px;margin:12px 0 4px}
+ html.npTight .npArt{width:124px;height:124px;border-radius:14px}
+ html.npTight .vinyl{width:116px;height:116px;left:20px;top:4px}
+ html.npTight .np.playing .vinyl{left:66px}
+ html.npTight .npTitle{grid-column:2;grid-row:2;align-self:end;font-size:21px;margin-top:12px}
+ html.npTight .npArtist{grid-column:2;grid-row:3;align-self:start;font-size:15px}
+ html.npTight .npTicker{grid-column:1/-1;height:38px;margin-top:10px}
+ html.npTight .tkItem{font-size:15px}
+ html.npTight #viz,html.npTight .radio,html.npTight .prog,html.npTight .times,html.npTight .ctrls,html.npTight .houseBtn{grid-column:1/-1}
+ html.npTight .houseBtn{height:46px;font-size:16px;margin-top:10px}
+ html.npTight .radio{margin:6px 0 2px}
+ html.npTight .dial{height:56px}
+ html.npTight .rTop{margin-bottom:6px}
+ html.npTight .rName{font-size:15px}
+ html.npTight #viz{height:44px;margin:6px 0 4px}
+ html.npTight .times{margin-top:4px}
+ html.npTight .ctrls{margin-top:6px}
+ html.npTight .playBtn{width:54px;height:54px}
+ html.npTight .playBtn svg{width:24px;height:24px}
+ html.npTight .skipBtn{width:46px;height:46px}
+ html.npTight .devBtn{width:46px;height:46px}
+ html.npTight .side{gap:12px}
+ html.npTight .queue{padding:14px 12px 10px 16px}
+ html.npTight .qHead{margin-bottom:8px;font-size:16px}
+html.yacht.npTight .npArt{border-radius:50%}
+html.npTight .ymMeter{grid-column:1/-1}
+html.npTight2 #viz{display:none}
+html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
 @media (max-width:1250px){.clock{display:none}.logo .l2{font-size:38px}.badge{display:none}}
 @media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 370px}.npArt{width:180px;height:180px}.npStage{height:180px}.vinyl{width:166px;height:166px}.np.playing .vinyl{left:136px}.coinBtn{padding:0 16px;font-size:14px}}
 @media (max-width:820px){
@@ -2917,6 +2950,7 @@ async function startTrack(t,house=false,radio=null,cd=null){
  START_SEQ++;if(DJ.audio&&!DJ.over){try{DJ.audio.pause()}catch(e){}}DJ.wiimWait=false;
  await speakersAuto();
  P.current=Object.assign({},t,{house,radio,cd});if(radio)RADIO.recent.add(t.id);ctxSet(t,house||radio||cd);P.pos=0;
+ if(!REMOTE)try{ymDockFor(P.current)}catch(e){}
  if(!REMOTE&&!t.img&&t.id)asCover(Object.assign({},t)).then(x=>{if(x.img&&P.current&&P.current.id===t.id&&!P.current.img){P.current.img=x.img;t.img=x.img;renderNP();accentFrom(P.current);if(DECK.open)try{deck3Info()}catch(e){}}});P.dur=t.duration||0;P.paused=false;
  if(!REMOTE){store.set('np_now',{t:slimT(P.current),at:Date.now()});djPlan();playLog(t,house,radio,cd);DJ.hist=(DJ.hist||[]).concat([{name:t.name,artist:t.artist,at:Date.now()}]).slice(-8)}
  renderNP();accentFrom(t);markNow();hueTrack();if(xmLook())xmasFlySoon();else{ymSync();if(ymLook()){ymFlySoon();ymPlayed(P.current)}}
@@ -4739,7 +4773,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.38.3';
+const GT_VERSION='1.39';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5197,6 +5231,19 @@ $('#gPlay').onclick=e=>{e.stopPropagation();sfx('tick');togglePlay()};
 $('#gSkip').onclick=e=>{e.stopPropagation();sfx('tick');advance()};
 $('#gVol').value=S.volume;$('#gVol').addEventListener('input',e=>{e.stopPropagation();setVol(+e.target.value)});$('#gVol').closest('label').addEventListener('click',e=>e.stopPropagation());
 $('#qList').addEventListener('scroll',qFade,{passive:true});addEventListener('resize',qFade);
+// Keep Up Next usable: when the Now Playing card leaves it less than ~3 rows (Yacht Mode's frame, a meter, a short
+// screen), switch to the compact Now Playing (html.npTight), then also drop the visualizer (html.npTight2).
+// The classes come off and the queue is measured again in the same task, so nothing flickers.
+const NPFIT_MIN=220;
+function npFit(){
+ const h=document.documentElement,q=document.querySelector('.queue');
+ if(!q||REMOTE||innerWidth<=820){h.classList.remove('npTight','npTight2');return}
+ const was=h.className;h.classList.remove('npTight','npTight2');
+ if(q.getBoundingClientRect().height<NPFIT_MIN){h.classList.add('npTight');if(q.getBoundingClientRect().height<NPFIT_MIN)h.classList.add('npTight2')}
+ if(h.className!==was)try{qFade()}catch(e){}
+}
+{let raf=0;const go=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(npFit)};addEventListener('resize',go);
+ try{new ResizeObserver(go).observe($('#np'))}catch(e){}go()}
 $('#shPrev').onclick=()=>$('#shelf').scrollBy({left:-$('#shelf').clientWidth*.8});
 $('#shNext').onclick=()=>$('#shelf').scrollBy({left:$('#shelf').clientWidth*.8});
 const vol=$('#vol');vol.value=S.volume;let volT=null,volSyncT=null;
@@ -7485,7 +7532,7 @@ function xmasFly(){
  setTimeout(()=>{if(xmLook())xmasBells()},5000);
 }
 /* ---------- ⛵ Yacht Mode ----------
-   On by itself while the Yacht Rock station plays (paid picks in between keep it on), or with the sailboat button /
+   On by itself while the Yacht Rock station plays (a song that isn't Yacht Rock ends it: see ymDockFor), or with the sailboat button /
    "Hey DJ, set sail" (which also starts the Yacht Rock station; "dock the boat" turns both off). Christmas Mode and the
    Fitzgerald memorial win over it. A golden-hour sea, a sailboat once per song, rope and signal flags, a captain's hat on
    the coin, sand-dollar coins, the Smooth-o-Meter, sunset Hue colors, a marina screensaver, a yacht ticker and a smooth
@@ -7507,11 +7554,22 @@ function ymSync(){
  if(was!==YM.look){
   seaSync();try{hueTrack()}catch(e){}
   if(YM.look){ymIntro();if(P.current){ymFlySoon(6000);ymPlayed(P.current)}}
-  else{clearTimeout(YM.flyT);if(YM.tkFor){YM.tkFor=null;tkStop()}}
+  else{clearTimeout(YM.flyT);if(YM.tkFor){YM.tkFor=null;tkStop()}YM.rate=null;ymMeter(null)}
   ymExtras(YM.look);
   try{hostSync()}catch(e){}
  }
  if(YM.look&&P.current&&YM.rateFor!==P.current.id)ymRateNow(P.current);
+}
+// Yacht Mode ends when a song that isn't Yacht Rock starts: anything not from the Yacht Rock station and not by one
+// of its artists (a "Certified Yacht" song). The station turns off too, so the look, Hue and mirrorball go back to normal.
+function ymDockFor(t){
+ if(!t||!(YM.on||(S.radio&&S.station==='yacht')))return;
+ if(t.radio&&S.station==='yacht')return;
+ const crew=(YACHT()&&YACHT().artists)||[];
+ if(crew.some(a=>asArtMatch(t.artist,a)))return;
+ YM.on=false;store.set('yacht_on',false);
+ if(S.radio&&S.station==='yacht'){S.radio=false;saveS();renderRadio();renderQueue()}
+ toast('⚓ Docked · not Yacht Rock, so Yacht Mode is off');
 }
 async function ymSet(on){
  if(REMOTE)return;
