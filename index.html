@@ -2275,7 +2275,7 @@ const SPOTIFY={
  get tabs(){return[{id:'albums',name:'My Albums'},{id:'playlists',name:'My Playlists'}].concat([{id:'family',name:'Family'}],[{id:'artists',name:'Artists'},{id:'new',name:'New Releases'},{id:'greatest',name:'Greatest Albums'}])},
  me:null,
  async load(tab){
-  if(tab==='albums'){const j=await api('/me/albums?limit=50');return((j&&j.items)||[]).filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
+  if(tab==='albums'){const all=await allPages(api,'/me/albums?limit=50',1000);return all.filter(Boolean).map(x=>spItem(x.album||x.item,'album')).filter(Boolean)}
   if(tab==='playlists'){
    if(!this.me)this.me=await api('/me');
    const all=await allPages(api,'/me/playlists?limit=50',1000);
@@ -4774,7 +4774,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.39.1';
+const GT_VERSION='1.39.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5362,6 +5362,7 @@ async function hostHandle(c,d){
   else if(d.owner&&!c.owner)sendTo(c,{t:'oldOwner'});
   return;
  }
+ if(d.t==='ping'){reply({ok:true});return}
  const OWNER_ONLY=['play','skip','qdel','qclear','devices','transfer','deck','lyrics','power','shuffle','reload','spcheck'];
  if(OWNER_ONLY.includes(d.t)&&!c.owner){sendTo(c,{t:'error',id:d.id,msg:'Only the couch remote can do that'});return}
  try{
@@ -5677,11 +5678,16 @@ function remoteConnect(){
   RM.peer=new Peer(peerOpts());
   RM.peer.on('error',e=>{if(e.type==='peer-unavailable')fail('Jukebox offline',6000);else if(['network','server-error','socket-error','socket-closed'].includes(e.type))fail('Reconnecting…',5000)});
  }
+ const att=RM.att=(RM.att||0)+1;RM.connAt=Date.now();
  const go=()=>{
+  if(att!==RM.att)return;
   const c=RM.peer.connect('grifftunes-'+REMOTE_ROOM,{reliable:true});
-  c.on('open',()=>{RM.conn=c;setBadge('spotify','Connected');if(RM.ownerKey)try{c.send({t:'hello',owner:RM.ownerKey})}catch(e){}});
+  // a phone that slept can leave the signaling link dead without saying so: if this never opens, start over with a fresh peer
+  setTimeout(()=>{if(att===RM.att&&!c.open&&RM.conn!==c){try{c.close()}catch(e){}try{RM.peer.destroy()}catch(e){}fail('Reconnecting…',300)}},10000);
+  c.on('open',()=>{if(att!==RM.att){try{c.close()}catch(e){}return}RM.conn=c;RM.lastMsg=Date.now();setBadge('spotify','Connected');if(RM.ownerKey)try{c.send({t:'hello',owner:RM.ownerKey})}catch(e){}});
   c.on('data',m=>{
    if(!m||!m.t)return;
+   RM.lastMsg=Date.now();
    if(m.t==='state')applyHostState(m);
    else if(m.t==='vol')applyRemoteVol(m.v,m.ok||RM.owner);
    else if(m.t==='oldOwner'){if(!RM.oldWarned){RM.oldWarned=true;toast('This couch remote code was replaced. Scan the new one from Settings → Couch remote','warn')}}
@@ -5692,6 +5698,30 @@ function remoteConnect(){
  };
  if(RM.peer.open)go();else RM.peer.once('open',go);
 }
+// Phones freeze the page when the screen locks or the app is switched away, and the link often dies
+// without a "close" event, so the remote would still say Connected while every tap times out.
+// The jukebox sends a tick every 4 seconds: if nothing arrives for a while, drop the dead link and reconnect.
+function remoteKill(){
+ const c=RM.conn;RM.conn=null;try{if(c)c.close()}catch(e){}
+ RM.pending.forEach(p=>p.rej(new Error('Reconnecting to the jukebox…')));RM.pending.clear();
+ remoteConnect();
+}
+let rmCheckT=null;
+function remoteCheck(){
+ // Back on the phone: if the link looks alive, prove it with a quick ping; otherwise reconnect right away
+ clearTimeout(rmCheckT);RM.visAt=Date.now();
+ if(!(RM.conn&&RM.conn.open)){if(Date.now()-(RM.connAt||0)>4000)remoteConnect();return}
+ if(Date.now()-(RM.lastMsg||0)<5000)return;
+ const c=RM.conn,since=Date.now();
+ try{c.send({t:'ping',id:++RM.seq})}catch(e){remoteKill();return}
+ rmCheckT=setTimeout(()=>{if(RM.conn===c&&(RM.lastMsg||0)<since)remoteKill()},2500);
+}
+setInterval(()=>{
+ if(!REMOTE||document.visibilityState!=='visible'||!(RM.conn&&RM.conn.open))return;
+ // just woke up: the ping in remoteCheck decides, so a link that survived the sleep isn't dropped
+ if(Date.now()-(RM.visAt||0)<4000)return;
+ if(Date.now()-(RM.lastMsg||0)>12000)remoteKill();
+},3000);
 
 /* ---------- Speaker picker (Spotify Connect) ---------- */
 const devIcon=t=>{t=String(t||'').toLowerCase();return t==='tv'||t==='castvideo'||t==='stb'?I.tv:t==='computer'?I.computer:t==='smartphone'||t==='tablet'?I.phone:t==='automobile'?I.car:I.speaker};
@@ -9002,7 +9032,10 @@ async function boot(){
   renderNP();renderQueue();buildTabs();sizeShelf();renderFlow([]);
   $('#shelf').innerHTML='<div class="shelfMsg">Connecting to the jukebox…</div>';
   requestAnimationFrame(frame);remoteConnect();
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&!(RM.conn&&RM.conn.open))remoteConnect()});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')remoteCheck()});
+  addEventListener('pageshow',e=>{if(e.persisted)remoteCheck()});
+  addEventListener('online',remoteCheck);
+  addEventListener('focus',remoteCheck);
   return;
  }
  await handleRedirect();

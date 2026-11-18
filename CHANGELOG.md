@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.39.2 — November 18, 2026
+
+- **My Albums shows every saved album.** It used to load only the 50 most recently saved; it now follows Spotify's pages like My Playlists does (up to 1,000, one page at a time).
+- **The Couch Remote reconnects instead of going stale.** Phones freeze the page when the screen locks or you switch apps, and the link often died without a "close", so the remote said Connected while every tap timed out. Now, when you come back to it, the remote pings the jukebox and reconnects within a couple of seconds if there's no answer; while it's open, 12 seconds without the jukebox's 4-second tick also triggers a reconnect, and a connection attempt that never opens starts over with a fresh link after 10 seconds. (`remoteCheck()`, `remoteKill()`, and a `ping` message on the jukebox.)
+
 ## 1.39.1 — November 18, 2026
 
 - Yacht Mode also docks when GriffTunes reloads in the middle of a song that isn't Yacht Rock (the song picked back up from Spotify), not just when a new song starts.
