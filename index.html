@@ -941,6 +941,18 @@ html.covered .layout *,html.covered .top *{animation-play-state:paused!important
 #deck.three #dkVid{display:block}#deck.three .dkBg{display:none}
 .dk3Cap{position:absolute;left:3vw;top:5vh;z-index:4;pointer-events:none;display:none;flex-direction:column;gap:2px;max-width:46vw;text-shadow:0 2px 18px rgba(0,0,0,.8)}
 #deck.three .dk3Cap{display:flex}
+/* 1.42 hi-fi meter bridge: the caption becomes a receiver faceplate (brushed-aluminum bezel, black-glass window) with
+   twin VU meters and LED ladders drawn on #dkHifi by hifiFrame(). Brass in Yacht Mode, candy-red/green glow at Christmas. */
+.dkHifi{display:none;width:100%;aspect-ratio:4.4;margin-top:clamp(8px,.8vw,14px)}
+#deck.hifi .dkHifi{display:block}
+#deck.hifi .dk3Cap{width:min(26vw,500px);max-width:none;padding:clamp(12px,1.1vw,20px) clamp(16px,1.4vw,26px) clamp(12px,1vw,18px);border-radius:16px;border:clamp(7px,.55vw,10px) solid transparent;
+ background:linear-gradient(180deg,rgba(10,10,14,.9),rgba(16,15,22,.84)) padding-box,repeating-linear-gradient(90deg,rgba(255,255,255,.1) 0 1px,rgba(0,0,0,.06) 1px 3px) border-box,linear-gradient(180deg,#f1f2f5,#b9bcc2 46%,#dfe1e5 54%,#9da0a6) border-box;
+ box-shadow:0 22px 60px rgba(0,0,0,.6),inset 0 0 0 1px rgba(255,255,255,.07),inset 0 10px 30px rgba(0,0,0,.5);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#deck.hifi .dk3Cap::before,#deck.hifi .dk3Cap::after{content:'';position:absolute;top:calc(clamp(7px,.55vw,10px)*-1 + 1px);width:clamp(5px,.4vw,7px);height:clamp(5px,.4vw,7px);border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff,#8d9097 60%,#55585e);box-shadow:0 1px 1px rgba(0,0,0,.4)}
+#deck.hifi .dk3Cap::before{left:8px}#deck.hifi .dk3Cap::after{right:8px}
+#deck.hifi .dk3Cap b{white-space:nowrap}
+html.yacht #deck.hifi .dk3Cap{top:118px;left:64px;background:linear-gradient(180deg,rgba(24,16,8,.9),rgba(30,20,10,.84)) padding-box,repeating-linear-gradient(90deg,rgba(255,240,200,.12) 0 1px,rgba(0,0,0,.06) 1px 3px) border-box,linear-gradient(180deg,#f8dc92,#c18f36 46%,#e6c06a 54%,#9a6a22) border-box}
+html.xmas #deck.hifi .dk3Cap{box-shadow:0 22px 60px rgba(0,0,0,.6),0 0 0 2px rgba(232,16,42,.55),0 0 28px rgba(232,16,42,.35),0 0 60px rgba(20,180,80,.2),inset 0 10px 30px rgba(0,0,0,.5)}
 .dk3Cap small{font-family:Bungee;font-size:clamp(11px,1vw,15px);letter-spacing:.24em;color:#ff8a4c}
 .dk3Cap b{font-size:clamp(24px,2.6vw,42px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dk3Cap span{font-size:clamp(16px,1.5vw,24px);color:rgba(255,255,255,.75)}
@@ -1781,7 +1793,7 @@ html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
  <div class="dkBg" id="dkBg"></div>
  <canvas id="dk3d"></canvas>
  <div class="dkScrim"></div>
- <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span><div class="npTicker dkTicker" id="dkTicker"><div class="tkBadge" id="dkTkBadge"></div><div class="tkWin"><div class="tkTrack" id="dkTkTrack"></div></div></div></div>
+ <div class="dk3Cap" id="dk3Cap"><small id="dk3State">STANDBY</small><b id="dk3Title">Pick a song</b><span id="dk3Artist">GriffTunes</span><div class="npTicker dkTicker" id="dkTicker"><div class="tkBadge" id="dkTkBadge"></div><div class="tkWin"><div class="tkTrack" id="dkTkTrack"></div></div></div><canvas class="dkHifi" id="dkHifi" aria-hidden="true"></canvas></div>
  <div class="dkLyr" id="dkLyr"><div class="dkLyrLines" id="dkLyrLines"></div></div>
  <div class="dkNext" id="dkNext"><div class="dkStack" id="dkStack"></div><div class="dkNextTxt"><small>Up next</small><b id="dkNextTitle"></b><span id="dkNextArtist"></span><em id="dkNextMore"></em></div></div>
  <div class="dkCtl" id="dkCtl">
@@ -4792,7 +4804,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.41.3';
+const GT_VERSION='1.42';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4929,6 +4941,7 @@ function openSettings(){
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
   <label class="tg" style="margin-top:8px"><span>Decade video screensavers (80s and 90s stations)</span><input type="checkbox" id="fEiSaver" ${S.eiSaver!==false?'checked':''}><i></i></label>
+  <label class="tg" style="margin-top:8px"><span>Hi-fi meters on the full-screen turntable</span><input type="checkbox" id="fDkHifi" ${S.dkHifi!==false?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
@@ -4980,7 +4993,7 @@ function openSettings(){
  $('#setPanes').addEventListener('input',()=>{$('#setDirty').textContent='Unsaved changes'},{once:true});
  $('#setPanes').addEventListener('click',e=>{if(e.target.closest('.seg button'))$('#setDirty').textContent='Unsaved changes'});
  $('#fMode').addEventListener('click',e=>{const b=e.target.closest('[data-mode]');if(!b)return;mode=b.dataset.mode;$$('#fMode button').forEach(x=>x.classList.toggle('on',x===b));$('#spBox').style.display=mode==='spotify'?'':'none'});
- const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci){const v=ci.value.trim();if(v&&S.clientId&&v!==S.clientId)newClientId();S.clientId=v}S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;S.efz=$('#fEfz').checked;efzRender();{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked;S.eiSaver=$('#fEiSaver').checked};
+ const collect=()=>{S.name=$('#fName').value.trim()||DEFAULTS.name;const ci=$('#fClient');if(ci){const v=ci.value.trim();if(v&&S.clientId&&v!==S.clientId)newClientId();S.clientId=v}S.freePlay=$('#fFree').checked;S.house=$('#fHouse').checked;S.sfx=$('#fSfx').checked;S.osk=$('#fOsk').checked;S.coinCredits=Math.max(1,+$('#fCoin').value||10);S.attractSecs=Math.max(0,+$('#fAttract').value||0);S.weekRefresh=$('#fWeekly').checked;S.xmas=$('#fXmas').checked;S.efz=$('#fEfz').checked;efzRender();{const o=$('#fXmasSrc');S.xmasSrc=o.value||'top';S.xmasSrcName=o.selectedOptions[0]?o.selectedOptions[0].textContent:''}if(!S.xmas&&XM.active)xmasSet(false);xmasRender();S.refreshDay=+$('#fRefDay').value||0;S.refreshTime=/^\d\d:\d\d$/.test($('#fRefTime').value)?$('#fRefTime').value:'04:00';store.set('wk_refresh_at',Date.now());S.artSecs=Math.max(10,+$('#fArtSecs').value||40);S.saver=saver;S.autoFs=$('#fAutoFs').checked;S.wake=$('#fWake').checked;S.phones=$('#fPhones').checked;S.phoneVol=$('#fPhoneVol').checked;S.phoneCoins=$('#fPhoneCoins').checked;S.lyricsSaver=$('#fLyrSaver').checked;S.eiSaver=$('#fEiSaver').checked;{const h=$('#fDkHifi');if(h)S.dkHifi=h.checked}};
  tabItems('playlists').then(L=>{const sel=$('#fXmasSrc');if(!sel)return;(L||[]).filter(x=>x.type==='playlist'||x.type==='liked').forEach(x=>{if(x.id===S.xmasSrc)return;const o=document.createElement('option');o.value=x.id;o.textContent=x.name;sel.append(o)})}).catch(()=>{});
 (provider===SPOTIFY?libLoad().then(()=>libCandidates()):Promise.resolve()).then(()=>libShow()).catch(()=>{const el=$('#libStat');if(el)el.textContent=libText()});
  $('#fLibNight').onchange=e=>{S.libNight=e.target.checked;saveS()};
@@ -8938,6 +8951,110 @@ function dkToggleLyrics(){
  if(S.dkLyr&&P.current&&(LYR.cur!==P.current.id||!LYR.data)&&!LYR.loading){LYR.cur=null;lyrTrack()}
  dkLyrRender();
 }
+/* ---------- Hi-fi meter bridge on the full-screen turntable (1.42) ----------
+   Simulated like the Now Playing bars (the music plays on the WiiM, so the page never hears it): the same 120 BPM pulse,
+   left and right a little out of step so it reads as stereo. VU needles have spring ballistics (they overshoot a bit),
+   the LED ladders are fast with peak-hold dots, and every 7-18 s a "slam" drives both needles into the red, lights
+   the PEAK lamps and throws sparks. Paused: needles fall to the pin and the backlight dims. One small canvas, drawn
+   only while the turntable is open and the tab is visible. Off: Settings -> Screen. */
+const HF={raf:0,last:0,on:false,back:.3,slam:0,next:0,sp:[],ch:[{n:0,v:0,led:0,pk:0,pkT:0,lamp:0},{n:0,v:0,led:0,pk:0,pkT:0,lamp:0}]};
+function hifiStart(){if(HF.raf)return;HF.last=0;HF.raf=requestAnimationFrame(hifiFrame)}
+function hifiStop(){cancelAnimationFrame(HF.raf);HF.raf=0}
+function hifiTheme(){
+ const de=document.documentElement;
+ if(de.classList.contains('yacht'))return{k:'y',face:['#fbecc4','#e8c47a'],ink:'#2a1a08',red:'#c2261b',needle:'#1b1206',glow:'#ffb347',led:['#9be15d','#ffc23d','#ff4b2b'],lbl:'rgba(255,226,160,.75)',sp:['#ffe08a','#ffb347','#fff3d0']};
+ if(de.classList.contains('xmas'))return{k:'x',face:['#0f3d22','#072415'],ink:'#f4f1e8',red:'#ff3048',needle:'#ffd23f',glow:'#ff3048',led:['#2fd36b','#ffd23f','#ff2a3c'],lbl:'rgba(255,255,255,.6)',sp:['#ff3048','#2fd36b','#ffd23f','#fff']};
+ const{a,b}=accents();return{k:'n',face:['#151320','#09080e'],ink:'rgba(255,255,255,.9)',red:'#ff3b5c',needle:'#fff',glow:b,glow2:a,led:[b,'#ffc23d','#ff3b5c'],lbl:'rgba(255,255,255,.55)',sp:[a,b,'#fff']};
+}
+function hifiFrame(now){
+ HF.raf=requestAnimationFrame(hifiFrame);
+ if(!DECK.open){hifiStop();return}
+ const dk=$('#deck'),want=S.dkHifi!==false;
+ if(want!==HF.on){HF.on=want;dk.classList.toggle('hifi',want);if(!want)$('#dkLyr').style.top=''}
+ // sing-along lyrics start just below the faceplate (its height follows the screen size and Yacht Mode's frame)
+ if(want&&now-(HF.lyrT||0)>600){HF.lyrT=now;const cb=$('#dk3Cap').getBoundingClientRect().bottom;if(cb>0)$('#dkLyr').style.top=Math.round(cb+18)+'px'}
+ if(!want||document.hidden||!dk.classList.contains('three'))return;
+ if(HF.last&&now-HF.last<15)return;
+ const dt=Math.min(.05,HF.last?(now-HF.last)/1000:.016);HF.last=now;
+ const cv=$('#dkHifi'),w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;
+ const dpr=Math.min(1.5,window.devicePixelRatio||1),W=Math.round(w*dpr),H=Math.round(h*dpr);
+ if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+ const x=cv.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);x.clearRect(0,0,w,h);
+ const T=hifiTheme(),on=!!P.current&&!P.paused,t=now,beat=Math.pow(Math.max(0,Math.cos(t/500*Math.PI)),6);
+ // big moments: a slam every 7-18 s while music plays
+ if(on&&!HF.next)HF.next=t+7000+Math.random()*11000;
+ if(on&&t>HF.next){HF.slam=1;HF.next=t+7000+Math.random()*11000;HF.boom=true}
+ if(!on)HF.next=0;
+ HF.slam=Math.max(0,HF.slam-dt*1.8);
+ HF.back+=((on?1:.28)+(on?beat*.1:0)-HF.back)*Math.min(1,dt*4);
+ const pad=h*.04,gap=w*.025,mw=Math.min(h*1.32,w*.27),mh=h-pad*2,lx=pad+mw*2+gap*2,lw=w-lx-pad;
+ const tips=[];
+ HF.ch.forEach((c,i)=>{
+  const ph=i*1.7,nz=(Math.sin(t*.0031*(1+i*.13)+ph)*.5+.5)*(Math.sin(t*.0013+ph*2.3)*.5+.5);
+  const fast=(Math.sin(t*.011*(1+i*.07)+ph*3)*.5+.5)*(Math.sin(t*.0047+ph)*.5+.5);
+  const tgt=on?Math.min(1.06,.36+.2*nz+.24*beat*(i?.9:1)+.5*HF.slam):0;
+  // needle: a slightly under-damped spring, pinned at both ends
+  c.vel=(c.vel||0)+((tgt-c.n)*95-(c.vel||0)*15)*dt;c.n+=c.vel*dt;
+  if(c.n<0){c.n=0;c.vel=Math.abs(c.vel)*.25}if(c.n>1.04){c.n=1.04;c.vel=-Math.abs(c.vel)*.3}
+  const lt=on?Math.min(1,.28+.32*fast+.34*beat+.45*HF.slam+.08*nz):0;
+  c.led=lt>c.led?lt:Math.max(lt,c.led-dt*1.6);
+  if(c.led>=c.pk){c.pk=c.led;c.pkT=t}else if(t-c.pkT>800)c.pk=Math.max(c.led,c.pk-dt*.7);
+  c.lamp=c.n>.82?1:Math.max(0,c.lamp-dt*2.2);
+  const mx=pad+i*(mw+gap);tips.push(hifiVU(x,mx,pad,mw,mh,c,T,i));
+ });
+ hifiLadders(x,lx,pad,lw,mh,T);
+ if(HF.boom){HF.boom=false;for(const p of tips)hifiSparks(p[0],p[1],10,T);for(const c of[0,1]){const y=pad+mh*(c?.72:.3);hifiSparks(lx+lw*Math.min(1,HF.ch[c].led),y,8,T)}}
+ if(HF.sp.length){x.globalCompositeOperation='lighter';HF.sp=HF.sp.filter(p=>{p.l-=dt;if(p.l<=0)return false;p.vx*=.96;p.vy+=dt*90;p.x+=p.vx*dt;p.y+=p.vy*dt;const a=Math.min(1,p.l/.5);x.globalAlpha=a;x.fillStyle=p.c;x.beginPath();x.arc(p.x,p.y,p.r*(.6+.4*a),0,7);x.fill();return true});x.globalAlpha=1;x.globalCompositeOperation='source-over'}
+}
+function hifiSparks(px,py,n,T){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;for(let k=0;k<n;k++){const a=-Math.PI/2+(Math.random()-.5)*2.4,v=40+Math.random()*120;HF.sp.push({x:px,y:py,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:.5+Math.random()*.5,r:1+Math.random()*1.8,c:T.sp[k%T.sp.length]})}if(HF.sp.length>90)HF.sp.splice(0,HF.sp.length-90)}
+function hifiVU(x,mx,my,mw,mh,c,T,i){
+ const r=Math.min(10,mh*.1),B=HF.back;
+ // bezel and backlit face
+ x.fillStyle=T.k==='y'?'#8a5a1c':'#2a2a30';x.beginPath();x.roundRect(mx,my,mw,mh,r);x.fill();
+ const fx=mx+mh*.05,fy=my+mh*.05,fw=mw-mh*.1,fh=mh-mh*.1;
+ const g=x.createLinearGradient(0,fy,0,fy+fh);g.addColorStop(0,T.face[0]);g.addColorStop(1,T.face[1]);x.fillStyle=g;x.beginPath();x.roundRect(fx,fy,fw,fh,r*.7);x.fill();
+ x.save();x.beginPath();x.roundRect(fx,fy,fw,fh,r*.7);x.clip();
+ const gl=x.createRadialGradient(fx+fw/2,fy+fh*1.05,0,fx+fw/2,fy+fh*1.05,fw*.85);
+ const glc=T.glow;gl.addColorStop(0,hexA(glc,.55*B));gl.addColorStop(.6,hexA(glc,.16*B));gl.addColorStop(1,hexA(glc,0));x.fillStyle=gl;x.fillRect(fx,fy,fw,fh);
+ if(T.k==='y'){x.fillStyle=`rgba(255,190,90,${.25*B})`;x.fillRect(fx,fy,fw,fh)}
+ // scale: -20..+3 VU, 0 VU at ~71% of the swing
+ const cx=fx+fw/2,cy=fy+fh*1.2,R=Math.min(fh*.96,fw*.62),A0=-0.7,A1=0.7,ang=p=>A0+(A1-A0)*p,P=db=>Math.pow(10,db/20)/Math.pow(10,3/20);
+ x.lineCap='round';
+ x.lineWidth=Math.max(1,fh*.025);x.strokeStyle=T.ink;x.globalAlpha=.85;x.beginPath();x.arc(cx,cy,R*.86,-Math.PI/2+ang(0),-Math.PI/2+ang(P(0)));x.stroke();
+ x.lineWidth=Math.max(2,fh*.05);x.strokeStyle=T.red;x.globalAlpha=.95;x.beginPath();x.arc(cx,cy,R*.86,-Math.PI/2+ang(P(0)),-Math.PI/2+ang(1));x.stroke();x.globalAlpha=1;
+ x.font=`700 ${Math.max(7,fh*.1)}px Outfit,sans-serif`;x.textAlign='center';x.textBaseline='middle';
+ for(const db of[-20,-10,-7,-5,-3,-1,0,1,3]){const a=-Math.PI/2+ang(P(db)),big=db%5===0||db===-7||db===-3||db===3;
+  x.strokeStyle=db>0?T.red:T.ink;x.lineWidth=Math.max(1,fh*.018);x.beginPath();x.moveTo(cx+Math.cos(a)*R*.86,cy+Math.sin(a)*R*.86);x.lineTo(cx+Math.cos(a)*R*(big?.97:.93),cy+Math.sin(a)*R*(big?.97:.93));x.stroke();
+  if(big&&db!==-1){x.fillStyle=db>0?T.red:T.ink;x.fillText(db>0?'+'+db:String(Math.abs(db)),cx+Math.cos(a)*R*1.07,cy+Math.sin(a)*R*1.07)}}
+ x.fillStyle=T.ink;x.globalAlpha=.8;x.font=`800 ${Math.max(8,fh*.13)}px Bungee,Outfit,sans-serif`;x.fillText('VU',cx,fy+fh*.58);
+ x.font=`700 ${Math.max(6,fh*.075)}px Outfit,sans-serif`;x.fillText(i?'RIGHT':'LEFT',fx+fw*(i?.82:.18),fy+fh*.86);x.globalAlpha=1;
+ // PEAK lamp
+ const lx=fx+fw*.86,ly=fy+fh*.2,lr=Math.max(2.5,fh*.05);x.fillStyle=c.lamp>.02?hexA(T.red,.35+.65*c.lamp):'rgba(70,20,20,.7)';x.beginPath();x.arc(lx,ly,lr,0,7);x.fill();
+ if(c.lamp>.02){const pg=x.createRadialGradient(lx,ly,0,lx,ly,lr*4);pg.addColorStop(0,hexA(T.red,.5*c.lamp));pg.addColorStop(1,hexA(T.red,0));x.fillStyle=pg;x.fillRect(lx-lr*4,ly-lr*4,lr*8,lr*8)}
+ // needle
+ const a=-Math.PI/2+ang(Math.min(1.04,c.n)),tx=cx+Math.cos(a)*R*.99,ty=cy+Math.sin(a)*R*.99;
+ x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=Math.max(1.5,fh*.03);x.beginPath();x.moveTo(cx+2,cy+2);x.lineTo(tx+2,ty+2);x.stroke();
+ x.strokeStyle=T.needle;x.lineWidth=Math.max(1,fh*.022);x.beginPath();x.moveTo(cx,cy);x.lineTo(tx,ty);x.stroke();
+ // glass glare
+ const gg=x.createLinearGradient(fx,fy,fx+fw*.6,fy+fh);gg.addColorStop(0,'rgba(255,255,255,.16)');gg.addColorStop(.45,'rgba(255,255,255,0)');x.fillStyle=gg;x.fillRect(fx,fy,fw,fh);
+ x.restore();
+ // pivot cap peeking up from the bottom edge
+ x.fillStyle=T.k==='y'?'#3a2610':'#111';x.beginPath();x.ellipse(cx,fy+fh,fw*.12,fh*.09,0,Math.PI,0);x.fill();
+ return[tx,ty];
+}
+function hifiLadders(x,lx,ly,lw,lh,T){
+ const N=20,rows=[ly+lh*.14,ly+lh*.58],sh=lh*.26,sg=lw/N,sw=sg*.72,B=HF.back;
+ x.font=`700 ${Math.max(7,lh*.1)}px Outfit,sans-serif`;x.textBaseline='middle';x.textAlign='center';x.fillStyle=T.lbl;
+ [['-20',0],['-10',.35],['-5',.55],['0',.75],['+3',.95]].forEach(([s,f])=>x.fillText(s,lx+lw*f+sg*.36,ly+lh*.47));
+ HF.ch.forEach((c,i)=>{const y=rows[i],lit=Math.round(c.led*N),pk=Math.min(N-1,Math.round(c.pk*N)-1);
+  for(let k=0;k<N;k++){const col=k>=N-3?T.led[2]:k>=N-7?T.led[1]:T.led[0],sx=lx+k*sg,isOn=k<lit||k===pk&&c.pk>.05;
+   x.fillStyle=isOn?col:'rgba(255,255,255,.07)';x.globalAlpha=isOn?Math.min(1,.55+.45*B):1;x.beginPath();x.roundRect(sx,y,sw,sh,Math.min(3,sw*.25));x.fill();
+   if(isOn){x.globalAlpha=.35*B;x.fillStyle='#fff';x.fillRect(sx+sw*.15,y+sh*.08,sw*.7,Math.max(1,sh*.12))}}
+  x.globalAlpha=1;x.fillStyle=T.lbl;x.textAlign='left';x.fillText(i?'R':'L',lx-sg*.1-lh*.09,y+sh/2);x.textAlign='center'});
+}
+function hexA(c,a){c=String(c).trim();let m=c.match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);if(m){let h=m[1];if(h.length===3)h=h.split('').map(z=>z+z).join('');const n=parseInt(h,16);return`rgba(${n>>16&255},${n>>8&255},${n&255},${a})`}
+ m=c.match(/^rgba?\(([^)]+)\)/);if(m){const p=m[1].split(',').map(z=>parseFloat(z));return`rgba(${p[0]},${p[1]},${p[2]},${a})`}return c}
+document.addEventListener('visibilitychange',()=>{HF.last=0});
 function openDeck(saver){
  DECK.open=true;DECK.saver=!!saver;if(!saver)sfx('tick');
  $('#deck').classList.toggle('saver',!!saver);DECK.nextSig=null;DECK.lyrKey=null;dkCtlRender();
@@ -8946,11 +9063,11 @@ function openDeck(saver){
  if(!D3&&!D3fail)dk.classList.add('loading3');
  deck3d().then(d=>{
   dk.classList.remove('loading3');if(!DECK.open)return;
-  if(d){dk.classList.add('three');cancelAnimationFrame(DECK.raf);d.start();deck3Info();clearInterval(DECK.capT);DECK.capT=setInterval(deck3Info,500)}
+  if(d){dk.classList.add('three');cancelAnimationFrame(DECK.raf);d.start();deck3Info();hifiStart();clearInterval(DECK.capT);DECK.capT=setInterval(deck3Info,500)}
   else{dk.classList.remove('three');cancelAnimationFrame(DECK.raf);DECK.last=0;DECK.raf=requestAnimationFrame(deckFrame)}
  });
 }
-function closeDeck(){hideTip();if(D3)D3.stop();clearInterval(DECK.capT);DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf);hostSync()}
+function closeDeck(){hideTip();if(D3)D3.stop();hifiStop();clearInterval(DECK.capT);DECK.open=false;DECK.saver=false;$('#deck').classList.remove('on');$('#deckBtn').classList.remove('on');cancelAnimationFrame(DECK.raf);hostSync()}
 $('#deckBtn').onclick=()=>{if(REMOTE){if(RM.owner)remoteScreen('deck');return}openDeck(false)};
 $('#dkClose').onclick=closeDeck;
 $('#dkStart').onclick=()=>{sfx('tick');togglePlay()};

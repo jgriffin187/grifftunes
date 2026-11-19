@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.42 — November 18, 2026
+
+- **Hi-fi meter bridge on the full-screen turntable.** The song title in the top-left corner now sits in a receiver-style faceplate (brushed-aluminum bezel, black glass) with two backlit analog VU meters (left and right) and two 20-segment LED level ladders with peak-hold dots. The needles swing with a little spring overshoot, and every 7–18 seconds a big moment slams them into the red, lights the PEAK lamps and throws a burst of sparks. When the music pauses or stops, the needles fall to rest and the backlights dim.
+- Like the Now Playing bars, it's simulated (the music plays on the WiiM, so the page never hears it), with left and right a little out of step so it reads as stereo.
+- **Follows the modes:** the meter faces and LEDs take the current accent colors; Yacht Mode gets a brass bezel and warm cream meter faces, placed inside the teak frame below the flags; Christmas Mode gets red-and-green faces and a red glow.
+- Sized to stay clear of the album-art label on the record; the sing-along lyrics now start just below the faceplate.
+- One small canvas (`#dkHifi`, `hifiFrame()`), drawn only while the turntable is open and the tab is visible. Turn it off in Settings → Screen → "Hi-fi meters on the full-screen turntable" (`S.dkHifi`, on by default). Sparks are skipped with reduced motion.
+
 ## 1.41.3 — November 18, 2026
 
 - **The overnight song finder now re-checks the songs 1.41.1 and 1.41.2 flagged** (titles with parentheses that were saved as "not on Spotify", and the 67 cleared wrong matches), so they're fixed without waiting for a countdown to reach them. Same gentle pace as always: 1–6 AM while the jukebox is idle, one song a minute, at most 60 Spotify requests an hour, and it stops for the night at any slow-down. Each song gets one more look (`libRedo()`).
