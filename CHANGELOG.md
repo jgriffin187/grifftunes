@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.41.1 — November 18, 2026
+
+- **Fix: songs whose titles start with a parenthesis showed "not on Spotify".** The song finder searched without the parenthetical ("I'm Outta Here!") and then insisted Spotify's name match that exactly, but Spotify keeps it ("(If You're Not In It For Love) I'm Outta Here!"), so the right track was found and thrown away. It now also compares names with the parentheses removed on both sides. Affected: Shania Twain's "(If You're Not in It for Love) I'm Outta Here!" (1996), Trace Adkins' "(This Ain't) No Thinkin' Thing", Ronnie Milsap's "(I'm a) Stand by My Woman Man" and Charley Pride's "(I'm So) Afraid of Losing You Again". Misses saved before this fix for titles with parentheses get one more lookup the next time they come up (one search each, no bulk lookups).
+
 ## 1.41 — November 18, 2026
 
 - **Offsite backup.** Settings → System → Offsite backup → **Save backup** downloads one file (`grifftunes-backup-YYYY-MM-DD.json`) with the settings, genre picks, lists, Up Next, credits and every song the library has found on Spotify. It holds **no keys or sign-ins**: the Gemini keys, owner key, Spotify sign-ins, family members' sign-ins, Couch Remote link, Hue bridge username and Spotify Client ID are all left out, so it's safe to keep in Google Drive or on a USB stick. **Restore backup** (tap twice) puts it all back and keeps whatever keys the jukebox already has. On a brand-new jukebox, re-enter the keys and re-add family members afterwards (RESTORE.md in the backup package walks through it). The existing "Move to a new jukebox" setup file is unchanged and still carries the keys, for moving to a new jukebox only.

@@ -2355,7 +2355,9 @@ const SPOTIFY={
    const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(q)).catch(e=>{if(e.status===429)throw e;return null});
    const items=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists);
    const byArtist=t=>t.artists.some(x=>{const n=flat(x.name);return n&&a&&(n.includes(a)||a.includes(n))});
-   const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
+   // compare with parentheses stripped on both sides too: the chart's "(If You're Not in It for Love) I'm Outta Here!" is searched as "I'm Outta Here!", but Spotify's name keeps the "(If You're…)" part
+   const bare=n=>songKey(String(n).replace(/\s*\([^)]*\)\s*/g,' '));
+   const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>bare(t.name)===k&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
    if(best)return spT(best);
   }
   return null;
@@ -4779,7 +4781,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.41';
+const GT_VERSION='1.41.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -6720,9 +6722,11 @@ async function libFind(title,artist){
  await libLoad();
  const k=libKey(title,artist),e=LIB.map.get(k);
  if(e&&e.t&&!e.t.img)await libArt(k,e);
- if(e&&(e.t||Date.now()-e.at<30*864e5))return e.t;
+ // 1.41.1: misses for titles with parentheses, saved before the matcher fix (no mv), get one more try now
+ const retry=e&&!e.t&&!e.mv&&/\(/.test(title);
+ if(e&&!retry&&(e.t||Date.now()-e.at<30*864e5))return e.t;
  const t=await provider.findSong(title,artist);
- const v={t:t?slimT(t):null,at:Date.now()};LIB.map.set(k,v);libPut(k,v);
+ const v={t:t?slimT(t):null,at:Date.now(),mv:2};LIB.map.set(k,v);libPut(k,v);
  return v.t;
 }
 // Spotify's embed info gives a 300 px cover from its image CDN; the same picture at 640 px is on i.scdn.co (sharper on the turntable)
