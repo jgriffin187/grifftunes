@@ -1589,7 +1589,7 @@ html.remote .modesBtn{height:44px;padding:0 10px}html.remote .modesBtn>span{disp
   <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
   <div class="modesWrap" id="modesWrap" style="display:none">
-  <button class="modesBtn" id="modesBtn" aria-label="Party modes" aria-haspopup="true" aria-expanded="false"><i class="mIco" id="modesIco"></i><span>Modes</span><em id="modesDays"></em></button>
+  <button class="modesBtn" id="modesBtn" aria-label="Party modes" aria-haspopup="true" aria-expanded="false"><i class="mIco" id="modesIco"></i><span>Modes</span></button>
   <div class="modePop" id="modePop" role="menu">
   <button class="xmasBtn" id="xmasBtn" aria-label="Christmas Mode" style="display:none"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 2l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#ffd23f"/><path d="M16 11l7 9h-3.5l6 8H19l3 4H10l3-4H5.5l6-8H8z" fill="#1fbf5a"/><rect x="14" y="32" width="4" height="4" rx="1" fill="#8b5a2b"/><circle cx="13" cy="20" r="1.4" fill="#ff3b3b"/><circle cx="19" cy="24" r="1.4" fill="#ffd23f"/><circle cx="12.5" cy="28" r="1.4" fill="#3bb7ff"/><circle cx="20" cy="29" r="1.4" fill="#ff3b3b"/></svg><span id="xmasDays"></span></button>
   <button class="xmasBtn efzBtn" id="efzBtn" aria-label="Edmund Fitzgerald memorial" style="display:none"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2a3 3 0 0 1 3 3v1.4c6.2 1.4 10 6.8 10 14.6v8.5l4 5.5H3l4-5.5V21c0-7.8 3.8-13.2 10-14.6V5a3 3 0 0 1 3-3z" fill="#e8c26a" stroke="#7a5a1c" stroke-width="1.2"/><path d="M9 31h22" stroke="#7a5a1c" stroke-width="1.2"/><circle cx="20" cy="39.5" r="3.6" fill="#c99a3a" stroke="#7a5a1c" stroke-width="1"/><path d="M13 12c1.5-2.5 3.5-3.6 5.5-4" stroke="#fff6d8" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/></svg><span>Fitz</span></button>
@@ -4826,7 +4826,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.43';
+const GT_VERSION='1.43.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -9430,7 +9430,7 @@ if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.ac
 setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
 /* ---------- 1.43 Modes drop-down (keeps the top bar from crowding out search) ---------- */
 (()=>{
- const wrap=$('#modesWrap'),btn=$('#modesBtn'),pop=$('#modePop'),ico=$('#modesIco'),days=$('#modesDays');
+ const wrap=$('#modesWrap'),btn=$('#modesBtn'),pop=$('#modePop'),ico=$('#modesIco');
  const KIDS=[['xmasBtn','xmas'],['efzBtn','efz'],['yachtBtn','yacht'],['atwBtn','atw']];
  const SPARK='<svg viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
  let shown='',idleT=0;
@@ -9442,7 +9442,6 @@ setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
   const pick=on||(kids.length===1?kids[0]:null),key=pick?pick.k:'spark';
   if(key!==shown){shown=key;const sv=pick&&pick.b.querySelector('svg');ico.innerHTML=sv?sv.outerHTML:SPARK}
   btn.className='modesBtn'+(on?' on m-'+on.k:'')+(pop.classList.contains('open')?' open':'');
-  const x=kids.find(k=>k.k==='xmas');days.textContent=x&&!on&&typeof xmasDays==='function'&&xmasDays()>0&&xmasDays()<=60?xmasDays()+'d':'';
   if(!kids.length)close();
   return ask;
  }

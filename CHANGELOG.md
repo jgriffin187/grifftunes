@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.43.1 — November 18, 2026
+
+- The Modes button just says "Modes" now; the Christmas countdown only shows inside the drop-down list.
+
 ## 1.43 — November 18, 2026
 
 - **Roomier top bar.** The Christmas, Fitz, Yacht and ATW buttons now live behind one **Modes** button, so the search bar has room again (it had been squeezed down to just the magnifying glass on the 24" screen). Tap Modes to drop down the list; tapping a mode starts it and closes the list. The scarf still asks "Play?" first, and the list stays open for that second tap.
