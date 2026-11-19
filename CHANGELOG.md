@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.41.3 — November 18, 2026
+
+- **The overnight song finder now re-checks the songs 1.41.1 and 1.41.2 flagged** (titles with parentheses that were saved as "not on Spotify", and the 67 cleared wrong matches), so they're fixed without waiting for a countdown to reach them. Same gentle pace as always: 1–6 AM while the jukebox is idle, one song a minute, at most 60 Spotify requests an hour, and it stops for the night at any slow-down. Each song gets one more look (`libRedo()`).
+
 ## 1.41.2 — November 18, 2026
 
 - **The song finder no longer picks covers, karaoke or tribute versions**, and only settles for a live recording when no studio version turns up (unless the chart title itself says live, karaoke, etc.). It also matches chart titles ending in "Part 1" to Spotify's plain or "Pt. 1" names, so the S.O.S. Band's "Take Your Time (Do It Right) Part 1" finds the studio single instead of a live all-star album.

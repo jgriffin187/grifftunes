@@ -4792,7 +4792,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.41.2';
+const GT_VERSION='1.41.3';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -6727,14 +6727,16 @@ function libLoad(){
  })();
  return LIB.ready;
 }
+// A miss that deserves one more look with the newer finder: titles with parentheses saved before 1.41.1, and songs the
+// shared library cleared (wrong matches, 1.41.2). Once looked up again they carry mv, so it's one try each.
+const libRedo=(e,title)=>!!e&&!e.t&&!e.mv&&(/\(/.test(title)||!!e.redo);
 // Find a chart song: from the library when possible, otherwise ask Spotify once and remember the answer (misses are retried after 30 days)
 async function libFind(title,artist){
  if(provider!==SPOTIFY)return provider.findSong(title,artist);
  await libLoad();
  const k=libKey(title,artist),e=LIB.map.get(k);
  if(e&&e.t&&!e.t.img)await libArt(k,e);
- // 1.41.1: misses for titles with parentheses, saved before the matcher fix (no mv), get one more try now
- const retry=e&&!e.t&&!e.mv&&(/\(/.test(title)||e.redo);
+ const retry=libRedo(e,title);
  if(e&&!retry&&(e.t||Date.now()-e.at<30*864e5))return e.t;
  const t=await provider.findSong(title,artist);
  const v={t:t?slimT(t):null,at:Date.now(),mv:3};LIB.map.set(k,v);libPut(k,v);
@@ -6873,7 +6875,7 @@ setInterval(async()=>{
  LIB.busy=true;
  try{
   const C=await libCandidates();
-  while(LIB.idx<C.length){const[t,a]=C[LIB.idx];const e=LIB.map.get(libKey(t,a));if(e&&(e.t||Date.now()-e.at<30*864e5)){LIB.idx++;continue}break}
+  while(LIB.idx<C.length){const[t,a]=C[LIB.idx];const e=LIB.map.get(libKey(t,a));if(e&&!libRedo(e,t)&&(e.t||Date.now()-e.at<30*864e5)){LIB.idx++;continue}break}
   if(LIB.idx>=C.length){if(LIB.manual){LIB.manual=false;toast('Song library is complete')}return}
   const[t,a]=C[LIB.idx++];
   try{await libFind(t,a);libNote(null,1)}catch(e){LIB.idx--;if(e.status===429){LIB.stopDay=new Date().toDateString();LIB.manual=false;libNote('Spotify asked GriffTunes to slow down')}}
