@@ -2,6 +2,13 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.43 — November 18, 2026
+
+- **Roomier top bar.** The Christmas, Fitz, Yacht and ATW buttons now live behind one **Modes** button, so the search bar has room again (it had been squeezed down to just the magnifying glass on the 24" screen). Tap Modes to drop down the list; tapping a mode starts it and closes the list. The scarf still asks "Play?" first, and the list stays open for that second tap.
+- The Modes button shows the running mode's icon and colors (red-green for Christmas, sunset for Yacht, red for All Too Well), and a small "37d" Christmas countdown when no mode is on. The list closes on a tap anywhere else, after 10 seconds idle, or with the hidden logo-hold reset.
+- Search now keeps at least 220 px, whatever else is in the bar.
+- The Settings toggles that hide a mode's button still work; Modes disappears if every mode button is hidden.
+
 ## 1.42 — November 18, 2026
 
 - **Hi-fi meter bridge on the full-screen turntable.** The song title in the top-left corner now sits in a receiver-style faceplate (brushed-aluminum bezel, black glass) with two backlit analog VU meters (left and right) and two 20-segment LED level ladders with peak-hold dots. The needles swing with a little spring overshoot, and every 7–18 seconds a big moment slams them into the red, lights the PEAK lamps and throws a burst of sparks. When the music pauses or stops, the needles fall to rest and the backlights dim.

@@ -1556,6 +1556,23 @@ html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
 #gyRange{flex:1;min-width:160px;max-width:360px}
 #gyList .mv{width:58px}
 #djStat:empty{display:none}
+/* 1.43 Modes drop-down: the Christmas / Fitz / Yacht / ATW buttons live in #modePop */
+.modesWrap{position:relative;flex:none;z-index:45}
+.modesBtn{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px 0 12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid var(--stroke);color:#fff;font-family:Bungee;font-size:13px;letter-spacing:.04em;white-space:nowrap}
+.modesBtn .mIco{display:grid;place-items:center;width:30px;height:32px}.modesBtn .mIco svg{width:28px;height:30px;filter:drop-shadow(0 0 6px rgba(255,210,63,.5))}
+.modesBtn em{font-style:normal;font-size:11px;padding:3px 7px;border-radius:99px;background:rgba(31,191,90,.25);border:1px solid rgba(31,191,90,.6);color:#bff5cf}.modesBtn em:empty{display:none}
+.modesBtn.open{border-color:var(--accent2)}
+.modesBtn.on{background:rgba(255,255,255,.14);border-color:rgba(255,215,120,.7);box-shadow:0 0 18px rgba(255,210,63,.35)}
+.modesBtn.on.m-xmas{background:linear-gradient(135deg,#b3001b,#0d7a3a)}
+.modesBtn.on.m-yacht{background:rgba(255,140,70,.18);border-color:rgba(255,170,90,.6);box-shadow:0 0 16px rgba(255,140,70,.35)}
+.modesBtn.on.m-atw{background:rgba(200,30,50,.2);border-color:rgba(255,120,120,.6);box-shadow:0 0 16px rgba(220,40,60,.4)}
+.modePop{position:absolute;top:calc(100% + 10px);right:0;min-width:250px;display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:22px;background:rgba(18,10,32,.94);border:1px solid var(--stroke);box-shadow:0 18px 50px rgba(0,0,0,.6);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);opacity:0;transform:translateY(-6px);pointer-events:none;transition:opacity .18s,transform .18s}
+.modePop.open{opacity:1;transform:none;pointer-events:auto}
+.modePop .xmasBtn{width:100%;height:58px;padding:0 16px 0 12px;gap:12px;font-size:15px;justify-content:flex-start}
+.modePop .xmasBtn span{display:inline!important}
+#modePop #xmasDays::before{content:'Christmas · '}#modePop #xmasDays:empty::before{content:'Christmas'}
+.searchBtn{min-width:220px}
+html.remote .modesBtn{height:44px;padding:0 10px}html.remote .modesBtn>span{display:none}
 </style>
 </head>
 <body>
@@ -1571,10 +1588,15 @@ html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
   <button class="askBtn" id="askBtn" aria-label="Ask DJ Griff for a song" style="display:none"><span data-icon="mic"></span><b>Ask DJ</b></button>
   <div class="credits" id="credits"><div class="coin">GT</div><div><small>CREDITS</small><b id="creditNum">0</b></div></div>
   <button class="coinBtn" id="coinBtn">Insert coin</button>
+  <div class="modesWrap" id="modesWrap" style="display:none">
+  <button class="modesBtn" id="modesBtn" aria-label="Party modes" aria-haspopup="true" aria-expanded="false"><i class="mIco" id="modesIco"></i><span>Modes</span><em id="modesDays"></em></button>
+  <div class="modePop" id="modePop" role="menu">
   <button class="xmasBtn" id="xmasBtn" aria-label="Christmas Mode" style="display:none"><svg viewBox="0 0 32 36" aria-hidden="true"><path d="M16 2l2.2 4.6 5 .6-3.7 3.4 1 5-4.5-2.5-4.5 2.5 1-5-3.7-3.4 5-.6z" fill="#ffd23f"/><path d="M16 11l7 9h-3.5l6 8H19l3 4H10l3-4H5.5l6-8H8z" fill="#1fbf5a"/><rect x="14" y="32" width="4" height="4" rx="1" fill="#8b5a2b"/><circle cx="13" cy="20" r="1.4" fill="#ff3b3b"/><circle cx="19" cy="24" r="1.4" fill="#ffd23f"/><circle cx="12.5" cy="28" r="1.4" fill="#3bb7ff"/><circle cx="20" cy="29" r="1.4" fill="#ff3b3b"/></svg><span id="xmasDays"></span></button>
   <button class="xmasBtn efzBtn" id="efzBtn" aria-label="Edmund Fitzgerald memorial" style="display:none"><svg viewBox="0 0 40 44" aria-hidden="true"><path d="M20 2a3 3 0 0 1 3 3v1.4c6.2 1.4 10 6.8 10 14.6v8.5l4 5.5H3l4-5.5V21c0-7.8 3.8-13.2 10-14.6V5a3 3 0 0 1 3-3z" fill="#e8c26a" stroke="#7a5a1c" stroke-width="1.2"/><path d="M9 31h22" stroke="#7a5a1c" stroke-width="1.2"/><circle cx="20" cy="39.5" r="3.6" fill="#c99a3a" stroke="#7a5a1c" stroke-width="1"/><path d="M13 12c1.5-2.5 3.5-3.6 5.5-4" stroke="#fff6d8" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/></svg><span>Fitz</span></button>
   <button class="xmasBtn yachtBtn" id="yachtBtn" aria-label="Yacht Mode" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4v26" stroke="#e8d7b8" stroke-width="2"/><path d="M21.5 6c7 5 11 12 12 20H21.5z" fill="#fff"/><path d="M18.5 10c-5 5-8 10-9 16h9z" fill="#f2e9d6"/><path d="M5 29h30l-4 7H9z" fill="#ff7a4a"/><path d="M2 38c6-2 10 1 16-1s10-2 20 0" stroke="#5fd3e6" stroke-width="2" fill="none"/></svg><span>Yacht</span></button>
   <button class="xmasBtn atwBtn" id="atwBtn" aria-label="All Too Well (10 Minute Version)" style="display:none"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M7 8c6-3 20-3 26 0l-2 7c-6-2.5-16-2.5-22 0z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M24 13l5 1-4 17-6-1z" fill="#a8172a" stroke="#6e0a19" stroke-width="1"/><path d="M12 14l5-1 1 16-6 1z" fill="#c21d2e" stroke="#6e0a19" stroke-width="1"/><path d="M12.5 30v6M14.5 30v6.5M16.5 29.5v6M19.5 30.5v6M21.5 31v6M23.5 31v5.5" stroke="#e0445a" stroke-width="1.2" stroke-linecap="round"/><path d="M10 10.5c5-1.6 15-1.6 20 0" stroke="#ff8a8a" stroke-width=".9" fill="none" opacity=".6"/></svg><span>ATW</span></button>
+  </div>
+  </div>
   <div class="clock" id="clock"></div>
   <button class="iconBtn" id="lightsBtn" aria-label="Lights" data-icon="bulb" style="display:none"></button>
   <button class="iconBtn" id="mbBtn" aria-label="Mirrorball" data-icon="mball" style="display:none"></button>
@@ -4804,7 +4826,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.42';
+const GT_VERSION='1.43';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -8002,6 +8024,7 @@ function ymIntro(){
    screensaver, sets the screensaver back to the fine art gallery and the lights back to album colors, and goes to the
    first tab. The music keeps playing (except the Yacht station, which ending Yacht Mode turns off). */
 async function gtHome(){
+ $('#modePop').classList.remove('open');$('#modesBtn').setAttribute('aria-expanded','false');
  if(REMOTE)return;
  try{if(EF.open)efzClose()}catch(e){}
  try{if(XM.active)await xmasSet(false)}catch(e){}
@@ -9099,6 +9122,7 @@ const TIPS={
  openAbout:'How GriffTunes works: features, setup, data sources and notes for developers',
  efzBtn:'Edmund Fitzgerald memorial: the song, the voyage on a map, and the bell for the 29',
  efRing:'Ring the bell 29 times, once for each crew member, and once more for all mariners lost on the Great Lakes',
+ modesBtn:'Party modes: Christmas, Edmund Fitzgerald, Yacht Rock, All Too Well',
  xmasBtn:()=>XM.active?'Turn off Christmas Mode':'Start Christmas Mode: Christmas music, lights and snow',
  npArt:'See the whole album and pick another song from it',
  albumAll:()=>isPlaylist(ALB.it)?`Add this playlist to the queue, in order (up to ${PLAYLIST_MAX} songs)`:'Add every song on this album to the queue, in order',
@@ -9404,6 +9428,35 @@ setInterval(()=>{
 // Christmas Mode comes back on after a reload if it was on
 if(!REMOTE){XM.active=!!S.xmas&&store.get('xmas_on',false);xmasRender();if(XM.active){xmasMatch();xartLoad()}}
 setInterval(()=>{if(S.xmas)$('#xmasDays').textContent=xmasDayTxt()},60*60e3);
+/* ---------- 1.43 Modes drop-down (keeps the top bar from crowding out search) ---------- */
+(()=>{
+ const wrap=$('#modesWrap'),btn=$('#modesBtn'),pop=$('#modePop'),ico=$('#modesIco'),days=$('#modesDays');
+ const KIDS=[['xmasBtn','xmas'],['efzBtn','efz'],['yachtBtn','yacht'],['atwBtn','atw']];
+ const SPARK='<svg viewBox="0 0 24 24" fill="none" stroke="#ffd23f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg>';
+ let shown='',idleT=0;
+ const vis=b=>b&&b.style.display!=='none'&&!(REMOTE&&getComputedStyle(b).display==='none');
+ function sync(){
+  const kids=KIDS.map(([id,k])=>({b:document.getElementById(id),k})).filter(x=>vis(x.b));
+  wrap.style.display=kids.length?'':'none';
+  const on=kids.find(x=>x.b.classList.contains('on')),ask=kids.some(x=>x.b.classList.contains('ask'));
+  const pick=on||(kids.length===1?kids[0]:null),key=pick?pick.k:'spark';
+  if(key!==shown){shown=key;const sv=pick&&pick.b.querySelector('svg');ico.innerHTML=sv?sv.outerHTML:SPARK}
+  btn.className='modesBtn'+(on?' on m-'+on.k:'')+(pop.classList.contains('open')?' open':'');
+  const x=kids.find(k=>k.k==='xmas');days.textContent=x&&!on&&typeof xmasDays==='function'&&xmasDays()>0&&xmasDays()<=60?xmasDays()+'d':'';
+  if(!kids.length)close();
+  return ask;
+ }
+ function open(){pop.classList.add('open');btn.setAttribute('aria-expanded','true');sync();arm()}
+ function close(){if(!pop.classList.contains('open'))return;pop.classList.remove('open');btn.setAttribute('aria-expanded','false');btn.classList.remove('open');clearTimeout(idleT)}
+ function arm(){clearTimeout(idleT);idleT=setTimeout(close,10e3)}
+ btn.addEventListener('click',e=>{e.stopPropagation();sfx('tick');pop.classList.contains('open')?close():open()});
+ // a mode tap closes the list, except the scarf's "Play?" first tap, which needs a second tap
+ pop.addEventListener('click',e=>{const tw=e.target.closest('#atwBtn');setTimeout(()=>{sync();if(tw&&tw.classList.contains('ask'))arm();else close()},0)});
+ addEventListener('pointerdown',e=>{if(pop.classList.contains('open')&&!wrap.contains(e.target))close()},true);
+ const mo=new MutationObserver(()=>sync());
+ KIDS.forEach(([id])=>{const b=document.getElementById(id);if(b)mo.observe(b,{attributes:true,attributeFilter:['style','class']})});
+ sync();setInterval(sync,60*60e3);
+})();
 // Weekly fresh start: reload at the chosen day and time once the jukebox is quiet (gives up 12 hours after the set time)
 if(!REMOTE&&!store.get('wk_refresh_at',0))store.set('wk_refresh_at',Date.now());
 const WK={quietSince:0};
