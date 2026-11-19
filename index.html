@@ -2351,16 +2351,27 @@ const SPOTIFY={
   const AKA={puffdaddy:'diddy',pdiddy:'diddy',seancombs:'diddy',puffy:'diddy',dixiechicks:'thechicks',ladyantebellum:'ladya',snoopdoggydogg:'snoopdogg'};
   const flat=x=>{const f=String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]/g,'');return AKA[f]||f};
   const k=songKey(clean),a=flat(main);
+  // covers, karaoke and tribute versions never count (1.41.2: "I Can See You" had matched "Taylor Swift Piano Covers"), and
+  // live recordings only count when nothing else turns up (the S.O.S. Band had matched a live all-star album), unless the chart asks for them
+  // (album names only count when they say so plainly: "Hobo's Lullaby", "Instrumental Hits" and "Live Like You Were Dying" are real albums)
+  const COV=/\b(covers?|karaoke|tribute|made famous|in the style of|originally performed|piano version|instrumental version|\(instrumental\))\b|\(instrumental\)/i,LIVE=/\blive\b/i;
+  const want=title+' '+artist,okCov=COV.test(want)||/instrumental/i.test(want),okLive=LIVE.test(title);
+  const isCov=t=>!okCov&&(COV.test(t.name)||/\binstrumental\b/i.test(t.name)||t.artists.some(x=>COV.test(x.name))||/\b(covers?|karaoke|tribute|made famous|piano version)\b|\(instrumental\)/i.test((t.album&&t.album.name)||''));
+  const isLive=t=>!okLive&&(LIVE.test(t.name)||/\(live\b|\blive (at|in|from|on)\b|\blive\)|^live( \d{4})?$|\bin concert\b|\bunplugged\b|\(swt live\)/i.test((t.album&&t.album.name)||''));
+  let liveBest=null;
   for(const q of[`track:"${clean}" artist:"${main}"`,`${clean} ${main}`,`track:"${clean}"`]){
    const j=await api('/search?type=track&limit=10&q='+encodeURIComponent(q)).catch(e=>{if(e.status===429)throw e;return null});
-   const items=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists);
+   const all=((j&&j.tracks&&j.tracks.items)||[]).filter(t=>t&&t.artists&&!isCov(t)),items=all.filter(t=>!isLive(t));
    const byArtist=t=>t.artists.some(x=>{const n=flat(x.name);return n&&a&&(n.includes(a)||a.includes(n))});
    // compare with parentheses stripped on both sides too: the chart's "(If You're Not in It for Love) I'm Outta Here!" is searched as "I'm Outta Here!", but Spotify's name keeps the "(If You're…)" part
    const bare=n=>songKey(String(n).replace(/\s*\([^)]*\)\s*/g,' '));
-   const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>bare(t.name)===k&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
+   // and without a "Part 1" / "Pt. 1" ending (charts list the A-side as "Part 1"; Spotify often doesn't)
+   const noPt=x=>x.replace(/\s+(part|pt)\s*(1|one|i)$/,''),kp=noPt(k);
+   const best=items.find(t=>songKey(t.name)===k&&byArtist(t))||items.find(t=>bare(t.name)===k&&byArtist(t))||items.find(t=>(noPt(songKey(t.name))===kp||noPt(bare(t.name))===kp)&&byArtist(t))||items.find(t=>(songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t));
    if(best)return spT(best);
+   if(!liveBest)liveBest=all.find(t=>(songKey(t.name)===k||bare(t.name)===k||songKey(t.name).startsWith(k)||k.startsWith(songKey(t.name)))&&byArtist(t))||null;
   }
-  return null;
+  return liveBest?spT(liveBest):null;
  },
  // Spotify releases new music on Fridays, so New Releases is built once a week (Friday morning) and kept on this device
  // all week. An older copy still shows instantly while the new week's list builds in the background.
@@ -4781,7 +4792,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.41.1';
+const GT_VERSION='1.41.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -6712,7 +6723,7 @@ function libLoad(){
   // the shared library file in the repo, if there is one
   try{const r=await fetch('song-library.json',{cache:'no-cache'});if(r.ok){const j=await r.json(),fix=new Set(j.fixed||[]);for(const[k,a]of Object.entries(j.songs||{})){
    // a song the file has found (or corrected) wins over this jukebox's own "not on Spotify"
-   const h=LIB.map.get(k);if(h&&!fix.has(k)&&(h.t||!a))continue;if(h&&fix.has(k)&&h.t&&a&&h.t.id===a[0])continue;LIB.map.set(k,{t:a?{id:a[0],uri:'spotify:track:'+a[0],name:a[1],artist:a[2],album:a[3],img:a[4],duration:a[5]}:null,at:j.at||0,shared:true})}}}catch(e){}
+   const h=LIB.map.get(k);if(h&&!fix.has(k)&&(h.t||!a))continue;if(h&&fix.has(k)&&!a&&(h.mv||0)>=3)continue;if(h&&fix.has(k)&&h.t&&a&&h.t.id===a[0])continue;LIB.map.set(k,{t:a?{id:a[0],uri:'spotify:track:'+a[0],name:a[1],artist:a[2],album:a[3],img:a[4],duration:a[5]}:null,at:j.at||0,shared:true,redo:fix.has(k)&&!a})}}}catch(e){}
  })();
  return LIB.ready;
 }
@@ -6723,10 +6734,10 @@ async function libFind(title,artist){
  const k=libKey(title,artist),e=LIB.map.get(k);
  if(e&&e.t&&!e.t.img)await libArt(k,e);
  // 1.41.1: misses for titles with parentheses, saved before the matcher fix (no mv), get one more try now
- const retry=e&&!e.t&&!e.mv&&/\(/.test(title);
+ const retry=e&&!e.t&&!e.mv&&(/\(/.test(title)||e.redo);
  if(e&&!retry&&(e.t||Date.now()-e.at<30*864e5))return e.t;
  const t=await provider.findSong(title,artist);
- const v={t:t?slimT(t):null,at:Date.now(),mv:2};LIB.map.set(k,v);libPut(k,v);
+ const v={t:t?slimT(t):null,at:Date.now(),mv:3};LIB.map.set(k,v);libPut(k,v);
  return v.t;
 }
 // Spotify's embed info gives a 300 px cover from its image CDN; the same picture at 640 px is on i.scdn.co (sharper on the turntable)
