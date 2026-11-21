@@ -4845,7 +4845,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.44.1';
+const GT_VERSION='1.44.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -6831,11 +6831,12 @@ async function libArt(k,e){
 }
 // Album covers in the Countdown and Grad Year lists: from the song library, and fetched (Spotify's public embed info,
 // no quota) for the rows that scroll into view, a few at a time. Fetched once per song, then kept with the library.
-function cdArtImg(r){if(provider!==SPOTIFY||!LIB.map.size)return'';const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t&&e.t.img||''}
+const cdArtOn=()=>provider===SPOTIFY||REMOTE;
+function cdArtImg(r){if(!cdArtOn()||!LIB.map.size)return'';const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t&&e.t.img||''}
 const cdArtTag=r=>{const k=libKey(r.title,r.artist),im=cdArtImg(r);return`<img class="cdArt${im?'':' none'}" data-ck="${esc(k)}" alt="" loading="lazy" decoding="async"${im?` src="${esc(im)}"`:''}>`};
 const CDART={q:[],busy:0,pend:new Set(),io:null};
 async function cdArtFill(box){
- if(!box||provider!==SPOTIFY||REMOTE)return;
+ if(!box||!cdArtOn())return; // the Couch Remote too: shared library + Spotify's public embed info (no quota), kept on the phone
  await libLoad();
  if(!CDART.io)CDART.io=new IntersectionObserver(es=>{for(const x of es)if(x.isIntersecting){CDART.io.unobserve(x.target);cdArtWant(x.target.dataset.ck)}},{rootMargin:'300px'});
  for(const im of box.querySelectorAll('img.cdArt')){

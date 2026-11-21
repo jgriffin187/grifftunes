@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44.2 — November 21, 2026
+
+- **Album covers on the Couch Remote's Countdown and Grad Year lists.** They only ever loaded on the jukebox itself. The remote now fills them in the same way: from the shared song library, and from Spotify's public embed info (no Spotify quota used) for the rows you scroll to, a few at a time. Covers are kept on the phone after the first look, so they show right away next time.
+
 ## 1.44.1 — November 21, 2026
 
 - The Couch Remote's Modes button now says "Modes" (it was icon-only on phones, so with just Christmas available it looked like the old Christmas tree button).
