@@ -1899,6 +1899,7 @@ const DEFAULTS={name:'GriffTunes',mode:'demo',clientId:'',freePlay:false,coinCre
 const S=Object.assign({},DEFAULTS,store.get('settings',{}));
 // "Listen for Hey DJ" and "Keep the screen awake" used to share one setting (S.wake), so turning Hey DJ off also let
 // the screen sleep. Hey DJ gets its own (S.hey), starting as it is now; the screen stays awake (its usual default).
+if(!S.hifiOffV1&&!REMOTE){S.dkHifi=false;S.hifiOffV1=true;store.set('settings',S)}   // Josh went back to the plain title (1.43.4)
 if(!S.heyV2&&!REMOTE){S.hey=store.get('settings',{}).wake===true;S.wake=true;S.heyV2=true;store.set('settings',S)}
 // Radio now follows album art colors like every other song; station colors are opt-in
 if(!S.hueRadioV2&&!REMOTE){S.hueRadio=false;S.hueRadioV2=true;store.set('settings',S)}
@@ -4844,7 +4845,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.43.3';
+const GT_VERSION='1.43.4';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -4981,7 +4982,7 @@ function openSettings(){
   <div class="field two" style="margin-bottom:0"><div><label for="fAttract">Start after (sec, 0 = off)</label><input type="number" id="fAttract" min="0" max="3600" value="${S.attractSecs}"></div><div><label for="fArtSecs">Seconds per painting</label><input type="number" id="fArtSecs" min="10" max="600" value="${S.artSecs}"></div></div>
   <label class="tg" style="margin-top:8px"><span>Show lyrics on the screensaver</span><input type="checkbox" id="fLyrSaver" ${S.lyricsSaver?'checked':''}><i></i></label>
   <label class="tg" style="margin-top:8px"><span>Decade video screensavers (80s and 90s stations)</span><input type="checkbox" id="fEiSaver" ${S.eiSaver!==false?'checked':''}><i></i></label>
-  <label class="tg" style="margin-top:8px"><span>Hi-fi meters on the full-screen turntable</span><input type="checkbox" id="fDkHifi" ${S.dkHifi!==false?'checked':''}><i></i></label>
+  <label class="tg" style="margin-top:8px"><span>Hi-fi meters on the full-screen turntable</span><input type="checkbox" id="fDkHifi" ${S.dkHifi===true?'checked':''}><i></i></label>
   <div class="btnRow" style="margin-top:12px"><button class="btn" id="previewSaver">Preview screensaver</button></div>
   <div class="note">Paintings are public-domain works from the Art Institute of Chicago's open-access collection.</div></div>
  <div class="field"><span class="lab">Wall display</span>
@@ -9025,7 +9026,7 @@ function hifiTheme(){
 function hifiFrame(now){
  HF.raf=requestAnimationFrame(hifiFrame);
  if(!DECK.open){hifiStop();return}
- const dk=$('#deck'),want=S.dkHifi!==false;
+ const dk=$('#deck'),want=S.dkHifi===true;
  if(want!==HF.on){HF.on=want;dk.classList.toggle('hifi',want);if(!want)$('#dkLyr').style.top=''}
  // sing-along lyrics start just below the faceplate (its height follows the screen size and Yacht Mode's frame)
  if(want&&now-(HF.lyrT||0)>600){HF.lyrT=now;const cb=$('#dk3Cap').getBoundingClientRect().bottom;if(cb>0)$('#dkLyr').style.top=Math.round(cb+18)+'px'}

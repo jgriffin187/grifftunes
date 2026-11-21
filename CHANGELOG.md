@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.43.4 — November 20, 2026
+
+- **The full-screen turntable is back to the plain title and artist** (as before 1.42): no faceplate box and no VU meters or LED ladders. The hi-fi meters are now off by default, and this update turns them off on the jukebox once. They can still be turned back on in Settings → Screen → "Hi-fi meters on the full-screen turntable". Long titles still scroll (1.43.3).
+
 ## 1.43.3 — November 20, 2026
 
 - **Long song titles scroll on the full-screen turntable.** When a title doesn't fit (in the hi-fi faceplate or the plain caption), it holds for a moment, then glides left like a marquee and loops seamlessly with a dot between repeats, with a soft fade at the right edge. Titles that fit stay still. No scrolling with reduced motion (it keeps the "…").
