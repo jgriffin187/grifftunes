@@ -1502,6 +1502,12 @@ html.npTight2 .ymMeter{margin-top:6px;padding:6px 10px}
 @media (max-width:1100px){.layout{grid-template-columns:minmax(0,1fr) 370px}.npArt{width:180px;height:180px}.npStage{height:180px}.vinyl{width:166px;height:166px}.np.playing .vinyl{left:136px}.coinBtn{padding:0 16px;font-size:14px}}
 @media (max-width:820px){
  html,body{overflow-y:auto;overflow-x:hidden;overflow-x:clip;max-width:100%}
+ /* phones: the page itself is the only vertical scroller (iOS latches a swipe onto an inner scroller, so a list
+    that fills the screen used to trap you below the controls) */
+ html{height:auto}
+ body{height:auto;overflow:visible;overflow-x:clip}
+ .cdPanel{flex:none;min-height:0}
+ .cdList{flex:none;overflow:visible;grid-auto-rows:minmax(60px,auto);padding-right:0}
  #app{max-width:100vw;overflow-x:hidden;overflow-x:clip}
  #app{height:auto;min-height:100vh;padding:12px 12px 20px}
  header.top{flex-wrap:wrap;height:auto;gap:10px}
@@ -4845,7 +4851,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.44.2';
+const GT_VERSION='1.44.3';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

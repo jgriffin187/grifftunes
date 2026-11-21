@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44.3 — November 21, 2026
+
+- **Couch Remote scrolling no longer gets stuck.** On phones the Countdown and Grad Year lists were their own little scrolling boxes inside the page, almost a full screen tall. iPhones lock a swipe onto whichever box it starts in, so once the list filled the screen you couldn't swipe back up to the controls. The lists are now part of the page, and the page is the only thing that scrolls (tapping the clock at the top of an iPhone also jumps back to the top now).
+
 ## 1.44.2 — November 21, 2026
 
 - **Album covers on the Couch Remote's Countdown and Grad Year lists.** They only ever loaded on the jukebox itself. The remote now fills them in the same way: from the shared song library, and from Spotify's public embed info (no Spotify quota used) for the rows you scroll to, a few at a time. Covers are kept on the phone after the first look, so they show right away next time.
