@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44.1 — November 21, 2026
+
+- The Couch Remote's Modes button now says "Modes" (it was icon-only on phones, so with just Christmas available it looked like the old Christmas tree button).
+
 ## 1.44 — November 20, 2026
 
 - **The Couch Remote has the full Modes list.** Its Modes button now drops down Christmas, Fitz, Yacht and ATW, just like the jukebox. Tapping one starts it on the jukebox; tapping Christmas, Fitz or Yacht again turns it off. ATW asks "Play?" first (tap again within 4 seconds), and is ended by skipping the song. The running mode lights up and its icon shows on the Modes button, and it follows the jukebox within a couple of seconds, however the mode was started.
