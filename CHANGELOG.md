@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.43.3 — November 20, 2026
+
+- **Long song titles scroll on the full-screen turntable.** When a title doesn't fit (in the hi-fi faceplate or the plain caption), it holds for a moment, then glides left like a marquee and loops seamlessly with a dot between repeats, with a soft fade at the right edge. Titles that fit stay still. No scrolling with reduced motion (it keeps the "…").
+
 ## 1.43.2 — November 20, 2026
 
 - **Hey DJ no longer plays songs nobody asked for.** It had woken up twice on room noise with nobody talking, and Gemini then "heard" a request in the silence ("play the song about Barbie") and played Barbie Girl. Three fixes:

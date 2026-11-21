@@ -955,6 +955,13 @@ html.yacht #deck.hifi .dk3Cap{top:118px;left:64px;background:linear-gradient(180
 html.xmas #deck.hifi .dk3Cap{box-shadow:0 22px 60px rgba(0,0,0,.6),0 0 0 2px rgba(232,16,42,.55),0 0 28px rgba(232,16,42,.35),0 0 60px rgba(20,180,80,.2),inset 0 10px 30px rgba(0,0,0,.5)}
 .dk3Cap small{font-family:Bungee;font-size:clamp(11px,1vw,15px);letter-spacing:.24em;color:#ff8a4c}
 .dk3Cap b{font-size:clamp(24px,2.6vw,42px);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* a title too long for its space scrolls like a marquee: hold, glide left, and the repeat slides in seamlessly */
+.dk3Cap b.mq{text-overflow:clip;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 30px),transparent)}
+.dk3Cap b .mqIn{display:inline-block;white-space:nowrap;will-change:transform}
+.dk3Cap b.mq .mqIn{animation:mqRun var(--mqT,12s) linear infinite}
+.dk3Cap b .mqGap{display:inline-block;padding:0 .7em;opacity:.45}
+@keyframes mqRun{0%,20%{transform:translateX(0)}100%{transform:translateX(calc(var(--mqD,0px)*-1))}}
+@media (prefers-reduced-motion:reduce){.dk3Cap b.mq .mqIn{animation:none}}
 .dk3Cap span{font-size:clamp(16px,1.5vw,24px);color:rgba(255,255,255,.75)}
 .dk3Load{position:absolute;inset:0;display:none;place-items:center;z-index:3}
 /* Turntable overlays: up-next record stack, transport controls, sing-along lyrics (video deck only) */
@@ -4837,7 +4844,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.43.2';
+const GT_VERSION='1.43.3';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -8921,10 +8928,25 @@ async function deck3d(){
  })();
  return D3loading;
 }
+// Marquee for the full-screen turntable's song title: only when it doesn't fit; re-checked when its width changes
+// (the turntable opening, the hi-fi faceplate, a resize). Setting the same title again doesn't restart the scroll.
+function mqSet(el,txt){if(!el||el._mq===txt)return;el._mq=txt;el._mqW=-1;mqFit(el)}
+function mqFit(el){
+ const txt=el._mq;if(txt==null)return;
+ el.classList.remove('mq');el.textContent=txt;el._mqW=el.clientWidth;
+ if(!el.clientWidth||el.scrollWidth<=el.clientWidth+1)return;
+ const box=document.createElement('span'),a=document.createElement('span'),g=document.createElement('span');
+ box.className='mqIn';a.textContent=txt;g.className='mqGap';g.textContent='•';box.append(a,g,a.cloneNode(true));
+ el.textContent='';el.append(box);
+ const d=a.offsetWidth+g.offsetWidth;   // one title plus the gap: the loop's length
+ el.style.setProperty('--mqD',d+'px');el.style.setProperty('--mqT',(d/60/.8).toFixed(1)+'s');   // about 60 px a second, after a short hold
+ el.classList.add('mq');
+}
+try{const ro=new ResizeObserver(es=>es.forEach(e=>{const el=e.target;if(el.clientWidth!==el._mqW)mqFit(el)}));setTimeout(()=>{const t=document.getElementById('dk3Title');if(t)ro.observe(t)},0)}catch(e){}
 function deck3Info(){
  const c=P.current;
  $('#dk3State').textContent=!c?'STANDBY':P.paused?'PAUSED':(c.cd?(c.cd.chart==="xmas"?"CHRISTMAS MODE":c.cd.chart==="xmascd"?`CHRISTMAS #${c.cd.pos}`:c.cd.chart==="grad"?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`COUNTDOWN #${c.cd.pos}`):c.radio?'RADIO · '+c.radio.toUpperCase():'NOW PLAYING');
- $('#dk3Title').textContent=c?c.name:'Pick a song';$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
+ mqSet($('#dk3Title'),c?c.name:'Pick a song');$('#dk3Artist').textContent=c?c.artist:'Tap the start button';
  dkNextRender();dkCtlRender();dkLyrRender();dkLyrSync();
  // The record always gets the song's real album art, in every mode (Christmas, Yacht, radio, countdowns…); only the
  // colors around it follow the mode. The plain GriffTunes label is just for a song with no cover at all.
