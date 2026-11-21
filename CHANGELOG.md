@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44 — November 20, 2026
+
+- **The Couch Remote has the full Modes list.** Its Modes button now drops down Christmas, Fitz, Yacht and ATW, just like the jukebox. Tapping one starts it on the jukebox; tapping Christmas, Fitz or Yacht again turns it off. ATW asks "Play?" first (tap again within 4 seconds), and is ended by skipping the song. The running mode lights up and its icon shows on the Modes button, and it follows the jukebox within a couple of seconds, however the mode was started.
+- Owner-only: guests' phones still see only Christmas (unchanged). Modes turned off in the jukebox's Settings don't show on the remote.
+
 ## 1.43.4 — November 20, 2026
 
 - **The full-screen turntable is back to the plain title and artist** (as before 1.42): no faceplate box and no VU meters or LED ladders. The hi-fi meters are now off by default, and this update turns them off on the jukebox once. They can still be turned back on in Settings → Screen → "Hi-fi meters on the full-screen turntable". Long titles still scroll (1.43.3).

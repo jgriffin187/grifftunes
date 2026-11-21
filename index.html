@@ -377,7 +377,7 @@ html.bgPause #bg *{animation-play-state:paused!important}
 /* Edmund Fitzgerald memorial */
 .efzBtn svg{width:30px;height:32px;filter:drop-shadow(0 0 6px rgba(232,194,106,.55))}
 .efzBtn:active svg{animation:efSwing .9s ease-in-out}
-html.remote .efzBtn{display:none!important}
+html.remote:not(.owner) .efzBtn{display:none!important}
 html.efzOn #toasts{z-index:99}
 #efz{position:fixed;inset:0;z-index:97;display:none;grid-template-rows:76px 1fr 104px;grid-template-columns:1fr minmax(460px,31vw);background:radial-gradient(ellipse at 30% 20%,#13284a 0%,#081427 55%,#040a16 100%);color:#e9eef6;font-family:'Outfit',system-ui,sans-serif;overflow:hidden}
 #efz.on{display:grid;animation:efIn 1.2s ease}
@@ -815,7 +815,7 @@ html.atw .twMeter[data-on]{display:block;background:rgba(50,8,14,.5);border-colo
 #twKeep svg{width:100%;height:100%}
 @keyframes twKeepIn{from{opacity:0;transform:translateY(20px)}}
 @keyframes twWink{30%{transform:rotate(-10deg) scale(1.15)}60%{transform:rotate(8deg) scale(1.1)}}
-html.remote #twKeep,html.remote .atwBtn{display:none!important}
+html.remote #twKeep,html.remote:not(.owner) .atwBtn,html.remote:not(.owner) .yachtBtn{display:none!important}
 /* 🎞 All Too Well: stills from the short film fill the browse area while the song plays */
 .browse{position:relative}
 #twShow{position:absolute;inset:0;z-index:6;display:none;border-radius:22px;overflow:hidden;background:#0b0305;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,170,170,.18)}
@@ -4845,7 +4845,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.43.4';
+const GT_VERSION='1.44';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5412,7 +5412,11 @@ const slimT=t=>t&&{np:t.np,id:t.id,uri:t.uri,name:t.name,artist:t.artist,album:t
 const slimI=i=>i&&{id:i.id,type:i.type,name:i.name,sub:i.sub,img:i.img,uri:i.uri,member:i.member,owner:i.owner,rank:i.rank,grp:i.grp};
 
 const HOST={peer:null,conns:new Set(),status:'off'};
-function hostBase(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare(),radio:!!S.radio,station:S.station,xmas:{en:!!S.xmas,on:!!XM.active,look:!!S.xmas&&!!XM.look},asst:asOn(),ym:ymLook()?{rate:YM.rate}:null}}
+function hostBase(){return{t:'state',name:S.name,current:slimT(P.current),queue:P.queue.slice(0,25).map(slimT),pos:P.pos,dur:P.dur,paused:P.paused,freePlay:S.freePlay,credits,tabs:provider.tabs,vol:S.volume,volOk:!!S.phoneVol,coinsOk:!!S.phoneCoins,coinCredits:S.coinCredits,cd:cdShare(),radio:!!S.radio,station:S.station,xmas:{en:!!S.xmas,on:!!XM.active,look:!!S.xmas&&!!XM.look},asst:asOn(),ym:ymLook()?{rate:YM.rate}:null,modes:modesShare()}}
+// The party modes for the couch remote's Modes list: which are available (en) and which is running (on)
+function modesShare(){try{return{efz:{en:S.efz!==false,on:!!EF.open},ym:{en:S.yachtBtn!==false,on:!!YM.on},atw:{en:S.atwBtn!==false,on:!!TW.look}}}catch(e){return null}}
+// a mode starting or ending anywhere (jukebox, voice, a song ending it) reaches the couch remote within a few seconds
+if(!REMOTE){let ms='';setInterval(()=>{const k=JSON.stringify(modesShare());if(k!==ms){ms=k;hostSync()}},2000)}
 // What the phones need to draw the Countdown and Grad Year tabs
 function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
@@ -5441,7 +5445,7 @@ async function hostHandle(c,d){
   return;
  }
  if(d.t==='ping'){reply({ok:true});return}
- const OWNER_ONLY=['play','skip','qdel','qclear','devices','transfer','deck','lyrics','power','shuffle','reload','spcheck'];
+ const OWNER_ONLY=['play','skip','qdel','qclear','devices','transfer','deck','lyrics','power','shuffle','reload','spcheck','mode'];
  if(OWNER_ONLY.includes(d.t)&&!c.owner){sendTo(c,{t:'error',id:d.id,msg:'Only the couch remote can do that'});return}
  try{
   if(d.t==='play'){await togglePlay();hostSync();reply({ok:true});return}
@@ -5455,6 +5459,18 @@ async function hostHandle(c,d){
    await spSrchProbe();reply({ok:true,sp:spShare()});return}
   if(d.t==='reload'){reply({ok:true});toast('Reloading GriffTunes from the couch remote…');console.info('[GriffTunes] reload from the couch remote');setTimeout(()=>location.reload(),1500);return}
   // couch remote: speaker power (Hue smart plugs) and the room lights
+  if(d.t==='mode'){
+   // couch remote's Modes list: Fitz memorial, Yacht Mode, All Too Well (Christmas has its own 'xmas' message)
+   const on=!!d.on;
+   if(d.m==='efz'){if(S.efz===false){reply({ok:false,msg:'The Fitz memorial is turned off in Settings'});return}reply({ok:true});if(on)await efzOpen();else if(EF.open)efzClose()}
+   else if(d.m==='yacht'){if(S.yachtBtn===false){reply({ok:false,msg:'Yacht Mode is turned off in Settings'});return}reply({ok:true});await ymSet(on)}
+   else if(d.m==='atw'){if(S.atwBtn===false){reply({ok:false,msg:'All Too Well is turned off in Settings'});return}
+    if(!on){reply({ok:false,msg:'Skip the song to end All Too Well'});return}
+    if(xmLook()){reply({ok:false,msg:'Christmas Mode is on. Turn it off first for All Too Well.'});return}
+    reply({ok:true});await twStart()}
+   else reply({ok:false,msg:'Unknown mode'});
+   hostSync();return;
+  }
   if(d.t==='power'){
    const on=!!d.on;
    if(d.what==='spk'){if(!spkReady()){reply({ok:false,msg:'Speaker plugs are not set up in Settings → Philips Hue'});return}
@@ -5726,6 +5742,7 @@ function applyHostState(m){
  if(P.current&&P.current.id!==prev){accentFrom(P.current);markNow()}
  if(m.cd)applyHostCd(m.cd);
  if(m.xmas){S.xmas=m.xmas.en;XM.active=m.xmas.on;XM.lookR=!!m.xmas.look;xmasRender()}
+ rmModes(m.modes);
  if('radio' in m&&(S.radio!==!!m.radio||S.station!==m.station)){S.radio=!!m.radio;if(m.station)S.station=m.station;renderRadio()}
  if(m.tabs&&m.tabs.length&&!RM.tabsLoaded){RM.tabsLoaded=true;REMOTE_PROVIDER.tabs=m.tabs;buildTabs();loadTab(m.tabs[0].id)}
 }
@@ -5740,6 +5757,12 @@ function applyHostCd(c){
  if(tabId==='countdown'&&(CD.chart==='country'?CD.cdata:CD.data))renderCountdown();
  else if(tabId==='countdown'&&CD.active&&!CD.grad)openCountdown();
  if(tabId==='gradyear'&&CD.data){GY.key=null;renderGradList()}
+}
+// Couch remote: the Fitz, Yacht and ATW buttons follow the jukebox (owner only; guests' phones hide them in CSS)
+const RMODES={efz:{},ym:{},atw:{}};
+function rmModes(md){
+ if(!REMOTE||!md)return;Object.assign(RMODES,md);
+ for(const[id,k]of[['#efzBtn','efz'],['#yachtBtn','ym'],['#atwBtn','atw']]){const b=$(id),x=RMODES[k]||{};if(!b)continue;b.style.display=x.en?'':'none';b.classList.toggle('on',!!x.on)}
 }
 async function remoteCd(msg){
  sfx('tick');
@@ -7198,7 +7221,7 @@ async function efzPrefetch(){
  try{const im=new Image();im.src=EFZ_SONG.img}catch(e){}
  Object.values(EFZ_PH).forEach((p,i)=>setTimeout(()=>{const im=new Image();im.src=p.src},i*400));
 }
-function efzRender(){const b=$('#efzBtn');if(b)b.style.display=efzOn()?'':'none'}
+function efzRender(){if(REMOTE)return;const b=$('#efzBtn');if(b)b.style.display=efzOn()?'':'none'}
 function efzLerp(path,h){
  if(h<=path[0][0])return[path[0][1],path[0][2]];
  for(let i=1;i<path.length;i++){const a=path[i-1],b=path[i];if(h<=b[0]){const f=(h-a[0])/(b[0]-a[0]);return[a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f]}}
@@ -7700,7 +7723,7 @@ function ymSync(){
  setTimeout(mbCheck,0);
  // picking another station ends a Yacht Mode that was switched on
  if(YM.on&&S.radio&&S.station!=='yacht'){YM.on=false;store.set('yacht_on',false)}
- const b=$('#yachtBtn');if(b){b.style.display=S.yachtBtn!==false?'':'none';b.classList.toggle('on',YM.on)}
+ const b=$('#yachtBtn');if(b&&!REMOTE){b.style.display=S.yachtBtn!==false?'':'none';b.classList.toggle('on',YM.on)}
  const was=YM.look;YM.look=ymLook();
  document.documentElement.classList.toggle('yacht',YM.look);document.documentElement.classList.toggle('yRoll',S.ymRoll!==false);if(YM.look)ymFlags();
  if(was!==YM.look){
@@ -8109,18 +8132,19 @@ function twSecs(){return P.current?Math.max(0,(P.pos||0)/1000):0}
 function twDur(){return Math.max(60,((P.dur||(P.current&&P.current.duration)||613026)/1000))}
 // the scarf button: tap once to ask, again within 4 s to play all 10:13 of it
 function twRender(){
- const b=$('#atwBtn');if(!b)return;
- b.style.display=!REMOTE&&S.atwBtn!==false?'':'none';b.classList.toggle('on',TW.look);
+ const b=$('#atwBtn');if(!b||REMOTE)return;
+ b.style.display=S.atwBtn!==false?'':'none';b.classList.toggle('on',TW.look);
 }
 function twTap(){
  const b=$('#atwBtn');sfx('tick');
- if(TW.look){toast('🧣 Already playing. All ten minutes of it.');return}
+ if(REMOTE?RMODES.atw&&RMODES.atw.on:TW.look){toast('🧣 Already playing. All ten minutes of it.');return}
  if(!b.classList.contains('ask')){
   b.classList.add('ask');b.querySelector('span').textContent='Play?';
   clearTimeout(TW.askT);TW.askT=setTimeout(()=>{b.classList.remove('ask');b.querySelector('span').textContent='ATW'},4000);
   return;
  }
  clearTimeout(TW.askT);b.classList.remove('ask');b.querySelector('span').textContent='ATW';
+ if(REMOTE){if(RM.owner)remoteCd({t:'mode',m:'atw',on:true});return}
  twStart();
 }
 async function twStart(){
@@ -8489,6 +8513,12 @@ function twSync(){
   try{ymSync()}catch(e){}
  }
  if(on)twFrame();
+}
+// couch remote: the mode buttons ask the jukebox (the jukebox's own wiring is in the !REMOTE blocks)
+if(REMOTE){
+ $('#efzBtn').onclick=()=>{if(RM.owner)remoteCd({t:'mode',m:'efz',on:!(RMODES.efz&&RMODES.efz.on)})};
+ $('#yachtBtn').onclick=()=>{if(RM.owner)remoteCd({t:'mode',m:'yacht',on:!(RMODES.ym&&RMODES.ym.on)})};
+ $('#atwBtn').onclick=twTap;
 }
 if(!REMOTE){
  $('#atwBtn').onclick=twTap;
