@@ -4681,7 +4681,7 @@ function duckEnd(){
    and that clip goes to Gemini (DJ Griff's Writing key) to be understood. Without the key it falls back to
    the browser's speech recognition, like the Ask DJ button. */
 const HD={on:false,starting:false,state:'off',err:'',model:'',fallback:false,last:0,hits:0,peak:0,rec:false};
-const WAKE_FRAMES=2;
+const WAKE_FRAMES=3;
 const wakeThr=()=>{const v=+S.wakeThr;return v>0&&v<1?v:.5};
 const WAKE_NAME=()=>HD.model==='hey_jarvis.onnx'?'Hey Jarvis':'Hey DJ';
 async function wakeModelFile(){
@@ -4714,7 +4714,7 @@ function wakeStop(){HD.on=false;HD.state='off';try{window.GTWake&&GTWake.stop()}
 function wakeScore(s){
  if(s==null||!HD.on)return;
  HD.peak=Math.max(HD.peak*.97,s);wakeMeter(s);
- // a real "Hey DJ" stays over the line for 3–6 frames in a row (80 ms each); music tends to spike for just one
+ // a real "Hey DJ" stays over the line for 3–6 frames in a row (80 ms each); music and room noise tend to spike for 1–2
  HD.run=s>=wakeThr()?(HD.run||0)+1:0;
  if(HD.run<WAKE_FRAMES||Date.now()-HD.last<4000)return;
  if(AS.talking||DJ.audio||DJ.wiimWait||Date.now()-(DJ.wiimAt||0)<3000)return;
@@ -4737,7 +4737,17 @@ async function asWake(){
  if(!clip)return;
  AS.busy=true;$('#askOut').innerHTML='<div class="loading askWork"><div class="spin"></div><div class="askProg" id="askProg">Listening to what you said…</div></div>';asHint('Listening to what you said…');
  let r;
- try{const q=await asParseAudio(clip,key);r=q?await asHandle(q.heard||'',[],'jukebox',q):{state:'unclear',say:"I didn't catch that. Say “Hey DJ” and try again."}}
+ const unclear={state:'unclear',heard:'',say:"I didn't catch that. Say “Hey DJ” and try again."};
+ HD.voice=clip.voice||null;
+ try{
+  // nobody talking after the wake word (it woke on room noise): don't send silence to Gemini, which may invent a request
+  if(clip.voice&&!clip.voice.ok){console.info('[GriffTunes] Hey DJ: no voice in the request, skipped',clip.voice);r=Object.assign({quiet:true},unclear)}
+  else{
+   const q=await asParseAudio(clip,key);
+   // a request with nothing actually heard is a guess, not a request
+   r=!q||(q.kind!=='other'&&q.kind!=='unclear'&&!String(q.heard||'').trim())?unclear:await asHandle(q.heard||'',[],'jukebox',q);
+  }
+ }
  catch(e){r={state:'error',say:e.message||'Something went wrong'}}
  finally{AS.busy=false}
  if(r.heard)$('#askHeard').textContent=`“${r.heard}”`;
@@ -4749,18 +4759,19 @@ async function asWake(){
 // The last few wake-ups (time, score, what was heard), shown in Settings for tuning the sensitivity
 function wakeLog(r){
  const L=store.get('wake_log',[]);
- L.push({at:Date.now(),peak:Math.round((HD.wakePeak||0)*100)/100,heard:String(r&&r.heard||'').slice(0,60),state:r&&r.state||''});
+ L.push({at:Date.now(),peak:Math.round((HD.wakePeak||0)*100)/100,heard:String(r&&r.heard||'').slice(0,60),state:r&&r.state||'',quiet:!!(r&&r.quiet),v:HD.voice?HD.voice.loud:null});
  store.set('wake_log',L.slice(-8));
 }
 function wakeLogText(){
  const L=store.get('wake_log',[]).filter(x=>Date.now()-x.at<7*864e5).slice(-5).reverse();
  if(!L.length)return'';
- return'Recent wake-ups: '+L.map(x=>`${new Date(x.at).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit'})} (score ${x.peak}) ${x.state==='unclear'||!x.heard?'no request heard':'“'+x.heard+'”'}`).join(' · ');
+ return'Recent wake-ups: '+L.map(x=>`${new Date(x.at).toLocaleString('en-US',{weekday:'short',hour:'numeric',minute:'2-digit'})} (score ${x.peak}) ${x.quiet?'no voice, skipped':x.state==='unclear'||!x.heard?'no request heard':'“'+x.heard+'”'}`).join(' · ');
 }
 // Gemini listens to the clip itself: what was said, and which song that is
 async function asParseAudio(blob,key){
  const b64=await new Promise(res=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result).split(',')[1]||'');fr.readAsDataURL(blob)});
  const sys=`You hear a short recording from a jukebox's microphone in a basement, made right after someone said "Hey DJ". Music is playing in the background (turned down). Work out the song they asked for: give the real song's official title and the artist's name as Spotify shows them. Names may be mumbled or half drowned out by the music, so use your knowledge of popular songs. If only a well-known song is named, fill in the artist who made it famous. People often describe a song instead of naming it ("the Mase song from the Rugrats soundtrack", "the song from Top Gun with the volleyball scene", "the one that goes 'is this the real life'", "that 80s song about a lighthouse keeper"): use your music knowledge to work out the exact song and give its official title and its main credited artist. If several songs fit, give the best one and the others in also. Ignore "hey DJ", "DJ Griff", "play", "can you put on" and similar.
+Only answer with a request when you clearly hear a person's voice asking the jukebox for something. If the recording is silence, room noise, a TV, a pet, or people talking that isn't a request to the jukebox, kind is "unclear" and heard, title and artist are empty. Never guess or invent a song from silence or noise.
 heard: what the person said (just their words, not the background song's lyrics). If all you can make out is the background song itself (its lyrics or chorus) rather than a person asking for something, kind is "unclear".
 kind is "album" when they ask for a whole album (title is the album's official title as Spotify shows it, artist is the album's artist), "song" for a song request, "artist" when only an artist is named (title empty), "other" for anything that isn't a music request, "unclear" when no request can be made out (for example only music, or silence).
 also: up to 2 other songs it might have meant, only when it's genuinely unclear; otherwise an empty list.
@@ -4826,7 +4837,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.43.1';
+const GT_VERSION='1.43.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

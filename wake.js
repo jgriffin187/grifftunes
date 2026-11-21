@@ -101,9 +101,21 @@ function record(ms){
  return new Promise(res=>{
   if(!W.running){res(null);return}
   recBuf=pre.slice();q=[];let t=null;
-  const done=()=>{if(!recBuf)return;clearTimeout(t);const b=recBuf;recBuf=null;W.recStop=null;reset();res(wav(b))};
+  const lead=recBuf.length;   // the wake word itself: left out of the voice check
+  const done=()=>{if(!recBuf)return;clearTimeout(t);const b=recBuf;recBuf=null;W.recStop=null;reset();const w=wav(b);w.voice=voiceCheck(b.slice(lead));res(w)};
   W.recStop=done;t=setTimeout(done,ms||5000);
  });
+}
+// Is anyone talking in the request? Speech rises and falls well above the room's own hum (syllables and gaps); silence,
+// a furnace or a fan stays flat. Each 80 ms chunk's loudness is compared with the quietest fifth of the recording.
+// ok: at least 3 chunks (about a quarter second) clearly louder than that floor and than a minimum level.
+const VOICE_MIN=250,VOICE_X=2.5,VOICE_CHUNKS=3;
+function voiceCheck(chunks){
+ const r=chunks.map(c=>{let a=0;for(let i=0;i<c.length;i++)a+=c[i]*c[i];return Math.sqrt(a/Math.max(1,c.length))});
+ if(r.length<6)return{ok:true,loud:0,floor:0,peak:0};   // too short to judge: let Gemini decide
+ const sorted=r.slice().sort((a,b)=>a-b),floor=sorted[Math.floor(sorted.length*.2)],peak=sorted[sorted.length-1];
+ const line=Math.max(VOICE_MIN,floor*VOICE_X),loud=r.filter(x=>x>line).length;
+ return{ok:loud>=VOICE_CHUNKS,loud,floor:Math.round(floor),peak:Math.round(peak)};
 }
 function wav(chunks){
  const n=chunks.reduce((a,c)=>a+c.length,0),buf=new ArrayBuffer(44+n*2),d=new DataView(buf),str=(o,s)=>{for(let i=0;i<s.length;i++)d.setUint8(o+i,s.charCodeAt(i))};

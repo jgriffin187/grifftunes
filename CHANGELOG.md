@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.43.2 — November 20, 2026
+
+- **Hey DJ no longer plays songs nobody asked for.** It had woken up twice on room noise with nobody talking, and Gemini then "heard" a request in the silence ("play the song about Barbie") and played Barbie Girl. Three fixes:
+  - **Voice check:** after the wake word, the 5-second recording is checked for someone actually talking (loudness that rises well above the room's hum for at least a quarter second). If there's no voice, it isn't sent to Gemini at all; the DJ window just says no request was heard.
+  - **Stricter wake-up:** the wake word now has to stay over the line for 3 frames in a row (about a quarter second) instead of 2.
+  - **Stricter Gemini:** it's told to answer only when it clearly hears a person asking, and never to guess a song from silence or noise. A request with nothing in "heard" is treated as no request.
+- Settings → Hey DJ's recent wake-ups list shows "no voice, skipped" for the ones the voice check stopped.
+
 ## 1.43.1 — November 18, 2026
 
 - The Modes button just says "Modes" now; the Christmas countdown only shows inside the drop-down list.
