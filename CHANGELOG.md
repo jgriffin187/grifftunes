@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44.4 — November 21, 2026
+
+- **Christmas lights change more through each song** (still red and green only, lights on Auto). Every 8–10 seconds one bulb slowly fades (10 s) to another Christmas color, instead of every 30 seconds. About once a minute every bulb swaps together, reds to green and greens to red. Every 4–7 seconds a bulb that isn't mid-fade gives a gentle twinkle (a quick dip to half brightness and back), and a bulb is never twinkled in the middle of a color fade.
+
 ## 1.44.3 — November 21, 2026
 
 - **Couch Remote scrolling no longer gets stuck.** On phones the Countdown and Grad Year lists were their own little scrolling boxes inside the page, almost a full screen tall. iPhones lock a swipe onto whichever box it starts in, so once the list filled the screen you couldn't swipe back up to the controls. The lists are now part of the page, and the page is the only thing that scrolls (tapping the clock at the top of an iPhone also jumps back to the top now).

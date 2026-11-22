@@ -4851,7 +4851,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.44.3';
+const GT_VERSION='1.44.4';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7522,7 +7522,7 @@ function efzClose(){
 // stormy blue while the memorial is up. If the room's lights are all off, the memorial switches them on (and back off when it closes).
 async function efzHue(on){
  if(!hueOn()||S.hueMode==='off')return;
- HUE.q=HUE.q.filter(c=>!c.mood);clearInterval(XH.t);XH.t=null;
+ HUE.q=HUE.q.filter(c=>!c.mood);xmasStop();
  if(!on)return;
  if(EF.lightsWereOff==null){
   EF.lightsWereOff='?';
@@ -7641,9 +7641,9 @@ function xmasRender(){
  snowSync();if(!REMOTE){hostSync();try{ymSync()}catch(e){}}
 }
 // Christmas lights: red and green only (two shades each), color bulbs at 70% brightness, white-only bulbs a dim candle glow.
-// Every 30 seconds one color bulb fades (10 s) to another Christmas color, so the room drifts slowly.
+// The room keeps changing through each song: see xmasDrift.
 const XHUE=['#e00010','#9c0012','#0c8f34','#0f6b3a'],XHUE_RED=new Set([0,1]);
-const XH={cols:{},t:null};
+const XH={cols:{},t:null,tw:null,busy:{},swapAt:0};
 function xmasB(){const B=HUE.dim?Math.max(10,Math.round(hueB()*.22)):hueB();return{col:Math.max(1,Math.round(B*.7)),glow:Math.max(1,Math.round(B*.2))}}
 function xmasHue(lights,B,t){
  const b=xmasB(),cl=lights.filter(L=>L.kind==='color');XH.cols={};
@@ -7659,17 +7659,46 @@ function xmasHue(lights,B,t){
  });
  xmasDrift();
 }
+// 1.44.4 (Josh's picks): every 8–10 s one color bulb fades (10 s) to another Christmas color; about once a minute every
+// bulb swaps red↔green together (10 s fade); every 4–7 s a bulb that isn't mid-fade twinkles (a quick dip and back).
+function xmasLive(){return xmLook()&&hueOn()&&S.hueMode==='auto'&&!EF.open}
+function xmasStop(){clearTimeout(XH.t);clearTimeout(XH.tw);XH.t=XH.tw=null}
+function xmasSend(id,body,busyMs){if(busyMs)XH.busy[id]=Math.max(XH.busy[id]||0,Date.now()+busyMs);HUE.q.push({path:`/lights/${id}/state`,body,gap:120,mood:true});huePump()}
+const xmasFree=()=>Object.keys(XH.cols).filter(id=>(XH.busy[id]||0)<Date.now());
 function xmasDrift(){
- clearInterval(XH.t);XH.t=setInterval(()=>{
-  if(!xmLook()||!hueOn()||S.hueMode!=='auto'||EF.open){clearInterval(XH.t);XH.t=null;return}
-  const ids=Object.keys(XH.cols);if(!ids.length)return;
-  const id=ids[Math.floor(Math.random()*ids.length)],cur=XH.cols[id];
-  const nRed=ids.filter(x=>XHUE_RED.has(XH.cols[x])).length,nGreen=ids.length-nRed,wasRed=XHUE_RED.has(cur);
-  // Keep reds and greens roughly even: a bulb on the bigger side switches family, otherwise it changes shade
-  let k;if(ids.length>1&&(wasRed?nRed>nGreen:nGreen>nRed))k=wasRed?2+Math.floor(Math.random()*2):Math.floor(Math.random()*2);else k=wasRed?1-cur:5-cur;
-  XH.cols[id]=k;
-  HUE.q.push({path:`/lights/${id}/state`,body:{effect:'none',xy:rgbToXy(...cssRgb(XHUE[k])),bri:xmasB().col,transitiontime:100},gap:120,mood:true});huePump();
- },30e3);
+ xmasStop();XH.busy={};const now=Date.now();
+ for(const id of Object.keys(XH.cols))XH.busy[id]=now+5500; // the song-start fade (5 s)
+ XH.swapAt=now+55e3+Math.random()*10e3;
+ const step=()=>{
+  if(!xmasLive()){xmasStop();return}
+  const ids=Object.keys(XH.cols);let wait=8e3+Math.random()*2e3;
+  if(ids.length&&Date.now()>=XH.swapAt){
+   // the full swap: reds go green, greens go red, all together
+   for(const id of ids){const cur=XH.cols[id],k=XHUE_RED.has(cur)?2+Math.floor(Math.random()*2):Math.floor(Math.random()*2);XH.cols[id]=k;
+    xmasSend(id,{effect:'none',xy:rgbToXy(...cssRgb(XHUE[k])),bri:xmasB().col,transitiontime:100},10500)}
+   XH.swapAt=Date.now()+55e3+Math.random()*10e3;wait=11e3;
+  }else{
+   const free=xmasFree();
+   if(free.length){
+    const id=free[Math.floor(Math.random()*free.length)],cur=XH.cols[id];
+    const nRed=ids.filter(x=>XHUE_RED.has(XH.cols[x])).length,nGreen=ids.length-nRed,wasRed=XHUE_RED.has(cur);
+    // Keep reds and greens roughly even: a bulb on the bigger side switches family, otherwise it changes shade
+    let k;if(ids.length>1&&(wasRed?nRed>nGreen:nGreen>nRed))k=wasRed?2+Math.floor(Math.random()*2):Math.floor(Math.random()*2);else k=wasRed?1-cur:5-cur;
+    XH.cols[id]=k;
+    xmasSend(id,{effect:'none',xy:rgbToXy(...cssRgb(XHUE[k])),bri:xmasB().col,transitiontime:100},10500);
+   }
+  }
+  XH.t=setTimeout(step,wait);
+ };
+ const twinkle=()=>{
+  if(!xmasLive()){xmasStop();return}
+  const free=xmasFree();
+  if(free.length){const id=free[Math.floor(Math.random()*free.length)],c=xmasB().col;
+   xmasSend(id,{bri:Math.max(1,Math.round(c*.5)),transitiontime:5},2000);
+   setTimeout(()=>{if(xmasLive()&&XH.cols[id]!=null)xmasSend(id,{bri:xmasB().col,transitiontime:10})},650)}
+  XH.tw=setTimeout(twinkle,4e3+Math.random()*3e3);
+ };
+ XH.t=setTimeout(step,8e3+Math.random()*2e3);XH.tw=setTimeout(twinkle,6e3+Math.random()*2e3);
 }
 function xmasPal(t){
  const P5=[['#ff1a1a','#0fa84a','#ffd9a0'],['#ff1a1a','#ffffff'],['#0fa84a','#ffd23f','#ff1a1a'],['#c4001a','#ffd9a0'],['#0fa84a','#ffffff','#ff1a1a']];
