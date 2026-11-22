@@ -306,8 +306,9 @@ html.remote #mbBtn{display:none!important}
 .cdYear small{font-size:12px;letter-spacing:.12em;color:var(--muted);font-weight:700;text-transform:uppercase}
 .cdYear.on{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent;box-shadow:0 0 26px color-mix(in srgb,var(--accent) 55%,transparent)}
 .cdYear.on small{color:rgba(255,255,255,.85)}
-.cdChart{width:260px;flex:none}
-.cdChart button{height:42px;font-size:15px}
+.cdChart{flex:none;gap:10px;max-width:100%;flex-wrap:wrap}
+.cdChart button{flex:none;height:42px;font-size:15px;padding:0 20px;white-space:nowrap}
+@media (max-width:640px){.cdChart{width:100%;flex-wrap:nowrap;gap:6px}.cdChart button{flex:1 1 auto;padding:0 8px;font-size:14px}}
 .cdYear[disabled]{opacity:.35}
 .cdBar{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .cdWeek{font-family:Bungee;font-size:15px;letter-spacing:.06em;color:var(--gold)}
@@ -4852,7 +4853,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.45.1';
+const GT_VERSION='1.45.2';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;

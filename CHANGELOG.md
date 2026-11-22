@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.45.2 — November 22, 2026
+
+- More room between the Countdown tab's chart buttons (Hot 100, Country, Dance, Christmas), on the jukebox and the Couch Remote: each button is as wide as its name with space around it, and "Hot 100" no longer wraps onto two lines.
+
 ## 1.45.1 — November 22, 2026
 
 - **The Dance Countdown loads again.** On the jukebox it said "Spotify blocks personal apps from opening this one": Spotify refuses to let developer apps like GriffTunes read playlists that belong to other people. Now a daily GitHub job (`.github/workflows/update-dance.yml`, `scripts/update_dance.py`) reads the playlist's public page (no sign-in, nothing tied to Josh's Spotify account) and saves `dance-top25.json` with the 25 songs and their covers. The jukebox and phones just load that file, so the Dance Countdown makes no Spotify requests at all.
