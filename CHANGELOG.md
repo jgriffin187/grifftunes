@@ -2,6 +2,14 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.45 — November 22, 2026
+
+- **Dance Countdown.** The Countdown tab has a new **Dance** button next to Hot 100 and Country: this week's Billboard Hot Dance/Electronic Songs Top 25, counted down from #25 to #1, with album covers, ▲▼/NEW badges against last week, a pop-up card per song ("Up 2 from #5") and DJ Griff introducing it as the dance countdown.
+- Where it comes from: a fan-made Spotify playlist that copies the Billboard chart each week ("Billboard Hot Dance/Electronic/EDM Songs Top 25 Weekly", id `3X8oqr3qpVuTkreQwa0DAO`). The playlist's description carries the chart date. It's one playlist read with no searches, at most every 12 hours (and only if the playlist changed), so it doesn't touch the search quota. The last good copy is kept (`jbx.dance`, left out of backups) and used if Spotify can't be reached.
+- If the playlist's owner stops updating it, the heading says "not updated lately" once the chart date is two weeks old.
+- The Couch Remote gets the Dance list from the jukebox and can start it or jump to a song.
+- Fixed: the Hot 100 button stayed lit while the Christmas chart was showing.
+
 ## 1.44.5 — November 21, 2026
 
 - **The "phones connected" count no longer grows forever.** A phone that locks, reloads or leaves usually never tells the jukebox it's gone, so every reload of the Couch Remote was counted as one more phone (12 on Nov 21). Phones now send a heartbeat every 10 seconds while GriffTunes is open on them, and the jukebox drops a link that's been silent for 45 seconds. A phone that comes back reconnects by itself. (A phone still on an older GriffTunes page sends no heartbeat, so it gets 30 minutes instead; reloading it brings the new page.)

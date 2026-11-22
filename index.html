@@ -2951,7 +2951,7 @@ function renderNP(){
  $('#npArtist').textContent=c?c.artist:(REMOTE?'Tap any album to get the party started':'Tap any album, or…');
  $('#houseBtn').style.display=c||REMOTE?'none':'';
  $('#houseTag').style.display=c&&(c.house||c.radio||c.cd||c.cont)?'':'none';
- $('#houseTag').textContent=c&&c.cd?(c.cd.chart==='xmas'?'CHRISTMAS MODE':c.cd.chart==='xmascd'?`CHRISTMAS COUNTDOWN · #${c.cd.pos}`:c.cd.chart==='grad'?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`):c&&c.radio?'RADIO · '+c.radio:c&&c.cont&&!c.house?('FROM · '+String(c.cont).toUpperCase()).slice(0,40):'HOUSE MIX';
+ $('#houseTag').textContent=c&&c.cd?(c.cd.chart==='xmas'?'CHRISTMAS MODE':c.cd.chart==='xmascd'?`CHRISTMAS COUNTDOWN · #${c.cd.pos}`:c.cd.chart==='grad'?`CLASS OF ${c.cd.year} · #${c.cd.pos}`:c.cd.chart==='dance'?`DANCE COUNTDOWN · #${c.cd.pos}`:`${c.cd.chart==='country'?'COUNTRY GOLD':'COUNTDOWN'} · #${c.cd.pos} · ${c.cd.year}`):c&&c.radio?'RADIO · '+c.radio:c&&c.cont&&!c.house?('FROM · '+String(c.cont).toUpperCase()).slice(0,40):'HOUSE MIX';
  $('#houseTag').classList.toggle('cdTag',!!(c&&c.cd));
  $('#houseTag').classList.toggle('radioTag',!!(c&&c.radio));
  renderRadio();
@@ -3158,6 +3158,7 @@ async function djFacts(t){
 function djWhy(t,how){
  if(t.cd){const c=t.cd;if(c.chart==='xmas'||c.chart==='xmascd')return`It's Christmas Mode: a Christmas song${c.pos?`, No. ${c.pos} in the Christmas countdown`:''}. Make it festive.`;
   if(c.chart==='grad')return`It's the Class of ${c.year} countdown: No. ${c.pos} of that school year's biggest songs. Celebrate the class first; any joke comes second.`;
+  if(c.chart==='dance')return`It's the dance countdown: No. ${c.pos||'?'} on this week's Billboard Dance/Electronic Songs chart. Bring club energy.`;
   return`It's a chart countdown: No. ${c.pos||'?'}${c.date?` on the Hot 100 for the week of ${c.date}`:''}${c.year&&!c.date?` (${c.year})`:''}.`}
  if(how==='queue')return'Someone requested this song on the jukebox.';
  if(how==='ctx'||t.cont)return`It continues from the album or playlist "${t.cont||(P.ctx&&P.ctx.it&&P.ctx.it.name)||''}".`;
@@ -4851,7 +4852,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.44.5';
+const GT_VERSION='1.45';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5424,7 +5425,7 @@ function modesShare(){try{return{efz:{en:S.efz!==false,on:!!EF.open},ym:{en:S.ya
 // a mode starting or ending anywhere (jukebox, voice, a song ending it) reaches the couch remote within a few seconds
 if(!REMOTE){let ms='';setInterval(()=>{const k=JSON.stringify(modesShare());if(k!==ms){ms=k;hostSync()}},2000)}
 // What the phones need to draw the Countdown and Grad Year tabs
-function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
+function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done,dance:danceShare()}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
 let syncT=null;
 // owner (couch remote) connections also get the speaker in use
@@ -5539,9 +5540,9 @@ async function hostHandle(c,d){
   }
   else if(d.t==='cd'){
    // phone asked for a Hot 100 Rewind / Country Gold countdown: start, stop, or jump to a song
-   const chart=d.chart==='country'?'country':d.chart==='xmas'&&S.xmas?'xmas':'hot100',years=+d.years,pos=+d.pos||0;
-   if(chart!=='xmas'&&!CD_YEARS.includes(years))throw new Error('That year is not on the list');
-   const same=CD.active&&!CD.grad&&CD.view&&CD.view.rows[0]&&(CD.view.rows[0].cd.chart===chart||(chart==='xmas'&&CD.view.rows[0].cd.chart==='xmascd'))&&(chart==='xmas'||CD.year===new Date().getFullYear()-years);
+   const chart=d.chart==='country'?'country':d.chart==='xmas'&&S.xmas?'xmas':d.chart==='dance'&&danceOk()?'dance':'hot100',years=+d.years,pos=+d.pos||0;
+   if(chart!=='xmas'&&chart!=='dance'&&!CD_YEARS.includes(years))throw new Error('That year is not on the list');
+   const same=CD.active&&!CD.grad&&CD.view&&CD.view.rows[0]&&(CD.view.rows[0].cd.chart===chart||(chart==='xmas'&&CD.view.rows[0].cd.chart==='xmascd'))&&(chart==='xmas'||chart==='dance'||CD.year===new Date().getFullYear()-years);
    if(CD.matching||GY.matching){reply({ok:false,msg:'The jukebox is still finding songs. Give it a moment.'});return}
    if(same){if(pos)cdJump(pos);else stopCountdown();reply({ok:true});return}
    if(CD.active&&!d.force){reply({ok:false,msg:'Another countdown is playing. Stop it first.'});return}
@@ -5761,12 +5762,13 @@ function applyHostState(m){
 // Phone: mirror the jukebox's countdown so the lists show what's playing; the buttons ask the jukebox to do it
 function applyHostCd(c){
  const was=JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]);
+ if(c.dance&&(!CD.ddata||CD.ddata.date!==c.dance.date||CD.ddata.rows.length!==c.dance.rows.length||(CD.ddata.rows[0]&&CD.ddata.rows[0].t.id)!==(c.dance.rows[0]&&c.dance.rows[0].t.id))){CD.ddata=c.dance;if(tabId==='countdown'&&!CD.active)renderCountdown()}
  CD.active=c.active;CD.grad=c.grad||null;CD.year=c.year;CD.date=c.date;CD.idx=c.idx|0;CD.missing=c.missing||[];
  CD.list=(c.list||[]).map(pos=>({cd:{pos}}));CD.matching=GY.matching=!!c.matching;GY.done=c.done|0;
  if(c.active&&c.chart&&c.chart!=='grad'){CD.chart=c.chart==='xmascd'?'xmas':c.chart;CD.years=new Date().getFullYear()-c.year}
  if(c.active&&c.grad)GRAD.pickYear=c.grad;
  if(was===JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]))return;
- if(tabId==='countdown'&&(CD.chart==='country'?CD.cdata:CD.data))renderCountdown();
+ if(tabId==='countdown'&&cdHas())renderCountdown();
  else if(tabId==='countdown'&&CD.active&&!CD.grad)openCountdown();
  if(tabId==='gradyear'&&CD.data){GY.key=null;renderGradList()}
 }
@@ -6651,10 +6653,36 @@ async function huePair(ip){
 }
 
 /* ---------- Countdown: Hot 100 Rewind (this week) + Country #1 hits (year) ---------- */
-const CD={data:null,cdata:null,loading:null,years:0,chart:'hot100',active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{},missing:[]};
+const CD={data:null,cdata:null,ddata:null,loading:null,years:0,chart:'hot100',active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{},missing:[]};
 const CD_YEARS=[0,1,5,10,15,20,25,30,35,40]; // 0 = last week's chart (the newest in the archive)
 const fetchJSON=f=>fetch(f).then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()});
+/* Dance: Billboard's Hot Dance/Electronic Songs Top 25, read from a fan-made Spotify playlist that copies the chart each week
+   ("Billboard Hot Dance/Electronic/EDM Songs Top 25 Weekly"). One playlist read, no searches, at most every 12 hours;
+   the playlist's description carries the chart date, and last week's order is kept for the ▲▼ badges. */
+const DANCE_PL='3X8oqr3qpVuTkreQwa0DAO';
+const danceOk=()=>REMOTE?!!CD.ddata:provider===SPOTIFY;
+function danceDate(desc){const m=String(desc||'').match(/([A-Z][a-z]+\.? \d{1,2},? \d{4})/);if(!m)return null;const d=new Date(m[1].replace('.','')+' 12:00');return isNaN(d)?null:d.toISOString().slice(0,10)}
+function danceKeep(c){try{localStorage.setItem('jbx.dance',JSON.stringify(c))}catch(e){}CD.ddata=c;CD.dshare=null;return c}
+async function danceData(){
+ let c=CD.ddata;if(!c)try{c=JSON.parse(localStorage.getItem('jbx.dance')||'null')}catch(e){}
+ if(c&&c.rows&&c.rows.length&&Date.now()-c.at<12*3600e3){CD.ddata=c;return c}
+ try{
+  const meta=await api(`/playlists/${DANCE_PL}?fields=description,snapshot_id`);
+  if(c&&c.rows&&c.rows.length&&c.snap===meta.snapshot_id){c.at=Date.now();return danceKeep(c)}
+  const items=await allPages(api,`/playlists/${DANCE_PL}/items?limit=50&market=from_token`,50);
+  const tr=items.filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean).slice(0,25);
+  if(!tr.length)throw new Error('The dance chart playlist came back empty');
+  const date=danceDate(meta.description)||(c&&c.date)||new Date().toISOString().slice(0,10);
+  const prev=c&&c.rows&&c.date&&c.date!==date?{date:c.date,ids:c.rows.map(x=>x.t.id)}:(c&&c.prev)||null;
+  return danceKeep({at:Date.now(),snap:meta.snapshot_id,date,prev,rows:tr.map(t=>({t}))});
+ }catch(e){if(c&&c.rows&&c.rows.length){CD.ddata=c;return c}throw e}
+}
+// what the phones get to draw the Dance list (the jukebox does the Spotify read)
+function danceShare(){const D=CD.ddata;if(!D)return null;if(!CD.dshare)CD.dshare={date:D.date,prev:D.prev,rows:D.rows.map(x=>({t:{id:x.t.id,name:x.t.name,artist:x.t.artist,img:x.t.img}}))};return CD.dshare}
+const cdHas=()=>CD.chart==='country'?CD.cdata:CD.chart==='dance'?CD.ddata:CD.data;
 async function cdData(){
+ if(CD.chart==='dance'&&!danceOk())CD.chart='hot100';
+ if(CD.chart==='dance')return REMOTE?CD.ddata:danceData();
  if(CD.chart==='country'){if(!CD.cdata)CD.cdata=await fetchJSON('country-top20.json');return CD.cdata}
  if(CD.chart==='xmas'&&!S.xmas)CD.chart='hot100';
  if(!CD.data){if(!CD.loading)CD.loading=fetchJSON('hot100-top20.json').finally(()=>{CD.loading=null});CD.data=await CD.loading}
@@ -6672,6 +6700,13 @@ function cdMove(pos,lw){if(!lw)return['new','NEW'];if(lw===pos)return['same','�
 // Unified view of the selected chart: rows are {pos,title,artist,sub,badge:[cls,txt],cd}
 function cdView(years){
  const yr=new Date().getFullYear()-years;
+ if(CD.chart==='dance'){
+  const D=CD.ddata||{rows:[]},prev=D.prev&&D.prev.ids,date=D.date||null,y=date?+date.slice(0,4):new Date().getFullYear();
+  const old=date&&Date.now()-new Date(date+'T12:00:00').getTime()>13*864e5;
+  return{year:y,date,heading:(date?`Chart week of ${fmtWeek(date)}`:'This week')+(old?' · not updated lately':''),rows:D.rows.map((x,i)=>{const pos=i+1,t=x.t,lw=prev?prev.indexOf(t.id)+1:null;
+   return{pos,title:t.name,artist:t.artist,img:t.img,track:REMOTE?null:t,sub:lw?`${t.artist} · last week #${lw}`:lw===0?`${t.artist} · new this week`:t.artist,
+    badge:lw==null?['same','']:cdMove(pos,lw),cd:{chart:'dance',pos,year:y,date,lw}}})};
+ }
  if(CD.chart==='xmas'){
   const L=xmasChart();
   return{year:0,date:null,heading:'The biggest Christmas songs in Hot 100 Top 20 history',rows:L.map(s=>({pos:s.pos,title:s.title,artist:s.artist,sub:`${s.artist} · peak #${s.peak} · ${s.weeks} holiday wk${s.weeks===1?'':'s'} in the Top 20`,badge:['up','#'+s.peak],cd:{chart:'xmascd',pos:s.pos,peak:s.peak,weeks:s.weeks,first:s.first}}))};
@@ -6690,14 +6725,15 @@ function cdView(years){
 }
 async function openCountdown(){
  const panel=$('#cdPanel');
- if(!(CD.chart==='country'?CD.cdata:CD.data)){panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
-  try{await cdData()}catch(e){panel.innerHTML=`<div class="loading">Couldn't load the chart archive<br><small>${esc(e.message)}</small></div>`;return}}
+ if(CD.chart==='dance'&&!danceOk())CD.chart='hot100';
+ if(!cdHas()||(CD.chart==='dance'&&!REMOTE)){if(!cdHas())panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
+  try{await cdData()}catch(e){if(!cdHas()){panel.innerHTML=`<div class="loading">Couldn't load ${CD.chart==='dance'?'the dance chart':'the chart archive'}<br><small>${esc(e.message)}</small>${CD.chart==='dance'?'<br><button class="cdYear" data-cdc="hot100" style="margin-top:14px;padding:10px 18px"><b>Back to Hot 100</b></button>':''}</div>`;return}}}
  if(tabId!=='countdown')return;
  renderCountdown();
 }
 function renderCountdown(){
  if(!REMOTE)try{hostSync()}catch(e){}
- const panel=$('#cdPanel');if(!(CD.chart==='country'?CD.cdata:CD.data))return;
+ const panel=$('#cdPanel');if(!cdHas())return;
  if(REMOTE)CD.view=CD.active&&!CD.grad?cdView(CD.years):null;
  const yr0=new Date().getFullYear();
  // Country has no chart for some years (often the current one): fall back to the newest year that has one
@@ -6706,11 +6742,11 @@ function renderCountdown(){
  if(!CD.active&&CD.chart!=='country'&&CD.wanted!=null){CD.years=CD.wanted;CD.wanted=null}
  const yr=yr0,v=CD.active&&CD.view?CD.view:cdView(CD.years),cty=CD.chart==='country';
  const hasYear=n=>!cty||!!(CD.cdata.years[String(yr-n)]||[]).length;
- panel.innerHTML=`<div class="cdHead"><div><h2>${CD.chart==='xmas'?'Christmas Countdown':cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${CD.chart==='xmas'?'The biggest Christmas songs ever on the Billboard Hot 100':cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
-  <div class="seg cdChart"><button data-cdc="hot100" class="${!cty?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button>${S.xmas?`<button data-cdc="xmas" class="${CD.chart==='xmas'?'on':''}"${CD.active?' disabled':''}>Christmas</button>`:''}</div></div>
-  <div class="cdYears"${CD.chart==='xmas'?' style="display:none"':''}>${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}>${n?`<b>${yr-n}</b><small>${n===1?'1 yr ago':n+' yrs ago'}</small>`:`<b>${!cty&&CD.data?fmtMon(cdWeek(0)):'Latest'}</b><small>Last week</small>`}</button>`).join('')}</div>
+ panel.innerHTML=`<div class="cdHead"><div><h2>${CD.chart==='xmas'?'Christmas Countdown':CD.chart==='dance'?'Dance Countdown':cty?'Country Gold':'Hot 100 Rewind'}</h2><p>${CD.chart==='xmas'?'The biggest Christmas songs ever on the Billboard Hot 100':CD.chart==='dance'?"This week's Billboard Dance/Electronic Top 25, the songs DJs are playing":cty?"Each year's #1 country hits, built up to its longest-running #1":"This week's Top 20, straight from the Billboard Hot 100 archives"}</p></div>
+  <div class="seg cdChart"><button data-cdc="hot100" class="${CD.chart==='hot100'?'on':''}"${CD.active?' disabled':''}>Hot 100</button><button data-cdc="country" class="${cty?'on':''}"${CD.active?' disabled':''}>Country</button>${danceOk()?`<button data-cdc="dance" class="${CD.chart==='dance'?'on':''}"${CD.active?' disabled':''}>Dance</button>`:''}${S.xmas?`<button data-cdc="xmas" class="${CD.chart==='xmas'?'on':''}"${CD.active?' disabled':''}>Christmas</button>`:''}</div></div>
+  <div class="cdYears"${CD.chart==='xmas'||CD.chart==='dance'?' style="display:none"':''}>${CD_YEARS.map(n=>`<button class="cdYear${(CD.active?CD.year===yr-n:CD.years===n)?' on':''}" data-cdy="${n}"${CD.active||!hasYear(n)?' disabled':''}>${n?`<b>${yr-n}</b><small>${n===1?'1 yr ago':n+' yrs ago'}</small>`:`<b>${!cty&&CD.data?fmtMon(cdWeek(0)):'Latest'}</b><small>Last week</small>`}</button>`).join('')}</div>
   <div class="cdBar"><span class="cdWeek">${esc(v.heading)}</span>
-  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${CD.chart==='xmas'?v.rows.length:Math.min(20,v.rows.length)} → #1`}</button></div>
+  <button class="cdGo${CD.active?' stop':''}" id="cdGo"${CD.matching||!v.rows.length?' disabled':''}>${CD.matching?'Finding songs…':CD.active?'Stop countdown':`Start countdown · #${CD.chart==='xmas'||CD.chart==='dance'?v.rows.length:Math.min(20,v.rows.length)} → #1`}</button></div>
   <div class="cdList" id="cdList">${v.rows.length?v.rows.map(r=>`<div class="cdRow" data-pos="${r.pos}"><span class="n">${r.pos}</span>${cdArtTag(r)}<span class="m"><b>${esc(r.title)}</b><span>${esc(r.sub)}</span></span><span class="mv ${r.badge[0]}">${r.badge[1]}</span></div>`).join(''):'<div class="loading">No chart for this year yet</div>'}</div>`;
  renderCdRows();cdArtFill($('#cdList'));
 }
@@ -6763,14 +6799,14 @@ async function startCountdown(fromPos){
  if(!rows.length)return;
  if(provider===SPOTIFY)await libLoad();
  const lib=r=>{if(provider!==SPOTIFY)return null;const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t||null};
- const list=rows.map(r=>cdItem(r,r.cd,lib(r)));
+ const list=rows.map(r=>cdItem(r,r.cd,r.track||lib(r)));
  const first=fromPos?list.find(x=>x.cd.pos===fromPos):list[0];
  CD.matching=true;renderCountdown();
  try{
   try{await cdResolve(first)}catch(e){toast(e.message,'warn');return}
   await gfLoad();GF.y=null;
   CD.active=true;CD.grad=null;CD.idx=0;CD.list=list;CD.missing=list.filter(x=>x.state==='miss').map(x=>x.cd.pos);CD.view=v;CD.date=v.date;CD.year=v.year;
-  sfx('coin');toast(CD.chart==='xmas'?'Christmas Countdown':CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`);
+  sfx('coin');toast(CD.chart==='xmas'?'Christmas Countdown':CD.chart==='dance'?`Dance Countdown · ${v.date?fmtWeek(v.date):'this week'}`:CD.chart==='country'?`Country Gold · ${v.year}`:`Hot 100 Rewind · ${fmtWeek(v.date)}`);
   if(fromPos)await cdJump(fromPos);
   else if(!P.current||P.current.house||P.current.radio||P.current.cd)advance();
   else toast('The countdown starts after the current picks');
@@ -6790,7 +6826,7 @@ async function cdNext(){
  if(!CD.active)return null;
  while(CD.idx<CD.list.length){const x=CD.list[CD.idx++];try{await cdResolve(x)}catch(e){}if(x.track)return x}
  CD.active=false;const top=[...CD.list].reverse().find(x=>x.track)||CD.list[CD.list.length-1];
- toast(top&&top.track?(top.cd.chart==='xmascd'?`That's the Christmas Countdown! #1: ${top.track.name}`:top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
+ toast(top&&top.track?(top.cd.chart==='xmascd'?`That's the Christmas Countdown! #1: ${top.track.name}`:top.cd.chart==='dance'?`That's the Dance Countdown! This week's #1: ${top.track.name}`:top.cd.chart==='grad'?`That's the Senior Countdown! The Class of ${top.cd.year}'s #1: ${top.track.name}`:top.cd.chart==='country'?(top.cd.chrono?`That's the countdown! The last country #1 of ${top.cd.year}: ${top.track.name}`:`That's the countdown! ${top.cd.year}'s biggest #1: ${top.track.name}`):`That's the countdown! #1 this week in ${top.cd.year}: ${top.track.name}`):"That's the countdown!");
  if(tabId==='countdown')renderCountdown();
  return null;
 }
@@ -6846,7 +6882,7 @@ async function libArt(k,e){
 // Album covers in the Countdown and Grad Year lists: from the song library, and fetched (Spotify's public embed info,
 // no quota) for the rows that scroll into view, a few at a time. Fetched once per song, then kept with the library.
 const cdArtOn=()=>provider===SPOTIFY||REMOTE;
-function cdArtImg(r){if(!cdArtOn()||!LIB.map.size)return'';const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t&&e.t.img||''}
+function cdArtImg(r){if(r.img)return r.img;if(!cdArtOn()||!LIB.map.size)return'';const e=LIB.map.get(libKey(r.title,r.artist));return e&&e.t&&e.t.img||''}
 const cdArtTag=r=>{const k=libKey(r.title,r.artist),im=cdArtImg(r);return`<img class="cdArt${im?'':' none'}" data-ck="${esc(k)}" alt="" loading="lazy" decoding="async"${im?` src="${esc(im)}"`:''}>`};
 const CDART={q:[],busy:0,pend:new Set(),io:null};
 async function cdArtFill(box){
@@ -6912,7 +6948,7 @@ async function setupLoad(file){
    the jukebox already has; on a fresh one you re-enter them (see RESTORE.md in the backup package). */
 const BK_SECRET=new Set(['dj_key','dj_gkey','owner_key','sp_tokens','pkce','remote_link']);
 // short-lived state that would be wrong or stale on another day or machine
-const BK_SKIP=new Set(['np_now','sp_block','sp_quota','sp_rq','sp_refused','sp_follow','sp_follow_403','hue_conn','wk_refresh_at','nr_cache','as_srch','sp_srch','wake_log','fs_lost','pkce']);
+const BK_SKIP=new Set(['np_now','sp_block','sp_quota','sp_rq','sp_refused','sp_follow','sp_follow_403','hue_conn','wk_refresh_at','nr_cache','as_srch','sp_srch','wake_log','fs_lost','pkce','dance']);
 function bkClean(k,raw){
  let v;try{v=JSON.parse(raw)}catch(e){return raw}
  if(k==='settings'&&v&&typeof v==='object'){v=Object.assign({},v);delete v.clientId;if(v.hue&&typeof v.hue==='object'){v.hue=Object.assign({},v.hue);delete v.hue.user}}
@@ -8621,7 +8657,7 @@ function gfReset(y){GF.y=y;GF.usedE=new Set();GF.usedS=new Set();GF.songs=0;GF.s
 function gfYear(c){if(c&&/^xmas/.test(c.chart)){if(GF.y!=='x')gfReset('x');return xmasData()}if(!c||!GF.data)return null;const g=c.chart==='grad',k=(g?'g':'c')+c.year,d=g?GF.data.years&&GF.data.years[c.year]:GF.data.cal&&GF.data.cal[c.year];if(d&&GF.y!==k)gfReset(k);return d}
 const gfMonth=(d,n)=>{const[y,m]=d.split('-').map(Number),t=y*12+m-1+n;return`${Math.floor(t/12)}-${String(t%12+1).padStart(2,'0')}`};
 function gfRange(c){if(c.chart==='grad')return[(c.first||'').slice(0,7),(c.last||'').slice(0,7)];const d=c.date||c.first;return d?[gfMonth(d,-1),gfMonth(d,1)]:['','']}
-const gfBadge=c=>/^xmas/.test(c.chart)?'MERRY<b>XMAS</b>':c.chart==='yacht'?`⚓ YACHT<b>'${String(c.year).slice(2)}</b>`:`${c.chart==='grad'?'CLASS OF':c.chart==='country'?'COUNTRY':'HOT 100'}<b>'${String(c.year).slice(2)}</b>`;
+const gfBadge=c=>/^xmas/.test(c.chart)?'MERRY<b>XMAS</b>':c.chart==='dance'?`DANCE<b>'${String(c.year).slice(2)}</b>`:c.chart==='yacht'?`⚓ YACHT<b>'${String(c.year).slice(2)}</b>`:`${c.chart==='grad'?'CLASS OF':c.chart==='country'?'COUNTRY':'HOT 100'}<b>'${String(c.year).slice(2)}</b>`;
 const gfWhen=m=>`${MON[+m.slice(5,7)-1]} '${m.slice(2,4)}`;
 // An event from while this song was on the chart, else any unused event, else a whole-year fact
 function gfPickEvent(d,from,to){
@@ -8795,7 +8831,7 @@ function gfNP(){
 function gfTick(){
  gfNP();
  const c=P.current&&P.current.cd;
- if(!c||!CD.active||P.paused||!P.dur||P.dur<60000||S.gradFacts===false)return;
+ if(!c||!CD.active||c.chart==='dance'||P.paused||!P.dur||P.dur<60000||S.gradFacts===false)return;
  if(GF.songs<1||GF.songs%4||GF.flashFor===GF.shown)return;
  const left=P.dur-P.pos;if(left>15000||left<5000)return;
  const d=gfYear(c);if(!d)return;
@@ -8820,6 +8856,10 @@ function cdCard(x){
  }else if(c.chart==='country'){
   $('#cdWhen').textContent=c.chrono?`Country Gold · #1 on ${fmtWeek(c.first)}`:c.pos===1?`${c.year}'s biggest country #1`:`Country Gold · Number ${c.pos} of ${c.year}`;
   $('#cdStats').textContent=c.radio?`Hit #1 on country radio in ${c.year}`:`#1 for ${c.weeks} week${c.weeks===1?'':'s'} · first hit #1 ${fmtWeek(c.first)}`;
+ }else if(c.chart==='dance'){
+  $('#cdWhen').textContent=c.pos===1?'The #1 dance song this week':`Dance Countdown · Number ${c.pos} this week`;
+  const[cls,mv]=c.lw==null?['','']:cdMove(c.pos,c.lw);
+  $('#cdStats').textContent=['Billboard Dance/Electronic Songs',cls==='new'?'New this week':cls==='same'?'Holding steady':cls==='up'?`Up ${mv.slice(1)} from #${c.lw}`:cls==='down'?`Down ${mv.slice(1)} from #${c.lw}`:''].filter(Boolean).join(' · ');
  }else{
   const[cls,mv]=cdMove(c.pos,c.lw);
   $('#cdWhen').textContent=c.pos===1?`The #1 song this week in ${c.year}`:`Number ${c.pos} this week in ${c.year}`;
@@ -9379,7 +9419,7 @@ async function boot(){
  if(S.hey)setTimeout(wakeStart,5000);
  renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
  // the chart archive and the song library load quietly once things settle, so Countdown and Grad Year open right away
- setTimeout(()=>{ybData().catch(()=>{});if(provider===SPOTIFY)libLoad().catch(()=>{})},45000);
+ setTimeout(()=>{ybData().catch(()=>{});if(provider===SPOTIFY){libLoad().catch(()=>{});danceData().then(()=>hostSync()).catch(()=>{})}},45000);
 }
 /* ---------- Grad Year: the 40 biggest songs of a class's senior year (Billboard Hot 100, September through graduation) ---------- */
 const GRAD={pickYear:null};
