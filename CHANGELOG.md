@@ -2,6 +2,10 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.44.5 — November 21, 2026
+
+- **The "phones connected" count no longer grows forever.** A phone that locks, reloads or leaves usually never tells the jukebox it's gone, so every reload of the Couch Remote was counted as one more phone (12 on Nov 21). Phones now send a heartbeat every 10 seconds while GriffTunes is open on them, and the jukebox drops a link that's been silent for 45 seconds. A phone that comes back reconnects by itself. (A phone still on an older GriffTunes page sends no heartbeat, so it gets 30 minutes instead; reloading it brings the new page.)
+
 ## 1.44.4 — November 21, 2026
 
 - **Christmas lights change more through each song** (still red and green only, lights on Auto). Every 8–10 seconds one bulb slowly fades (10 s) to another Christmas color, instead of every 30 seconds. About once a minute every bulb swaps together, reds to green and greens to red. Every 4–7 seconds a bulb that isn't mid-fade gives a gentle twinkle (a quick dip to half brightness and back), and a bulb is never twinkled in the middle of a color fade.

@@ -4851,7 +4851,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.44.4';
+const GT_VERSION='1.44.5';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5440,8 +5440,14 @@ async function spSrchProbe(){
 }
 setInterval(()=>{if(REMOTE||provider!==SPOTIFY||SPSRCH.state!=='blocked'||Date.now()<SPQUOTA.until)return;if(Date.now()-Math.max(SPSRCH.checked,spSrchProbe.at||0)>2*3600e3)spSrchProbe()},60e3);
 function hostSync(){if(REMOTE||!HOST.conns.size)return;clearTimeout(syncT);syncT=setTimeout(()=>{const b=hostBase();HOST.conns.forEach(c=>sendTo(c,hostState(c,b)))},150)}
+// A phone that locks, reloads or walks away usually never sends "close", so its link would be counted forever.
+// Remotes send a heartbeat every 10 s while they're open on screen; a link that's been silent for 45 s is dropped
+// (a phone that comes back reconnects by itself).
+setInterval(()=>{if(REMOTE||!HOST.conns.size)return;const old=Date.now()-45e3;let n=0;
+ HOST.conns.forEach(c=>{if((c.seen||0)<(c.hb?old:old-30*60e3)){HOST.conns.delete(c);n++;try{c.close()}catch(e){}}});if(n)updateQrStatus()},15e3);
 setInterval(()=>{if(!REMOTE&&HOST.conns.size){const m={t:'tick',pos:P.pos,dur:P.dur,paused:P.paused};HOST.conns.forEach(c=>sendTo(c,m))}},4000);
 async function hostHandle(c,d){
+ c.seen=Date.now();if(d&&d.t==='hb'){c.hb=true;return} // (a phone on an older page never sends heartbeats: it gets 30 minutes)
  if(!d||typeof d!=='object'||!d.t)return;
  const reply=data=>sendTo(c,{t:'result',id:d.id,data});
  if(d.t==='hello'){
@@ -5582,7 +5588,7 @@ async function startHost(){
  const peer=new Peer('grifftunes-'+roomCode(),peerOpts());HOST.peer=peer;
  peer.on('open',()=>{HOST.status='ready';updateQrStatus()});
  peer.on('connection',c=>{
-  c.on('open',()=>{HOST.conns.add(c);sendTo(c,hostState(c));updateQrStatus();setTimeout(()=>{if(!c.owner&&c.open)toast('A phone joined '+S.name)},1500)});
+  c.on('open',()=>{c.seen=Date.now();HOST.conns.add(c);sendTo(c,hostState(c));updateQrStatus();setTimeout(()=>{if(!c.owner&&c.open)toast('A phone joined '+S.name)},1500)});
   c.on('data',d=>hostHandle(c,d));
   const gone=()=>{HOST.conns.delete(c);updateQrStatus()};c.on('close',gone);c.on('error',gone);
  });
@@ -5827,7 +5833,9 @@ setInterval(()=>{
  if(!REMOTE||document.visibilityState!=='visible'||!(RM.conn&&RM.conn.open))return;
  // just woke up: the ping in remoteCheck decides, so a link that survived the sleep isn't dropped
  if(Date.now()-(RM.visAt||0)<4000)return;
- if(Date.now()-(RM.lastMsg||0)>12000)remoteKill();
+ if(Date.now()-(RM.lastMsg||0)>12000){remoteKill();return}
+ // heartbeat, so the jukebox knows this phone is still here
+ if(Date.now()-(RM.hbAt||0)>=10e3){RM.hbAt=Date.now();try{RM.conn.send({t:'hb'})}catch(e){}}
 },3000);
 
 /* ---------- Speaker picker (Spotify Connect) ---------- */
