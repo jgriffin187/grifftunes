@@ -10,7 +10,7 @@ const KEEP = [/\/vendor\//, /\/photos\//, /\/atw\//, /\/efz-bell\.mp3$/];
 // Hey DJ (wake.js and its models in wake/) and the About text: served from the copy on the jukebox, so Hey DJ starts even
 // without internet, and refreshed in the background so a retrained "Hey DJ" model arrives on the next load.
 const FRESHEN = [/\/wake\//, /\/wake\.js$/, /\/about\.html$/];
-const DATA = /\/(hot100-top20|country-top20|grad-facts|song-library)\.json$/, DATA_FRESH = 6 * 3600e3;
+const DATA = /\/(hot100-top20|country-top20|dance-top25|grad-facts|song-library)\.json$/, DATA_FRESH = 6 * 3600e3;
 const REFRESH = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/(upload|thumb)\.wikimedia\.org\/wikipedia\/commons\//, /^https:\/\/i\.scdn\.co\/image\/ab67616d0000b2737e12e3a6154eb79f0ee4b36c$/];
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(

@@ -2,6 +2,11 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.45.1 — November 22, 2026
+
+- **The Dance Countdown loads again.** On the jukebox it said "Spotify blocks personal apps from opening this one": Spotify refuses to let developer apps like GriffTunes read playlists that belong to other people. Now a daily GitHub job (`.github/workflows/update-dance.yml`, `scripts/update_dance.py`) reads the playlist's public page (no sign-in, nothing tied to Josh's Spotify account) and saves `dance-top25.json` with the 25 songs and their covers. The jukebox and phones just load that file, so the Dance Countdown makes no Spotify requests at all.
+- When the playlist's description has no date, the chart week is the Saturday on or before the day the list changed (Billboard's chart dates are Saturdays).
+
 ## 1.45 — November 22, 2026
 
 - **Dance Countdown.** The Countdown tab has a new **Dance** button next to Hot 100 and Country: this week's Billboard Hot Dance/Electronic Songs Top 25, counted down from #25 to #1, with album covers, ▲▼/NEW badges against last week, a pop-up card per song ("Up 2 from #5") and DJ Griff introducing it as the dance countdown.

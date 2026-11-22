@@ -68,7 +68,9 @@ def main():
     ids = [r['id'] for r in rows]
     if old and [r['id'] for r in old['rows']] == ids:
         print('No change'); return
-    d = chart_date(desc) or date.today().isoformat()
+    # no date in the description: Billboard-style chart date, the Saturday on or before today
+    t = date.today()
+    d = chart_date(desc) or date.fromordinal(t.toordinal() - (t.weekday() - 5) % 7).isoformat()
     prev = old.get('prev') if old else None
     if old and old.get('date') != d:
         prev = {'date': old['date'], 'ids': [r['id'] for r in old['rows']]}

@@ -4852,7 +4852,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.45';
+const GT_VERSION='1.45.1';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -5425,7 +5425,7 @@ function modesShare(){try{return{efz:{en:S.efz!==false,on:!!EF.open},ym:{en:S.ya
 // a mode starting or ending anywhere (jukebox, voice, a song ending it) reaches the couch remote within a few seconds
 if(!REMOTE){let ms='';setInterval(()=>{const k=JSON.stringify(modesShare());if(k!==ms){ms=k;hostSync()}},2000)}
 // What the phones need to draw the Countdown and Grad Year tabs
-function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done,dance:danceShare()}}
+function cdShare(){return{active:!!CD.active,chart:CD.active?(CD.grad?'grad':CD.list[0]&&CD.list[0].cd.chart):null,year:CD.year,grad:CD.grad,date:CD.date,idx:CD.idx,list:CD.active?CD.list.map(x=>x.cd.pos):[],missing:CD.missing||[],matching:!!(CD.matching||GY.matching),done:GY.done}}
 function sendTo(c,m){try{if(c.open)c.send(m)}catch(e){}}
 let syncT=null;
 // owner (couch remote) connections also get the speaker in use
@@ -5762,7 +5762,6 @@ function applyHostState(m){
 // Phone: mirror the jukebox's countdown so the lists show what's playing; the buttons ask the jukebox to do it
 function applyHostCd(c){
  const was=JSON.stringify([CD.active,CD.year,CD.grad,CD.idx,CD.matching,GY.matching,GY.done]);
- if(c.dance&&(!CD.ddata||CD.ddata.date!==c.dance.date||CD.ddata.rows.length!==c.dance.rows.length||(CD.ddata.rows[0]&&CD.ddata.rows[0].t.id)!==(c.dance.rows[0]&&c.dance.rows[0].t.id))){CD.ddata=c.dance;if(tabId==='countdown'&&!CD.active)renderCountdown()}
  CD.active=c.active;CD.grad=c.grad||null;CD.year=c.year;CD.date=c.date;CD.idx=c.idx|0;CD.missing=c.missing||[];
  CD.list=(c.list||[]).map(pos=>({cd:{pos}}));CD.matching=GY.matching=!!c.matching;GY.done=c.done|0;
  if(c.active&&c.chart&&c.chart!=='grad'){CD.chart=c.chart==='xmascd'?'xmas':c.chart;CD.years=new Date().getFullYear()-c.year}
@@ -6656,33 +6655,22 @@ async function huePair(ip){
 const CD={data:null,cdata:null,ddata:null,loading:null,years:0,chart:'hot100',active:false,list:[],idx:0,date:null,year:null,matching:false,cache:{},missing:[]};
 const CD_YEARS=[0,1,5,10,15,20,25,30,35,40]; // 0 = last week's chart (the newest in the archive)
 const fetchJSON=f=>fetch(f).then(r=>{if(!r.ok)throw new Error('chart file missing');return r.json()});
-/* Dance: Billboard's Hot Dance/Electronic Songs Top 25, read from a fan-made Spotify playlist that copies the chart each week
-   ("Billboard Hot Dance/Electronic/EDM Songs Top 25 Weekly"). One playlist read, no searches, at most every 12 hours;
-   the playlist's description carries the chart date, and last week's order is kept for the ▲▼ badges. */
-const DANCE_PL='3X8oqr3qpVuTkreQwa0DAO';
-const danceOk=()=>REMOTE?!!CD.ddata:provider===SPOTIFY;
-function danceDate(desc){const m=String(desc||'').match(/([A-Z][a-z]+\.? \d{1,2},? \d{4})/);if(!m)return null;const d=new Date(m[1].replace('.','')+' 12:00');return isNaN(d)?null:d.toISOString().slice(0,10)}
-function danceKeep(c){try{localStorage.setItem('jbx.dance',JSON.stringify(c))}catch(e){}CD.ddata=c;CD.dshare=null;return c}
+/* Dance: Billboard's Hot Dance/Electronic Songs Top 25. A GitHub job (scripts/update_dance.py, daily) reads the fan-made
+   Spotify playlist that copies the chart ("Billboard Hot Dance/Electronic/EDM Songs Top 25 Weekly") from its public page and
+   saves dance-top25.json, because Spotify won't let GriffTunes's developer app read other people's playlists.
+   The jukebox and the phones just load that file: no Spotify requests at all. */
+const danceOk=()=>REMOTE||provider===SPOTIFY;
 async function danceData(){
- let c=CD.ddata;if(!c)try{c=JSON.parse(localStorage.getItem('jbx.dance')||'null')}catch(e){}
- if(c&&c.rows&&c.rows.length&&Date.now()-c.at<12*3600e3){CD.ddata=c;return c}
+ if(CD.ddata&&Date.now()-(CD.ddata.at||0)<3600e3)return CD.ddata;
  try{
-  const meta=await api(`/playlists/${DANCE_PL}?fields=description,snapshot_id`);
-  if(c&&c.rows&&c.rows.length&&c.snap===meta.snapshot_id){c.at=Date.now();return danceKeep(c)}
-  const items=await allPages(api,`/playlists/${DANCE_PL}/items?limit=50&market=from_token`,50);
-  const tr=items.filter(Boolean).map(e=>spT(e.item||e.track)).filter(Boolean).slice(0,25);
-  if(!tr.length)throw new Error('The dance chart playlist came back empty');
-  const date=danceDate(meta.description)||(c&&c.date)||new Date().toISOString().slice(0,10);
-  const prev=c&&c.rows&&c.date&&c.date!==date?{date:c.date,ids:c.rows.map(x=>x.t.id)}:(c&&c.prev)||null;
-  return danceKeep({at:Date.now(),snap:meta.snapshot_id,date,prev,rows:tr.map(t=>({t}))});
- }catch(e){if(c&&c.rows&&c.rows.length){CD.ddata=c;return c}throw e}
+  const j=await fetch('dance-top25.json',{cache:'no-cache'}).then(r=>{if(!r.ok)throw new Error('The dance chart file is missing');return r.json()});
+  CD.ddata={at:Date.now(),date:j.date,prev:j.prev,rows:(j.rows||[]).map(t=>({t:Object.assign({},t,{img:t.img?bigArt(t.img):''})}))};return CD.ddata;
+ }catch(e){if(CD.ddata)return CD.ddata;throw e}
 }
-// what the phones get to draw the Dance list (the jukebox does the Spotify read)
-function danceShare(){const D=CD.ddata;if(!D)return null;if(!CD.dshare)CD.dshare={date:D.date,prev:D.prev,rows:D.rows.map(x=>({t:{id:x.t.id,name:x.t.name,artist:x.t.artist,img:x.t.img}}))};return CD.dshare}
 const cdHas=()=>CD.chart==='country'?CD.cdata:CD.chart==='dance'?CD.ddata:CD.data;
 async function cdData(){
  if(CD.chart==='dance'&&!danceOk())CD.chart='hot100';
- if(CD.chart==='dance')return REMOTE?CD.ddata:danceData();
+ if(CD.chart==='dance')return danceData();
  if(CD.chart==='country'){if(!CD.cdata)CD.cdata=await fetchJSON('country-top20.json');return CD.cdata}
  if(CD.chart==='xmas'&&!S.xmas)CD.chart='hot100';
  if(!CD.data){if(!CD.loading)CD.loading=fetchJSON('hot100-top20.json').finally(()=>{CD.loading=null});CD.data=await CD.loading}
@@ -6726,7 +6714,7 @@ function cdView(years){
 async function openCountdown(){
  const panel=$('#cdPanel');
  if(CD.chart==='dance'&&!danceOk())CD.chart='hot100';
- if(!cdHas()||(CD.chart==='dance'&&!REMOTE)){if(!cdHas())panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
+ if(!cdHas()||CD.chart==='dance'){if(!cdHas())panel.innerHTML='<div class="loading"><div class="spin"></div><div>Loading the charts…</div></div>';
   try{await cdData()}catch(e){if(!cdHas()){panel.innerHTML=`<div class="loading">Couldn't load ${CD.chart==='dance'?'the dance chart':'the chart archive'}<br><small>${esc(e.message)}</small>${CD.chart==='dance'?'<br><button class="cdYear" data-cdc="hot100" style="margin-top:14px;padding:10px 18px"><b>Back to Hot 100</b></button>':''}</div>`;return}}}
  if(tabId!=='countdown')return;
  renderCountdown();
@@ -6948,7 +6936,7 @@ async function setupLoad(file){
    the jukebox already has; on a fresh one you re-enter them (see RESTORE.md in the backup package). */
 const BK_SECRET=new Set(['dj_key','dj_gkey','owner_key','sp_tokens','pkce','remote_link']);
 // short-lived state that would be wrong or stale on another day or machine
-const BK_SKIP=new Set(['np_now','sp_block','sp_quota','sp_rq','sp_refused','sp_follow','sp_follow_403','hue_conn','wk_refresh_at','nr_cache','as_srch','sp_srch','wake_log','fs_lost','pkce','dance']);
+const BK_SKIP=new Set(['np_now','sp_block','sp_quota','sp_rq','sp_refused','sp_follow','sp_follow_403','hue_conn','wk_refresh_at','nr_cache','as_srch','sp_srch','wake_log','fs_lost','pkce']);
 function bkClean(k,raw){
  let v;try{v=JSON.parse(raw)}catch(e){return raw}
  if(k==='settings'&&v&&typeof v==='object'){v=Object.assign({},v);delete v.clientId;if(v.hue&&typeof v.hue==='object'){v.hue=Object.assign({},v.hue);delete v.hue.user}}
@@ -9419,7 +9407,7 @@ async function boot(){
  if(S.hey)setTimeout(wakeStart,5000);
  renderLightsBtn();if(hueOn())hueLoadLights().then(hueApply);
  // the chart archive and the song library load quietly once things settle, so Countdown and Grad Year open right away
- setTimeout(()=>{ybData().catch(()=>{});if(provider===SPOTIFY){libLoad().catch(()=>{});danceData().then(()=>hostSync()).catch(()=>{})}},45000);
+ setTimeout(()=>{ybData().catch(()=>{});if(provider===SPOTIFY)libLoad().catch(()=>{})},45000);
 }
 /* ---------- Grad Year: the 40 biggest songs of a class's senior year (Billboard Hot 100, September through graduation) ---------- */
 const GRAD={pickYear:null};
