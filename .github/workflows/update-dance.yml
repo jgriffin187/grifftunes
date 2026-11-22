@@ -1,0 +1,24 @@
+name: Update dance chart
+# Every day, refresh dance-top25.json from the fan-made Spotify playlist that copies Billboard's Dance/Electronic Top 25.
+on:
+  schedule:
+    - cron: '41 14 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the playlist
+        run: python3 scripts/update_dance.py
+      - name: Save to GitHub
+        run: |
+          if [ -z "$(git status --porcelain dance-top25.json)" ]; then echo "Nothing new"; exit 0; fi
+          git config user.name "GriffTunes chart update"
+          git config user.email "actions@users.noreply.github.com"
+          git add dance-top25.json
+          git commit -m "Daily dance chart update"
+          git pull --rebase
+          git push
