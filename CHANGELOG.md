@@ -2,6 +2,16 @@
 
 Newest first. Version numbers also show in GriffTunes under **Settings → About GriffTunes**.
 
+## 1.45.3 — November 24, 2026
+
+- **The Fitz bell and DJ Griff no longer go silent without saying why.** Both play through the WiiM over Wi-Fi, because the Chromebox has no speakers. When GriffTunes couldn't reach the WiiM, the bell quietly played on the Chromebox (so nobody heard it) and DJ Griff's spoken lines were dropped, with only a note in the developer console. The usual cause is Chrome forgetting the "Proceed" on the WiiM's certificate warning after about a week. Now:
+  - A warning says what happened and how to fix it (Settings → DJ Griff → **Trust the WiiM** → Advanced → Proceed).
+  - The jukebox checks the WiiM 25 seconds after it starts and every 20 minutes, and warns after two misses in a row, so a lost WiiM shows up before a party instead of during one.
+  - Opening the Fitz memorial checks the WiiM right away, before anyone rings the bell.
+  - When DJ Griff has something to say but the music is on a speaker that isn't the WiiM (a Google Home speaker group, a phone), a warning says he only talks when the music is on the WiiM (at most every 10 minutes).
+  - Other voice problems (Text-to-Speech too slow or refusing the key) show a warning too.
+- **The bell rings on the WiiM whenever one is set up**, even when the music is playing on a speaker group, instead of on the Chromebox.
+
 ## 1.45.2 — November 22, 2026
 
 - More room between the Countdown tab's chart buttons (Hot 100, Country, Dance, Christmas), on the jukebox and the Couch Remote: each button is as wide as its name with space around it, and "Hot 100" no longer wraps onto two lines.

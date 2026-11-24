@@ -3281,6 +3281,21 @@ async function djWiimReach(){
  for(const p of['http','https'])if(p!==DJ.proto&&await tryP(p)){DJ.proto=p;return true}
  return false;
 }
+// When the WiiM can't be reached, DJ Griff and the Fitz bell have nowhere to play (the Chromebox has no speakers), so say so.
+// The usual cause: Chrome forgets "Proceed" on the WiiM's certificate warning after about a week.
+function wiimWarn(what){if(!S.djWiim)return;
+ if(Date.now()-(DJ.wwAt||0)<90e3)return;DJ.wwAt=Date.now();
+ toast(`${what}: GriffTunes can't reach the WiiM (${S.djWiim}). Chrome probably stopped trusting it. Go to Settings → DJ Griff → Trust the WiiM, choose Advanced → Proceed, then close that tab.`,'warn');
+}
+// check now and then, so a lost WiiM shows up before a party instead of during one
+async function wiimHealth(){
+ if(REMOTE||!S.djWiim||provider!==SPOTIFY||document.hidden||DJ.wiimWait||EF.bell)return;
+ if(!(S.dj||S.asSpeak!==false||efzOn()))return;
+ const ok=await djWiimReach();
+ if(ok){DJ.hcFails=0;return}
+ if(++DJ.hcFails===2){DJ.wwAt=0;wiimWarn("DJ Griff and the Fitz bell won't have sound")}
+}
+if(!REMOTE){DJ.hcFails=0;setTimeout(wiimHealth,25e3);setInterval(wiimHealth,20*60e3)}
 async function djUpload(url){
  const blob=await (await fetch(url)).blob(),name=`dj-${Date.now()}-${Math.random().toString(36).slice(2,7)}.mp3`;
  const r=await fetch(`https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(S.djBucket)}/o?uploadType=media&name=${encodeURIComponent(name)}`,{method:'POST',headers:{'Content-Type':'audio/mpeg'},body:blob,signal:tmo(20000)});
@@ -3425,7 +3440,7 @@ async function advance(ended=false){
    const seq=START_SEQ,route=djRoute(),clip=await djClip(Object.assign({},t,{cd:cd||t.cd,radio:radio||t.radio}),how);
    if(clip&&START_SEQ===seq&&!stale()){
     if(route==='local'){await djTalkOver(clip,()=>startTrack(t,house,radio,cd));return true}
-    try{await djPlayWiim(clip.url,clip.secs)}catch(e){djFail(e)}
+    try{await djPlayWiim(clip.url,clip.secs)}catch(e){if(/reach the WiiM/.test(e&&e.message))wiimWarn('DJ Griff had no sound');djFail(e)}
    }
    if(START_SEQ!==seq){if(how==='queue'){P.queue.unshift(t);saveQueue();renderQueue()}return false}}
   // a newer skip took over while this one was stuck: a paid pick goes back to the front of Up Next, anything else is dropped
@@ -4567,12 +4582,17 @@ async function asHandle(text,alts,src,pre){
 /* ---------- DJ Griff says it out loud ---------- */
 const asCanSpeak=()=>!REMOTE&&S.asSpeak!==false&&!!djKey()&&provider===SPOTIFY&&djRoute()!=='none';
 async function asSay(text,start){
+ // he has something to say but no speaker to say it on: tell the room why it's quiet
+ if(text&&!REMOTE&&S.asSpeak!==false&&djKey()&&provider===SPOTIFY&&djRoute()==='none'&&Date.now()-(DJ.noneAt||0)>10*60e3){
+  DJ.noneAt=Date.now();
+  toast(`DJ Griff only talks when the music is on the WiiM${S.djWiim&&S.djBucket?'':' (and the WiiM is set up in Settings → DJ Griff)'}. Right now it's playing on ${spkLabel(engine.targetName)}.`,'warn');
+ }
  const go=async()=>{if(!start)return;if(P.current&&P.current.id===start.id)return;await startTrack(start,false,null,start.cd||null);if(start.cd&&start.cd.chart==='xmas')xmasPlayed(start);toast('Now playing · '+start.name,start.img)};
  if(!text||!asCanSpeak()||AS.talking||advancing||(DJ.audio&&!start)){await go();return}
  AS.talking=true;let sp=null;
  try{
   sp=await Promise.race([djSpeech(text),sleep(8000).then(()=>null)]);
-  if(!sp){await go();return}
+  if(!sp){toast('DJ Griff lost his voice (Text-to-Speech took too long). Try again in a moment','warn');await go();return}
   if(djRoute()==='local'){
    // this jukebox (Bluetooth speaker): the music dips while he talks, then comes back up
    const pl=engine.player,playing=P.current&&!P.paused;let vol=null;
@@ -4597,7 +4617,7 @@ async function asSay(text,start){
    try{await api(`/me/player/play?device_id=${engine.target}`,{method:'PUT',body:{uris:[cur.uri],position_ms:at}});engine.playAt=Date.now()}
    catch(e){try{await api('/me/player',{method:'PUT',body:{device_ids:[engine.target],play:true}})}catch(e2){toast("The music didn't come back after DJ Griff. Tap Play",'warn')}}
   }
- }catch(e){console.warn('[GriffTunes] Assistant voice',e);try{await go()}catch(x){}}
+ }catch(e){console.warn('[GriffTunes] Assistant voice',e);if(/reach the WiiM/.test(e&&e.message))wiimWarn('DJ Griff had no sound');else toast(`🎙 DJ Griff couldn't get on the air · ${String(e&&e.message||e).slice(0,90)}`,'warn');try{await go()}catch(x){}}
  finally{AS.talking=false;if(sp)setTimeout(()=>URL.revokeObjectURL(sp.url),60000)}
 }
 /* ---------- The Ask DJ Griff window (same on the touchscreen and phones) ---------- */
@@ -4853,7 +4873,7 @@ function buildOSK(){
 }
 
 /* ---------- Settings ---------- */
-const GT_VERSION='1.45.2';
+const GT_VERSION='1.45.3';
 // The About text lives in about.html (57 KB the jukebox no longer reads at every start); fetched the first time it's opened
 async function openAbout(){
  const b=$('#abBody');b.scrollTop=0;
@@ -7519,6 +7539,7 @@ function efzVoyage(){EF.mode='voyage';$('#efz').classList.remove('explore');if(E
 async function efzOpen(){
  if(REMOTE||EF.open)return;
  efzPrefetch();
+ if(S.djWiim&&provider===SPOTIFY)djWiimReach().then(ok=>{if(!ok&&EF.open)wiimWarn("The bell won't have sound")});
  sfx('coin');hideAttract();
  EF.open=true;mbCheck();EF.plIcon=null;EF.mode='voyage';EF.card=-1;EF.held=null;EF.clock=0;EF.clockAt=performance.now();EF.view=null;
  document.documentElement.classList.add('efzOn');$('#efz').classList.add('on');$('#efz').classList.remove('explore','ringing','after');
@@ -7579,11 +7600,7 @@ function efzHoldEnd(){
  return true;
 }
 /* --- the bell --- */
-function efzBellRoute(){
- if(provider!==SPOTIFY||!engine.target||!S.djWiim)return'local';
- const n=engine.targetName||'';
- return engine.target===S.djWiimDev||/wiim/i.test(n)||unnamedDev(n)||(S.spkDeviceId&&engine.target===S.spkDeviceId)?'wiim':'local';
-}
+function efzBellRoute(){return provider===SPOTIFY&&S.djWiim?'wiim':'local'}
 async function efzRing(){
  if(EF.bell)return;
  clearTimeout(EF.closeT);sfx('tick');
@@ -7596,7 +7613,7 @@ async function efzRing(){
    if(!await djWiimReach())throw new Error('no WiiM');
    await djWiimCmd('setPlayerCmd:play:'+EFZ_BELL_URL);
    B.start=performance.now()+2200;   // the WiiM takes a moment to fetch the file
-  }catch(e){B.route='local'}
+  }catch(e){B.route='local';wiimWarn('The bell had no sound')}
  }
  if(B.route==='local'){
   const a=new Audio(EF.bellUrl||EFZ_BELL);B.audio=a;a.volume=Math.min(1,Math.max(.2,S.volume/100));
